@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 // app/api/recipe/route.ts (Enhanced version)
 import { NextResponse, NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
+import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 import prisma from "@/lib/prisma";
 import { withRetry } from "@/lib/prisma-helpers";
 import { revalidateTag, revalidatePath } from "next/cache";
@@ -160,9 +161,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const token = await auth.getToken(request);
-    if (!token) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    // Check authentication (supports both JWT and API tokens)
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const recipe = await request.json();
@@ -335,9 +337,10 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const token = await auth.getToken(request);
-    if (!token) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    // Check authentication (supports both JWT and API tokens)
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const updatedRecipe = await prisma.recipe.update({

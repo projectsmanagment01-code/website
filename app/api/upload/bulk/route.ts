@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { unlink } from "fs/promises";
 import path from "path";
-import { auth } from "@/lib/auth";
+import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 
 // Next.js configuration for API route
 export const dynamic = "force-dynamic";
@@ -10,13 +10,10 @@ const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Verify authentication
-    const token = await auth.getToken(request);
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+    // Check authentication (supports both JWT and API tokens)
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const body = await request.json();

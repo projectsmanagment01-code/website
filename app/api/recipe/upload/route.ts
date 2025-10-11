@@ -2,19 +2,22 @@ export const dynamic = "force-static";
 export const revalidate = 60;
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 
 /**
  * POST /api/recipe/upload
  * Upload images for recipes with automatic categorization
+ * Supports both JWT and API token authentication
  */
 export async function POST(request: NextRequest) {
   try {
-    // Auth is handled by middleware, so we can get user info from headers
-    const userId = request.headers.get("x-user-id");
-    const userEmail = request.headers.get("x-user-email");
+    // Check authentication (supports both JWT and API tokens)
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
+    }
 
-    console.log(`� Upload request from user: ${userEmail} (ID: ${userId})`);
+    console.log(`📤 Upload request (auth type: ${authCheck.authType})`);
 
     const formData = await request.formData();
     const file = formData.get("file") as File;

@@ -15,8 +15,13 @@ Your application now supports **TWO types of authentication**:
 
 | Endpoint | Methods | Description |
 |----------|---------|-------------|
-| `/api/admin/authors` | GET, POST | List/Create authors - **NOW SUPPORTS API TOKENS** |
-| `/api/admin/authors/[id]` | GET, PUT, DELETE | Get/Update/Delete author - **NOW SUPPORTS API TOKENS** |
+| `/api/admin/authors` | GET, POST | List/Create authors - **✅ SUPPORTS API TOKENS** |
+| `/api/admin/authors/[id]` | GET, PUT, DELETE | Get/Update/Delete author - **✅ SUPPORTS API TOKENS** |
+| `/api/recipe` | POST, PUT, DELETE | Create/Update/Delete recipes - **✅ SUPPORTS API TOKENS** |
+| `/api/recipe/upload` | POST | Upload recipe images - **✅ SUPPORTS API TOKENS** |
+| `/api/upload` | POST, GET, DELETE | Upload/List/Delete images - **✅ SUPPORTS API TOKENS** |
+| `/api/upload/bulk-upload` | POST | Bulk image upload - **✅ SUPPORTS API TOKENS** |
+| `/api/upload/bulk` | DELETE | Bulk image delete - **✅ SUPPORTS API TOKENS** |
 
 ### ❌ APIs Supporting JWT ONLY (Dashboard use only)
 

@@ -4,7 +4,7 @@ import { existsSync } from "fs";
 import path from "path";
 import { revalidatePath, revalidateTag } from "next/cache";
 import sharp from "sharp";
-import { auth } from "@/lib/auth";
+import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 
 // Next.js configuration for API route
 export const dynamic = "force-dynamic";
@@ -79,10 +79,10 @@ function validateFile(file: File): { isValid: boolean; error?: string } {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const token = await auth.getToken(request);
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Check authentication (supports both JWT and API tokens)
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     // Ensure upload directory exists
@@ -195,10 +195,10 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const token = await auth.getToken(request);
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Check authentication (supports both JWT and API tokens)
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const { searchParams } = new URL(request.url);
@@ -266,10 +266,10 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Check authentication
-    const token = await auth.getToken(request);
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Check authentication (supports both JWT and API tokens)
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const { searchParams } = new URL(request.url);

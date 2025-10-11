@@ -3,7 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import sharp from "sharp";
-import { auth } from "@/lib/auth";
+import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 
 // Next.js configuration for API route
 export const dynamic = "force-dynamic";
@@ -36,13 +36,10 @@ function generateFileName(originalName: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify authentication
-    const token = await auth.getToken(request);
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+    // Check authentication (supports both JWT and API tokens)
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     await ensureUploadDir();
