@@ -7,11 +7,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthor, getAuthors, searchAuthors } from '@/lib/author-service';
-import { checkAuthOrRespond } from '@/lib/auth-standard';
+import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 
 export async function GET(request: NextRequest) {
-  // Check authentication
-  const authCheck = await checkAuthOrRespond(request);
+  // Check authentication (supports both JWT and API tokens)
+  const authCheck = await checkHybridAuthOrRespond(request);
   if (!authCheck.authorized) {
     return authCheck.response;
   }
@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Check authentication
-  const authCheck = await checkAuthOrRespond(request);
+  // Check authentication (supports both JWT and API tokens)
+  const authCheck = await checkHybridAuthOrRespond(request);
   if (!authCheck.authorized) {
     return authCheck.response;
   }

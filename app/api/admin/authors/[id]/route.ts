@@ -8,14 +8,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthorById, updateAuthor, deleteAuthor } from '@/lib/author-service';
-import { checkAuthOrRespond } from '@/lib/auth-standard';
+import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Check authentication
-  const authCheck = await checkAuthOrRespond(request);
+  // Check authentication (supports both JWT and API tokens)
+  const authCheck = await checkHybridAuthOrRespond(request);
   if (!authCheck.authorized) {
     return authCheck.response;
   }
@@ -45,8 +45,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Check authentication
-  const authCheck = await checkAuthOrRespond(request);
+  // Check authentication (supports both JWT and API tokens)
+  const authCheck = await checkHybridAuthOrRespond(request);
   if (!authCheck.authorized) {
     return authCheck.response;
   }
@@ -100,8 +100,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Check authentication
-  const authCheck = await checkAuthOrRespond(request);
+  // Check authentication (supports both JWT and API tokens)
+  const authCheck = await checkHybridAuthOrRespond(request);
   if (!authCheck.authorized) {
     return authCheck.response;
   }

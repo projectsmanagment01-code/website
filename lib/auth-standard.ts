@@ -285,5 +285,57 @@ export async function getAuthenticatedUser(
   return authResult.success ? authResult.payload : null;
 }
 
+/**
+ * Hybrid authentication check with conditional response
+ * 
+ * Like checkAuthOrRespond but supports BOTH JWT tokens and API tokens.
+ * Use this for routes that need to work with automation tools like n8n.
+ * 
+ * @param request - NextRequest object
+ * @returns Object with authorized flag and either payload or error response
+ * 
+ * @example
+ * ```typescript
+ * export async function GET(request: NextRequest) {
+ *   const authCheck = await checkHybridAuthOrRespond(request);
+ *   
+ *   if (!authCheck.authorized) {
+ *     return authCheck.response; // Returns 401 response
+ *   }
+ *   
+ *   // authCheck.authType tells you if it's 'jwt' or 'api'
+ *   // authCheck.payload contains user/token info
+ *   // ... your logic
+ * }
+ * ```
+ */
+export async function checkHybridAuthOrRespond(
+  request: NextRequest
+): Promise<
+  | { authorized: true; payload: any; authType: 'jwt' | 'api' }
+  | { authorized: false; response: NextResponse }
+> {
+  const authResult = await requireHybridAuth(request);
+  
+  if (!authResult.success || !authResult.payload) {
+    return {
+      authorized: false,
+      response: NextResponse.json(
+        { 
+          error: authResult.error || "Unauthorized",
+          message: "Authentication required. Use JWT token (Bearer) or API token (rtk_)."
+        },
+        { status: 401 }
+      )
+    };
+  }
+  
+  return {
+    authorized: true,
+    payload: authResult.payload,
+    authType: authResult.authType || 'jwt'
+  };
+}
+
 // Export type for use in other files
 export type AuthPayload = NonNullable<AuthResult["payload"]>;
