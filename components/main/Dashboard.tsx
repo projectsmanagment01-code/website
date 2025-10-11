@@ -1,0 +1,195 @@
+"use client";
+import React, { useState } from "react";
+import { Menu } from "lucide-react";
+import { Sidebar } from "@/components/dashboard/Sidebar";
+import { Dashboard } from "@/components/dashboard/Dashboard";
+import { RecipeTable } from "@/components/recipe-table";
+import { RecipeModal } from "@/components/dashboard/RecipeModal";
+import { MediaLibrary } from "@/components/admin/MediaLibrary";
+import ContentManagementCards from "@/components/admin/ContentManagementCards";
+import GenericContentEditor from "@/components/admin/GenericContentEditor";
+import HomeContentEditor from "@/components/admin/HomeContentEditor";
+import SiteSettingsEditor from "@/components/admin/SiteSettingsEditor";
+import AboutContentEditor from "@/components/admin/AboutContentEditor";
+import ContactContentEditor from "@/components/admin/ContactContentEditor";
+import DisclaimerContentEditor from "@/components/admin/DisclaimerContentEditor";
+import CookiesContentEditor from "@/components/admin/CookiesContentEditor";
+import FAQContentManager from "@/components/admin/FAQContentManager";
+import Settings from "@/components/admin/Settings";
+import AIPlugin from "@/components/admin/AIPlugin";
+import AuthorManagement from "@/components/admin/authors/AuthorManagement";
+import ProfileSettings from "@/components/admin/ProfileSettings";
+import ApiTokenManager from "@/components/admin/ApiTokenManager";
+import BackupManager from "@/components/admin/BackupManager";
+import { Recipe } from "@/outils/types";
+import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
+
+function AdminDashboardContent() {
+  const { state, openCreateModal, openEditModal, closeModal, deleteRecipe } =
+    useAdmin();
+  const [activeSection, setActiveSection] = useState("dashboard");
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const handleAddRecipe = () => {
+    openCreateModal();
+  };
+
+  const handleEditRecipe = (recipe: Recipe) => {
+    openEditModal(recipe);
+  };
+
+  const handleDeleteRecipe = async (id: string) => {
+    await deleteRecipe(id);
+  };
+
+  const toggleMobileSidebar = () => {
+    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  };
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case "dashboard":
+        return (
+          <Dashboard recipes={state.recipes} onEditRecipe={handleEditRecipe} />
+        );
+      case "recipes":
+        return (
+          <RecipeTable
+            recipes={state.recipes}
+            onEdit={handleEditRecipe}
+            onDelete={handleDeleteRecipe}
+            onAdd={handleAddRecipe}
+          />
+        );
+      case "categories":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Categories
+              </h1>
+              <p className="text-gray-600">
+                Manage recipe categories and organization
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+              <p className="text-gray-500">
+                Categories management coming soon...
+              </p>
+            </div>
+          </div>
+        );
+      case "authors":
+        return <AuthorManagement />;
+      case "media":
+        return (
+          <div className="space-y-6">
+            <MediaLibrary />
+          </div>
+        );
+      case "content":
+        return (
+          <div className="space-y-6">
+            <ContentManagementCards onSectionChange={setActiveSection} />
+          </div>
+        );
+      case "content-site":
+        return (
+          <SiteSettingsEditor
+            onBack={() => setActiveSection("content")}
+          />
+        );
+      case "content-home":
+        return <HomeContentEditor onBack={() => setActiveSection("content")} />;
+      case "content-about":
+        return <AboutContentEditor onBack={() => setActiveSection("content")} />;
+      case "content-contact":
+        return <ContactContentEditor onBack={() => setActiveSection("content")} />;
+      case "content-privacy":
+        return (
+          <GenericContentEditor
+            pageId="privacy"
+            pageTitle="Privacy Policy"
+            pageDescription="Privacy policy and data protection information"
+            previewPath="/privacy"
+            onBack={() => setActiveSection("content")}
+          />
+        );
+      case "content-terms":
+        return (
+          <GenericContentEditor
+            pageId="terms"
+            pageTitle="Terms of Service"
+            pageDescription="Terms of service and legal conditions"
+            previewPath="/terms"
+            onBack={() => setActiveSection("content")}
+          />
+        );
+      case "content-faq":
+        return <FAQContentManager onBack={() => setActiveSection("content")} />;
+      case "content-disclaimer":
+        return <DisclaimerContentEditor onBack={() => setActiveSection("content")} />;
+      case "content-cookies":
+        return <CookiesContentEditor onBack={() => setActiveSection("content")} />;
+      case "backup":
+        return <BackupManager />;
+      case "plugins":
+        return <AIPlugin />;
+      case "api-tokens":
+        return <ApiTokenManager />;
+      case "settings":
+        return <Settings />;
+      case "profile":
+        return <ProfileSettings />;
+      default:
+        return (
+          <Dashboard recipes={state.recipes} onEditRecipe={handleEditRecipe} />
+        );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex relative">
+      <Sidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onAddRecipe={handleAddRecipe}
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileToggle={toggleMobileSidebar}
+      />
+
+      <main className="flex-1 overflow-auto">
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
+          <button
+            onClick={toggleMobileSidebar}
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="p-1 md:p-2">{renderContent()}</div>
+      </main>
+
+      <RecipeModal
+        key={`${state.modalMode}-${Date.now()}`}
+        isOpen={state.isModalOpen}
+        onClose={closeModal}
+        recipe={state.selectedRecipe}
+        mode={state.modalMode === "create" ? "add" : "edit"}
+      />
+    </div>
+  );
+}
+
+function AdminDashboard() {
+  return (
+    <AdminProvider>
+      <AdminDashboardContent />
+    </AdminProvider>
+  );
+}
+
+export default AdminDashboard;

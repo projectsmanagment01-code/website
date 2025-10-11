@@ -1,0 +1,94 @@
+{
+  "id": "2",
+  "slug": "recipe-slug-here",
+  "title": "Your Recipe Title Here",
+  "category": "SEAFOOD",
+  "img": "/path-to-your-image.jpg",
+  "heroImage": "/path-to-hero-image.jpg",
+  "images": [
+    "/image1.jpg",
+    "/image2.jpg",
+    "/image3.jpg"
+  ],
+  "href": "/recipes/recipe-slug-here",
+  "intro": "Brief introduction to your recipe...",
+  "story": "The full story about this recipe...",
+  "testimonial": "What people say about this recipe...",
+  "description": "Recipe description for the card...",
+  "authorId": "cmg44yie80000u7cowmbz5zjs",
+  "whyYouLove": {
+    "type": "Card",
+    "title": "Why You'll Love It",
+    "items": [
+      "**Reason 1** - Description of why it's great",
+      "**Reason 2** - Another great feature",
+      "**Reason 3** - More benefits"
+    ]
+  },
+  "essIngredientGuide": [
+    {
+      "ingredient": "Main ingredient name",
+      "note": "Tips about this ingredient and why it's important"
+    }
+  ],
+  "completeProcess": [
+    {
+      "title": "Step 1 Title",
+      "description": "Detailed description of what to do in this step..."
+    },
+    {
+      "title": "Step 2 Title", 
+      "description": "Next step instructions..."
+    }
+  ],
+  "sections": [
+    {
+      "type": "content",
+      "title": "Section Title",
+      "content": "Section content here...",
+      "img": 1
+    }
+  ],
+  "questions": {
+    "title": "Frequently Asked Questions",
+    "items": [
+      {
+        "question": "Common question about the recipe?",
+        "answer": "Detailed answer to help readers..."
+      }
+    ]
+  },
+  "timing": {
+    "prepTime": "15 minutes",
+    "cookTime": "25 minutes", 
+    "totalTime": "40 minutes"
+  },
+  "recipeInfo": {
+    "difficulty": "Easy",
+    "cuisine": "Asian",
+    "servings": "4 servings",
+    "dietary": "None"
+  },
+  "ingredients": [
+    {
+      "section": "Main Ingredients",
+      "items": [
+        {
+          "ingredient": "1 lb chicken breast, diced",
+          "note": "Cut into uniform pieces"
+        }
+      ]
+    }
+  ],
+  "instructions": [
+    {
+      "instruction": "Step-by-step cooking instruction here..."
+    }
+  ],
+  "notes": [
+    "Important cooking tip or storage note..."
+  ],
+  "mustKnowTips": [
+    "Essential tip for success with this recipe..."
+  ]
+}

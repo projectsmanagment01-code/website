@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Recipe {
+  id                  String    @id @default(cuid())
+  title               String
+  category            String
+  description         String
+  status              String    @default("published") // published, draft, archived
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  views               Int       @default(0)
+  lastViewedAt        DateTime?
+  allergyInfo         String
+  author              Json
+  categoryHref        String?
+  categoryLink        String
+  completeProcess     Json?
+  essIngredientGuide  Json?
+  faq                 Json?
+  featuredText        String
+  heroImage           String
+  href                String?
+  imageAlt            String?
+  images              String[]
+  img                 String
+  ingredientGuide     Json?
+  intro               String
+  mustKnowTips        String[]
+  notes               String[]
+  nutritionDisclaimer String
+  professionalSecrets String[]
+  questions           Json?
+  recipeInfo          Json?
+  relatedRecipes      Json?
+  sections            Json?
+  serving             String
+  shortDescription    String
+  slug                String    @unique
+  storage             String
+  story               String
+  testimonial         String
+  timing              Json?
+  tools               String[]
+  updatedDate         String
+  whyYouLove          Json?
+  ingredients         Json?
+  instructions        Json?
+  authorId            String?
+  authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])
+}
+
+model Author {
+  id        String   @id @default(cuid())
+  name      String
+  bio       String?
+  img       String?
+  avatar    String?
+  slug      String   @unique
+  link      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  recipes   Recipe[] @relation("AuthorRecipes")
+
+  @@map("authors")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  title       String
+  href        String
+  description String
+  image       String
+  alt         String
+  sizes       String?
+}
+
+model NavigationItem {
+  id            String  @id @default(cuid())
+  href          String
+  title         String
+  iconSrc       String
+  iconClassName String
+  label         String?
+}
+
+model AdminSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String?
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+}
+
+model ApiToken {
+  id          String    @id @default(cuid())
+  name        String
+  token       String    @unique
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime
+  isActive    Boolean   @default(true)
+  lastUsedAt  DateTime?
+  createdBy   String
+  description String?
+
+  @@map("api_tokens")
+}

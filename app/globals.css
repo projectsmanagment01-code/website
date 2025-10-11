@@ -1,0 +1,514 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+body {
+  background: var(--mo-body);
+  color: var(--mo-on-body);
+  font-family: var(--mo-font-family);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  min-height: 100vh;
+}
+
+/* Prevent layout shifts during navigation */
+main {
+  min-height: calc(100vh - 200px); /* Adjust based on header/footer height */
+}
+
+/* Smooth transitions for content loading */
+.page-content {
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.page-loading {
+  opacity: 0.7;
+}
+
+/* Ensure footer stays at bottom */
+.layout-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-area {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Phase 1 Layout Foundation - Unified Container System */
+.container-sm {
+  max-width: 768px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.container-md {
+  max-width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.container-lg {
+  max-width: 1152px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.container-xl {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.container-wide {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.container-full {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Responsive padding for containers */
+@media (min-width: 640px) {
+  .container-sm,
+  .container-md,
+  .container-lg,
+  .container-xl,
+  .container-wide,
+  .container-full {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-sm,
+  .container-md,
+  .container-lg,
+  .container-xl,
+  .container-wide,
+  .container-full {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Consistent section spacing */
+.section-sm {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.section-md {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.section-lg {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.section-xl {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.marker::marker {
+  font-size: 1.5em; /* make the bullet larger */
+  unicode-bidi: isolate;
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+  text-indent: 0px;
+  text-align: start;
+  text-align-last: auto;
+  list-style-type: disc;
+  list-style-position: outside;
+}
+
+:root {
+  --mo-body: #fff;
+  --mo-on-body: #000;
+  --mo-header: #fff;
+  --mo-on-header: #141413;
+  --mo-header-accent: #141413;
+  --mo-on-header-accent: #fff;
+  --mo-offcanvas: #fff;
+  --mo-on-offcanvas: #000;
+  --mo-on-offcanvas-accent: #bd2c00;
+  --mo-border-offcanvas: #ddd;
+  --mo-footer: #f6f5f3;
+  --mo-on-footer: #141413;
+  --mo-on-footer-accent: #bd2c00;
+  --mo-outline-footer: #141413;
+  --mo-search: #f1f1f1;
+  --mo-on-search: #0b0a0a;
+  --mo-outline-search: rgba(0, 0, 0, 0.09);
+  --mo-pagination-enabled: #000;
+  --mo-on-pagination-enabled: #fff;
+  --mo-pagination-disabled: #e9ecef;
+  --mo-on-pagination-disabled: #354757;
+  --mo-pagination-accent: #bd2c00;
+  --mo-on-pagination-accent: #fff;
+  --mo-separator: #d9dfe3;
+  --mo-on-separator: #141413;
+  --mo-separator-link: #141413;
+  --mo-on-separator-link: #fff;
+  --mo-social-item: #000;
+  --mo-on-social-item: #fff;
+  --mo-hero: #f6f5f3;
+  --mo-on-hero: #141413;
+  --mo-hero-title: #fff;
+  --mo-on-hero-title: #000;
+  --mo-landing: #f6f5f3;
+  --mo-on-landing: #000;
+  --mo-on-landing-title: #000;
+  --mo-on-landing-link: #c64118;
+  --mo-on-landing-link-accent: #f5533d;
+  --mo-category: #f6f5f3;
+  --mo-on-category: #000;
+  --mo-entry: #fff;
+  --mo-on-entry: #000;
+  --mo-entry-title: #000;
+  --mo-on-entry-title: #000000;
+  --mo-on-entry-link: #394840;
+  --mo-on-entry-link-accent: #d54215;
+  --mo-preview: #f6f5f3;
+  --mo-on-preview: #000;
+  --mo-on-preview-title: #000;
+  --mo-on-preview-title-accent: #bd2c00;
+  --mo-faq: #f8f8f8;
+  --mo-on-faq: #3b3c3d;
+  --mo-faq-accent: #f4f3f3;
+  --mo-on-faq-accent: #000;
+  --mo-on-action: #000;
+  --mo-action-accent: #000;
+  --mo-on-action-accent: #fff;
+  --mo-article: #ffffff;
+  --mo-on-article: #000;
+  --mo-article-any: #2d5942;
+  --mo-on-article-any: #fff;
+  --mo-on-article-heading: #000;
+  --mo-article-dt: #dfdfdf94;
+  --mo-on-article-dt: #2d5942;
+  --mo-article-note: #e7efec;
+  --mo-on-article-note: #0f2118;
+  --mo-on-article-link: #0041af;
+  --mo-on-article-link-accent: #f5533d;
+  --mo-article-recommendations: #dee2e7;
+  --mo-on-article-recommendations: #000;
+  --mo-on-article-recommendations-title: #2d5942;
+  --mo-author: #f6f5f3;
+  --mo-on-author: #000;
+  --mo-outline-author: #fff;
+  --mo-recipe: #e7efec;
+  --mo-on-recipe: #000;
+  --mo-on-recipe-title: #394840;
+  --mo-on-recipe-highlight: #394840;
+  --mo-on-recipe-link: #0c3e5a;
+  --mo-on-recipe-link-accent: #d54215;
+  --mo-recipe-separator: #abb9b3;
+  --mo-on-recipe-separator: #394840;
+  --mo-recipe-number: #2e5f48;
+  --mo-on-recipe-number: #fff;
+  --mo-related-entry: #f6f5f3;
+  --mo-on-related-entry: #000;
+  --mo-on-related-entry-accent: #d54215;
+  --mo-contact: #f6f5f3;
+  --mo-on-contact: #000;
+  --mo-on-contact-title: #000;
+  --mo-on-contact-subtitle: #394840;
+  --mo-keypoints-card: #f6f5f3;
+  --mo-on-keypoints-card: #000;
+  --mo-keypoints-card-svg: #eae8e4;
+  --mo-on-keypoints-card-svg: #000;
+  --mo-chip: #f1f1f1;
+  --mo-on-chip: #000;
+  --mo-printable: #fff;
+  --mo-on-printable: #000;
+  --mo-on-printable-accent: #c51a42;
+  --mo-font-family: system-ui, sans-serif;
+  --mo-font-size: 1.2rem;
+  --mo-line-height: 1.6;
+  --mo-icon-dimen: 1em;
+  --mo-space: 3.2rem;
+  --mo-gap: 1.6rem;
+  --mo-spacing: 1rem;
+  --mo-breadcrumb-delimiter: " » ";
+}
+
+@layer base {
+  ::marker {
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    text-indent: 0 !important;
+    text-align: start !important;
+    text-align-last: auto !important;
+  }
+}
+
+.recipe-notes {
+  counter-reset: list-counter;
+}
+.recipe-notes li {
+  counter-increment: list-counter;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Print Styles - Show only recipe card */
+@media print {
+  /* Hide everything except the recipe card */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the recipe card and its contents */
+  #recipe,
+  #recipe * {
+    visibility: visible;
+  }
+
+  /* Make the recipe card take full width */
+  #recipe {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Optimize recipe card styling for print */
+  .recipe__wrapper {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    border-style: solid !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Improve typography for print */
+  .recipe__title {
+    font-size: 24px !important;
+    color: black !important;
+    margin-bottom: 16px !important;
+    page-break-after: avoid;
+  }
+
+  /* Recipe description */
+  #recipe p {
+    color: black !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Timing grid - ensure it fits well */
+  #recipe .grid {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  #recipe .grid > div {
+    display: table-cell !important;
+    text-align: center !important;
+    padding: 8px !important;
+    border: 1px solid #ddd !important;
+  }
+
+  /* Ingredients and instructions */
+  #recipe h3 {
+    color: black !important;
+    font-size: 18px !important;
+    margin: 20px 0 10px 0 !important;
+    page-break-after: avoid;
+  }
+
+  /* Recipe notes and tips */
+  .recipe-notes li {
+    break-inside: avoid;
+    margin-bottom: 8px !important;
+  }
+
+  /* Ensure proper page breaks */
+  .recipe__separator {
+    page-break-after: avoid;
+  }
+
+  /* Hide icons in print */
+  #recipe svg,
+  #recipe .lucide {
+    display: none !important;
+  }
+
+  /* Adjust spacing for print */
+  #recipe .space-y-6 > * + * {
+    margin-top: 12px !important;
+  }
+
+  #recipe .space-y-4 > * + * {
+    margin-top: 8px !important;
+  }
+
+  #recipe .space-y-2 > * + * {
+    margin-top: 4px !important;
+  }
+
+  /* Ensure text is readable */
+  #recipe {
+    font-family: Arial, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Force page breaks for major sections */
+  #recipe h2 {
+    page-break-before: always;
+    page-break-after: avoid;
+  }
+
+  /* Avoid breaking instructions */
+  .recipe__interact-list > * {
+    page-break-inside: avoid;
+  }
+}

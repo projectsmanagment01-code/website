@@ -1,0 +1,91 @@
+// ---------- Prisma Schema ----------
+
+datasource db {
+  provider = "postgresql" // or "mysql" / "sqlite" depending on your DB
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------- Recipe Model with Embedded JSON ----------
+// All relations are stored as JSON to match the recipe.json structure
+
+model Recipe {
+  id               String   @id @default(cuid()) // String to match JSON
+  slug             String   @unique
+  href             String?
+  imageAlt         String?  // Optional to match JSON
+  categoryHref     String?
+  img              String
+  title            String
+  intro            String
+  description      String
+  shortDescription String
+  story            String
+  testimonial      String
+  category         String
+  categoryLink     String
+  featuredText     String
+  updatedDate      String
+
+  // Author as embedded JSON (matches JSON structure)
+  author       Json
+
+  // Embedded JSON objects (matches JSON structure)
+  whyYouLove     Json?
+  timing         Json?
+  recipeInfo     Json?
+  questions      Json?
+
+  // Array fields stored as JSON (matches JSON structure)
+  essIngredientGuide       Json?
+  ingredientGuide          Json?
+  ingredients              Json?
+  instructions             Json?
+  completeProcess          Json?
+  sections                 Json?
+  faq                      Json?
+  relatedRecipes           Json?
+
+  // Simple array fields
+  mustKnowTips       String[]
+  professionalSecrets String[]
+
+  // Simple fields from JSON
+  serving             String
+  storage             String
+  heroImage           String
+  images              String[]
+  notes               String[]
+  tools               String[]
+  allergyInfo         String
+  nutritionDisclaimer String
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------- Optional: Separate models for other entities ----------
+
+model Category {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  title       String
+  href        String
+  description String
+  image       String
+  alt         String
+  sizes       String?
+}
+
+model NavigationItem {
+  id            String @id @default(cuid())
+  href          String
+  title         String
+  iconSrc       String
+  iconClassName String
+  label         String?
+}

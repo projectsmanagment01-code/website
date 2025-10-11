@@ -1,0 +1,90 @@
+import { ImageResponse } from "next/og";
+import fs from "fs/promises";
+import path from "path";
+
+// Image metadata for Apple touch icon
+export const size = {
+  width: 180,
+  height: 180,
+};
+export const contentType = "image/png";
+
+// Function to get favicon settings
+async function getFaviconSettings() {
+  try {
+    const contentDir = path.join(process.cwd(), "uploads", "content");
+    const filePath = path.join(contentDir, "site.json");
+    
+    try {
+      const content = await fs.readFile(filePath, "utf-8");
+      const data = JSON.parse(content);
+      return data.favicon || "";
+    } catch {
+      return "";
+    }
+  } catch {
+    return "";
+  }
+}
+
+// Function to read local favicon file
+async function getLocalFavicon(faviconPath: string) {
+  try {
+    const cleanPath = faviconPath.startsWith('/') ? faviconPath.slice(1) : faviconPath;
+    const fullPath = path.join(process.cwd(), cleanPath);
+    
+    await fs.access(fullPath);
+    const buffer = await fs.readFile(fullPath);
+    
+    let contentType = 'image/png';
+    if (faviconPath.endsWith('.webp')) contentType = 'image/webp';
+    else if (faviconPath.endsWith('.jpg') || faviconPath.endsWith('.jpeg')) contentType = 'image/jpeg';
+    
+    return { buffer, contentType };
+  } catch (error) {
+    console.error('Error reading local favicon for apple-icon:', error);
+    return null;
+  }
+}
+
+// Apple icon generation
+export default async function AppleIcon() {
+  const customFavicon = await getFaviconSettings();
+  
+  if (customFavicon) {
+    const faviconData = await getLocalFavicon(customFavicon);
+    
+    if (faviconData) {
+      return new Response(new Uint8Array(faviconData.buffer), {
+        headers: {
+          'Content-Type': faviconData.contentType,
+          'Cache-Control': 'public, max-age=86400, immutable',
+        },
+      });
+    }
+  }
+
+  // Fallback to default generated apple icon
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          fontSize: 48,
+          background: "linear-gradient(90deg, #059669, #10b981)",
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          borderRadius: "20%",
+        }}
+      >
+        🍽️
+      </div>
+    ),
+    {
+      ...size,
+    }
+  );
+}
