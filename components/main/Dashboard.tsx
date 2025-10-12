@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Menu } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Dashboard } from "@/components/dashboard/Dashboard";
-import { RecipeTable } from "@/components/recipe-table";
+import { RecipeTableWithSEO } from "@/components/recipe-table/RecipeTableWithSEO";
 import { RecipeModal } from "@/components/dashboard/RecipeModal";
 import { MediaLibrary } from "@/components/admin/MediaLibrary";
 import ContentManagementCards from "@/components/admin/ContentManagementCards";
@@ -21,6 +21,7 @@ import AuthorManagement from "@/components/admin/authors/AuthorManagement";
 import ProfileSettings from "@/components/admin/ProfileSettings";
 import ApiTokenManager from "@/components/admin/ApiTokenManager";
 import BackupManager from "@/components/admin/BackupManager";
+import SEOReportsView from "@/components/admin/SEOReportsView";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -54,7 +55,7 @@ function AdminDashboardContent() {
         );
       case "recipes":
         return (
-          <RecipeTable
+          <RecipeTableWithSEO
             recipes={state.recipes}
             onEdit={handleEditRecipe}
             onDelete={handleDeleteRecipe}
@@ -133,6 +134,20 @@ function AdminDashboardContent() {
         return <CookiesContentEditor onBack={() => setActiveSection("content")} />;
       case "backup":
         return <BackupManager />;
+      case "seo-reports":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                AI SEO Reports
+              </h1>
+              <p className="text-gray-600">
+                View and manage AI-generated SEO enhancements for your recipes
+              </p>
+            </div>
+            <SEOReportsView />
+          </div>
+        );
       case "plugins":
         return <AIPlugin />;
       case "api-tokens":

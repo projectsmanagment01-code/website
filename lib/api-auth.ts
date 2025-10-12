@@ -5,7 +5,9 @@ import { verify } from "jsonwebtoken";
 const prisma = new PrismaClient();
 
 interface JwtPayload {
-  username: string;
+  sub?: number;
+  email?: string;
+  username?: string;
   role: string;
 }
 
@@ -56,18 +58,22 @@ export async function verifyAdminAuth(request: NextRequest): Promise<JwtPayload 
   try {
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log("❌ No authorization header or invalid format");
       return null;
     }
 
     const token = authHeader.substring(7);
     const secret = process.env.JWT_SECRET;
     if (!secret) {
+      console.error("❌ JWT_SECRET is not configured");
       throw new Error("JWT_SECRET is not configured");
     }
 
     const payload = verify(token, secret) as JwtPayload;
+    console.log("✅ JWT verified successfully:", { email: payload.email, role: payload.role });
     return payload;
   } catch (error) {
+    console.error("❌ JWT verification error:", error instanceof Error ? error.message : error);
     return null;
   }
 }

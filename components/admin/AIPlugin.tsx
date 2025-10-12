@@ -608,7 +608,7 @@ export default function AIPlugin() {
                     <div className="text-xs text-gray-500">
                       {key === 'contentGeneration' && 'Auto-generate blog content'}
                       {key === 'recipeAssistance' && 'Recipe suggestions & improvements'}
-                      {key === 'seoOptimization' && 'Optimize content for search engines'}
+                      {key === 'seoOptimization' && '🎯 Enable AI SEO reports for recipes (metadata, alt text, internal links)'}
                       {key === 'imageAnalysis' && 'Analyze and understand images'}
                       {key === 'imageDescriptions' && 'Auto-generate image alt text'}
                       {key === 'objectDetection' && 'Detect objects in images with bounding boxes'}

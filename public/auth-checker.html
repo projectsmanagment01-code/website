@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Auth Checker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #007bff;
+    }
+    .section.error {
+      border-left-color: #dc3545;
+      background: #fff5f5;
+    }
+    .section.success {
+      border-left-color: #28a745;
+      background: #f0fff4;
+    }
+    .section.warning {
+      border-left-color: #ffc107;
+      background: #fffbf0;
+    }
+    h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .status.success {
+      background: #28a745;
+      color: white;
+    }
+    .status.error {
+      background: #dc3545;
+      color: white;
+    }
+    .status.warning {
+      background: #ffc107;
+      color: #333;
+    }
+    .info {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .info strong {
+      color: #007bff;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 10px;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    button.danger {
+      background: #dc3545;
+    }
+    button.danger:hover {
+      background: #c82333;
+    }
+    .test-results {
+      margin-top: 15px;
+    }
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Admin Authentication Checker</h1>
+    <p class="subtitle">Diagnose authentication issues with authors and tokens</p>
+
+    <div id="tokenStatus" class="section"></div>
+    <div id="apiTests" class="section"></div>
+
+    <div class="section">
+      <h2>Actions</h2>
+      <button onclick="checkToken()">🔄 Refresh Token Check</button>
+      <button onclick="testAuthors()">👥 Test Fetch Authors</button>
+      <button onclick="testTokens()">🔑 Test Fetch API Tokens</button>
+      <button onclick="window.location.href='/admin/login'" class="danger">🚪 Go to Login</button>
+    </div>
+
+    <div class="section">
+      <h2>📋 Quick Fixes</h2>
+      <div class="info">
+        <strong>If you can't fetch authors/tokens:</strong><br>
+        1. Make sure you're logged in to /admin/login<br>
+        2. Check that your admin_token exists in localStorage<br>
+        3. Verify the token hasn't expired<br>
+        4. Check API routes are running (http://localhost:3001)
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function checkToken() {
+      const section = document.getElementById('tokenStatus');
+      const token = localStorage.getItem('admin_token');
+      
+      if (!token) {
+        section.className = 'section error';
+        section.innerHTML = `
+          <h2>❌ No Admin Token Found <span class="status error">NOT LOGGED IN</span></h2>
+          <div class="info">
+            <strong>Problem:</strong> No JWT token found in localStorage<br>
+            <strong>Solution:</strong> You need to log in first<br>
+            <strong>Action:</strong> <a href="/admin/login">Go to Admin Login →</a>
+          </div>
+        `;
+        return false;
+      }
+
+      // Parse JWT to check expiration
+      try {
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+          throw new Error('Invalid token format');
+        }
+        
+        const payload = JSON.parse(atob(parts[1]));
+        const now = Math.floor(Date.now() / 1000);
+        const isExpired = payload.exp && payload.exp < now;
+        
+        if (isExpired) {
+          section.className = 'section error';
+          section.innerHTML = `
+            <h2>⚠️ Token Expired <span class="status error">EXPIRED</span></h2>
+            <div class="info">
+              <strong>Token expired at:</strong> ${new Date(payload.exp * 1000).toLocaleString()}<br>
+              <strong>Solution:</strong> Log in again to get a new token<br>
+              <strong>Action:</strong> <a href="/admin/login">Go to Admin Login →</a>
+            </div>
+          `;
+          return false;
+        }
+
+        section.className = 'section success';
+        section.innerHTML = `
+          <h2>✅ Valid Admin Token <span class="status success">LOGGED IN</span></h2>
+          <div class="info">
+            <strong>User:</strong> ${payload.email || payload.username || 'N/A'}<br>
+            <strong>Role:</strong> ${payload.role || 'admin'}<br>
+            <strong>Expires:</strong> ${new Date(payload.exp * 1000).toLocaleString()}<br>
+            <strong>Token (first 20 chars):</strong> ${token.substring(0, 20)}...
+          </div>
+        `;
+        return true;
+      } catch (error) {
+        section.className = 'section error';
+        section.innerHTML = `
+          <h2>❌ Invalid Token Format <span class="status error">ERROR</span></h2>
+          <div class="info">
+            <strong>Error:</strong> ${error.message}<br>
+            <strong>Solution:</strong> Clear localStorage and log in again
+          </div>
+        `;
+        return false;
+      }
+    }
+
+    async function testAuthors() {
+      const section = document.getElementById('apiTests');
+      const token = localStorage.getItem('admin_token');
+
+      if (!token) {
+        section.className = 'section error';
+        section.innerHTML = '<h2>❌ Cannot test - no token found</h2>';
+        return;
+      }
+
+      section.className = 'section';
+      section.innerHTML = '<h2>🔄 Testing Author API... <span class="loading"></span></h2>';
+
+      try {
+        const response = await fetch('/api/admin/authors', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          section.className = 'section success';
+          section.innerHTML = `
+            <h2>✅ Authors API Working <span class="status success">${response.status} OK</span></h2>
+            <div class="info">
+              <strong>Total Authors:</strong> ${data.total || data.authors?.length || 0}<br>
+              <strong>Current Page:</strong> ${data.currentPage || 1}<br>
+              <strong>Total Pages:</strong> ${data.totalPages || 1}<br>
+              <strong>Authors:</strong><br>
+              ${data.authors?.map(a => `- ${a.name} (${a.slug})`).join('<br>') || 'No authors found'}
+            </div>
+          `;
+        } else {
+          section.className = 'section error';
+          section.innerHTML = `
+            <h2>❌ Author API Failed <span class="status error">${response.status}</span></h2>
+            <div class="info">
+              <strong>Error:</strong> ${data.error || 'Unknown error'}<br>
+              <strong>Message:</strong> ${data.message || 'No message'}
+            </div>
+          `;
+        }
+      } catch (error) {
+        section.className = 'section error';
+        section.innerHTML = `
+          <h2>❌ Network Error <span class="status error">FAILED</span></h2>
+          <div class="info">
+            <strong>Error:</strong> ${error.message}<br>
+            <strong>Check:</strong> Is the dev server running on port 3001?
+          </div>
+        `;
+      }
+    }
+
+    async function testTokens() {
+      const section = document.getElementById('apiTests');
+      const token = localStorage.getItem('admin_token');
+
+      if (!token) {
+        section.className = 'section error';
+        section.innerHTML = '<h2>❌ Cannot test - no token found</h2>';
+        return;
+      }
+
+      section.className = 'section';
+      section.innerHTML = '<h2>🔄 Testing API Tokens... <span class="loading"></span></h2>';
+
+      try {
+        const response = await fetch('/api/admin/tokens', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          section.className = 'section success';
+          section.innerHTML = `
+            <h2>✅ API Tokens Working <span class="status success">${response.status} OK</span></h2>
+            <div class="info">
+              <strong>Total Tokens:</strong> ${data.tokens?.length || 0}<br>
+              <strong>Tokens:</strong><br>
+              ${data.tokens?.length > 0 
+                ? data.tokens.map(t => `- ${t.name} (${t.isActive ? '🟢 Active' : '🔴 Inactive'})`).join('<br>') 
+                : '⚠️ No API tokens found. Create one in the API Tokens section.'}
+            </div>
+          `;
+        } else {
+          section.className = 'section error';
+          section.innerHTML = `
+            <h2>❌ API Tokens Failed <span class="status error">${response.status}</span></h2>
+            <div class="info">
+              <strong>Error:</strong> ${data.error || 'Unknown error'}<br>
+              <strong>Message:</strong> ${data.message || 'No message'}
+            </div>
+          `;
+        }
+      } catch (error) {
+        section.className = 'section error';
+        section.innerHTML = `
+          <h2>❌ Network Error <span class="status error">FAILED</span></h2>
+          <div class="info">
+            <strong>Error:</strong> ${error.message}<br>
+            <strong>Check:</strong> Is the dev server running? Is /api/admin/tokens route exists?
+          </div>
+        `;
+      }
+    }
+
+    // Auto-check on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      checkToken();
+      
+      // Auto-test if token exists
+      if (localStorage.getItem('admin_token')) {
+        setTimeout(testAuthors, 500);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -140,23 +140,12 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         <meta
           name="title"
           content="Guelma Team Recipes - Delicious Family-Friendly Recipes"
         />
-
-        <style>
-          {`
-html {
-  font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
-  --font-mono: ${GeistMono.variable};
-}
-        `}
-        </style>
-
 
         {!excludeScripts &&
           settings.header?.html?.map((script, index) => {
@@ -184,7 +173,7 @@ html {
             return null;
           })}
       </head>
-      <body className="layout-container">
+      <body className="layout-container" suppressHydrationWarning>
         {/* Custom Body Code */}
         {bodyCode.html && (
           <div dangerouslySetInnerHTML={{ __html: bodyCode.html }} />

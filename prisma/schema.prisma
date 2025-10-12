@@ -12,11 +12,8 @@ model Recipe {
   title               String
   category            String
   description         String
-  status              String    @default("published") // published, draft, archived
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  views               Int       @default(0)
-  lastViewedAt        DateTime?
   allergyInfo         String
   author              Json
   categoryHref        String?
@@ -52,7 +49,10 @@ model Recipe {
   whyYouLove          Json?
   ingredients         Json?
   instructions        Json?
+  lastViewedAt        DateTime?
+  views               Int       @default(0)
   authorId            String?
+  status              String    @default("published")
   authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])
 }
 
@@ -111,4 +111,27 @@ model ApiToken {
   description String?
 
   @@map("api_tokens")
+}
+
+model SEOEnhancementReport {
+  id                  String   @id @default(cuid())
+  recipeId            String
+  recipeTitle         String
+  status              String   @default("pending") // pending, processing, success, failed
+  seoScore            Int?
+  enhancementsCount   Int      @default(0)
+  processingTime      Int?     // in seconds
+  metadataGenerated   Boolean  @default(false)
+  imagesProcessed     Int      @default(0)
+  linksGenerated      Int      @default(0)
+  schemaEnhanced      Boolean  @default(false)
+  errorMessage        String?
+  aiResponse          Json?    // Store full AI response
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("seo_enhancement_reports")
+  @@index([recipeId])
+  @@index([status])
+  @@index([createdAt])
 }

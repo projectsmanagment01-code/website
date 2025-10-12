@@ -89,6 +89,7 @@ export default function Admin() {
         </div>
       </div>
       <Dashboard />
+     
     </div>
   );
 }
