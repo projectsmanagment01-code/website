@@ -214,28 +214,6 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
         );
       })}
 
-      {/* 4. Final Presentation Image - Before FAQ section */}
-      {finalImage && (
-        <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100 my-8">
-          <Image
-            src={finalImage}
-            alt={`${recipe.title} - final presentation`}
-            width={1200}
-            height={800}
-            style={{
-              width: "100%",
-              height: "auto",
-            }}
-            loading="lazy"
-            quality={75}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
-          />
-          <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
-            {recipe.title} - Final Presentation | {getHostname()}
-          </div>
-        </div>
-      )}
-
       {/* FAQ Section */}
       <div>
         <h2
@@ -273,6 +251,28 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
           ))}
         </div>
       </div>
+
+      {/* 4. Final Presentation Image - Just before recipe card */}
+      {finalImage && (
+        <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100 my-8">
+          <Image
+            src={finalImage}
+            alt={`${recipe.title} - final presentation`}
+            width={1200}
+            height={800}
+            style={{
+              width: "100%",
+              height: "auto",
+            }}
+            loading="lazy"
+            quality={75}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
+          />
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
+            {recipe.title} - Final Presentation | {getHostname()}
+          </div>
+        </div>
+      )}
 
       <Card recipe={recipe} />
     </div>

@@ -36,7 +36,7 @@ export const Card: React.FC<{
         <div className="md:w-1/3">
           <div className="relative w-full h-48 md:h-full rounded-lg overflow-hidden shadow-md">
             <Image
-              src={recipe.images?.[0] || "/placeholder-recipe.jpg"}
+              src={recipe.featureImage || recipe.images?.[0] || recipe.heroImage || "/placeholder-recipe.jpg"}
               alt={recipe.title}
               fill
               quality={75}
