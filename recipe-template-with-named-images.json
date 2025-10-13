@@ -15,13 +15,6 @@
   "cookingImage": "https://cdn.example.com/pizza-cooking-mixing.jpg",
   "finalPresentationImage": "https://cdn.example.com/pizza-final-plated.jpg",
   
-  "images": [
-    "https://cdn.example.com/pizza-hero-beautiful-shot.jpg",
-    "https://cdn.example.com/pizza-ingredients-prep.jpg",
-    "https://cdn.example.com/pizza-cooking-mixing.jpg",
-    "https://cdn.example.com/pizza-final-plated.jpg"
-  ],
-  
   "heroImage": "https://cdn.example.com/pizza-hero-beautiful-shot.jpg",
   "img": "https://cdn.example.com/pizza-hero-beautiful-shot.jpg",
   "imageAlt": "Classic Margherita Pizza with fresh mozzarella and basil",
