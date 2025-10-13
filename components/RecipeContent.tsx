@@ -25,11 +25,26 @@ const getOptimizedImageUrl = (
 export function RecipeContent({ recipe }: RecipeContentProps) {
   recipe = Array.isArray(recipe) ? recipe[0] : recipe;
 
+  // Check if recipe uses new named image fields
+  const hasNamedImages = !!(recipe.featureImage || recipe.preparationImage || recipe.cookingImage || recipe.finalPresentationImage);
+
   // Get images from named fields or fallback to array indices
   const featureImage = recipe.featureImage || recipe.images?.[0] || recipe.heroImage;
-  const ingredientImage = recipe.preparationImage || recipe.images?.[1]; // Renamed for clarity
-  const mixingImage = recipe.cookingImage || recipe.images?.[2]; // Renamed for clarity
-  const finalImage = recipe.finalPresentationImage || recipe.images?.[3];
+  
+  // Only show subsequent images if:
+  // 1. Recipe has named fields (new system), OR
+  // 2. The image is different from featureImage (old system - prevent duplicates)
+  const ingredientImage = hasNamedImages 
+    ? (recipe.preparationImage || recipe.images?.[1])
+    : (recipe.images?.[1] && recipe.images[1] !== featureImage ? recipe.images[1] : null);
+    
+  const mixingImage = hasNamedImages 
+    ? (recipe.cookingImage || recipe.images?.[2])
+    : (recipe.images?.[2] && recipe.images[2] !== featureImage && recipe.images[2] !== ingredientImage ? recipe.images[2] : null);
+    
+  const finalImage = hasNamedImages 
+    ? (recipe.finalPresentationImage || recipe.images?.[3])
+    : (recipe.images?.[3] && recipe.images[3] !== featureImage && recipe.images[3] !== ingredientImage && recipe.images[3] !== mixingImage ? recipe.images[3] : null);
 
   return (
     <div className="space-y-8 mt-2 text-md max-w-none">
