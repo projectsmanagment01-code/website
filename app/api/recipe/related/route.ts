@@ -39,17 +39,9 @@ export async function GET(request: NextRequest) {
     // Find related recipes based on category or similar criteria
     const relatedRecipes = await prisma.recipe.findMany({
       where: {
-        href: { not: null }, // Only show published recipes (with href)
-        AND: [
-          { id: { not: recipeId } },
-          {
-            OR: [
-              { category: currentRecipe.category },
-              // You can add more sophisticated matching logic here
-              // For example, matching ingredients, tags, etc.
-            ],
-          },
-        ],
+        status: "published", // Only show published recipes
+        id: { not: recipeId }, // Exclude current recipe
+        category: currentRecipe.category, // Same category
       },
       take: limit,
       orderBy: { createdAt: "desc" },
