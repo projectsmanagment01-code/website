@@ -55,6 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "content", label: "Content Management", icon: Edit },
     { id: "backup", label: "Backup & Restore", icon: Archive },
     { id: "seo-reports", label: "AI SEO Reports", icon: Sparkles },
+    { id: "google-search", label: "Google Search", icon: Bot },
     { id: "plugins", label: "Plugins", icon: Bot },
     { id: "api-tokens", label: "API Tokens", icon: Key },
     { id: "profile", label: "Login Settings", icon: User },

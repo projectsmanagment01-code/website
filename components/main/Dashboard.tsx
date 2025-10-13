@@ -22,6 +22,7 @@ import ProfileSettings from "@/components/admin/ProfileSettings";
 import ApiTokenManager from "@/components/admin/ApiTokenManager";
 import BackupManager from "@/components/admin/BackupManager";
 import SEOReportsView from "@/components/admin/SEOReportsView";
+import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -148,6 +149,8 @@ function AdminDashboardContent() {
             <SEOReportsView />
           </div>
         );
+      case "google-search":
+        return <GoogleSearchSettings />;
       case "plugins":
         return <AIPlugin />;
       case "api-tokens":
