@@ -11,15 +11,15 @@
   "testimonial": "This is hands down the best pizza I've ever made at home! The crust was perfectly crispy on the outside and chewy on the inside. My family couldn't believe I made this myself!",
   
   "featureImage": "https://cdn.example.com/pizza-hero-beautiful-shot.jpg",
-  "cookingImage": "https://cdn.example.com/pizza-in-oven-cooking.jpg",
-  "preparationImage": "https://cdn.example.com/pizza-dough-preparation.jpg",
-  "finalPresentationImage": "https://cdn.example.com/pizza-plated-garnished.jpg",
+  "preparationImage": "https://cdn.example.com/pizza-ingredients-prep.jpg",
+  "cookingImage": "https://cdn.example.com/pizza-cooking-mixing.jpg",
+  "finalPresentationImage": "https://cdn.example.com/pizza-final-plated.jpg",
   
   "images": [
     "https://cdn.example.com/pizza-hero-beautiful-shot.jpg",
-    "https://cdn.example.com/pizza-in-oven-cooking.jpg",
-    "https://cdn.example.com/pizza-dough-preparation.jpg",
-    "https://cdn.example.com/pizza-plated-garnished.jpg"
+    "https://cdn.example.com/pizza-ingredients-prep.jpg",
+    "https://cdn.example.com/pizza-cooking-mixing.jpg",
+    "https://cdn.example.com/pizza-final-plated.jpg"
   ],
   
   "heroImage": "https://cdn.example.com/pizza-hero-beautiful-shot.jpg",
