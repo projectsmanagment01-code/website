@@ -1,5 +1,4 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 interface HeroContent {
   heroTitle: string;
@@ -13,37 +12,42 @@ interface HeroSectionProps {
   className?: string;
 }
 
-export default function HeroSection({ className }: HeroSectionProps) {
-  const [heroContent, setHeroContent] = useState<HeroContent>({
+// Server-side data fetching
+async function getHeroContent(): Promise<HeroContent> {
+  try {
+    const response = await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/content/home`, {
+      cache: 'force-cache'
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        heroTitle: data.heroTitle || "",
+        heroDescription: data.heroDescription || "",
+        heroButtonText: data.heroButtonText || "",
+        heroButtonLink: data.heroButtonLink || "",
+        heroBackgroundImage: data.heroBackgroundImage || "",
+      };
+    }
+  } catch (error) {
+    console.warn("Failed to load hero content:", error);
+  }
+  
+  // Fallback content
+  return {
     heroTitle: "",
     heroDescription: "",
     heroButtonText: "",
     heroButtonLink: "",
-    heroBackgroundImage: ""
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    fetch('/api/content/home')
-      .then(response => response.json())
-      .then(data => {
-        setHeroContent({
-          heroTitle: data.heroTitle || "",
-          heroDescription: data.heroDescription || "",
-          heroButtonText: data.heroButtonText || "",
-          heroButtonLink: data.heroButtonLink || "",
-          heroBackgroundImage: data.heroBackgroundImage || "",
-        });
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.warn("Failed to load hero content:", error);
-        setIsLoading(false);
-      });
-  }, []);
+    heroBackgroundImage: "",
+  };
+}
 
-  // Don't render hero if still loading or no content
-  if (isLoading || (!heroContent.heroTitle && !heroContent.heroDescription)) {
+export default async function HeroSection({ className }: HeroSectionProps) {
+  const heroContent = await getHeroContent();
+
+  // Don't render hero if no content
+  if (!heroContent.heroTitle && !heroContent.heroDescription) {
     return <div className={`min-h-screen ${className || ""}`}></div>;
   }
 

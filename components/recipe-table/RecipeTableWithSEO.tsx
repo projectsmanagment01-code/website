@@ -27,6 +27,12 @@ export const RecipeTableWithSEO: React.FC<RecipeTableWithSEOProps> = (props) => 
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGenerateButton, setShowGenerateButton] = useState(false);
+  const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
+  const [generationProgress, setGenerationProgress] = useState<{
+    current: number;
+    total: number;
+    currentRecipe?: string;
+  }>({ current: 0, total: 0 });
 
   // Fetch SEO scores on mount and when recipes change
   useEffect(() => {
@@ -71,32 +77,89 @@ export const RecipeTableWithSEO: React.FC<RecipeTableWithSEOProps> = (props) => 
   };
 
   const handleGenerateSEO = async () => {
-    if (!confirm(`Generate SEO reports for all recipes?\n\nThis may take a few minutes and will use OpenAI API credits.`)) {
+    // Determine which recipes to process
+    const recipesToProcess = selectedRecipes.size > 0 
+      ? Array.from(selectedRecipes)
+      : enrichedRecipes
+          .filter(r => !r.seoScore || r.seoScore === 0)
+          .map(r => r.id);
+
+    if (recipesToProcess.length === 0) {
+      alert('No recipes selected or all recipes already have SEO scores.');
+      return;
+    }
+
+    const confirmMessage = selectedRecipes.size > 0
+      ? `Generate SEO reports for ${recipesToProcess.length} selected recipe(s)?`
+      : `Generate SEO reports for ${recipesToProcess.length} recipe(s) without SEO scores?`;
+
+    if (!confirm(`${confirmMessage}\n\nThis may take a few minutes and will use OpenAI API credits.\nRecipes will be processed one by one to avoid API limits.`)) {
       return;
     }
 
     try {
       setIsGenerating(true);
-      const response = await fetch('/api/seo/generate-bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      });
+      setGenerationProgress({ current: 0, total: recipesToProcess.length });
+      
+      let successCount = 0;
+      let failedCount = 0;
+      const failedRecipes: string[] = [];
 
-      if (response.ok) {
-        const data = await response.json();
-        alert(`✅ SEO Generation Complete!\n\nSuccess: ${data.summary.success}\nFailed: ${data.summary.failed}\n\nRefresh to see updated scores.`);
-        // Refresh scores
-        await fetchSEOScores();
-      } else {
-        const error = await response.json();
-        throw new Error(error.details || error.error);
+      // Process recipes one by one
+      for (let i = 0; i < recipesToProcess.length; i++) {
+        const recipeId = recipesToProcess[i];
+        const recipe = enrichedRecipes.find(r => r.id === recipeId);
+        
+        setGenerationProgress({ 
+          current: i + 1, 
+          total: recipesToProcess.length,
+          currentRecipe: recipe?.title || recipeId
+        });
+
+        try {
+          const response = await fetch('/api/seo/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipeId })
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            const error = await response.json();
+            console.error(`Failed to generate SEO for recipe ${recipeId}:`, error);
+            failedCount++;
+            failedRecipes.push(recipe?.title || recipeId);
+          }
+        } catch (error) {
+          console.error(`Error processing recipe ${recipeId}:`, error);
+          failedCount++;
+          failedRecipes.push(recipe?.title || recipeId);
+        }
+
+        // Small delay between requests to be nice to the API
+        if (i < recipesToProcess.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
+
+      // Show completion message
+      let message = `✅ SEO Generation Complete!\n\nSuccess: ${successCount}\nFailed: ${failedCount}`;
+      if (failedRecipes.length > 0) {
+        message += `\n\nFailed recipes:\n${failedRecipes.join('\n')}`;
+      }
+      alert(message);
+
+      // Refresh scores and clear selection
+      await fetchSEOScores();
+      setSelectedRecipes(new Set());
+      
     } catch (error: any) {
       console.error('Failed to generate SEO:', error);
       alert(`❌ SEO generation failed:\n${error.message}\n\nMake sure OPENAI_API_KEY is set in your .env file.`);
     } finally {
       setIsGenerating(false);
+      setGenerationProgress({ current: 0, total: 0 });
     }
   };
 
@@ -119,7 +182,9 @@ export const RecipeTableWithSEO: React.FC<RecipeTableWithSEOProps> = (props) => 
               AI SEO Enhancement Available
             </h3>
             <p className="text-sm text-blue-700 mt-1">
-              Some recipes don't have SEO reports yet. Generate AI-powered SEO enhancements for all recipes.
+              {selectedRecipes.size > 0 
+                ? `Generate SEO for ${selectedRecipes.size} selected recipe(s).`
+                : `Some recipes don't have SEO reports yet. Generate AI-powered SEO enhancements.`}
             </p>
           </div>
           <button
@@ -127,18 +192,33 @@ export const RecipeTableWithSEO: React.FC<RecipeTableWithSEOProps> = (props) => 
             disabled={isGenerating}
             className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
           >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
-                Generate SEO
-              </>
-            )}
+            {isGenerating ? 'Generating...' : 'Generate SEO'}
           </button>
+        </div>
+      )}
+
+      {/* Progress display during SEO generation */}
+      {isGenerating && generationProgress.total > 0 && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-green-800">
+              Generating SEO Reports...
+            </span>
+            <span className="text-sm text-green-600">
+              {generationProgress.current} / {generationProgress.total}
+            </span>
+          </div>
+          <div className="w-full bg-green-200 rounded-full h-2 mb-2">
+            <div 
+              className="bg-green-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(generationProgress.current / generationProgress.total) * 100}%` }}
+            />
+          </div>
+          {generationProgress.currentRecipe && (
+            <p className="text-xs text-green-700">
+              Processing: {generationProgress.currentRecipe}
+            </p>
+          )}
         </div>
       )}
       

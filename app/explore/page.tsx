@@ -21,7 +21,7 @@ const RecipeCard = ({ recipe }: { recipe: Recipe }) => {
   return (
     <div className="bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg flex flex-col shadow-sm">
       {/* Smaller image height */}
-      <a
+      <Link
         href={"/recipes/" + recipe.slug}
         className="block w-full h-40 overflow-hidden"
       >
@@ -33,14 +33,14 @@ const RecipeCard = ({ recipe }: { recipe: Recipe }) => {
           sizes="(min-width: 768px) calc((100vw - 6rem) / 3), (min-width: 640px) calc((100vw - 4rem) / 2), calc(100vw - 2rem)"
           className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105"
         />
-      </a>
+      </Link>
 
       <div className="flex flex-col flex-1 gap-2 p-3">
-        <a href={"/recipes/" + recipe.slug} className="block">
+        <Link href={"/recipes/" + recipe.slug} className="block">
           <h3 className="text-base font-semibold text-black hover:text-gray-700 transition-colors line-clamp-1">
             {recipe.title}
           </h3>
-        </a>
+        </Link>
 
         {/* Limit description length */}
         <p className="text-gray-600 text-sm leading-snug line-clamp-2">

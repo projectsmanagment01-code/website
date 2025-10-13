@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, Edit, Eye, EyeOff, Check, X } from 'lucide-react';
+import { Trash2, Edit, Eye, EyeOff, Check, X, Sparkles } from 'lucide-react';
 
 interface BulkOperationsProps {
   selectedRecipes: string[];
@@ -8,8 +8,10 @@ interface BulkOperationsProps {
   onClearSelection: () => void;
   onBulkDelete: () => void;
   onBulkStatusChange: (status: 'published' | 'draft') => void;
+  onBulkSEOGenerate?: () => void;
   isDeleting: boolean;
   isUpdatingStatus: boolean;
+  isGeneratingSEO?: boolean;
 }
 
 export const BulkOperations: React.FC<BulkOperationsProps> = ({
@@ -19,8 +21,10 @@ export const BulkOperations: React.FC<BulkOperationsProps> = ({
   onClearSelection,
   onBulkDelete,
   onBulkStatusChange,
+  onBulkSEOGenerate,
   isDeleting,
-  isUpdatingStatus
+  isUpdatingStatus,
+  isGeneratingSEO
 }) => {
   const selectedCount = selectedRecipes.length;
   const isAllSelected = selectedCount === totalRecipes && totalRecipes > 0;
@@ -77,6 +81,18 @@ export const BulkOperations: React.FC<BulkOperationsProps> = ({
               {isUpdatingStatus ? 'Drafting...' : 'Draft'}
             </button>
           </div>
+
+          {/* SEO Generation Button */}
+          {onBulkSEOGenerate && (
+            <button
+              onClick={onBulkSEOGenerate}
+              disabled={isGeneratingSEO}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400 rounded transition-colors"
+            >
+              <Sparkles className="w-3 h-3" />
+              {isGeneratingSEO ? 'Generating...' : 'Generate SEO'}
+            </button>
+          )}
 
           {/* Delete Button */}
           <button

@@ -1,5 +1,3 @@
-"use client";
-import { useState, useEffect } from "react";
 import Image from "next/image";
 
 interface LogoSettings {
@@ -13,35 +11,35 @@ interface LogoProps {
   className?: string;
 }
 
-export default function Logo({ className }: LogoProps) {
-  const [logoSettings, setLogoSettings] = useState<LogoSettings>({
-    logoType: "text",
-    logoText: "",
-    logoImage: "",
-    logoTagline: ""
-  });
-  const [isLoading, setIsLoading] = useState(true);
+// Server-side function to fetch logo settings
+async function getLogoSettings(): Promise<LogoSettings> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/content/site`, {
+      cache: 'force-cache'
+    });
+    const data = await response.json();
+    return {
+      logoType: data.logoType || "text",
+      logoText: data.logoText || "",
+      logoImage: data.logoImage || "",
+      logoTagline: data.logoTagline || "",
+    };
+  } catch (error) {
+    console.warn("Failed to load logo settings:", error);
+    return {
+      logoType: "text",
+      logoText: "",
+      logoImage: "",
+      logoTagline: ""
+    };
+  }
+}
 
-  useEffect(() => {
-    fetch('/api/content/site')
-      .then(response => response.json())
-      .then(data => {
-        setLogoSettings({
-          logoType: data.logoType || "text",
-          logoText: data.logoText || "",
-          logoImage: data.logoImage || "",
-          logoTagline: data.logoTagline || "",
-        });
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.warn("Failed to load logo settings:", error);
-        setIsLoading(false);
-      });
-  }, []);
+export default async function Logo({ className }: LogoProps) {
+  const logoSettings = await getLogoSettings();
 
-  // Don't render anything while loading or if no content
-  if (isLoading || (!logoSettings.logoText && !logoSettings.logoImage)) {
+  // Don't render anything if no content
+  if (!logoSettings.logoText && !logoSettings.logoImage) {
     return <div className={`${className} min-h-[2rem]`}></div>;
   }
 

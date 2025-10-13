@@ -1,11 +1,114 @@
-﻿import { NextResponse } from 'next/server';
+﻿import { NextResponse, NextRequest } from 'next/server';
 import fs from 'fs-extra';
 import path from 'path';
 
-export const maxDuration = 1800; // 30 minutes for large files
+export const maxDuration = 3600; // 60 minutes for very large files (1GB+)
 export const dynamic = 'force-dynamic';
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
+  try {
+    const contentType = request.headers.get('content-type');
+    
+    // Check if this is a file upload (multipart/form-data) or URL import (application/json)
+    if (contentType?.includes('multipart/form-data')) {
+      return handleFileUpload(request);
+    } else {
+      return handleUrlImport(request);
+    }
+  } catch (error) {
+    console.error('❌ Import error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to process import request' },
+      { status: 500 }
+    );
+  }
+}
+
+// Handle file upload
+async function handleFileUpload(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
+
+    if (!file) {
+      return NextResponse.json(
+        { success: false, error: 'No file provided' },
+        { status: 400 }
+      );
+    }
+
+    console.log('📥 Importing backup from uploaded file:', file.name);
+
+    // Validate file type
+    if (!file.name.endsWith('.zip') && !file.name.endsWith('.gz')) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid file type. Only .zip and .gz files are supported.' },
+        { status: 400 }
+      );
+    }
+
+    // Log file size for monitoring (no limit)
+    console.log(`📊 Uploading file size: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+    
+    // Warn for very large files but don't block them
+    if (file.size > 500 * 1024 * 1024) { // 500MB
+      console.log(`⚠️  Large file detected: ${(file.size / 1024 / 1024).toFixed(2)} MB - This may take a while to process`);
+    }
+
+    // Save to main backups directory
+    const backupsDir = path.join(process.cwd(), 'backups');
+    await fs.ensureDir(backupsDir);
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `uploaded-backup-${timestamp}.zip`;
+    const filepath = path.join(backupsDir, filename);
+
+    console.log('💾 Saving uploaded file to:', filepath);
+
+    // Use streaming for memory efficiency with large files
+    const fileStream = fs.createWriteStream(filepath);
+    const reader = file.stream().getReader();
+    
+    try {
+      let totalSize = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        fileStream.write(value);
+        totalSize += value.length;
+        
+        // Log progress for large files
+        if (totalSize % (100 * 1024 * 1024) === 0) { // Every 100MB
+          console.log(`📊 Processed: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
+        }
+      }
+      
+    } finally {
+      reader.releaseLock();
+      fileStream.end();
+    }
+
+    console.log('✅ Backup uploaded successfully:', filename);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Backup uploaded and imported successfully',
+      filename: filename,
+      size: Math.round(file.size / 1024 / 1024) // Size in MB
+    });
+
+  } catch (error) {
+    console.error('❌ File upload error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to upload backup file' },
+      { status: 500 }
+    );
+  }
+}
+
+// Handle URL import (existing functionality)
+async function handleUrlImport(request: NextRequest) {
   try {
     const body = await request.json();
     const { url } = body;
@@ -19,9 +122,9 @@ export async function POST(request) {
 
     console.log('📥 Importing backup from URL:', url);
 
-    // Add timeout and headers for large files
+    // Add timeout and headers for very large files
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25 * 60 * 1000); // 25 minutes
+    const timeoutId = setTimeout(() => controller.abort(), 55 * 60 * 1000); // 55 minutes (5 min buffer from maxDuration)
 
     const response = await fetch(url, {
       headers: {
@@ -43,20 +146,18 @@ export async function POST(request) {
       );
     }
 
-    // Check file size before downloading
+    // Check file size before downloading (log only, no limit)
     const contentLength = response.headers.get('content-length');
-    const maxSize = 1000 * 1024 * 1024; // 1GB limit
     
     if (contentLength) {
       const fileSize = parseInt(contentLength);
-      console.log(`📊 File size: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
+      console.log(`📊 Download file size: ${(fileSize / 1024 / 1024).toFixed(2)} MB`);
       
-      if (fileSize > maxSize) {
-        return NextResponse.json(
-          { success: false, error: `File too large: ${(fileSize / 1024 / 1024).toFixed(2)} MB. Max: ${maxSize / 1024 / 1024} MB` },
-          { status: 400 }
-        );
+      if (fileSize > 1000 * 1024 * 1024) { // 1GB
+        console.log(`⚠️  Very large file detected: ${(fileSize / 1024 / 1024).toFixed(2)} MB - This will take significant time to process`);
       }
+    } else {
+      console.log('📊 File size unknown - streaming without size check');
     }
 
     // Save to main backups directory
@@ -100,14 +201,9 @@ export async function POST(request) {
           console.log(`📊 Downloaded: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
         }
         
-        // Safety check during download
-        if (totalSize > maxSize) {
-          fileStream.close();
-          await fs.remove(filepath);
-          return NextResponse.json(
-            { success: false, error: 'File exceeded size limit during download' },
-            { status: 400 }
-          );
+        // Log progress for very large files (no size limit)
+        if (totalSize > 1000 * 1024 * 1024 && totalSize % (100 * 1024 * 1024) === 0) { // Every 100MB after 1GB
+          console.log(`📊 Large file progress: ${(totalSize / 1024 / 1024).toFixed(2)} MB downloaded`);
         }
       }
       

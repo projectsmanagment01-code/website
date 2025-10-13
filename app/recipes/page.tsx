@@ -156,7 +156,7 @@ const RecipeCard = ({ recipe, index }: { recipe: Recipe; index: number }) => {
   return (
     <div className="bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-lg flex flex-col shadow-sm">
       {/* Responsive image height */}
-      <a
+      <Link
         href={"/recipes/" + recipe.slug}
         className="block w-full h-40 sm:h-48 overflow-hidden"
       >
@@ -170,14 +170,14 @@ const RecipeCard = ({ recipe, index }: { recipe: Recipe; index: number }) => {
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-105"
         />
-      </a>
+      </Link>
 
       <div className="flex flex-col flex-1 gap-2 p-3 sm:p-4">
-        <a href={"/recipes/" + recipe.slug} className="block">
+        <Link href={"/recipes/" + recipe.slug} className="block">
           <h3 className="text-sm sm:text-base font-semibold text-black hover:text-gray-700 transition-colors line-clamp-2 sm:line-clamp-1">
             {recipe.title}
           </h3>
-        </a>
+        </Link>
 
         {/* Responsive description */}
         <p className="text-gray-600 text-xs sm:text-sm leading-snug line-clamp-2 sm:line-clamp-3">

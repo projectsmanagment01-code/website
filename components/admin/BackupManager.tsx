@@ -64,6 +64,9 @@ const BackupManager: React.FC = () => {
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [showDownloadForm, setShowDownloadForm] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState('');
+  const [showFileUpload, setShowFileUpload] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Create backup form state
   const [createForm, setCreateForm] = useState({
@@ -89,7 +92,11 @@ const BackupManager: React.FC = () => {
 
   const loadBackups = async () => {
     try {
-      const response = await fetch('/api/admin/backup');
+      const response = await fetch('/api/admin/backup', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -106,7 +113,11 @@ const BackupManager: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const response = await fetch('/api/admin/backup/stats');
+      const response = await fetch('/api/admin/backup/stats', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -131,6 +142,7 @@ const BackupManager: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
         body: JSON.stringify(createForm),
       });
@@ -167,6 +179,7 @@ const BackupManager: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
         body: JSON.stringify(restoreOptions),
       });
@@ -199,6 +212,9 @@ const BackupManager: React.FC = () => {
       
       const response = await fetch(`/api/admin/backup/${backupId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
       });
 
       console.log('Delete response status:', response.status);
@@ -253,7 +269,11 @@ const BackupManager: React.FC = () => {
     setDownloadLoading(backupId);
 
     try {
-      const response = await fetch(`/api/admin/backup/${backupId}/download`);
+      const response = await fetch(`/api/admin/backup/${backupId}/download`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
 
       if (response.ok) {
         // Create download link
@@ -293,13 +313,14 @@ const BackupManager: React.FC = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
-        setError('Import timed out after 30 minutes. For very large files (>300MB), consider direct server upload.');
-      }, 30 * 60 * 1000); // 30 minutes timeout for large files
+        setError('Import timed out after 55 minutes. This may happen with very large files (>2GB) on slower connections.');
+      }, 55 * 60 * 1000); // 55 minutes timeout for very large files
 
       const response = await fetch('/api/admin/backup/import', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
         body: JSON.stringify({ url: downloadUrl.trim() }),
         signal: controller.signal
@@ -316,25 +337,117 @@ const BackupManager: React.FC = () => {
         await loadBackups();
         await loadStats();
       } else {
-        if (data.error && data.error.includes('too large')) {
-          setError(`${data.error}. Consider using a smaller backup file or contact support for large file import assistance.`);
-        } else {
-          setError(data.error || 'Failed to import backup');
-        }
+        setError(data.error || 'Failed to import backup');
       }
     } catch (err) {
       console.error('Import error:', err);
       if (err instanceof Error && err.name === 'AbortError') {
-        setError('Import was cancelled due to timeout. Large backups may require direct server access.');
+        setError('Import was cancelled due to timeout. Very large backups (>5GB) may require direct server access or faster connection.');
       } else if (err instanceof Error && err.message.includes('524')) {
-        setError('Cloudflare timeout (524). The file is too large for web import. Try: 1) Use a smaller backup file, 2) Import directly on the server, or 3) Contact support for assistance.');
+        setError('Cloudflare timeout (524). This can happen with very large files (>5GB) or slow connections. The import may have completed - check your backups list.');
       } else if (err instanceof Error && err.message.includes('Failed to fetch')) {
-        setError('Network error during import. This may be due to file size or connection issues. For large files, consider direct server import.');
+        setError('Network error during import. This may be due to connection issues or very large file size. For files (>5GB), try splitting into smaller chunks.');
       } else {
         setError('Failed to import backup from URL. Check the URL and try again.');
       }
     } finally {
       setCreateLoading(false);
+    }
+  };
+
+  // Upload backup from local file
+  const uploadBackupFile = async () => {
+    if (!selectedFile) {
+      setError('Please select a backup file to upload');
+      return;
+    }
+
+    // Validate file type (should be a ZIP file)
+    if (!selectedFile.name.endsWith('.zip') && !selectedFile.name.endsWith('.gz')) {
+      setError('Please select a valid backup file (.zip or .gz format)');
+      return;
+    }
+
+    // Show warning for very large files (but don't block them)
+    const largeFileWarning = 500 * 1024 * 1024; // 500MB
+    const veryLargeFileWarning = 1024 * 1024 * 1024; // 1GB
+    
+    if (selectedFile.size > veryLargeFileWarning) {
+      const proceed = confirm(
+        `This is a very large file (${formatFileSize(selectedFile.size)}). ` +
+        `Upload may take 30+ minutes and could timeout on slower connections. ` +
+        `Consider using "Import from URL" for files over 1GB. Continue anyway?`
+      );
+      if (!proceed) return;
+    } else if (selectedFile.size > largeFileWarning) {
+      const proceed = confirm(
+        `This is a large file (${formatFileSize(selectedFile.size)}). ` +
+        `Upload may take several minutes. Continue?`
+      );
+      if (!proceed) return;
+    }
+
+    setCreateLoading(true);
+    setError(null);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      // Create XMLHttpRequest for progress tracking
+      const xhr = new XMLHttpRequest();
+      
+      return new Promise((resolve, reject) => {
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
+        });
+
+        xhr.addEventListener('load', async () => {
+          if (xhr.status === 200) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              if (data.success) {
+                alert('Backup uploaded and imported successfully!');
+                setSelectedFile(null);
+                setShowFileUpload(false);
+                setUploadProgress(0);
+                await loadBackups();
+                await loadStats();
+                resolve(data);
+              } else {
+                setError(data.error || 'Failed to import uploaded backup');
+                reject(new Error(data.error));
+              }
+            } catch (e) {
+              setError('Invalid response from server');
+              reject(e);
+            }
+          } else {
+            setError(`Upload failed with status ${xhr.status}`);
+            reject(new Error(`HTTP ${xhr.status}`));
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          setError('Network error during upload');
+          reject(new Error('Network error'));
+        });
+
+        xhr.open('POST', '/api/admin/backup/import');
+        xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('admin_token')}`);
+        xhr.send(formData);
+      });
+
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      setError('Failed to upload backup file');
+    } finally {
+      setCreateLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -381,6 +494,14 @@ const BackupManager: React.FC = () => {
           >
             <ExternalLink className="w-4 h-4" />
             Import from URL
+          </button>
+          
+          <button
+            onClick={() => setShowFileUpload(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 hover:scale-105 cursor-pointer transition-all duration-200"
+          >
+            <Upload className="w-4 h-4" />
+            Upload from Local
           </button>
         </div>
       </div>
@@ -561,9 +682,11 @@ const BackupManager: React.FC = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Import Backup from URL</h3>
           <p className="text-sm text-gray-600 mb-4">
             Import a backup by providing a direct ZIP file URL or a shareable backup link. 
-            Supports files up to 500MB. Large files may take several minutes to import.
+            Supports files of any size. Large files may take up to 60 minutes to import.
             <br />
-            <span className="text-amber-600 font-medium">⚠️ Files over 300MB may encounter Cloudflare timeouts (524 error). Consider direct server upload for very large backups.</span>
+            <span className="text-green-600 font-medium">✅ Recommended for files {'>'}2GB - more reliable for very large backups.</span>
+            <br />
+            <span className="text-amber-600 font-medium">⚠️ Files {'>'}5GB may still encounter timeouts on slower connections.</span>
           </p>
           
           <div className="space-y-4">
@@ -607,6 +730,91 @@ const BackupManager: React.FC = () => {
                 <ExternalLink className="w-3 h-3" />
               )}
               {createLoading ? 'Importing...' : 'Import Backup'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Upload File Form */}
+      {showFileUpload && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Upload Backup from Local File</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Upload a backup file from your computer. Supports .zip and .gz files of any size.
+            <br />
+            <span className="text-blue-600 font-medium">💡 Large files ({'>'}1GB) may take 30+ minutes to upload. For very large files ({'>'}2GB), consider using "Import from URL" for better reliability.</span>
+            <br />
+            <span className="text-amber-600 font-medium">⚠️ Keep this page open during upload - closing it will cancel the process.</span>
+          </p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Backup File *
+              </label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".zip,.gz"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  className="w-full bg-gray-50 border border-gray-300 rounded p-3 text-sm text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  required
+                />
+              </div>
+              {selectedFile && (
+                <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                  <p><strong>File:</strong> {selectedFile.name}</p>
+                  <p><strong>Size:</strong> {formatFileSize(selectedFile.size)}</p>
+                  <p><strong>Type:</strong> {selectedFile.type || 'Unknown'}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Upload Progress */}
+            {createLoading && uploadProgress > 0 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Uploading {selectedFile ? formatFileSize(selectedFile.size) : ''}...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+                {selectedFile && selectedFile.size > 500 * 1024 * 1024 && (
+                  <p className="text-xs text-amber-600">
+                    📡 Large file upload in progress - this may take 15-60 minutes depending on file size and connection speed.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex justify-end gap-3 mt-6">
+            <button
+              onClick={() => {
+                setShowFileUpload(false);
+                setSelectedFile(null);
+                setUploadProgress(0);
+                setError(null);
+              }}
+              className="flex items-center gap-2 px-3 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded text-sm transition-all duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={uploadBackupFile}
+              disabled={createLoading || !selectedFile}
+              className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 hover:scale-105 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              {createLoading ? (
+                <RefreshCw className="w-3 h-3 animate-spin" />
+              ) : (
+                <Upload className="w-3 h-3" />
+              )}
+              {createLoading ? 'Uploading...' : 'Upload & Import'}
             </button>
           </div>
         </div>

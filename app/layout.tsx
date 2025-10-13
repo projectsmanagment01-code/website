@@ -4,7 +4,6 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import Header from "./layout/Header";
 import Footer from "./layout/Footer";
-import ClientLayout from "@/components/ClientLayout";
 import CustomCodeInjector from "@/components/CustomCodeInjector";
 import { getAdminSettings } from "@/lib/admin-settings";
 import { Fragment } from "react";
@@ -187,7 +186,7 @@ export default async function RootLayout({
 
         {!excludeLayout && <Header />}
         <main className="content-area">
-          <ClientLayout>{children}</ClientLayout>
+          {children}
         </main>
         {!excludeLayout && <Footer />}
 

@@ -36,6 +36,7 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
   const [selectedRecipes, setSelectedRecipes] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isGeneratingSEO, setIsGeneratingSEO] = useState(false);
 
   // Get unique categories for filter
   const categories = useMemo(() => {
@@ -194,6 +195,74 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
     }
   };
 
+  // Handle bulk SEO generation
+  const handleBulkSEOGenerate = async () => {
+    if (selectedRecipes.length === 0 || isGeneratingSEO) return;
+
+    const confirmMessage = `Generate SEO reports for ${selectedRecipes.length} selected recipe${selectedRecipes.length !== 1 ? 's' : ''}?\n\nThis may take a few minutes and will use OpenAI API credits.\nRecipes will be processed one by one to avoid API limits.`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setIsGeneratingSEO(true);
+      
+      let successCount = 0;
+      let failedCount = 0;
+      const failedRecipes: string[] = [];
+
+      // Process recipes one by one to avoid API limits
+      for (let i = 0; i < selectedRecipes.length; i++) {
+        const recipeId = selectedRecipes[i];
+        const recipe = recipes.find(r => r.id === recipeId);
+        
+        try {
+          const response = await fetch('/api/seo/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipeId })
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            const error = await response.json();
+            console.error(`Failed to generate SEO for recipe ${recipeId}:`, error);
+            failedCount++;
+            failedRecipes.push(recipe?.title || recipeId);
+          }
+        } catch (error) {
+          console.error(`Error processing recipe ${recipeId}:`, error);
+          failedCount++;
+          failedRecipes.push(recipe?.title || recipeId);
+        }
+
+        // Small delay between requests to be nice to the API
+        if (i < selectedRecipes.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // Show completion message
+      let message = `✅ SEO Generation Complete!\n\nSuccess: ${successCount}\nFailed: ${failedCount}`;
+      if (failedRecipes.length > 0) {
+        message += `\n\nFailed recipes:\n${failedRecipes.join('\n')}`;
+      }
+      alert(message);
+
+      // Clear selection and refresh the page to see updated SEO scores
+      setSelectedRecipes([]);
+      window.location.reload();
+      
+    } catch (error: any) {
+      console.error('Failed to generate SEO:', error);
+      alert(`❌ SEO generation failed:\n${error.message}\n\nMake sure OPENAI_API_KEY is set in your .env file.`);
+    } finally {
+      setIsGeneratingSEO(false);
+    }
+  };
+
   // Clear all filters
   const handleClearFilters = () => {
     setSearchTerm("");
@@ -317,8 +386,10 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
         onClearSelection={handleClearSelection}
         onBulkDelete={handleBulkDelete}
         onBulkStatusChange={handleBulkStatusChange}
+        onBulkSEOGenerate={handleBulkSEOGenerate}
         isDeleting={isDeleting}
         isUpdatingStatus={isUpdatingStatus}
+        isGeneratingSEO={isGeneratingSEO}
       />
 
       {/* Results Summary */}

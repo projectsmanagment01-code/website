@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { uploadRecipeImage, verifyAuth } from "@/lib/api-client";
 
 export default function AuthTestPage() {
@@ -104,9 +105,9 @@ export default function AuthTestPage() {
         <ol className="text-sm text-blue-700 space-y-1">
           <li>
             1. First, login at{" "}
-            <a href="/admin/login" className="underline">
+            <Link href="/admin/login" className="underline">
               /admin/login
-            </a>
+            </Link>
           </li>
           <li>2. Come back to this page to test authenticated requests</li>
           <li>3. Try clearing the token to see authentication failures</li>

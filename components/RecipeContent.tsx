@@ -1,6 +1,4 @@
-"use client";
 import Image from "next/image";
-import { useState } from "react";
 import Recipe from "@/outils/types";
 import { TipCard } from "./TipCard";
 import EssentialIngredients from "./EssentialIngerdients";
