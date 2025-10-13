@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { AISeOEngine } from '@/lib/ai-seo/seo-engine';
+import prisma from '@/lib/prisma';
 
 const seoEngine = new AISeOEngine();
 
@@ -12,28 +13,55 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { 
+      recipeId,
       recipeData, 
       enhancementTypes = ['metadata', 'images', 'schema'] 
     } = body;
 
-    // Validate input
-    if (!recipeData) {
+    // Validate input - need either recipeId or recipeData
+    if (!recipeId && !recipeData) {
       return NextResponse.json(
-        { error: 'Recipe data is required' },
+        { error: 'Either recipeId or recipeData is required' },
         { status: 400 }
       );
     }
 
+    // Fetch recipe data if only recipeId is provided
+    let recipe = recipeData;
+    if (!recipe && recipeId) {
+      try {
+        recipe = await prisma.recipe.findUnique({
+          where: { id: recipeId },
+          include: {
+            author: true,
+          }
+        });
+
+        if (!recipe) {
+          return NextResponse.json(
+            { error: `Recipe with ID ${recipeId} not found` },
+            { status: 404 }
+          );
+        }
+      } catch (dbError: any) {
+        console.error('Database error fetching recipe:', dbError);
+        return NextResponse.json(
+          { error: 'Failed to fetch recipe from database', details: dbError.message },
+          { status: 500 }
+        );
+      }
+    }
+
     const results: any = {
-      recipeId: recipeData.id,
-      recipeTitle: recipeData.title,
+      recipeId: recipe.id,
+      recipeTitle: recipe.title,
       enhancements: {}
     };
 
     // Generate metadata enhancements
     if (enhancementTypes.includes('metadata')) {
       try {
-        const metadata = await seoEngine.generateMetadataSuggestions(recipeData);
+        const metadata = await seoEngine.generateMetadataSuggestions(recipe);
         results.enhancements.metadata = {
           status: 'generated',
           data: metadata
@@ -47,11 +75,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate image SEO enhancements
-    if (enhancementTypes.includes('images') && recipeData.heroImage) {
+    if (enhancementTypes.includes('images') && recipe.heroImage) {
       try {
         const imageSEO = await seoEngine.generateImageAltText(
-          recipeData.heroImage,
-          recipeData,
+          recipe.heroImage,
+          recipe,
           'hero'
         );
         results.enhancements.images = {
@@ -69,7 +97,7 @@ export async function POST(request: NextRequest) {
     // Generate schema enhancements
     if (enhancementTypes.includes('schema')) {
       try {
-        const schema = await seoEngine.generateSchemaEnhancements(recipeData);
+        const schema = await seoEngine.generateSchemaEnhancements(recipe);
         results.enhancements.schema = {
           status: 'generated',
           data: schema
@@ -85,7 +113,7 @@ export async function POST(request: NextRequest) {
     // Generate content analysis
     if (enhancementTypes.includes('content-analysis')) {
       try {
-        const analysis = await seoEngine.analyzeContentSEO(recipeData);
+        const analysis = await seoEngine.analyzeContentSEO(recipe);
         results.enhancements.contentAnalysis = {
           status: 'generated',
           data: analysis
@@ -128,8 +156,13 @@ export async function GET(request: NextRequest) {
         endpoint: '/api/seo/generate',
         method: 'POST',
         body: {
+          recipeId: 'Recipe ID (will fetch from database) - OR -',
           recipeData: 'Recipe object with title, description, ingredients, etc.',
-          enhancementTypes: 'Array of enhancement types to generate'
+          enhancementTypes: 'Array of enhancement types to generate (optional, defaults to ["metadata", "images", "schema"])'
+        },
+        examples: {
+          byId: '{ "recipeId": "clx123abc..." }',
+          byData: '{ "recipeData": { "title": "...", "description": "..." } }'
         }
       }
     });
