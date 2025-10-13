@@ -27,6 +27,10 @@ model Recipe {
   imageAlt            String?
   images              String[]
   img                 String
+  featureImage        String?
+  cookingImage        String?
+  preparationImage    String?
+  finalPresentationImage String?
   ingredientGuide     Json?
   intro               String
   mustKnowTips        String[]

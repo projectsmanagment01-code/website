@@ -225,6 +225,13 @@ export interface Recipe {
   storage: string;
   heroImage: string;
   images: string[];
+  
+  // Named image fields for n8n AI integration
+  featureImage?: string;        // Main hero/feature image
+  cookingImage?: string;         // Cooking process image
+  preparationImage?: string;     // Preparation steps image
+  finalPresentationImage?: string; // Final dish presentation
+  
   notes: string[];
   tools: string[];
   allergyInfo: string;

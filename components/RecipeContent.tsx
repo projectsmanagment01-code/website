@@ -25,29 +25,37 @@ const getOptimizedImageUrl = (
 export function RecipeContent({ recipe }: RecipeContentProps) {
   recipe = Array.isArray(recipe) ? recipe[0] : recipe;
 
+  // Get images from named fields or fallback to array indices
+  const featureImage = recipe.featureImage || recipe.images?.[0] || recipe.heroImage;
+  const cookingImage = recipe.cookingImage || recipe.images?.[1];
+  const preparationImage = recipe.preparationImage || recipe.images?.[2];
+  const finalImage = recipe.finalPresentationImage || recipe.images?.[3];
+
   return (
     <div className="space-y-8 mt-2 text-md max-w-none">
-      {/* Hero Image - Optimized for LCP */}
-      <div className="relative w-full rounded-lg overflow-hidden shadow-xl">
-        <Image
-          src={recipe.images[0]}
-          alt={recipe.title}
-          width={1200}
-          height={800}
-          quality={75}
-          style={{
-            width: "100%",
-            height: "auto",
-          }}
-          priority
-          loading="eager"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
-        />
+      {/* Feature/Hero Image - Optimized for LCP */}
+      {featureImage && (
+        <div className="relative w-full rounded-lg overflow-hidden shadow-xl">
+          <Image
+            src={featureImage}
+            alt={`${recipe.title} - feature image`}
+            width={1200}
+            height={800}
+            quality={75}
+            style={{
+              width: "100%",
+              height: "auto",
+            }}
+            priority
+            loading="eager"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
+          />
 
-        <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
-          {recipe.title} | {getHostname()}
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
+            {recipe.title} | {getHostname()}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Story */}
       <div className="prose prose-lg max-w-none">
@@ -86,14 +94,13 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
       {/* Essential Ingredient Guide */}
       <EssentialIngredients essIngredientGuide={recipe.essIngredientGuide} />
 
-      {/* Second Image - Lazy loaded with optimized sizes */}
-      <div
-        
-        className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100"
-      >
-        
+      {/* Cooking Image - Shows cooking process */}
+      {cookingImage && (
+        <div
+          className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100"
+        >
           <Image
-            src={recipe.images[1]}
+            src={cookingImage}
             alt={`${recipe.title} - cooking process`}
             width={800}
             height={600}
@@ -105,24 +112,23 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
             quality={75}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 800px"
           />
-        
-        <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
-          {recipe.title} | {getHostname()}
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
+            {recipe.title} | {getHostname()}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Complete Cooking Process */}
       <CompleteCookingProcess completeProcess={recipe.completeProcess} />
 
-      {/* Third Image - Lazy loaded */}
-      <div
-        
-        className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100"
-      >
-        
+      {/* Preparation Image - Shows preparation steps */}
+      {preparationImage && (
+        <div
+          className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100"
+        >
           <Image
-            src={recipe.images[2]}
-            alt={`${recipe.title} - final dish`}
+            src={preparationImage}
+            alt={`${recipe.title} - preparation steps`}
             width={800}
             height={600}
             style={{
@@ -133,11 +139,35 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
             quality={75}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 800px"
           />
-        
-        <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
-          {recipe.title} | {getHostname()}
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
+            {recipe.title} | {getHostname()}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Final Presentation Image - Shows final plated dish */}
+      {finalImage && (
+        <div
+          className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100"
+        >
+          <Image
+            src={finalImage}
+            alt={`${recipe.title} - final presentation`}
+            width={800}
+            height={600}
+            style={{
+              width: "100%",
+              height: "auto",
+            }}
+            loading="lazy"
+            quality={75}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 800px"
+          />
+          <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded backdrop-blur-sm">
+            {recipe.title} | {getHostname()}
+          </div>
+        </div>
+      )}
 
       {/* Sections with optimized images */}
       {recipe.sections?.map((item: any, index: number) => {
