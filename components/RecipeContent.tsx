@@ -25,11 +25,11 @@ const getOptimizedImageUrl = (
 export function RecipeContent({ recipe }: RecipeContentProps) {
   recipe = Array.isArray(recipe) ? recipe[0] : recipe;
 
-  // Use only named fields (new approach)
-  const featureImage = recipe.featureImage || recipe.heroImage;
-  const ingredientImage = recipe.preparationImage;
-  const mixingImage = recipe.cookingImage;
-  const finalImage = recipe.finalPresentationImage;
+  // Get images from named fields or fallback to array indices
+  const featureImage = recipe.featureImage || recipe.images?.[0] || recipe.heroImage;
+  const ingredientImage = recipe.preparationImage || recipe.images?.[1]; // Renamed for clarity
+  const mixingImage = recipe.cookingImage || recipe.images?.[2]; // Renamed for clarity
+  const finalImage = recipe.finalPresentationImage || recipe.images?.[3];
 
   return (
     <div className="space-y-8 mt-2 text-md max-w-none">
