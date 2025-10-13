@@ -53,15 +53,34 @@ export default function CompleteCookingProcess({
                 >
                   {step.title ?? step.section}:
                 </span>{" "}
-                <p className=" text-gray-700 leading-relaxed block text-[19.2px]">
-                  {hasHtmlTags(step.description) ? (
-                    <span
-                      dangerouslySetInnerHTML={renderSafeHtml(step.description)}
-                    />
-                  ) : (
-                    step.description
-                  )}
-                </p>
+                
+                {/* Render items array if it exists, otherwise fall back to description */}
+                {step.items && Array.isArray(step.items) ? (
+                  <ul className="mt-2 space-y-2">
+                    {step.items.map((item: string, itemIndex: number) => (
+                      <li 
+                        key={`step-${index}-item-${itemIndex}`} 
+                        className="text-gray-700 leading-relaxed text-[19.2px] list-disc ml-6"
+                      >
+                        {hasHtmlTags(item) ? (
+                          <span dangerouslySetInnerHTML={renderSafeHtml(item)} />
+                        ) : (
+                          item
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className=" text-gray-700 leading-relaxed block text-[19.2px]">
+                    {hasHtmlTags(step.description) ? (
+                      <span
+                        dangerouslySetInnerHTML={renderSafeHtml(step.description)}
+                      />
+                    ) : (
+                      step.description
+                    )}
+                  </p>
+                )}
               </div>
             );
           })}
