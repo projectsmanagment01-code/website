@@ -156,6 +156,23 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                 </p>
               )}
 
+              {/* Author Specialties */}
+              {author.tags && author.tags.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Specialties:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {author.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Author Stats */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-blue-50 rounded-lg p-4 text-center">
@@ -188,10 +205,10 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                     <Users className="w-4 h-4 text-purple-600" />
                   </div>
                   <h3 className="text-2xl font-bold text-purple-900 mb-1">
-                    {authorRecipes.length > 0 ? new Set(authorRecipes.map(recipe => recipe.category)).size : 0}
+                    {author.tags?.length || 0}
                   </h3>
                   <p className="text-purple-600 text-sm">
-                    Categor{(authorRecipes.length > 0 ? new Set(authorRecipes.map(recipe => recipe.category)).size : 0) !== 1 ? 'ies' : 'y'}
+                    Specialt{(author.tags?.length || 0) !== 1 ? 'ies' : 'y'}
                   </p>
                 </div>
               </div>

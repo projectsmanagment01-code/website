@@ -129,6 +129,7 @@ export async function getAuthors(page: number = 1, limit: number = 20): Promise<
       avatar: author.avatar,
       slug: author.slug,
       link: author.link,
+      tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt,
       recipeCount: author._count.recipes
@@ -165,6 +166,7 @@ export async function getAllAuthors(): Promise<AuthorEntity[]> {
       avatar: author.avatar,
       slug: author.slug,
       link: author.link,
+      tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt
     }));
@@ -347,6 +349,7 @@ export async function searchAuthors(query: string, limit: number = 10): Promise<
       avatar: author.avatar,
       slug: author.slug,
       link: author.link,
+      tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt,
       recipeCount: author._count.recipes
