@@ -10,6 +10,18 @@ export interface Author {
   bio: string;
 }
 
+// Category type for author-category relation
+export interface CategoryInfo {
+  id: string;
+  slug: string;
+  title: string;
+  href: string;
+  description: string;
+  image: string;
+  alt: string;
+  sizes?: string;
+}
+
 // Author database entity (for admin management)
 export interface AuthorEntity {
   id: string;
@@ -19,6 +31,7 @@ export interface AuthorEntity {
   avatar?: string;  // External avatar URL (for n8n imports)  
   slug: string;
   link?: string;    // Custom author page link
+  tags?: string[];  // Category tags (simple string array)
   createdAt: Date;
   updatedAt: Date;
 }

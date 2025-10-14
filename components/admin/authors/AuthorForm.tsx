@@ -22,6 +22,7 @@ interface AuthorFormData {
   img: string;
   avatar: string;
   link: string;
+  tags: string[]; // Category tag names typed by user
 }
 
 interface AuthorFormProps {
@@ -42,12 +43,16 @@ export default function AuthorForm({
     bio: '',
     img: '',
     avatar: '',
-    link: ''
+    link: '',
+    tags: []
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [generatingField, setGeneratingField] = useState<keyof AuthorFormData | null>(null);
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [existingImages, setExistingImages] = useState<Array<{name: string; url: string; size: number; modified: string}>>([]);
+  const [loadingImages, setLoadingImages] = useState(false);
   
   // File upload hook
   const { uploadFile, uploading: imageUploading, error: uploadError } = useFileUpload();
@@ -62,7 +67,8 @@ export default function AuthorForm({
         bio: author.bio || '',
         img: author.img || '',
         avatar: author.avatar || '',
-        link: author.link || ''
+        link: author.link || '',
+        tags: author.tags || []
       });
     }
   }, [author]);
@@ -115,12 +121,13 @@ export default function AuthorForm({
         bio: formData.bio.trim() || undefined,
         img: formData.img.trim() || undefined,
         avatar: formData.avatar.trim() || undefined,
-        link: formData.link.trim() || undefined
+        link: formData.link.trim() || undefined,
+        tags: formData.tags
       };
 
       // If onSave callback is provided, use it instead of making direct API call
       if (onSave) {
-        await onSave(submitData as AuthorEntity);
+        await onSave(submitData as any);
         
         setSuccess(isEditMode ? 'Author updated successfully!' : 'Author created successfully!');
         
@@ -131,7 +138,8 @@ export default function AuthorForm({
             bio: '',
             img: '',
             avatar: '',
-            link: ''
+            link: '',
+            tags: []
           });
         }
         return;
@@ -174,7 +182,8 @@ export default function AuthorForm({
           bio: '',
           img: '',
           avatar: '',
-          link: ''
+          link: '',
+          tags: []
         });
       }
 
@@ -212,6 +221,43 @@ export default function AuthorForm({
       console.error('Image upload error:', err);
       setError(err instanceof Error ? err.message : 'Failed to upload image');
     }
+  };
+
+  // Load existing images
+  const loadExistingImages = async () => {
+    try {
+      setLoadingImages(true);
+      const token = localStorage.getItem('admin_token');
+      
+      const response = await fetch('/api/admin/author-images', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load images');
+      }
+      
+      const data = await response.json();
+      setExistingImages(data.images || []);
+      setShowImagePicker(true);
+    } catch (err) {
+      console.error('Error loading images:', err);
+      setError('Failed to load existing images');
+    } finally {
+      setLoadingImages(false);
+    }
+  };
+
+  const selectExistingImage = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      img: imageUrl
+    }));
+    setShowImagePicker(false);
+    setSuccess('Image selected successfully!');
+    setTimeout(() => setSuccess(null), 3000);
   };
 
   const generateFieldContent = async (fieldName: keyof AuthorFormData) => {
@@ -428,40 +474,79 @@ Return only one clean URL or handle, no additional text.`;
               </p>
             </div>
 
-            {/* Custom Link */}
+            {/* Categories - Manual Input */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="link" className="block text-sm font-semibold text-gray-700">
-                  Custom Author Page Link
-                </label>
-                <button
-                  type="button"
-                  onClick={() => generateFieldContent('link')}
-                  disabled={generatingField === 'link'}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Generate with AI"
-                >
-                  {generatingField === 'link' ? (
-                    <RefreshCw className="w-3 h-3 animate-spin" />
-                  ) : (
-                    <Wand2 className="w-3 h-3" />
-                  )}
-                  {generatingField === 'link' ? 'Generating...' : 'AI Generate'}
-                </button>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Categories (Specialties)
+              </label>
+              
+              {/* Display selected categories as tags */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.tags.map((categoryName, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium"
+                  >
+                    {categoryName}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          tags: prev.tags.filter((_, i) => i !== index)
+                        }));
+                      }}
+                      className="hover:text-blue-900"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
               </div>
-              <div className="flex items-center gap-3">
-                <LinkIcon className="w-5 h-5 text-gray-400" />
+
+              {/* Input to add new category */}
+              <div className="flex gap-2">
                 <input
                   type="text"
-                  id="link"
-                  value={formData.link}
-                  onChange={(e) => handleChange('link', e.target.value)}
-                  placeholder={`/authors/${slugPreview}`}
+                  id="category-input"
+                  placeholder="Type category name and press Enter"
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const input = e.currentTarget;
+                      const value = input.value.trim();
+                      if (value && !formData.tags.includes(value)) {
+                        setFormData(prev => ({
+                          ...prev,
+                          tags: [...prev.tags, value]
+                        }));
+                        input.value = '';
+                      }
+                    }
+                  }}
                 />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const input = document.getElementById('category-input') as HTMLInputElement;
+                    const value = input.value.trim();
+                    if (value && !formData.tags.includes(value)) {
+                      setFormData(prev => ({
+                        ...prev,
+                        tags: [...prev.tags, value]
+                      }));
+                      input.value = '';
+                    }
+                  }}
+                  className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  Add
+                </button>
               </div>
+              
               <p className="mt-2 text-sm text-gray-500">
-                Leave empty to use default URL structure
+                {formData.tags.length} {formData.tags.length === 1 ? 'category' : 'categories'} added
               </p>
             </div>
           </div>
@@ -502,14 +587,103 @@ Return only one clean URL or handle, no additional text.`;
                   </div>
                 </div>
               )}
+
+              {/* Image Picker Modal */}
+              {showImagePicker && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+                    {/* Header */}
+                    <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">Select Existing Image</h3>
+                      <button
+                        type="button"
+                        onClick={() => setShowImagePicker(false)}
+                        className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto p-6">
+                      {loadingImages ? (
+                        <div className="flex items-center justify-center py-12">
+                          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      ) : existingImages.length === 0 ? (
+                        <div className="text-center py-12">
+                          <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                          <p className="text-gray-500">No existing author images found</p>
+                          <p className="text-sm text-gray-400 mt-2">Upload your first author image below</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                          {existingImages.map((image) => (
+                            <button
+                              key={image.url}
+                              type="button"
+                              onClick={() => selectExistingImage(image.url)}
+                              className="group relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition-all hover:scale-105"
+                            >
+                              <img
+                                src={image.url}
+                                alt={image.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  console.error('Failed to load image:', image.url);
+                                  e.currentTarget.src = '/placeholder-recipe.jpg';
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center pointer-events-none">
+                                <CheckCircle className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p className="text-white text-xs truncate">{image.name}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                      <p className="text-sm text-gray-600">
+                        Click an image to select it, or close this dialog to upload a new one
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
               
+              {/* Action Buttons */}
+              <div className="flex gap-3 mb-3">
+                <button
+                  type="button"
+                  onClick={loadExistingImages}
+                  disabled={loadingImages}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  {loadingImages ? 'Loading...' : 'Select Existing Image'}
+                </button>
+                
+                <label
+                  htmlFor="image-upload"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload New
+                </label>
+              </div>
+
               {/* Upload Area */}
               <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-all ${
                 imageUploading 
                   ? 'border-blue-300 bg-blue-50' 
                   : formData.img 
                     ? 'border-green-300 bg-green-50' 
-                    : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
+                    : 'border-gray-300 bg-gray-50'
               }`}>
                 <div className="flex flex-col items-center gap-2">
                   {imageUploading ? (
@@ -520,13 +694,13 @@ Return only one clean URL or handle, no additional text.`;
                   ) : formData.img ? (
                     <>
                       <CheckCircle className="w-8 h-8 text-green-600" />
-                      <p className="text-sm text-green-600 font-medium">Image uploaded successfully</p>
+                      <p className="text-sm text-green-600 font-medium">Image selected</p>
                     </>
                   ) : (
                     <>
                       <ImageIcon className="w-8 h-8 text-gray-400" />
-                      <p className="text-sm text-gray-600">Upload author profile image</p>
-                      <p className="text-xs text-gray-500">PNG, JPG, WebP up to 5MB</p>
+                      <p className="text-sm text-gray-600">No image selected</p>
+                      <p className="text-xs text-gray-500">Use buttons above to upload or select</p>
                     </>
                   )}
                 </div>
@@ -542,16 +716,6 @@ Return only one clean URL or handle, no additional text.`;
                   id="image-upload"
                   disabled={imageUploading}
                 />
-                
-                {!imageUploading && (
-                  <label
-                    htmlFor="image-upload"
-                    className="inline-flex items-center gap-2 px-4 py-2 mt-3 text-sm font-medium bg-white border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                  >
-                    <Upload className="w-4 h-4" />
-                    {formData.img ? 'Replace Image' : 'Choose File'}
-                  </label>
-                )}
               </div>
               
               {/* Upload Error */}
@@ -578,41 +742,9 @@ Return only one clean URL or handle, no additional text.`;
               )}
             </div>
 
-            {/* Avatar URL (External) */}
-            <div>
-              <label htmlFor="avatar" className="block text-sm font-semibold text-gray-700 mb-2">
-                Avatar URL (External)
-              </label>
-              <input
-                type="url"
-                id="avatar"
-                value={formData.avatar}
-                onChange={(e) => handleChange('avatar', e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              />
-              <p className="mt-2 text-sm text-gray-500">
-                Used for external author profiles and n8n imports
-              </p>
-              {formData.avatar && (
-                <div className="mt-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={formData.avatar}
-                      alt="Avatar preview"
-                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">External Avatar</p>
-                      <p className="text-xs text-gray-600 truncate">{formData.avatar}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Hidden fields - Avatar and Link kept for backend but not shown in UI */}
+            <input type="hidden" value={formData.avatar} />
+            <input type="hidden" value={formData.link} />
           </div>
         </div>
 

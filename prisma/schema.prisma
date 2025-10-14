@@ -61,23 +61,24 @@ model Recipe {
 }
 
 model Author {
-  id        String   @id @default(cuid())
-  name      String
-  bio       String?
-  img       String?
-  avatar    String?
-  slug      String   @unique
-  link      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  recipes   Recipe[] @relation("AuthorRecipes")
+  id         String              @id @default(cuid())
+  name       String
+  bio        String?
+  img        String?
+  avatar     String?
+  slug       String              @unique
+  link       String?
+  tags       String[]            @default([]) // Simple category tags (no relation to Category model)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  recipes    Recipe[]            @relation("AuthorRecipes")
 
   @@map("authors")
 }
 
 model Category {
-  id          String  @id @default(cuid())
-  slug        String  @unique
+  id          String   @id @default(cuid())
+  slug        String   @unique
   title       String
   href        String
   description String

@@ -54,12 +54,20 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, bio, img, avatar, link } = body;
+    const { name, bio, img, avatar, link, tags } = body;
 
     // Validate required fields
     if (!name) {
       return NextResponse.json(
         { error: 'Name is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate tags if provided
+    if (tags && !Array.isArray(tags)) {
+      return NextResponse.json(
+        { error: 'tags must be an array' },
         { status: 400 }
       );
     }
@@ -70,10 +78,11 @@ export async function POST(request: NextRequest) {
       bio,
       img,
       avatar,
-      link
+      link,
+      tags: tags || []
     });
 
-    console.log(`✅ Author created: ${author.name} (ID: ${author.id})`);
+    console.log(`✅ Author created: ${author.name} (ID: ${author.id}) with ${author.tags?.length || 0} tags`);
 
     return NextResponse.json({
       message: 'Author created successfully',

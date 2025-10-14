@@ -15,6 +15,7 @@ export interface CreateAuthorData {
   img?: string;
   avatar?: string;
   link?: string;
+  tags?: string[]; // Array of category tag names
 }
 
 export interface UpdateAuthorData {
@@ -23,6 +24,7 @@ export interface UpdateAuthorData {
   img?: string;
   avatar?: string;
   link?: string;
+  tags?: string[]; // Array of category tag names
 }
 
 /**
@@ -68,18 +70,20 @@ export async function createAuthor(data: CreateAuthorData): Promise<AuthorEntity
         img: data.img || null,
         avatar: avatarValue,
         slug: uniqueSlug,
-        link: data.link || `/authors/${uniqueSlug}`
+        link: data.link || `/authors/${uniqueSlug}`,
+        tags: data.tags || [] // Simple string array for category tags
       }
     });
 
     return {
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio || undefined,
+      img: author.img || undefined,
+      avatar: author.avatar || undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link || undefined,
+      tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt
     };
@@ -189,11 +193,12 @@ export async function getAuthorById(id: string): Promise<(AuthorEntity & { recip
     return {
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio || undefined,
+      img: author.img || undefined,
+      avatar: author.avatar || undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link || undefined,
+      tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt,
       recipeCount: author._count.recipes
@@ -210,7 +215,14 @@ export async function getAuthorById(id: string): Promise<(AuthorEntity & { recip
 export async function updateAuthor(id: string, data: UpdateAuthorData): Promise<AuthorEntity | null> {
   try {
     // If name is being updated, generate new slug
-    let updateData: any = { ...data };
+    let updateData: any = { 
+      name: data.name,
+      bio: data.bio,
+      img: data.img,
+      avatar: data.avatar,
+      link: data.link,
+      tags: data.tags
+    };
     
     if (data.name) {
       let slug = generateAuthorSlug(data.name);
@@ -246,11 +258,12 @@ export async function updateAuthor(id: string, data: UpdateAuthorData): Promise<
     return {
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio || undefined,
+      img: author.img || undefined,
+      avatar: author.avatar || undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link || undefined,
+      tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt
     };

@@ -54,7 +54,15 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, bio, img, avatar, link } = body;
+    const { name, bio, img, avatar, link, tags } = body;
+
+    // Validate tags if provided
+    if (tags !== undefined && !Array.isArray(tags)) {
+      return NextResponse.json(
+        { error: 'tags must be an array' },
+        { status: 400 }
+      );
+    }
 
     // Update author
     const author = await updateAuthor(id, {
@@ -62,7 +70,8 @@ export async function PUT(
       bio,
       img,
       avatar,
-      link
+      link,
+      tags
     });
 
     if (!author) {
@@ -72,7 +81,7 @@ export async function PUT(
       );
     }
 
-    console.log(`✅ Author updated: ${author.name} (ID: ${author.id})`);
+    console.log(`✅ Author updated: ${author.name} (ID: ${author.id}) with ${author.tags?.length || 0} tags`);
 
     return NextResponse.json({
       message: 'Author updated successfully',
