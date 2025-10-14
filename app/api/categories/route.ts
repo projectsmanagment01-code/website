@@ -21,6 +21,9 @@ function createCategoryFromName(
 
   const slug = normalizedName.replace(/\s+/g, "-");
 
+  // Use recipe image from uploads, or fallback to placeholder
+  const categoryImage = image ? `/uploads/recipes/${image}` : "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp";
+
   return {
     id: slug,
     slug,
@@ -30,7 +33,7 @@ function createCategoryFromName(
       .join(" "),
     href: link,
     description: `Discover ${count} delicious ${normalizedName} recipes`,
-    image: image || "/images/categories/default.jpg",
+    image: categoryImage,
     alt: `${normalizedName} recipes`,
     sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
     recipeCount: count,
@@ -61,7 +64,7 @@ export async function GET(request: Request) {
         href: `/categories/${category.slug}`,
         alt: `${category.name} recipes`,
         description: category.description || `Discover delicious ${category.name} recipes`,
-        image: category.img || "/placeholder.jpg",
+        image: "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp",
         sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
         recipeCount: 0 // TODO: Add recipe count from relationships
       };
