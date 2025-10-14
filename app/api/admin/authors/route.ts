@@ -26,48 +26,61 @@ export async function GET(request: NextRequest) {
 
     // Handle tag filter
     if (tag) {
-      const authors = await prisma.$queryRaw`
-        SELECT 
-          a.id,
-          a.name,
-          a.bio,
-          a.img,
-          a.avatar,
-          a.slug,
-          a.link,
-          a.tags,
-          a."createdAt",
-          a."updatedAt",
-          COUNT(r.id)::int as "recipeCount"
-        FROM authors a
-        LEFT JOIN recipes r ON r."authorId" = a.id
-        WHERE ${tag} = ANY(a.tags)
-        GROUP BY a.id, a.name, a.bio, a.img, a.avatar, a.slug, a.link, a.tags, a."createdAt", a."updatedAt"
-        ORDER BY a."createdAt" DESC
-        LIMIT ${limit}
-      ` as any[];
+      try {
+        // Get all authors and filter by tag in JavaScript
+        // This is a workaround until Prisma types are regenerated
+        const allAuthors = await prisma.$queryRaw`
+          SELECT 
+            a.id,
+            a.name,
+            a.bio,
+            a.img,
+            a.avatar,
+            a.slug,
+            a.link,
+            a.tags,
+            a."createdAt",
+            a."updatedAt",
+            COUNT(r.id)::int as "recipeCount"
+          FROM authors a
+          LEFT JOIN recipes r ON r."authorId" = a.id
+          GROUP BY a.id, a.name, a.bio, a.img, a.avatar, a.slug, a.link, a.tags, a."createdAt", a."updatedAt"
+          ORDER BY a."createdAt" DESC
+        ` as any[];
 
-      const authorsWithCount = authors.map((author: any) => ({
-        id: author.id,
-        name: author.name,
-        bio: author.bio || undefined,
-        img: author.img || undefined,
-        avatar: author.avatar || undefined,
-        slug: author.slug,
-        link: author.link || undefined,
-        tags: author.tags,
-        createdAt: new Date(author.createdAt),
-        updatedAt: new Date(author.updatedAt),
-        recipeCount: author.recipeCount
-      }));
+        // Filter by tag in JavaScript
+        const filteredAuthors = allAuthors.filter((author: any) => 
+          author.tags && Array.isArray(author.tags) && author.tags.includes(tag)
+        ).slice(0, limit);
 
-      return NextResponse.json({
-        authors: authorsWithCount,
-        total: authorsWithCount.length,
-        currentPage: 1,
-        totalPages: 1,
-        tag
-      });
+        const authorsWithCount = filteredAuthors.map((author: any) => ({
+          id: author.id,
+          name: author.name,
+          bio: author.bio || undefined,
+          img: author.img || undefined,
+          avatar: author.avatar || undefined,
+          slug: author.slug,
+          link: author.link || undefined,
+          tags: author.tags || [],
+          createdAt: new Date(author.createdAt),
+          updatedAt: new Date(author.updatedAt),
+          recipeCount: author.recipeCount
+        }));
+
+        return NextResponse.json({
+          authors: authorsWithCount,
+          total: authorsWithCount.length,
+          currentPage: 1,
+          totalPages: 1,
+          tag
+        });
+      } catch (tagError) {
+        console.error('❌ Error filtering authors by tag:', tagError);
+        return NextResponse.json(
+          { error: 'Failed to filter authors by tag', details: tagError instanceof Error ? tagError.message : 'Unknown error' },
+          { status: 500 }
+        );
+      }
     }
 
     // Handle search query
