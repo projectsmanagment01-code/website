@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
             a."updatedAt",
             COUNT(r.id)::int as "recipeCount"
           FROM authors a
-          LEFT JOIN recipes r ON r."authorId" = a.id
+          LEFT JOIN "Recipe" r ON r."authorId" = a.id
           GROUP BY a.id, a.name, a.bio, a.img, a.avatar, a.slug, a.link, a.tags, a."createdAt", a."updatedAt"
           ORDER BY a."createdAt" DESC
         ` as any[];
