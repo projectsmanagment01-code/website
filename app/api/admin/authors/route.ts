@@ -2,12 +2,14 @@
  * Author API Routes - Admin Only
  * 
  * GET  /api/admin/authors - List all authors with pagination
+ * GET  /api/admin/authors?tag=Seafood - Filter authors by tag
  * POST /api/admin/authors - Create new author
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createAuthor, getAuthors, searchAuthors } from '@/lib/author-service';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   // Check authentication (supports both JWT and API tokens)
@@ -20,6 +22,53 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const search = searchParams.get('search');
+    const tag = searchParams.get('tag');
+
+    // Handle tag filter
+    if (tag) {
+      const authors = await prisma.$queryRaw`
+        SELECT 
+          a.id,
+          a.name,
+          a.bio,
+          a.img,
+          a.avatar,
+          a.slug,
+          a.link,
+          a.tags,
+          a."createdAt",
+          a."updatedAt",
+          COUNT(r.id)::int as "recipeCount"
+        FROM authors a
+        LEFT JOIN recipes r ON r."authorId" = a.id
+        WHERE ${tag} = ANY(a.tags)
+        GROUP BY a.id, a.name, a.bio, a.img, a.avatar, a.slug, a.link, a.tags, a."createdAt", a."updatedAt"
+        ORDER BY a."createdAt" DESC
+        LIMIT ${limit}
+      ` as any[];
+
+      const authorsWithCount = authors.map((author: any) => ({
+        id: author.id,
+        name: author.name,
+        bio: author.bio || undefined,
+        img: author.img || undefined,
+        avatar: author.avatar || undefined,
+        slug: author.slug,
+        link: author.link || undefined,
+        tags: author.tags,
+        createdAt: new Date(author.createdAt),
+        updatedAt: new Date(author.updatedAt),
+        recipeCount: author.recipeCount
+      }));
+
+      return NextResponse.json({
+        authors: authorsWithCount,
+        total: authorsWithCount.length,
+        currentPage: 1,
+        totalPages: 1,
+        tag
+      });
+    }
 
     // Handle search query
     if (search) {
