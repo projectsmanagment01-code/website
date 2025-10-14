@@ -123,14 +123,14 @@ export async function RecipeAuthorSidebar({ recipe, className = '' }: RecipeAuth
   return (
     <div className={`relative text-black ${className}`}>
       {/* Dashed border container for the content */}
-      <div className="border border-dashed border-black relative mt-20 border-dashed border-[var(--mo-border-width-light)] border-black rounded-2xl bg-stone-100 p-8 pt-24 mb-8">
-        <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 w-40 h-40 z-10 flex items-center justify-center">
+      <div className="border border-dashed border-black relative mt-32 border-dashed border-[var(--mo-border-width-light)] border-black rounded-2xl bg-stone-100 p-8 pt-36 mb-8">
+        <div className="absolute -top-32 left-1/2 transform -translate-x-1/2 w-60 h-60 z-10 flex items-center justify-center">
           {/* Avatar wrapper */}
           <div
-            className="w-[var(--mo-diameter-img)] h-[var(--mo-diameter-img)] relative z-[1] overflow-hidden rounded-full bg-[var(--mo-author)] mx-auto"
+            className="w-60 h-60 relative z-[1] overflow-hidden rounded-full bg-stone-200 mx-auto"
             style={{
-              outline: "1px dashed var(--mo-outline-author)",
-              outlineOffset: "calc(-1 * var(--mo-spacing) / 4)",
+              outline: "1px dashed black",
+              outlineOffset: "-4px",
             }}
           >
             <Link
@@ -139,8 +139,8 @@ export async function RecipeAuthorSidebar({ recipe, className = '' }: RecipeAuth
               className="no-underline"
             >
               <Image
-                height={144}
-                width={144}
+                height={240}
+                width={240}
                 alt={author.name || "Author"}
                 src={author.image || '/placeholder-user.jpg'}
                 className="block w-full h-full aspect-square object-cover transition-transform duration-300 ease-[cubic-bezier(0.5,1.25,0.75,1.25)] hover:scale-105 rounded-full"

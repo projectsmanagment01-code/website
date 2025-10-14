@@ -57,10 +57,17 @@ export const AuthorForm: React.FC<AuthorFormProps> = ({
   const loadAuthors = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/admin/authors?limit=1000');
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/authors?limit=1000', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setAuthors(data.authors || []);
+      } else {
+        console.error('Failed to load authors:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Failed to load authors:', error);

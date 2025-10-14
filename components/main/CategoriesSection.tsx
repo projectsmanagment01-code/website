@@ -1,7 +1,7 @@
-import React from "react";
-import { getCategories } from "@/data/data";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { Category } from "@/outils/types";
-import { categories } from "@/data/categories";
 import Icon from "@/components/Icon";
 import Image from "next/image";
 
@@ -20,29 +20,60 @@ const getOptimizedImageUrl = (
   return `${cleanSrc}?w=${width}&q=${quality}&f=${format}`;
 };
 
-export default async function CategoriesSection({
+export default function CategoriesSection({
   className,
 }: CategoriesSectionProps) {
-  let _categories: Category[] = [];
-  let hasError = false;
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  try {
-    _categories = await getCategories();
-  } catch (err) {
-    console.error("Failed to fetch categories:", err);
-    hasError = true;
-    // Try to load fallback static categories
-    try {
-      _categories = categories || [];
-    } catch (fallbackErr) {
-      console.error("Failed to load fallback categories:", fallbackErr);
-      _categories = [];
-    }
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        } else {
+          console.error('Failed to load categories:', response.status);
+          setError(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <section className={`py-12 ${className || ""}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Title with horizontal lines */}
+          <div className="flex items-center justify-center mb-12">
+            <div className="flex-grow h-px bg-gray-300"></div>
+            <h2 className="px-6 text-2xl md:text-3xl font-bold text-gray-900">
+              Categories
+            </h2>
+            <div className="flex-grow h-px bg-gray-300"></div>
+          </div>
+
+          {/* Loading message */}
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">Loading categories...</p>
+          </div>
+        </div>
+      </section>
+    );
   }
 
-  // If we still have no categories, provide a minimal fallback
-  if (_categories.length === 0) {
-    console.warn("No categories found, showing fallback message");
+  // Error or no categories
+  if (error || categories.length === 0) {
     return (
       <section className={`py-12 ${className || ""}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,8 +96,8 @@ export default async function CategoriesSection({
     );
   }
 
-  // Remove the limit - show all categories
-  const displayCategories = _categories;
+  // Display categories
+  const displayCategories = categories;
 
   return (
     <section className={`py-12 ${className || ""}`}>
@@ -98,6 +129,9 @@ export default async function CategoriesSection({
                   sizes="(min-width: 1024px) 192px, 144px"
                   quality={100}
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
+                  onError={(e) => {
+                    console.error('Failed to load category image:', category.title, category.image);
+                  }}
                 />
               </div>
               <h3 className="text-sm lg:text-base font-semibold text-gray-900 text-center leading-tight max-w-[150px] group-hover:text-orange-600 transition-colors duration-300">
@@ -125,6 +159,9 @@ export default async function CategoriesSection({
                   sizes="120px"
                   quality={100}
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
+                  onError={(e) => {
+                    console.error('Failed to load category image:', category.title, category.image);
+                  }}
                 />
               </div>
               <h3 className="text-sm font-semibold text-gray-900 text-center leading-tight max-w-[120px] group-hover:text-orange-600 transition-colors duration-300">
