@@ -139,7 +139,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
             {/* Image */}
             <div className="aspect-square bg-gray-100 relative group">
               <img
-                src={file.url}
+                src={`${file.url}?w=400&q=50`}
                 alt={file.name}
                 className="w-full h-full object-cover"
               />
@@ -233,7 +233,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
         >
           <div className="max-w-4xl max-h-full">
             <img
-              src={selectedImage}
+              src={`${selectedImage}?w=1200&q=75`}
               alt="Full size"
               className="max-w-full max-h-full object-contain"
               onClick={(e) => e.stopPropagation()}

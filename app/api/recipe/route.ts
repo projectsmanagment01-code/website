@@ -167,12 +167,56 @@ export async function POST(request: NextRequest) {
       return authCheck.response;
     }
 
-    const recipe = await request.json();
+    let recipe;
+    try {
+      recipe = await request.json();
+    } catch (parseError) {
+      console.error("❌ JSON Parse Error:", parseError);
+      return NextResponse.json(
+        {
+          error: "Invalid JSON in request body",
+          details: parseError instanceof Error ? parseError.message : String(parseError),
+          hint: "Ensure the request body contains valid JSON data"
+        },
+        { status: 400 }
+      );
+    }
+
     console.log("📥 Received recipe data:", {
       title: recipe.title,
       keys: Object.keys(recipe),
       hasAuthor: !!recipe.author,
       hasAuthorId: !!recipe.authorId
+    });
+
+    // Validate required fields
+    const requiredFields = ['title'];
+    const missingFields = requiredFields.filter(field => !recipe[field]);
+    
+    if (missingFields.length > 0) {
+      console.error("❌ Missing required fields:", missingFields);
+      return NextResponse.json(
+        {
+          error: "Missing required fields",
+          missingFields,
+          hint: `Please provide: ${missingFields.join(', ')}`
+        },
+        { status: 400 }
+      );
+    }
+
+    // Log complete recipe structure for debugging
+    console.log("📋 Recipe fields:", {
+      title: recipe.title,
+      slug: recipe.slug,
+      category: recipe.category,
+      description: recipe.description,
+      imagesCount: Array.isArray(recipe.images) ? recipe.images.length : 0,
+      ingredientsCount: Array.isArray(recipe.ingredients) ? recipe.ingredients.length : 0,
+      instructionsCount: Array.isArray(recipe.instructions) ? recipe.instructions.length : 0,
+      hasAuthor: !!recipe.author,
+      authorId: recipe.authorId,
+      timing: recipe.timing
     });
 
     // Process author data and get authorId
@@ -302,11 +346,112 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(createdRecipe);
   } catch (error) {
-    console.error("Error creating recipe:", error);
+    // Detailed error logging and response
+    console.error("❌ RECIPE CREATION ERROR - DETAILED REPORT:");
+    console.error("=====================================");
+    
+    // Error type and message
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error Type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("Error Message:", errorMessage);
+    
+    // Stack trace for debugging
+    if (error instanceof Error && error.stack) {
+      console.error("Stack Trace:", error.stack);
+    }
+    
+    // Prisma-specific errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as any;
+      console.error("Prisma Error Code:", prismaError.code);
+      console.error("Prisma Meta:", prismaError.meta);
+      
+      // Common Prisma error codes
+      const prismaErrorMap: Record<string, string> = {
+        'P2002': 'Unique constraint violation - duplicate slug or field',
+        'P2003': 'Foreign key constraint failed - invalid authorId or reference',
+        'P2025': 'Record not found',
+        'P2000': 'Value too long for field',
+        'P2001': 'Record does not exist',
+        'P2011': 'Null constraint violation - required field is missing',
+        'P2012': 'Missing required value',
+        'P2014': 'Relation violation',
+      };
+      
+      const errorDescription = prismaErrorMap[prismaError.code] || 'Unknown database error';
+      console.error("Error Description:", errorDescription);
+      
+      // Return detailed error for Prisma errors
+      return NextResponse.json(
+        {
+          error: "Failed to create recipe",
+          details: errorDescription,
+          code: prismaError.code,
+          message: errorMessage,
+          meta: prismaError.meta,
+          hint: getErrorHint(prismaError.code, prismaError.meta)
+        },
+        { status: 500 }
+      );
+    }
+    
+    // Validation errors
+    if (errorMessage.includes('required') || errorMessage.includes('validation')) {
+      console.error("Validation Error Detected");
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: errorMessage,
+          hint: "Check that all required fields are provided with valid data types"
+        },
+        { status: 400 }
+      );
+    }
+    
+    // JSON parsing errors
+    if (errorMessage.includes('JSON') || errorMessage.includes('parse')) {
+      console.error("JSON Parsing Error Detected");
+      return NextResponse.json(
+        {
+          error: "Invalid JSON data",
+          details: errorMessage,
+          hint: "Check that the request body contains valid JSON"
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Generic error response with as much detail as possible
     return NextResponse.json(
-      { error: "Failed to create recipe" },
+      {
+        error: "Failed to create recipe",
+        details: errorMessage,
+        type: error instanceof Error ? error.constructor.name : typeof error,
+        hint: "Check server logs for full error details"
+      },
       { status: 500 }
     );
+  }
+}
+
+// Helper function to provide actionable hints based on error
+function getErrorHint(code: string, meta: any): string {
+  switch (code) {
+    case 'P2002':
+      const target = meta?.target?.[0] || 'field';
+      return `The ${target} already exists. Try using a different value or check for duplicates.`;
+    case 'P2003':
+      const field = meta?.field_name || 'reference field';
+      return `The ${field} references a record that doesn't exist. Verify that the related record (e.g., author) exists first.`;
+    case 'P2011':
+      const nullField = meta?.constraint || 'required field';
+      return `The ${nullField} cannot be null. Provide a valid value for this required field.`;
+    case 'P2000':
+      return `One or more field values are too long. Check string lengths and reduce if necessary.`;
+    case 'P2025':
+      return `The related record was not found in the database. Ensure all references exist before creating the recipe.`;
+    default:
+      return `Check the error details and verify all data is correctly formatted.`;
   }
 }
 
@@ -401,9 +546,46 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedRecipe);
   } catch (error) {
-    console.error("Error updating recipe:", error);
+    // Detailed error logging for UPDATE operations
+    console.error("❌ RECIPE UPDATE ERROR - DETAILED REPORT:");
+    console.error("=====================================");
+    console.error("Recipe ID:", id);
+    
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error Type:", error instanceof Error ? error.constructor.name : typeof error);
+    console.error("Error Message:", errorMessage);
+    
+    if (error instanceof Error && error.stack) {
+      console.error("Stack Trace:", error.stack);
+    }
+    
+    // Prisma-specific errors
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as any;
+      console.error("Prisma Error Code:", prismaError.code);
+      console.error("Prisma Meta:", prismaError.meta);
+      
+      return NextResponse.json(
+        {
+          error: "Failed to update recipe",
+          details: errorMessage,
+          code: prismaError.code,
+          meta: prismaError.meta,
+          recipeId: id,
+          hint: getErrorHint(prismaError.code, prismaError.meta)
+        },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: "Failed to update recipe" },
+      {
+        error: "Failed to update recipe",
+        details: errorMessage,
+        recipeId: id,
+        type: error instanceof Error ? error.constructor.name : typeof error,
+        hint: "Check server logs for full error details"
+      },
       { status: 500 }
     );
   }

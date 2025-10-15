@@ -313,7 +313,7 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
                   {/* Image */}
                   <div className="aspect-square bg-gray-100 relative">
                     <img
-                      src={`/uploads/${fileName}`}
+                      src={`/uploads/${fileName}?w=400&q=50`}
                       alt={fileName}
                       className="w-full h-full object-cover"
                       loading="lazy"
@@ -380,7 +380,7 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
                     {/* Thumbnail */}
                     <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 mr-4">
                       <img
-                        src={`/uploads/${fileName}`}
+                        src={`/uploads/${fileName}?w=100&q=50`}
                         alt={fileName}
                         className="w-full h-full object-cover"
                         loading="lazy"
