@@ -20,7 +20,7 @@ export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
     const url = window.location.href;
     
     // Get the featured image - prioritize featureImage, then heroImage, then img, then first image
-    const media = recipe.featureImage || recipe.heroImage || recipe.img || recipe.images?.[0];
+    const media = recipe.images?.[0] || recipe.featureImage || recipe.img || recipe.heroImage;
     
     console.log('Selected media:', media);
     
