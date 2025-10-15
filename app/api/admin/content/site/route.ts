@@ -29,17 +29,17 @@ export async function GET() {
       // Return default content if file doesn't exist
       return NextResponse.json({
         logoType: "text",
-        logoText: "Recipes by Calama",
+        logoText: "Recipes website",
         logoTagline: "Recipe Collection",
         logoImage: "",
         favicon: "",
-        footerCopyright: "2025 Recipes by Calama. All rights reserved.",
-        footerVersion: "V10.01",
-        siteTitle: "Calama Team Recipes - Delicious Family-Friendly Recipes",
+        footerCopyright: "2025 Recipes website. All rights reserved.",
+        footerVersion: "V0.1",
+        siteTitle: "Recipes website - Delicious Friendly Recipes",
         siteDescription: "Discover amazing recipes from Guelma Team. Perfect for family meals, special occasions, and everyday cooking.",
         siteDomain: "example.com",
         siteUrl: "https://example.com",
-        siteEmail: "hello@example.com",
+        siteEmail: "contact@example.com",
         lastUpdated: null,
       });
     }
@@ -49,17 +49,17 @@ export async function GET() {
     // Return default content on error
     return NextResponse.json({
       logoType: "text",
-      logoText: "Recipes by Calama",
+      logoText: "Recipes website",
       logoTagline: "Recipe Collection",
       logoImage: "",
       favicon: "",
-      footerCopyright: "2025 Recipes by Calama. All rights reserved.",
-      footerVersion: "V10.01",
-      siteTitle: "Calama Team Recipes - Delicious Family-Friendly Recipes",
+      footerCopyright: "2025 Recipes website. All rights reserved.",
+      footerVersion: "V0.1",
+      siteTitle: "Recipes website - Delicious Family-Friendly Recipes",
       siteDescription: "Discover amazing recipes from Guelma Team. Perfect for family meals, special occasions, and everyday cooking.",
       siteDomain: "example.com",
       siteUrl: "https://example.com",
-      siteEmail: "hello@example.com",
+      siteEmail: "contact@example.com",
       lastUpdated: null,
     });
   }

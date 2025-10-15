@@ -21,8 +21,13 @@ function createCategoryFromName(
 
   const slug = normalizedName.replace(/\s+/g, "-");
 
-  // Use recipe image from uploads, or fallback to placeholder
-  const categoryImage = image ? `/uploads/recipes/${image}` : "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp";
+  // Use recipe image - check if it already has the full path or just filename
+  let categoryImage = "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp";
+  if (image) {
+    // If image already starts with /uploads, use it as-is
+    // Otherwise, prepend the uploads path
+    categoryImage = image.startsWith('/uploads') ? image : `/uploads/recipes/${image}`;
+  }
 
   return {
     id: slug,
@@ -64,7 +69,7 @@ export async function GET(request: Request) {
         href: `/categories/${category.slug}`,
         alt: `${category.name} recipes`,
         description: category.description || `Discover delicious ${category.name} recipes`,
-        image: category.img || "/placeholder.jpg",
+        image: "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp",
         sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
         recipeCount: 0 // TODO: Add recipe count from relationships
       };
@@ -73,12 +78,16 @@ export async function GET(request: Request) {
     }
 
     // Get all categories from recipes (the correct approach)
+    // Order by createdAt ASC to get OLDEST (first) recipes first
     const recipes = await prisma.recipe.findMany({
       select: {
         category: true,
         categoryLink: true,
         images: true,
       },
+      orderBy: {
+        createdAt: 'asc'  // Oldest first = first recipe posted
+      }
     });
 
     const categoryMap = new Map<
@@ -91,17 +100,17 @@ export async function GET(request: Request) {
         const existing = categoryMap.get(recipe.category);
         if (existing) {
           existing.count += 1;
-          // Use first available image
-          if (!existing.image && recipe.images?.[0]) {
-            existing.image = recipe.images[0];
-          }
+          // DON'T update the image - keep the first recipe's image permanently
         } else {
+          // First time seeing this category - use the first recipe's image
+          // This image will stay permanent for this category
+          const firstImage = recipe.images?.[0] || null;
           categoryMap.set(recipe.category, {
             count: 1,
             link: `/categories/${recipe.category
               .toLowerCase()
               .replace(/\s+/g, "-")}`,
-            image: recipe.images?.[0],
+            image: firstImage,
           });
         }
       }

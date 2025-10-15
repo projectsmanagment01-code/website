@@ -15,7 +15,7 @@ export default async function WebsiteSchema() {
         siteDescription: "Delicious recipes for every occasion",
         siteDomain: "localhost:3000",
         siteUrl: "http://localhost:3000",
-        siteEmail: "hello@example.com"
+        siteEmail: "contact@localhost:3000"
       };
     }
   };

@@ -1,10 +1,13 @@
 import { Recipe } from "@/outils/types";
+import { getSiteSettings } from "@/lib/server-utils";
 
 interface RecipeSchemaProps {
   recipe: Recipe;
 }
 
-export default function RecipeSchema({ recipe }: RecipeSchemaProps) {
+export default async function RecipeSchema({ recipe }: RecipeSchemaProps) {
+  // Get site settings to use the actual website URL and name
+  const siteSettings = await getSiteSettings();
   // Helper function to parse time strings (e.g., "30 minutes", "1 hour 15 minutes")
   const parseTimeToISO8601 = (timeString: string): string => {
     if (!timeString) return "PT0M";
@@ -43,6 +46,13 @@ export default function RecipeSchema({ recipe }: RecipeSchemaProps) {
     return null;
   };
 
+  // Use the site URL from settings (from content management system)
+  // This way when you update it in the CMS, it automatically updates everywhere
+  const baseUrl = siteSettings.siteDomain ||
+                  process.env.NEXT_PUBLIC_BASE_URL || 
+                  process.env.NEXT_PUBLIC_SITE_URL || 
+                  'https://www.flavorfable.com';
+
   // Build the structured data object
   const schemaData = {
     "@context": "https://schema.org",
@@ -50,7 +60,7 @@ export default function RecipeSchema({ recipe }: RecipeSchemaProps) {
     name: recipe.title,
     description: recipe.description || recipe.shortDescription,
     image: recipe.images?.map(img => 
-      img.startsWith('http') ? img : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}${img}`
+      img.startsWith('http') ? img : `${baseUrl}${img}`
     ) || [],
     
     // Author information
