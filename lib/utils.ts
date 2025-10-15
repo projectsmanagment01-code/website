@@ -50,17 +50,41 @@ export function getHostname(): string {
     return window.location.hostname;
   }
 
-  // Server-side: try to get from environment or use localhost as fallback
-  if ((process.env as any)["VERCEL_URL"]) {
-    return (process.env as any)["VERCEL_URL"];
+  // Server-side: Priority order for hostname resolution
+  
+  // 1. Environment variable (highest priority)
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SITE_URL).hostname;
+    } catch (e) {
+      // If URL parsing fails, might be just hostname
+      return process.env.NEXT_PUBLIC_SITE_URL.replace(/^https?:\/\//, '').split('/')[0];
+    }
   }
 
-  if ((process.env as any)["NEXT_PUBLIC_SITE_URL"]) {
-    return new URL((process.env as any)["NEXT_PUBLIC_SITE_URL"]).hostname;
+  // 2. Vercel deployment URL
+  if (process.env.VERCEL_URL) {
+    return process.env.VERCEL_URL;
   }
 
-  // Fallback for development
-  return "localhost";
+  // 3. Try to read from site configuration file
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const siteConfigPath = path.join(process.cwd(), 'uploads', 'content', 'site.json');
+    
+    if (fs.existsSync(siteConfigPath)) {
+      const siteConfig = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'));
+      if (siteConfig.siteDomain) {
+        return siteConfig.siteDomain;
+      }
+    }
+  } catch (error) {
+    // Silently fail and use fallback
+  }
+
+  // 4. Fallback for local development
+  return "localhost:3000";
 }
 
 /**

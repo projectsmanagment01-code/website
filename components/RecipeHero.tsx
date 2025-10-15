@@ -300,7 +300,7 @@ export function RecipeHero({ recipe }: { recipe?: Recipe }) {
       </div>
 
       {/* Social Share Buttons */}
-      <SocialShareButtons />
+      <SocialShareButtons recipe={recipe} />
 
 
     </div>

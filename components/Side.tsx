@@ -52,16 +52,16 @@ async function AuthorCard({ recipe }: { recipe: any }) {
 
   return (
     <div className="bg-white rounded-lg p-4 md:p-8 text-center shadow-sm border border-gray-100">
-      {/* Circular Profile Photo - Responsive Size */}
-      <div className="mb-4 md:mb-6">
-        <div className="w-48 h-48 md:w-72 md:h-72 mx-auto rounded-full overflow-hidden border-4 border-gray-100">
+      {/* Circular Profile Photo - Clean and Centered - 40% Larger */}
+      <div className="mb-4 md:mb-6 flex justify-center items-center">
+        <div className="relative w-64 h-64 md:w-96 md:h-96">
           <Image
             src={authorData.avatar || '/placeholder-user.jpg'}
             alt={authorData.name}
-            width={288}
-            height={288}
+            width={384}
+            height={384}
             quality={100}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-full"
           />
         </div>
       </div>

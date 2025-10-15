@@ -21,8 +21,8 @@ function createCategoryFromName(
 
   const slug = normalizedName.replace(/\s+/g, "-");
 
-  // Use recipe image from uploads, or fallback to placeholder
-  const categoryImage = image ? `/uploads/recipes/${image}` : "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp";
+  // Use recipe image - it's already a full URL or path, don't add prefix
+  const categoryImage = image || "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp";
 
   return {
     id: slug,
@@ -77,7 +77,9 @@ export async function GET(request: Request) {
       select: {
         category: true,
         categoryLink: true,
-        images: true,
+        featureImage: true,
+        heroImage: true,
+        images: true, // Include images array as fallback
       },
     });
 
@@ -89,11 +91,20 @@ export async function GET(request: Request) {
     recipes.forEach((recipe: any) => {
       if (recipe.category) {
         const existing = categoryMap.get(recipe.category);
+        
+        // Get image: prefer local paths from named fields, then images array
+        let recipeImage = recipe.featureImage || recipe.heroImage;
+        
+        // If image is external URL or null, fallback to first local image from images array
+        if (!recipeImage || recipeImage.startsWith('http')) {
+          recipeImage = recipe.images && recipe.images.length > 0 ? recipe.images[0] : null;
+        }
+        
         if (existing) {
           existing.count += 1;
-          // Use first available image
-          if (!existing.image && recipe.images?.[0]) {
-            existing.image = recipe.images[0];
+          // Use first available local image
+          if (!existing.image && recipeImage) {
+            existing.image = recipeImage;
           }
         } else {
           categoryMap.set(recipe.category, {
@@ -101,7 +112,7 @@ export async function GET(request: Request) {
             link: `/categories/${recipe.category
               .toLowerCase()
               .replace(/\s+/g, "-")}`,
-            image: recipe.images?.[0],
+            image: recipeImage,
           });
         }
       }

@@ -176,7 +176,9 @@ async function getPrisma() {
  * Check if we should use direct database access
  */
 function shouldUseDirectDB(): boolean {
-  return isServer && (IS_DEVELOPMENT || IS_BUILD_TIME);
+  // Always use direct DB on server side (SSR, SSG, API routes)
+  // This is more reliable than internal API calls during rendering
+  return isServer;
 }
 
 /**

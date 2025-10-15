@@ -1,16 +1,55 @@
 import { Pin, Share2, Mail, Printer, ArrowDown } from "lucide-react";
+import Recipe from "@/outils/types";
 
-export default function SocialShareButtons() {
+export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
   const handlePinIt = () => {
+    // Debug: Log the entire recipe object
+    console.log('=== PINTEREST SHARE DEBUG ===');
+    console.log('Recipe object:', recipe);
+    console.log('featureImage:', recipe?.featureImage);
+    console.log('heroImage:', recipe?.heroImage);
+    console.log('img:', recipe?.img);
+    console.log('images array:', recipe?.images);
+    
+    if (!recipe) {
+      console.error('No recipe data available for Pinterest share');
+      alert('Unable to share: Recipe data not loaded');
+      return;
+    }
+
     const url = window.location.href;
-    const media = "https://ext.same-assets.com/3912301781/917733602.jpeg";
-    const description =
-      "Crispy chicken and tender broccoli coated in a sweet and savory honey sesame sauce, ready in 30 minutes.";
+    
+    // Get the featured image - prioritize featureImage, then heroImage, then img, then first image
+    const media = recipe.featureImage || recipe.heroImage || recipe.img || recipe.images?.[0];
+    
+    console.log('Selected media:', media);
+    
+    if (!media) {
+      console.error('No image available for Pinterest share');
+      alert('Unable to pin: No image found for this recipe');
+      return;
+    }
+    
+    // Get title and description - use actual recipe data only
+    const title = recipe.title || 'Recipe';
+    const description = recipe.shortDescription || recipe.description || title;
+    
+    // Construct full image URL if it's a relative path
+    const imageUrl = media.startsWith('http') ? media : `${window.location.origin}${media}`;
+    
+    console.log('Final Pinterest Share Data:', { 
+      url, 
+      imageUrl, 
+      description, 
+      title,
+      rawMedia: media 
+    });
+    
     window.open(
       `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(
         url
-      )}&media=${encodeURIComponent(media)}&description=${encodeURIComponent(
-        description
+      )}&media=${encodeURIComponent(imageUrl)}&description=${encodeURIComponent(
+        `${title} - ${description}`
       )}`,
       "_blank"
     );
@@ -25,8 +64,15 @@ export default function SocialShareButtons() {
   };
 
   const handleSendIt = () => {
-    const subject = "Honey Sesame Chicken and Broccoli";
-    const body = window.location.href;
+    if (!recipe) {
+      alert('Unable to share: Recipe data not loaded');
+      return;
+    }
+    
+    const subject = `Check out this recipe: ${recipe.title}`;
+    const description = recipe.shortDescription || recipe.description || '';
+    const body = `${recipe.title}\n\n${description}\n\nView the full recipe here:\n${window.location.href}`;
+    
     window.open(
       `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
         body
