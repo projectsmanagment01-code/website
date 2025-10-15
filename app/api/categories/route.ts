@@ -21,8 +21,8 @@ function createCategoryFromName(
 
   const slug = normalizedName.replace(/\s+/g, "-");
 
-  // Use recipe image - it's already a full URL or path, don't add prefix
-  const categoryImage = image || "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp";
+  // Use recipe image from uploads, or fallback to placeholder
+  const categoryImage = image ? `/uploads/recipes/${image}` : "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp";
 
   return {
     id: slug,
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
         href: `/categories/${category.slug}`,
         alt: `${category.name} recipes`,
         description: category.description || `Discover delicious ${category.name} recipes`,
-        image: "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp",
+        image: category.img || "/placeholder.jpg",
         sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
         recipeCount: 0 // TODO: Add recipe count from relationships
       };
@@ -77,9 +77,7 @@ export async function GET(request: Request) {
       select: {
         category: true,
         categoryLink: true,
-        featureImage: true,
-        heroImage: true,
-        images: true, // Include images array as fallback
+        images: true,
       },
     });
 
@@ -91,20 +89,11 @@ export async function GET(request: Request) {
     recipes.forEach((recipe: any) => {
       if (recipe.category) {
         const existing = categoryMap.get(recipe.category);
-        
-        // Get image: prefer local paths from named fields, then images array
-        let recipeImage = recipe.featureImage || recipe.heroImage;
-        
-        // If image is external URL or null, fallback to first local image from images array
-        if (!recipeImage || recipeImage.startsWith('http')) {
-          recipeImage = recipe.images && recipe.images.length > 0 ? recipe.images[0] : null;
-        }
-        
         if (existing) {
           existing.count += 1;
-          // Use first available local image
-          if (!existing.image && recipeImage) {
-            existing.image = recipeImage;
+          // Use first available image
+          if (!existing.image && recipe.images?.[0]) {
+            existing.image = recipe.images[0];
           }
         } else {
           categoryMap.set(recipe.category, {
@@ -112,7 +101,7 @@ export async function GET(request: Request) {
             link: `/categories/${recipe.category
               .toLowerCase()
               .replace(/\s+/g, "-")}`,
-            image: recipeImage,
+            image: recipe.images?.[0],
           });
         }
       }
