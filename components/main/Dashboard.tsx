@@ -23,6 +23,7 @@ import ApiTokenManager from "@/components/admin/ApiTokenManager";
 import BackupManager from "@/components/admin/BackupManager";
 import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
+import CategoryManager from "@/components/admin/CategoryManager";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -64,23 +65,7 @@ function AdminDashboardContent() {
           />
         );
       case "categories":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Categories
-              </h1>
-              <p className="text-gray-600">
-                Manage recipe categories and organization
-              </p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-              <p className="text-gray-500">
-                Categories management coming soon...
-              </p>
-            </div>
-          </div>
-        );
+        return <CategoryManager />;
       case "authors":
         return <AuthorManagement />;
       case "media":

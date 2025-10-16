@@ -35,15 +35,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
 
-    console.log("✅ Current recipe:", currentRecipe.title, "| Category:", currentRecipe.category);
+    console.log("✅ Current recipe:", currentRecipe.title, "| Category:", currentRecipe.category, "| CategoryId:", currentRecipe.categoryId);
 
-    // Try to find related recipes with less strict filtering
+    // Build where clause for related recipes (supports both old string category and new categoryId)
+    const whereClause: any = {
+      id: { not: recipeId }, // Exclude current recipe
+    };
+    
+    // Prioritize categoryId if available, fallback to old category string
+    if (currentRecipe.categoryId) {
+      whereClause.categoryId = currentRecipe.categoryId;
+      console.log("🔗 Using new categoryId-based relationship:", currentRecipe.categoryId);
+    } else if (currentRecipe.category) {
+      whereClause.category = currentRecipe.category;
+      console.log("📝 Using old category string:", currentRecipe.category);
+    }
+
+    // Try to find related recipes
     const relatedRecipes = await prisma.recipe.findMany({
-      where: {
-        id: { not: recipeId }, // Exclude current recipe
-        category: currentRecipe.category, // Same category
-        // Removed status filter to see if any recipes exist
-      },
+      where: whereClause,
       take: limit,
       orderBy: { createdAt: "desc" },
     });

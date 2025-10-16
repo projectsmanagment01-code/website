@@ -90,7 +90,7 @@ export async function GET(request: Request) {
     // Fetch dynamic categories from database
     const categories = await withRetry(() =>
       prisma.category.findMany({
-        orderBy: { title: "asc" },
+        orderBy: { name: "asc" },
       })
     );
 

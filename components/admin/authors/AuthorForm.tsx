@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { AuthorEntity } from '@/outils/types';
 import { useFileUpload } from '@/lib/hooks/useFileUpload';
+import CategoryTagSelector from './CategoryTagSelector2';
 
 interface AuthorFormData {
   name: string;
@@ -474,81 +475,11 @@ Return only one clean URL or handle, no additional text.`;
               </p>
             </div>
 
-            {/* Categories - Manual Input */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Categories (Specialties)
-              </label>
-              
-              {/* Display selected categories as tags */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                {formData.tags.map((categoryName, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium"
-                  >
-                    {categoryName}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormData(prev => ({
-                          ...prev,
-                          tags: prev.tags.filter((_, i) => i !== index)
-                        }));
-                      }}
-                      className="hover:text-blue-900"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-
-              {/* Input to add new category */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  id="category-input"
-                  placeholder="Type category name and press Enter"
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      const input = e.currentTarget;
-                      const value = input.value.trim();
-                      if (value && !formData.tags.includes(value)) {
-                        setFormData(prev => ({
-                          ...prev,
-                          tags: [...prev.tags, value]
-                        }));
-                        input.value = '';
-                      }
-                    }
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const input = document.getElementById('category-input') as HTMLInputElement;
-                    const value = input.value.trim();
-                    if (value && !formData.tags.includes(value)) {
-                      setFormData(prev => ({
-                        ...prev,
-                        tags: [...prev.tags, value]
-                      }));
-                      input.value = '';
-                    }
-                  }}
-                  className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  Add
-                </button>
-              </div>
-              
-              <p className="mt-2 text-sm text-gray-500">
-                {formData.tags.length} {formData.tags.length === 1 ? 'category' : 'categories'} added
-              </p>
-            </div>
+            {/* Categories - Dropdown Selection */}
+            <CategoryTagSelector
+              selectedTags={formData.tags}
+              onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+            />
           </div>
 
           {/* Right Column - Images */}

@@ -139,7 +139,7 @@ export async function getCategories(
   const categories = await prisma.category.findMany({
     where,
     orderBy: [
-      { title: 'asc' }
+      { name: 'asc' }
     ],
     skip,
     take: limit
@@ -278,7 +278,7 @@ export async function getAllCategories() {
     
     const categories = await prisma.category.findMany({
       orderBy: [
-        { title: 'asc' }
+        { name: 'asc' }
       ]
     });
     

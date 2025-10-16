@@ -488,12 +488,23 @@ export async function PUT(request: NextRequest) {
       return authCheck.response;
     }
 
+    // Remove fields that don't exist in schema or are relationship fields
+    const { categoryId, authorId, seoScore, ...recipeData } = recipe;
+    
+    // Build update data object
+    const updateData: any = {
+      ...recipeData,
+      updatedAt: new Date(),
+    };
+    
+    // Only include authorId if it's a valid string (not null/undefined)
+    if (authorId && typeof authorId === 'string') {
+      updateData.authorId = authorId;
+    }
+    
     const updatedRecipe = await prisma.recipe.update({
       where: { id },
-      data: {
-        ...recipe,
-        updatedAt: new Date(),
-      },
+      data: updateData,
     });
 
     // Automatically revalidate affected pages using tags

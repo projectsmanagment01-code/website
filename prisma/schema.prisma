@@ -10,14 +10,15 @@ datasource db {
 model Recipe {
   id                  String    @id @default(cuid())
   title               String
-  category            String
+  category            String    // DEPRECATED: Keep temporarily for backward compatibility
+  categoryId          String?   // NEW: Foreign key to Category model
   description         String
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   allergyInfo         String
   author              Json
-  categoryHref        String?
-  categoryLink        String
+  categoryHref        String?   // DEPRECATED: Will be removed after migration
+  categoryLink        String    // DEPRECATED: Will be removed after migration
   completeProcess     Json?
   essIngredientGuide  Json?
   faq                 Json?
@@ -57,7 +58,14 @@ model Recipe {
   views               Int       @default(0)
   authorId            String?
   status              String    @default("published")
+  
+  // Relations
   authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])
+  categoryRef         Category? @relation("CategoryRecipes", fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Author {
@@ -78,13 +86,30 @@ model Author {
 
 model Category {
   id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  href        String
-  description String
-  image       String
-  alt         String
-  sizes       String?
+  name        String   // Display name (e.g., "Evening Meals", "Desserts")
+  slug        String   @unique // URL-friendly (e.g., "evening-meals", "desserts")
+  description String?  @db.Text // Full description for category page
+  image       String   // Dedicated category image (stored in uploads/categories/)
+  icon        String?  // Optional icon identifier for UI
+  color       String?  // Brand color for category (hex code)
+  order       Int      @default(0) // Display order (lower = shown first)
+  isActive    Boolean  @default(true) // Active/inactive toggle
+  
+  // SEO fields
+  metaTitle       String?  @db.Text
+  metaDescription String?  @db.Text
+  
+  // Relations
+  recipes     Recipe[] @relation("CategoryRecipes")
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([slug])
+  @@index([isActive])
+  @@index([order])
+  @@map("categories")
 }
 
 model NavigationItem {

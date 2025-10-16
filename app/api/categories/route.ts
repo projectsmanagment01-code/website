@@ -1,10 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { getCategoryBySlug } from "@/lib/category-service";
 import { Category } from "@/outils/types";
 import { prisma } from "@/lib/prisma";
 import { safeImageUrl } from "@/lib/utils";
+import { getCategories, getCategoryBySlug as getNewCategoryBySlug } from "@/lib/category-service-new";
 
 // Helper function to create category from recipe data
 function createCategoryFromName(
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
     // If slug is provided, get specific category with details
     if (slug) {
-      const category = await getCategoryBySlug(slug);
+      const category = await getNewCategoryBySlug(slug, true); // Include recipes
       
       if (!category) {
         return NextResponse.json(
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
         );
       }
 
-      // Convert CategoryEntity to Category format for frontend compatibility
+      // Convert to frontend format
       const categoryResponse: Category = {
         id: category.id,
         slug: category.slug,
@@ -72,16 +72,66 @@ export async function GET(request: Request) {
         href: `/categories/${category.slug}`,
         alt: `${category.name} recipes`,
         description: category.description || `Discover delicious ${category.name} recipes`,
-        image: "https://c.animaapp.com/mer35j4wJPAxku/assets/1753113321200-qrb53cbf.webp",
+        image: safeImageUrl(category.image),
         sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
-        recipeCount: 0 // TODO: Add recipe count from relationships
+        recipeCount: (category as any).recipes?.length || 0
       };
 
       return NextResponse.json(categoryResponse);
     }
 
-    // Get all categories from recipes (the correct approach)
-    // Order by createdAt ASC to get OLDEST (first) recipes first
+    // NEW SYSTEM: Get categories from Category table
+    try {
+      const dbCategories = await getCategories({
+        includeInactive: false,
+        includeCount: true,
+        orderBy: 'order',
+        orderDirection: 'asc'
+      });
+      
+      // If we have categories in the database, use them
+      if (dbCategories && dbCategories.length > 0) {
+        // HYBRID COUNT: Count recipes using BOTH new categoryId and old category string
+        // This ensures accurate counts during migration period
+        const categoriesWithHybridCount = await Promise.all(
+          dbCategories.map(async (cat) => {
+            // Count recipes with new categoryId relationship
+            const newSystemCount = cat._count?.recipes || 0;
+            
+            // Count recipes with old category string that matches this category's slug
+            const oldSystemCount = await prisma.recipe.count({
+              where: {
+                category: {
+                  equals: cat.slug,
+                  mode: 'insensitive'
+                }
+              }
+            });
+            
+            // Use whichever count is higher (handles partial migration)
+            const totalCount = Math.max(newSystemCount, oldSystemCount);
+            
+            return {
+              id: cat.id,
+              slug: cat.slug,
+              title: cat.name,
+              href: `/categories/${cat.slug}`,
+              alt: `${cat.name} recipes`,
+              description: cat.description || `Discover ${totalCount} delicious ${cat.name} recipes`,
+              image: safeImageUrl(cat.image),
+              sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
+              recipeCount: totalCount
+            };
+          })
+        );
+        
+        return NextResponse.json(categoriesWithHybridCount);
+      }
+    } catch (catError) {
+      console.warn('⚠️ New category system not ready, falling back to old system:', catError);
+    }
+    
+    // FALLBACK: Old system (for backward compatibility during migration)
     const recipes = await prisma.recipe.findMany({
       select: {
         category: true,
@@ -89,7 +139,7 @@ export async function GET(request: Request) {
         images: true,
       },
       orderBy: {
-        createdAt: 'asc'  // Oldest first = first recipe posted
+        createdAt: 'asc'
       }
     });
 
@@ -103,10 +153,7 @@ export async function GET(request: Request) {
         const existing = categoryMap.get(recipe.category);
         if (existing) {
           existing.count += 1;
-          // DON'T update the image - keep the first recipe's image permanently
         } else {
-          // First time seeing this category - use the first recipe's image
-          // This image will stay permanent for this category
           const firstImage = recipe.images?.[0] || null;
           categoryMap.set(recipe.category, {
             count: 1,
@@ -124,7 +171,6 @@ export async function GET(request: Request) {
         createCategoryFromName(categoryName, count, link, image)
     );
 
-    // Sort by recipe count (most recipes first)
     const sortedCategories = categories.sort(
       (a, b) => (b.recipeCount || 0) - (a.recipeCount || 0)
     );
