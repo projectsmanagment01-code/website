@@ -138,29 +138,6 @@ export default function CategoryTagSelector({ selectedTags, onChange }: Category
       <p className="text-xs text-gray-500">
         Available categories: {categories.length > 0 ? categories.join(', ') : 'No categories loaded'}
       </p>
-      
-      {/* Manual Test Button */}
-      <button
-        type="button"
-        onClick={() => {
-          console.log('🔄 Manual fetch triggered...');
-          fetch('/api/categories')
-            .then(res => res.json())
-            .then(data => {
-              console.log('🔄 Manual fetch result:', data);
-              const categories = Array.isArray(data) ? data : (data.value || data.categories || []);
-              const categoryNames = categories.map((c: any) => c.title || c.name);
-              alert(`Got ${categories.length} categories: ${categoryNames.join(', ')}`);
-            })
-            .catch(err => {
-              console.error('🔄 Manual fetch error:', err);
-              alert('Manual fetch failed: ' + err.message);
-            });
-        }}
-        className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-      >
-        🔄 Test Fetch Categories
-      </button>
     </div>
   );
 }
