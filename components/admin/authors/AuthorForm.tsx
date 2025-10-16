@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { AuthorEntity } from '@/outils/types';
 import { useFileUpload } from '@/lib/hooks/useFileUpload';
-import CategoryTagSelector from './CategoryTagSelector2';
+import CategoryTagSelector from './SimpleCategorySelector';
 
 interface AuthorFormData {
   name: string;
