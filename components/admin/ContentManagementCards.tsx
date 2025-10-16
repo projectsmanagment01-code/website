@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Cookie,
   ArrowLeft,
+  Share2,
 } from "lucide-react";
 
 const contentPages = [
@@ -24,6 +25,12 @@ const contentPages = [
     label: "Home Page",
     icon: Home,
     description: "Manage homepage content and hero section",
+  },
+  {
+    id: "content-social",
+    label: "Social Media Links",
+    icon: Share2,
+    description: "Manage social media links in footer",
   },
   {
     id: "content-about",

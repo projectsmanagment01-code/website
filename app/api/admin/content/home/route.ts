@@ -83,3 +83,33 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    // Verify admin token
+    const authResult = await verifyAdminToken(request);
+    if (!authResult.success) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    
+    await ensureContentDir();
+    const filePath = path.join(CONTENT_DIR, "home.json");
+
+    // Save content to file
+    await fs.writeFile(filePath, JSON.stringify(body, null, 2));
+
+    // Create response with cache invalidation headers
+    const response = NextResponse.json({ success: true });
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    
+    return response;
+  } catch (error) {
+    console.error("Error saving home content:", error);
+    return NextResponse.json(
+      { error: "Failed to save content" },
+      { status: 500 }
+    );
+  }
+}

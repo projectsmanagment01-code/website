@@ -15,6 +15,7 @@ import ContactContentEditor from "@/components/admin/ContactContentEditor";
 import DisclaimerContentEditor from "@/components/admin/DisclaimerContentEditor";
 import CookiesContentEditor from "@/components/admin/CookiesContentEditor";
 import FAQContentManager from "@/components/admin/FAQContentManager";
+import SocialMediaManager from "@/components/admin/SocialMediaManager";
 import Settings from "@/components/admin/Settings";
 import AIPlugin from "@/components/admin/AIPlugin";
 import AuthorManagement from "@/components/admin/authors/AuthorManagement";
@@ -88,6 +89,8 @@ function AdminDashboardContent() {
         );
       case "content-home":
         return <HomeContentEditor onBack={() => setActiveSection("content")} />;
+      case "content-social":
+        return <SocialMediaManager onBack={() => setActiveSection("content")} />;
       case "content-about":
         return <AboutContentEditor onBack={() => setActiveSection("content")} />;
       case "content-contact":
