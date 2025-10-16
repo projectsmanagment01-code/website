@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Recipe } from "@/outils/types";
 import { Edit, Trash2, Eye, Plus, Calendar, Tag, User, Filter, Check, ChefHat, UserCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { getAuthorImage } from "@/lib/utils";
+import { getAuthorImage, safeImageUrl } from "@/lib/utils";
 import { StatusBadge } from "./StatusBadge";
 import { SEOScoreIndicator } from "./SEOScoreIndicator";
 import { AdvancedFilters } from "./AdvancedFilters";
@@ -288,11 +288,20 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
   };
 
   // Helper function to get proper image URL
+  // UPDATED: Now handles legacy filenames with spaces using safeImageUrl
   const getRecipeImageUrl = (imagePath: string) => {
     if (!imagePath) return '/uploads/recipes/default-recipe.jpg';
     if (imagePath.startsWith('http')) return imagePath;
-    if (imagePath.startsWith('/')) return imagePath;
-    return `/uploads/recipes/${imagePath}`;
+    
+    let finalPath: string;
+    if (imagePath.startsWith('/')) {
+      finalPath = imagePath;
+    } else {
+      finalPath = `/uploads/recipes/${imagePath}`;
+    }
+    
+    // Encode URL to handle legacy filenames with spaces
+    return safeImageUrl(finalPath);
   };
 
   // Helper function to handle recipe image errors

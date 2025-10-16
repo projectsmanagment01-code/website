@@ -1,7 +1,7 @@
 # ========================
 # Builder (deps + prisma client)
 # ========================
-FROM node:21-alpine3.18 AS builder
+FROM node:20-alpine3.18 AS builder
 WORKDIR /app
 
 # build-time args
@@ -64,10 +64,12 @@ RUN npx prisma generate
 
 COPY . .
 
+RUN yarn build
+
 # ========================
 # Runner (runtime only)
 # ========================
-FROM node:21-alpine3.18 AS runner
+FROM node:20-alpine3.18 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -137,4 +139,4 @@ EXPOSE 3000
 # ... rest of runner stage
 
 #CMD ["sh", "-c", "echo '⏳ Waiting for database to be ready...' && until nc -z db 5432; do echo 'Database not ready, waiting...'; sleep 2; done && echo '✅ Database is ready, running migrations...' && npx prisma migrate deploy && echo '🚀 Starting application...' && yarn build && yarn start"]
-CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ yaaay DB ready' && npx prisma db push && echo '🚀 Starting app...' && yarn build && yarn start"]
+CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ yaaay DB ready' && npx prisma db push && echo '🚀 Starting app...' && yarn start"]

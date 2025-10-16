@@ -172,3 +172,77 @@ export function hasHtmlTags(content: string): boolean {
   }
   return /<[^>]+>/.test(content);
 }
+
+/**
+ * Safe URL encoding for image paths
+ * Handles both new sanitized filenames and legacy filenames with spaces
+ * Only encodes the filename portion, not the directory structure
+ * 
+ * @param imagePath - The image path (e.g., "/uploads/recipes/My Recipe.webp")
+ * @returns URL-safe path (e.g., "/uploads/recipes/My%20Recipe.webp")
+ */
+export function safeImageUrl(imagePath: string): string {
+  if (!imagePath || typeof imagePath !== "string") {
+    return imagePath;
+  }
+
+  // If it's already an external URL, return as-is
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  // Split the path into parts
+  const parts = imagePath.split('/');
+  
+  // Encode only the filename (last part), not the directory structure
+  const encodedParts = parts.map((part, index) => {
+    // Don't encode empty parts or directory names
+    if (!part || index < parts.length - 1) {
+      return part;
+    }
+    
+    // Only encode the filename if it contains spaces or special characters that need encoding
+    // Check if encoding is needed (has spaces or other characters that need encoding)
+    if (/[\s%#]/.test(part)) {
+      return encodeURIComponent(part);
+    }
+    
+    return part;
+  });
+  
+  return encodedParts.join('/');
+}
+
+/**
+ * Sanitize filename for new uploads
+ * Converts spaces and special characters to hyphens
+ * Makes filenames URL-safe and SEO-friendly
+ * 
+ * @param filename - Original filename
+ * @returns Sanitized filename
+ */
+export function sanitizeFilename(filename: string): string {
+  if (!filename || typeof filename !== "string") {
+    return filename;
+  }
+
+  // Get the filename without extension
+  const lastDotIndex = filename.lastIndexOf('.');
+  const nameWithoutExt = lastDotIndex > 0 ? filename.substring(0, lastDotIndex) : filename;
+  const extension = lastDotIndex > 0 ? filename.substring(lastDotIndex) : '';
+
+  // Sanitize the name:
+  // 1. Convert to lowercase
+  // 2. Replace spaces with hyphens
+  // 3. Remove special characters except hyphens and underscores
+  // 4. Replace multiple hyphens with single hyphen
+  // 5. Remove leading/trailing hyphens
+  const sanitized = nameWithoutExt
+    .toLowerCase()
+    .replace(/\s+/g, '-')           // spaces to hyphens
+    .replace(/[^a-z0-9\-_]/g, '-')  // special chars to hyphens
+    .replace(/-+/g, '-')             // multiple hyphens to single
+    .replace(/^-+|-+$/g, '');        // remove leading/trailing hyphens
+
+  return sanitized + extension;
+}

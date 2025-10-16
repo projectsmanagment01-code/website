@@ -29,9 +29,19 @@ async function ensureUploadDir() {
 }
 
 // Generate filename keeping original name with WebP extension
+// NEW: Sanitizes filename to be URL-safe (replaces spaces with hyphens)
 function generateFileName(originalName: string): string {
   const nameWithoutExt = path.parse(originalName).name;
-  return `${nameWithoutExt}.webp`;
+  
+  // Sanitize filename: convert spaces to hyphens, lowercase, remove special chars
+  const sanitized = nameWithoutExt
+    .toLowerCase()
+    .replace(/\s+/g, '-')           // spaces to hyphens
+    .replace(/[^a-z0-9\-_]/g, '-')  // special chars to hyphens
+    .replace(/-+/g, '-')             // multiple hyphens to single
+    .replace(/^-+|-+$/g, '');        // remove leading/trailing hyphens
+  
+  return `${sanitized}.webp`;
 }
 
 // Check if file already exists and return appropriate filename or error

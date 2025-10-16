@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getCategoryBySlug } from "@/lib/category-service";
 import { Category } from "@/outils/types";
 import { prisma } from "@/lib/prisma";
+import { safeImageUrl } from "@/lib/utils";
 
 // Helper function to create category from recipe data
 function createCategoryFromName(
@@ -26,7 +27,9 @@ function createCategoryFromName(
   if (image) {
     // If image already starts with /uploads, use it as-is
     // Otherwise, prepend the uploads path
-    categoryImage = image.startsWith('/uploads') ? image : `/uploads/recipes/${image}`;
+    const rawPath = image.startsWith('/uploads') ? image : `/uploads/recipes/${image}`;
+    // IMPORTANT: Encode URL to handle legacy filenames with spaces
+    categoryImage = safeImageUrl(rawPath);
   }
 
   return {
