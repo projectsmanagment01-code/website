@@ -9,9 +9,9 @@ import { getAuthorImageUrl, getAuthorInitials } from '@/lib/author-image-utils';
 interface AuthorImageProps {
   author: {
     name: string;
-    image?: string;
-    avatar?: string;
-    img?: string;
+    image?: string | null;
+    avatar?: string | null;
+    img?: string | null;
     slug: string;
   };
   size?: 'sm' | 'md' | 'lg';
@@ -21,13 +21,11 @@ interface AuthorImageProps {
 export default function AuthorImage({ author, size = 'md', className = '' }: AuthorImageProps) {
   const [imageError, setImageError] = useState(false);
   
-  // Transform author object to match the expected interface
-  const authorForImageUrl = {
+  // Pass the author object directly - getAuthorImageUrl expects avatar and img fields
+  const imageUrl = getAuthorImageUrl({
     avatar: author.avatar,
-    img: author.img || author.image
-  };
-  
-  const imageUrl = getAuthorImageUrl(authorForImageUrl);
+    img: author.img || author.image || null
+  });
 
   const sizeClasses = {
     sm: 'w-16 h-16',
