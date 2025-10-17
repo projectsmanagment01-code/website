@@ -2,20 +2,25 @@ import { getHostname } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { getAuthorById } from '@/lib/author-integration';
+import { getAuthorImageUrl } from '@/lib/author-image';
 
 async function AuthorCard({ recipe }: { recipe: any }) {
   let authorData = null;
+  let authorImageUrl = '/placeholder-user.jpg';
 
   // Fetch author by authorId
   if (recipe.authorId) {
     try {
       const authorEntity = await getAuthorById(recipe.authorId);
       if (authorEntity) {
+        // Use the unified image helper
+        authorImageUrl = getAuthorImageUrl(authorEntity);
+        
         authorData = {
           name: authorEntity.name,
           bio: authorEntity.bio || '',
-          avatar: authorEntity.avatar || (authorEntity.img ? authorEntity.img : ''),
-          link: authorEntity.link || `/authors/${authorEntity.slug}`
+          avatar: authorImageUrl,
+          link: `/authors`  // Always link to authors page, no individual profiles
         };
       }
     } catch (error) {
@@ -25,11 +30,20 @@ async function AuthorCard({ recipe }: { recipe: any }) {
 
   // Fallback: use embedded author (backward compatibility)
   if (!authorData && recipe.author) {
+    // If author has avatar or img, use the helper
+    if (recipe.author.avatar || recipe.author.img) {
+      authorImageUrl = getAuthorImageUrl({
+        avatar: recipe.author.avatar,
+        img: recipe.author.img,
+        name: recipe.author.name
+      });
+    }
+    
     authorData = {
       name: recipe.author.name,
       bio: recipe.author.bio,
-      avatar: recipe.author.avatar,
-      link: recipe.author.link
+      avatar: authorImageUrl,
+      link: '/authors'  // Always link to authors page
     };
   }
 
@@ -56,7 +70,7 @@ async function AuthorCard({ recipe }: { recipe: any }) {
       <div className="mb-4 md:mb-6 flex justify-center items-center">
         <div className="relative w-64 h-64 md:w-96 md:h-96">
           <Image
-            src={authorData.avatar || '/placeholder-user.jpg'}
+            src={authorData.avatar}
             alt={authorData.name}
             width={384}
             height={384}
@@ -81,13 +95,13 @@ async function AuthorCard({ recipe }: { recipe: any }) {
         </p>
       </div>
 
-      {/* Read More Link */}
+      {/* Link to Authors Page */}
       <div>
         <Link
           href={authorData.link}
           className="inline-block text-sm font-medium text-gray-900 hover:text-orange-600 transition-colors border-b border-gray-900 hover:border-orange-600"
         >
-          — Read more about me —
+          — Meet Our Authors —
         </Link>
       </div>
     </div>

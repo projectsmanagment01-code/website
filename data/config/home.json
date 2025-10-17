@@ -3,46 +3,46 @@
   "heroDescription": "The go-to place for simple, plant-based recipes that fuel your body, fit your busy life, and make eating more fruits and veggies feel easy—not guilty. Because progress isn't about perfection: it's about small, healthy changes... like sipping a green smoothie and still enjoying Taco Bell.",
   "heroButtonText": "ALL RECIPES",
   "heroButtonLink": "/recipes",
-  "heroBackgroundImage": "/uploads/hero-backgrounds/a-3.webp",
+  "heroBackgroundImage": "/uploads/hero-backgrounds/a-2.webp",
   "metaTitle": "Recipes by Calama - Plant-Based Recipes Made Simple",
   "metaDescription": "Discover simple, delicious plant-based recipes that fit your busy lifestyle. Easy healthy cooking made simple.",
   "socialMediaLinks": [
     {
       "platform": "Facebook",
-      "url": "https://www.facebook.com",
-      "enabled": false,
+      "url": "https://facebook.com/",
+      "enabled": true,
       "icon": "facebook"
     },
     {
       "platform": "Instagram",
-      "url": "https://www.instagram.com",
-      "enabled": false,
+      "url": "https://instagram.com/",
+      "enabled": true,
       "icon": "instagram"
     },
     {
       "platform": "YouTube",
-      "url": "https://www.youtube.com",
-      "enabled": false,
+      "url": "https://youtube.com/@",
+      "enabled": true,
       "icon": "youtube"
     },
     {
       "platform": "Twitter/X",
-      "url": "https://twitter.com",
-      "enabled": false,
+      "url": "https://x.com/",
+      "enabled": true,
       "icon": "twitter"
     },
     {
       "platform": "Pinterest",
-      "url": "https://www.pinterest.com",
-      "enabled": false,
+      "url": "https://pinterest.com/",
+      "enabled": true,
       "icon": "pinterest"
     },
     {
       "platform": "Email",
-      "url": "mailto:youremail@example.com",
+      "url": "mailto:",
       "enabled": false,
       "icon": "email"
     }
   ],
-  "lastUpdated": "2025-10-17T11:48:30.994Z"
+  "lastUpdated": "2025-10-17T13:05:17.699Z"
 }

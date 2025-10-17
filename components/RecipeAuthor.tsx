@@ -7,7 +7,7 @@
 
 import { Recipe } from '@/outils/types';
 import { getAuthorById } from '@/lib/author-integration';
-import { getAuthorImage } from '@/lib/utils';
+import { getAuthorImageUrl } from '@/lib/author-image';
 import Image from 'next/image';
 import Link from 'next/link';
 import { User, Calendar } from 'lucide-react';
@@ -28,12 +28,13 @@ async function getRecipeAuthorData(recipe: Recipe) {
     try {
       const authorEntity = await getAuthorById(recipe.authorId);
       if (authorEntity) {
+        const imageUrl = getAuthorImageUrl(authorEntity);
         return {
           name: authorEntity.name,
           bio: authorEntity.bio || '',
-          avatar: authorEntity.avatar || (authorEntity.img ? `/uploads/authors/${authorEntity.img}` : ''),
-          link: authorEntity.link || `/authors/${authorEntity.slug}`,
-          image: authorEntity.avatar || (authorEntity.img ? `/uploads/authors/${authorEntity.img}` : '')
+          avatar: imageUrl,
+          link: '/authors', // Always link to authors page, no individual profiles
+          image: imageUrl
         };
       }
     } catch (error) {
@@ -43,12 +44,18 @@ async function getRecipeAuthorData(recipe: Recipe) {
 
   // Fallback: use embedded author (backward compatibility)
   if (recipe.author) {
+    const imageUrl = getAuthorImageUrl({
+      avatar: recipe.author.avatar,
+      img: recipe.author.img,
+      name: recipe.author.name
+    });
+    
     return {
       name: recipe.author.name,
       bio: recipe.author.bio,
-      avatar: recipe.author.avatar,
-      link: recipe.author.link,
-      image: recipe.author.avatar
+      avatar: imageUrl,
+      link: '/authors', // Always link to authors page
+      image: imageUrl
     };
   }
 

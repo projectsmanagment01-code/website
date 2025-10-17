@@ -165,3 +165,47 @@ model SEOEnhancementReport {
   @@index([status])
   @@index([createdAt])
 }
+
+// Media Management System - Tracks all uploaded files with metadata
+model Media {
+  id            String    @id @default(cuid())
+  filename      String    // Sanitized filename on disk (e.g., "chocolate-cake.webp")
+  originalName  String    // Original upload filename (e.g., "Chocolate Cake.jpg")
+  path          String    // Relative path from uploads root (e.g., "recipes/chocolate-cake.webp")
+  url           String    // Public URL to access file (e.g., "/uploads/recipes/chocolate-cake.webp")
+  category      String    // File category: recipes, authors, general, categories, ingredients
+  mimeType      String    // MIME type (e.g., "image/webp", "image/jpeg")
+  size          Int       // File size in bytes
+  width         Int?      // Image width in pixels (null for non-images)
+  height        Int?      // Image height in pixels (null for non-images)
+  thumbnailUrl  String?   // URL to thumbnail version (e.g., "/uploads/recipes/thumb_chocolate-cake.webp")
+  
+  // Metadata
+  alt           String?   // Alt text for accessibility
+  caption       String?   // Image caption
+  tags          String[]  @default([]) // Searchable tags
+  
+  // Relationships
+  recipeId      String?   // Optional: Link to recipe this image belongs to
+  authorId      String?   // Optional: Link to author (for author avatars)
+  categoryId    String?   // Optional: Link to category (for category images)
+  
+  // Audit fields
+  uploadedBy    String?   // User ID or admin who uploaded
+  uploadedAt    DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Soft delete
+  deletedAt     DateTime? // Soft delete timestamp
+  
+  // Performance indexes
+  @@index([category])
+  @@index([filename])
+  @@index([uploadedAt])
+  @@index([recipeId])
+  @@index([authorId])
+  @@index([categoryId])
+  @@unique([category, filename]) // Prevent duplicate filenames within same category
+  
+  @@map("media")
+}
