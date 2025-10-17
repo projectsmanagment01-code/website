@@ -47,7 +47,9 @@ export default function Admin() {
   };
 
   const handleGoHome = () => {
-    router.push("/");
+    // Open home page in new tab with cache-busting timestamp for fresh reload
+    const timestamp = new Date().getTime();
+    window.open(`/?_refresh=${timestamp}`, '_blank');
   };
 
   if (loading) {

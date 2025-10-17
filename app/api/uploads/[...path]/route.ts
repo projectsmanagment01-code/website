@@ -42,6 +42,9 @@ export async function GET(
     try {
       let sharpInstance = sharp(filePath);
       
+      // Get image metadata for responsive sizing
+      const metadata = await sharpInstance.metadata();
+      
       // Resize only if width is specified
       if (width) {
         const w = parseInt(width);
@@ -52,7 +55,8 @@ export async function GET(
       }
 
       // Use optimized quality settings
-      const q = quality ? Math.min(parseInt(quality), 85) : 75; // Max 85% for speed
+      // For hero images: prioritize speed over quality
+      const q = quality ? Math.min(parseInt(quality), 90) : 80;
       
       // Try AVIF first (best compression), fallback to WebP
       const acceptHeader = req.headers.get("accept") || "";
@@ -63,13 +67,13 @@ export async function GET(
       if (acceptHeader.includes("image/avif")) {
         // AVIF: 50% smaller than WebP, excellent quality
         optimizedBuffer = await sharpInstance
-          .avif({ quality: q, effort: 2 }) // effort: 2 for good compression vs speed balance
+          .avif({ quality: q, effort: 1, chromaSubsampling: '4:2:0' }) // effort: 1 for fastest
           .toBuffer();
         contentType = "image/avif";
       } else {
         // WebP fallback: widely supported, good compression
         optimizedBuffer = await sharpInstance
-          .webp({ quality: q, effort: 1 }) // effort: 1 for fastest processing
+          .webp({ quality: q, effort: 0, smartSubsample: true }) // effort: 0 for maximum speed
           .toBuffer();
         contentType = "image/webp";
       }
@@ -77,7 +81,9 @@ export async function GET(
       return new NextResponse(new Uint8Array(optimizedBuffer), {
         headers: {
           "Content-Type": contentType,
-          "Cache-Control": "public, max-age=86400, immutable",
+          "Cache-Control": "public, max-age=31536000, immutable", // Cache for 1 year
+          "X-Image-Width": metadata.width?.toString() || '',
+          "X-Image-Height": metadata.height?.toString() || '',
         },
       });
     } catch (err) {

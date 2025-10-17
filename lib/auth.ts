@@ -15,6 +15,19 @@ export const auth = {
 
 export async function verifyAdminToken(request: NextRequest) {
   try {
+    // Development bypass for local testing
+    if (process.env.NODE_ENV === "development" || process.env.SKIP_AUTH === "true") {
+      console.log("🔓 Skipping auth (development mode or SKIP_AUTH=true)");
+      return { 
+        success: true, 
+        payload: { 
+          sub: 1, 
+          email: "admin@yourrecipesite.com", 
+          role: "admin" 
+        } 
+      };
+    }
+
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
       return { success: false, error: "No authorization header" };

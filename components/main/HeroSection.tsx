@@ -58,17 +58,17 @@ export default async function HeroSection({ className }: HeroSectionProps) {
         className || ""
       }`}
     >
-      {/* Optimized background image with priority loading */}
+      {/* Optimized background image - fastest loading strategy */}
       <Image
         src={heroContent.heroBackgroundImage}
         alt={heroContent.heroTitle || "Hero background"}
         fill
-        priority
-        quality={85}
+        priority={true}
+        quality={90}
         sizes="100vw"
+        loading="eager"
+        fetchPriority="high"
         className="object-cover object-center"
-        placeholder="blur"
-        blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNjY2MiLz48L3N2Zz4="
       />
 
       {/* Black transparent overlay */}
