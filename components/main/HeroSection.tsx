@@ -58,13 +58,13 @@ export default async function HeroSection({ className }: HeroSectionProps) {
         className || ""
       }`}
     >
-      {/* Optimized background image - fastest loading strategy */}
+      {/* Optimized background image - fast initial load with lower quality */}
       <Image
         src={heroContent.heroBackgroundImage}
         alt={heroContent.heroTitle || "Hero background"}
         fill
         priority={true}
-        quality={90}
+        quality={50}
         sizes="100vw"
         loading="eager"
         fetchPriority="high"

@@ -41,8 +41,8 @@ export default function imageLoader({ src, width, quality }) {
       params.set("w", width.toString());
     }
     
-    // Use reasonable quality for speed
-    const q = quality ? Math.min(quality, 85) : 75;
+    // Use quality capped at 80% for good balance between size and quality
+    const q = quality ? Math.min(quality, 80) : 75;
     params.set("q", q.toString());
     
     return safeSrc + (params.toString() ? "?" + params.toString() : "");
