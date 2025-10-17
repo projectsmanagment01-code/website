@@ -11,6 +11,7 @@ import {
   CheckCircle,
   Wand2,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface StaticPageContent {
   title: string;
@@ -121,6 +122,10 @@ export default function GenericContentEditor({
           ...prev,
           lastUpdated: new Date().toISOString(),
         }));
+        
+        // Immediately revalidate the specific page
+        await refreshAfterChange([pageId]);
+        
         setTimeout(() => setSaveStatus("idle"), 3000);
       } else {
         setSaveStatus("error");

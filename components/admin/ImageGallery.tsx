@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useFileUpload, UploadedFile } from "../../lib/hooks/useFileUpload";
 import { Trash2, Copy, Eye, Download, Link } from "lucide-react";
 import { RecipeImageLinker } from "./RecipeImageLinker";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface ImageGalleryProps {
   category?: string;
@@ -46,6 +47,9 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
     const success = await deleteFile(file.name, file.category);
     if (success) {
       setFiles(files.filter((f) => f.name !== file.name));
+      
+      // Revalidate recipes and home page since images are used there
+      await refreshAfterChange(['recipes', 'home']);
     }
   };
 

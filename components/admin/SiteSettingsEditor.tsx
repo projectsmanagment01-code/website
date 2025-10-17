@@ -10,6 +10,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import AIContentAssistant from "./AIContentAssistant";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface SiteSettings {
   logoType: "text" | "image";
@@ -111,6 +112,10 @@ export default function SiteSettingsEditor({ onBack }: SiteSettingsEditorProps) 
           ...prev,
           lastUpdated: new Date().toISOString(),
         }));
+        
+        // Immediately revalidate all pages since site settings affect the entire site
+        await refreshAfterChange(['site']);
+        
         setTimeout(() => setSaveStatus("idle"), 3000);
       } else {
         setSaveStatus("error");

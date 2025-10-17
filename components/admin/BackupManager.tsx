@@ -20,6 +20,7 @@ import {
   Copy,
   ExternalLink
 } from 'lucide-react';
+import { refreshAfterChange } from '@/lib/revalidation-utils';
 
 interface BackupMetadata {
   id: string;
@@ -227,6 +228,8 @@ const BackupManager: React.FC = () => {
         alert('Backup deleted successfully!');
         await loadBackups();
         await loadStats();
+        
+        // Note: Backup deletion doesn't affect frontend pages, no revalidation needed
       } else {
         setError(data.error || 'Failed to delete backup');
       }

@@ -14,6 +14,7 @@ import {
   Download,
   Upload,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface CodeSection {
   html: string[];
@@ -124,6 +125,9 @@ export default function Settings({ className }: SettingsProps) {
         const data = await response.json();
         setSettings(data.settings);
         setMessage({ type: "success", text: "Settings saved successfully!" });
+        
+        // Immediately revalidate all pages since custom code affects the entire site
+        await refreshAfterChange(['site', 'all']);
       } else {
         const error = await response.json();
         setMessage({
@@ -220,6 +224,9 @@ export default function Settings({ className }: SettingsProps) {
       updateCodeBlock(editingIndex, editValue);
       setEditingIndex(null);
       setEditValue("");
+      
+      // Note: This updates local state, actual save happens via saveSettings button
+      // No need for revalidation here since it's just editing in-memory
     }
   };
 
@@ -245,6 +252,9 @@ export default function Settings({ className }: SettingsProps) {
     }
     setEditingFile(false);
     setFileEditValue("");
+    
+    // Note: This updates local state, actual API save happens via saveSettings button
+    // No need for revalidation here since it's just editing in-memory
   };
 
   const cancelFileEdit = () => {

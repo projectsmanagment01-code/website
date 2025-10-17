@@ -3,6 +3,7 @@ import { useMediaGallery } from '@/lib/hooks/useMediaGallery';
 import { Eye, Trash2, Copy, Download, Link as LinkIcon, FileImage, Calendar, User } from 'lucide-react';
 import { MediaBulkOperations } from './MediaBulkOperations';
 import { MediaViewSwitcher, ViewMode } from './MediaViewSwitcher';
+import { refreshAfterChange } from '@/lib/revalidation-utils';
 
 interface EnhancedImageGalleryProps {
   category: string;
@@ -143,6 +144,10 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
 
       setSelectedFiles([]);
       refreshFilesRef.current();
+      
+      // Revalidate pages after bulk delete
+      await refreshAfterChange(['recipes', 'home']);
+      
       alert(result.message || `Successfully deleted ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}.`);
       
     } catch (error) {
@@ -194,6 +199,9 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
         await deleteFile(fileName);
         setSelectedFiles(prev => prev.filter(f => f !== fileName));
         refreshFilesRef.current();
+        
+        // Revalidate pages after single file delete
+        await refreshAfterChange(['recipes', 'home']);
       } catch (error) {
         console.error('Delete error:', error);
         alert('Error deleting file. Please try again.');

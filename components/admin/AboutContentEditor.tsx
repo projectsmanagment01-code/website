@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Wand2, RefreshCw, Save, Eye, AlertCircle, CheckCircle, Info, ArrowLeft } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface AboutPageSection {
   id: string;
@@ -304,6 +305,9 @@ export default function AboutContentEditor({ onBack }: { onBack?: () => void }) 
 
       setSuccess("About page content saved successfully!");
       setTimeout(() => setSuccess(null), 3000);
+      
+      // Immediately revalidate about page
+      await refreshAfterChange(['about']);
 
     } catch (err) {
       console.error("Save error:", err);

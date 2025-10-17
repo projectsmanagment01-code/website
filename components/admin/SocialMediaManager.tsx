@@ -14,6 +14,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface SocialMediaLink {
   platform: string;
@@ -208,10 +209,14 @@ export default function SocialMediaManager({ onBack }: SocialMediaManagerProps) 
 
       if (response.ok) {
         setMessage({ type: "success", text: "Social media links updated successfully!" });
+        
+        // Immediately revalidate home page (where footer appears)
+        await refreshAfterChange(['social']);
+        
         // Reload to get the latest data
         setTimeout(() => {
           loadContent();
-        }, 1000);
+        }, 500);
       } else {
         throw new Error("Failed to save");
       }

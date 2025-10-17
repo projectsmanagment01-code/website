@@ -16,6 +16,7 @@ import {
   Trash2,
   ArrowLeft,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface HomeContent {
   heroTitle: string;
@@ -309,8 +310,12 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
           type: "success",
           text: "Home content saved successfully!"
         });
+        
         // Reload content to get the updated timestamp
         await loadContent();
+        
+        // Immediately revalidate home page
+        await refreshAfterChange(['home']);
       } else {
         throw new Error("Failed to save content");
       }

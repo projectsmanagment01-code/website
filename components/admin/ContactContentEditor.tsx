@@ -17,6 +17,7 @@ import {
   Trash2,
   ArrowLeft,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface ContactCard {
   id: string;
@@ -218,6 +219,9 @@ export default function ContactContentEditor({ onBack }: { onBack?: () => void }
           text: "Contact content saved successfully!"
         });
         await loadContent();
+        
+        // Immediately revalidate contact page
+        await refreshAfterChange(['contact']);
       } else {
         throw new Error("Failed to save content");
       }

@@ -13,6 +13,7 @@ import {
 import { Recipe } from "@/outils/types";
 import { useAdmin } from "@/contexts/AdminContext";
 import { AUTHOR_HERO_IMAGES } from "@/data/author-hero-images";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 // Import modular forms
 import { BasicInfoForm } from "@/components/admin/forms/BasicInfoForm";
@@ -204,6 +205,10 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
         console.log("RecipeModal: About to create new recipe");
         await createRecipe(recipeData);
       }
+      
+      // Immediately revalidate affected pages
+      await refreshAfterChange(['recipes', 'categories', 'home']);
+      
       onClose();
     } catch (error) {
       console.error("Error saving recipe:", error);

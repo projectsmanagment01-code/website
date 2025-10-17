@@ -12,6 +12,7 @@ import { Plus, Search, Users, FileText, Calendar, AlertCircle, X, ChevronDown, C
 import AuthorList from './AuthorList';
 import AuthorForm from './AuthorForm';
 import { AuthorEntity } from '@/outils/types';
+import { refreshAfterChange } from '@/lib/revalidation-utils';
 
 interface AuthorStats {
   totalAuthors: number;
@@ -121,6 +122,9 @@ const AuthorManagement: React.FC = () => {
       setShowCreateForm(false);
       await loadAuthors(currentPage, searchQuery);
       await loadStats();
+      
+      // Immediately revalidate affected pages
+      await refreshAfterChange(['authors', 'recipes']);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create author');
     }
@@ -148,6 +152,9 @@ const AuthorManagement: React.FC = () => {
       setEditingAuthor(null);
       await loadAuthors(currentPage, searchQuery);
       await loadStats();
+      
+      // Immediately revalidate affected pages
+      await refreshAfterChange(['authors', 'recipes']);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update author');
     }
@@ -176,6 +183,9 @@ const AuthorManagement: React.FC = () => {
 
       await loadAuthors(currentPage, searchQuery);
       await loadStats();
+      
+      // Immediately revalidate affected pages
+      await refreshAfterChange(['authors', 'recipes']);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete author');
     }

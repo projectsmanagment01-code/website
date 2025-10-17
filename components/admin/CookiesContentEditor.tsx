@@ -13,6 +13,7 @@ import {
   Eye,
   ArrowLeft,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface CookiesContent {
   heroTitle: string;
@@ -157,6 +158,9 @@ export default function CookiesContentEditor({ onBack }: { onBack?: () => void }
           text: "Cookie policy content saved successfully!"
         });
         await loadContent();
+        
+        // Immediately revalidate cookies page
+        await refreshAfterChange(['cookies']);
       } else {
         throw new Error("Failed to save content");
       }

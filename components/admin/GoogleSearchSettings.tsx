@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Search, Save, Loader2 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface GoogleSearchConfig {
   cx: string;
@@ -50,6 +51,9 @@ export default function GoogleSearchSettings() {
 
       if (response.ok) {
         setMessage({ type: "success", text: "Settings saved successfully!" });
+        
+        // Revalidate search page since Google search settings affect search functionality
+        await refreshAfterChange(['search']);
       } else {
         setMessage({ type: "error", text: "Failed to save settings" });
       }

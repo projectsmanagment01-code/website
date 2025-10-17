@@ -15,6 +15,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, GripVertical, Search, Image as ImageIcon, Eye, EyeOff, Upload } from 'lucide-react';
+import { refreshAfterChange } from '@/lib/revalidation-utils';
 
 // ============================================================================
 // Types
@@ -170,7 +171,12 @@ export default function CategoryManager() {
       }
       
       setShowModal(false);
-      fetchCategories();
+      
+      // Immediate refresh
+      await fetchCategories();
+      
+      // Revalidate affected pages
+      await refreshAfterChange(['categories', 'recipes', 'home']);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to save category');
     }
@@ -204,7 +210,12 @@ export default function CategoryManager() {
       
       setDeleteConfirm(null);
       setDeleteForce(false);
-      fetchCategories();
+      
+      // Immediate refresh
+      await fetchCategories();
+      
+      // Revalidate affected pages
+      await refreshAfterChange(['categories', 'recipes', 'home']);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete category');
     }
