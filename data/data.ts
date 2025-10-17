@@ -481,11 +481,50 @@ async function getRelated(
     const recipes = await fetchWithFallback(
       async () => {
         const prisma = await getPrisma();
+        
+        // First, get the current recipe to find its category
+        const currentRecipe = await prisma.recipe.findUnique({
+          where: { id: recipeId },
+          select: { categoryId: true, category: true }
+        });
+        
+        if (!currentRecipe) {
+          console.log("⚠️ Recipe not found, returning empty array");
+          return [];
+        }
+
+        console.log("📋 Current recipe category:", {
+          categoryId: currentRecipe.categoryId,
+          category: currentRecipe.category
+        });
+        
+        // Build where clause - prioritize categoryId, fallback to category string
+        const whereClause: any = { 
+          id: { not: recipeId }
+        };
+
+        if (currentRecipe.categoryId) {
+          // Use new categoryId approach
+          whereClause.categoryId = currentRecipe.categoryId;
+          console.log("✅ Filtering by categoryId:", currentRecipe.categoryId);
+        } else if (currentRecipe.category) {
+          // Fallback to old category string
+          whereClause.category = currentRecipe.category;
+          console.log("✅ Filtering by category string:", currentRecipe.category);
+        } else {
+          // No category at all, return random recipes
+          console.log("⚠️ No category found, showing recent recipes");
+        }
+        
+        // Get recipes from the SAME CATEGORY
         const recipes = await prisma.recipe.findMany({
-          where: { id: { not: recipeId } },
+          where: whereClause,
           take: limit,
           orderBy: { createdAt: "desc" },
         });
+
+        console.log(`✅ Found ${recipes.length} related recipes`);
+        
         return recipes.map((recipe: any) => ({
           ...recipe,
           featuredText: "Related Recipe",

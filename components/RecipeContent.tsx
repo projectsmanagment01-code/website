@@ -5,6 +5,7 @@ import EssentialIngredients from "./EssentialIngerdients";
 import CompleteCookingProcess from "./CompleteProcess";
 import { Card } from "./Card";
 import { getHostname, renderSafeHtml, hasHtmlTags } from "@/lib/utils";
+import { PinterestPinButton } from "./PinterestPinButton";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -52,6 +53,11 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
       {featureImage && (
         <div>
           <div className="relative w-full rounded-lg overflow-hidden shadow-xl">
+            <PinterestPinButton 
+              imageUrl={featureImage}
+              description={`${recipe.title} - Delicious recipe from ${getHostname()}`}
+              altText={`${recipe.title} - feature image`}
+            />
             <Image
               src={featureImage}
               alt={`${recipe.title} - feature image`}
@@ -114,6 +120,11 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
       {ingredientImage && (
         <div className="my-8">
           <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
+            <PinterestPinButton 
+              imageUrl={ingredientImage}
+              description={`${recipe.title} - Ingredients preparation`}
+              altText={`${recipe.title} - ingredients preparation`}
+            />
             <Image
               src={ingredientImage}
               alt={`${recipe.title} - ingredients preparation`}
@@ -141,6 +152,11 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
       {mixingImage && (
         <div className="my-8">
           <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
+            <PinterestPinButton 
+              imageUrl={mixingImage}
+              description={`${recipe.title} - Cooking process`}
+              altText={`${recipe.title} - cooking process`}
+            />
             <Image
               src={mixingImage}
               alt={`${recipe.title} - cooking process`}
@@ -208,6 +224,11 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
             {item.img !== undefined && (
               <div className="my-8">
                 <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
+                  <PinterestPinButton 
+                    imageUrl={recipe.images[item.img] || recipe.images[1]}
+                    description={`${recipe.title} - ${item.title}`}
+                    altText={`${recipe.title} - ${item.title}`}
+                  />
                   <Image
                     src={recipe.images[item.img] || recipe.images[1]}
                     alt={`${recipe.title} - ${item.title}`}
@@ -273,6 +294,11 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
       {finalImage && (
         <div className="my-8">
           <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
+            <PinterestPinButton 
+              imageUrl={finalImage}
+              description={`${recipe.title} - Final presentation`}
+              altText={`${recipe.title} - final presentation`}
+            />
             <Image
               src={finalImage}
               alt={`${recipe.title} - final presentation`}

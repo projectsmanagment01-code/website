@@ -1,59 +1,7 @@
-import { Pin, Share2, Mail, Printer, ArrowDown } from "lucide-react";
+import { Share2, Mail, Printer, ArrowDown } from "lucide-react";
 import Recipe from "@/outils/types";
 
 export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
-  const handlePinIt = () => {
-    // Debug: Log the entire recipe object
-    console.log('=== PINTEREST SHARE DEBUG ===');
-    console.log('Recipe object:', recipe);
-    console.log('featureImage:', recipe?.featureImage);
-    console.log('heroImage:', recipe?.heroImage);
-    console.log('img:', recipe?.img);
-    console.log('images array:', recipe?.images);
-    
-    if (!recipe) {
-      console.error('No recipe data available for Pinterest share');
-      alert('Unable to share: Recipe data not loaded');
-      return;
-    }
-
-    const url = window.location.href;
-    
-    // Get the featured image - prioritize featureImage, then heroImage, then img, then first image
-    const media = recipe.images?.[0] || recipe.featureImage || recipe.img || recipe.heroImage;
-    
-    console.log('Selected media:', media);
-    
-    if (!media) {
-      console.error('No image available for Pinterest share');
-      alert('Unable to pin: No image found for this recipe');
-      return;
-    }
-    
-    // Get title and description - use actual recipe data only
-    const title = recipe.title || 'Recipe';
-    const description = recipe.shortDescription || recipe.description || title;
-    
-    // Construct full image URL if it's a relative path
-    const imageUrl = media.startsWith('http') ? media : `${window.location.origin}${media}`;
-    
-    console.log('Final Pinterest Share Data:', { 
-      url, 
-      imageUrl, 
-      description, 
-      title,
-      rawMedia: media 
-    });
-    
-    window.open(
-      `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(
-        url
-      )}&media=${encodeURIComponent(imageUrl)}&description=${encodeURIComponent(
-        `${title} - ${description}`
-      )}`,
-      "_blank"
-    );
-  };
 
   const handleShareIt = () => {
     const url = window.location.href;
@@ -636,14 +584,6 @@ export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
 
   return (
     <div className="flex flex-wrap gap-4 items-center text-sm">
-      <button
-        onClick={handlePinIt}
-        className="inline-flex items-center gap-1.5 px-2 py-2 border-2 border-black bg-transparent rounded text-black font-bold transition-all duration-300 hover:bg-black hover:text-white cursor-pointer"
-      >
-        <Pin className="w-5 h-5 flex-shrink-0" />
-        <span>Pin it</span>
-      </button>
-
       <button
         onClick={handleShareIt}
         className="inline-flex items-center gap-1.5 px-2 py-2 border-2 border-black bg-transparent rounded text-black font-bold transition-all duration-300 hover:bg-black hover:text-white cursor-pointer"

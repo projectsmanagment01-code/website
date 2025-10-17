@@ -6,6 +6,7 @@ import SocialShareButtons from "./Share";
 import Recipe from "@/outils/types";
 import React from "react";
 import { hasHtmlTags, renderSafeHtml } from "@/lib/utils";
+import { Calendar, Clock } from "lucide-react";
 
 /* -------------------- Breadcrumbs -------------------- */
 import { usePathname } from "next/navigation";
@@ -297,6 +298,51 @@ export function RecipeHero({ recipe }: { recipe?: Recipe }) {
             recipe?.shortDescription
           )}
         </p>
+      </div>
+
+      {/* Date and Author Info Section */}
+      <div className="flex flex-col space-y-3 py-4 border-t border-b border-gray-300">
+        {/* Dates Row */}
+        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+          {recipe?.createdAt && (
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span>
+                <strong>Published:</strong> {formatDate(recipe.createdAt)}
+              </span>
+            </div>
+          )}
+          {/* Only show update time if recipe was actually updated */}
+          {recipe?.updatedAt && recipe?.createdAt && 
+           new Date(recipe.updatedAt).getTime() > new Date(recipe.createdAt).getTime() && (
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span>
+                <strong>Updated:</strong> {formatDate(recipe.updatedDate || recipe.updatedAt)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Author Info Row */}
+        {recipe?.author && (
+          <div className="flex items-center gap-3">
+            <Link href="/authors" className="flex items-center gap-3 group hover:opacity-80 transition-opacity">
+              <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-200">
+                <Image
+                  src={recipe.author.avatar || '/placeholder-user.jpg'}
+                  alt={recipe.author.name}
+                  width={40}
+                  height={40}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <span className="text-sm font-medium text-gray-900 group-hover:text-[#c64118]">
+                By {recipe.author.name}
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Social Share Buttons */}

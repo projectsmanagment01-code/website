@@ -7,6 +7,7 @@
 
 import { Recipe, Author } from '@/outils/types';
 import { getAuthorById } from './author-integration';
+import { getAuthorImageUrl } from './author-image';
 
 /**
  * Resolve author data for a recipe
@@ -26,7 +27,7 @@ async function resolveRecipeAuthor(recipe: Recipe): Promise<Recipe> {
         const author: Author = {
           name: authorEntity.name,
           bio: authorEntity.bio || '',
-          avatar: authorEntity.avatar || (authorEntity.img ? `/uploads/authors/${authorEntity.img}` : ''),
+          avatar: getAuthorImageUrl(authorEntity), // Use helper to get correct URL
           link: authorEntity.link || `/authors/${authorEntity.slug}`
         };
 
