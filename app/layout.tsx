@@ -22,18 +22,29 @@ export async function generateMetadata(): Promise<Metadata> {
     
     if (response.ok) {
       const siteSettings = await response.json();
+      const baseUrl = siteSettings.siteUrl || 'https://yoursite.com';
       
       return {
         title: siteSettings.siteTitle || "Calama Team Recipes - Delicious Family-Friendly Recipes",
         description: siteSettings.siteDescription || "Discover amazing recipes from the Calama team.",
-        metadataBase: new URL(siteSettings.siteUrl || 'https://yoursite.com'),
+        metadataBase: new URL(baseUrl),
         icons: {
           icon: siteSettings.favicon || '/favicon.ico',
+        },
+        alternates: {
+          types: {
+            'application/rss+xml': [
+              { url: '/feed.xml', title: 'RSS Feed' }
+            ],
+            'application/atom+xml': [
+              { url: '/atom.xml', title: 'Atom Feed' }
+            ],
+          },
         },
         openGraph: {
           title: siteSettings.siteTitle || "Calama Team Recipes",
           description: siteSettings.siteDescription || "Discover amazing recipes from the Calama team.",
-          url: siteSettings.siteUrl || 'https://yoursite.com',
+          url: baseUrl,
           siteName: siteSettings.siteTitle || "Calama Team Recipes",
           type: "website",
         },
@@ -55,6 +66,16 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL('https://yoursite.com'),
     icons: {
       icon: '/favicon.ico',
+    },
+    alternates: {
+      types: {
+        'application/rss+xml': [
+          { url: '/feed.xml', title: 'RSS Feed' }
+        ],
+        'application/atom+xml': [
+          { url: '/atom.xml', title: 'Atom Feed' }
+        ],
+      },
     },
   };
 }

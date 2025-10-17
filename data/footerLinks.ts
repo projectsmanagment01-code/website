@@ -119,8 +119,8 @@ export const footerLinks: FooterLink[] = [
   {
     id: "feed",
     href: "/feed.xml",
-    title: "Feed",
-    label: "Feed",
+    title: "RSS Feed - Subscribe to our latest recipes",
+    label: "RSS Feed",
     iconSrc: "https://c.animaapp.com/mer35j4wJPAxku/assets/icon-31.svg",
     className:
       "text-neutral-900 text-[15.36px] font-bold items-center box-border gap-x-1.5 flex leading-[24.576px] gap-y-1.5 md:text-[19.2px] md:leading-[30.72px]",

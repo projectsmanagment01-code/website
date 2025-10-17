@@ -98,7 +98,14 @@ export default function ApiTokenManager() {
 
       if (response.ok) {
         const data = await response.json();
-        setCreatedToken(data.token.token);
+        const fullToken = data.token.token;
+        setCreatedToken(fullToken);
+        
+        // Store full token in localStorage for later viewing
+        const storedTokens = JSON.parse(localStorage.getItem('api_tokens_full') || '{}');
+        storedTokens[data.token.id] = fullToken;
+        localStorage.setItem('api_tokens_full', JSON.stringify(storedTokens));
+        
         setNewToken({ name: '', duration: '1month', description: '' });
         fetchTokens();
       } else {
@@ -127,6 +134,11 @@ export default function ApiTokenManager() {
       });
 
       if (response.ok) {
+        // Remove from localStorage as well
+        const storedTokens = JSON.parse(localStorage.getItem('api_tokens_full') || '{}');
+        delete storedTokens[tokenId];
+        localStorage.setItem('api_tokens_full', JSON.stringify(storedTokens));
+        
         fetchTokens();
         
         // Note: API token deletion doesn't affect frontend pages, no revalidation needed
@@ -171,6 +183,12 @@ export default function ApiTokenManager() {
       newVisible.add(tokenId);
     }
     setVisibleTokens(newVisible);
+  };
+
+  const getFullToken = (tokenId: string, maskedToken: string): string => {
+    // Try to get full token from localStorage
+    const storedTokens = JSON.parse(localStorage.getItem('api_tokens_full') || '{}');
+    return storedTokens[tokenId] || maskedToken;
   };
 
   const copyToClipboard = async (text: string, tokenId: string) => {
@@ -335,11 +353,12 @@ export default function ApiTokenManager() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-                          {visibleTokens.has(token.id) ? token.token : token.token}
+                          {visibleTokens.has(token.id) ? getFullToken(token.id, token.token) : token.token}
                         </code>
                         <button
                           onClick={() => toggleTokenVisibility(token.id)}
                           className="p-1 hover:bg-gray-200 rounded"
+                          title={visibleTokens.has(token.id) ? "Hide token" : "Show full token"}
                         >
                           {visibleTokens.has(token.id) ? (
                             <EyeOff className="w-4 h-4" />
@@ -348,8 +367,9 @@ export default function ApiTokenManager() {
                           )}
                         </button>
                         <button
-                          onClick={() => copyToClipboard(token.token, token.id)}
+                          onClick={() => copyToClipboard(getFullToken(token.id, token.token), token.id)}
                           className="p-1 hover:bg-gray-200 rounded"
+                          title="Copy token"
                         >
                           {copiedToken === token.id ? (
                             <CheckCircle className="w-4 h-4 text-green-600" />
@@ -480,13 +500,13 @@ export default function ApiTokenManager() {
               <h3 className="text-lg font-semibold text-gray-900">Token Created Successfully!</h3>
             </div>
             
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-yellow-800">Important:</p>
-                  <p className="text-sm text-yellow-700">
-                    This is the only time you'll see the full token. Make sure to copy it now.
+                  <p className="text-sm font-medium text-blue-800">Token Created!</p>
+                  <p className="text-sm text-blue-700">
+                    Copy your token now. You can also view it later by clicking the eye icon in the token list.
                   </p>
                 </div>
               </div>
