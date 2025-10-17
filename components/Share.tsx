@@ -28,7 +28,7 @@ export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
     );
   };
 
-  const handlePrintIt = () => {
+  const handlePrintIt = async () => {
     const recipeCard = document.getElementById("recipe");
     if (recipeCard) {
       // Create a new window for printing
@@ -39,9 +39,22 @@ export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
         const recipeDescription = recipeCard.querySelector('p')?.textContent || '';
         const recipeImage = recipeCard.querySelector('img')?.src || '';
         
-        // Get the current website domain
-        const websiteDomain = window.location.hostname || window.location.origin;
-        const websiteName = websiteDomain.replace('www.', '').split('.')[0].charAt(0).toUpperCase() + websiteDomain.replace('www.', '').split('.')[0].slice(1);
+        // Fetch site settings to get logo text
+        let websiteName = 'Recipe Website';
+        let websiteDomain = window.location.hostname || window.location.origin;
+        
+        try {
+          const response = await fetch('/api/content/site');
+          if (response.ok) {
+            const siteData = await response.json();
+            // Use logo text from site settings
+            websiteName = siteData.logoText || siteData.siteTitle || websiteName;
+          }
+        } catch (error) {
+          console.error('Failed to fetch site settings:', error);
+          // Fallback to domain-based name
+          websiteName = websiteDomain.replace('www.', '').split('.')[0].charAt(0).toUpperCase() + websiteDomain.replace('www.', '').split('.')[0].slice(1);
+        }
         
         // Create a beautifully formatted print document
         printWindow.document.write(`

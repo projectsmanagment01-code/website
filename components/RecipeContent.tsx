@@ -6,6 +6,7 @@ import CompleteCookingProcess from "./CompleteProcess";
 import { Card } from "./Card";
 import { getHostname, renderSafeHtml, hasHtmlTags } from "@/lib/utils";
 import { PinterestPinButton } from "./PinterestPinButton";
+import { getSiteSettings } from "@/lib/server-utils";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -23,8 +24,12 @@ const getOptimizedImageUrl = (
   return `${cleanSrc}?w=${width}&q=${quality}&f=${format}`;
 };
 
-export function RecipeContent({ recipe }: RecipeContentProps) {
+export async function RecipeContent({ recipe }: RecipeContentProps) {
   recipe = Array.isArray(recipe) ? recipe[0] : recipe;
+
+  // Get site settings for logo text
+  const siteSettings = await getSiteSettings();
+  const siteName = siteSettings.logoSettings?.logoText || siteSettings.siteTitle || getHostname();
 
   // Check if recipe uses new named image fields
   const hasNamedImages = !!(recipe.featureImage || recipe.preparationImage || recipe.cookingImage || recipe.finalPresentationImage);
@@ -55,7 +60,7 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
           <div className="relative w-full rounded-lg overflow-hidden shadow-xl">
             <PinterestPinButton 
               imageUrl={featureImage}
-              description={`${recipe.title} - Delicious recipe from ${getHostname()}`}
+              description={`${recipe.title} - Delicious recipe from ${siteName}`}
               altText={`${recipe.title} - feature image`}
             />
             <Image
@@ -74,7 +79,7 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            {recipe.title} | {getHostname()}
+            {recipe.title} | {siteName}
           </div>
         </div>
       )}
@@ -140,7 +145,7 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            Preparing {recipe.title} | {getHostname()}
+            Preparing {recipe.title} | {siteName}
           </div>
         </div>
       )}
@@ -172,7 +177,7 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            Cooking {recipe.title} | {getHostname()}
+            Cooking {recipe.title} | {siteName}
           </div>
         </div>
       )}
@@ -314,7 +319,7 @@ export function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            {recipe.title} - Final Presentation | {getHostname()}
+            {recipe.title} - Final Presentation | {siteName}
           </div>
         </div>
       )}
