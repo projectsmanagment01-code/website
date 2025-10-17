@@ -57,7 +57,19 @@ export function useMediaGallery(): UseMediaGalleryReturn {
 
   const deleteFile = useCallback(async (fileName: string): Promise<boolean> => {
     try {
-      const success = await deleteFileBase(fileName);
+      // Parse category from fileName (e.g., "recipes/image.jpg" -> category="recipes", name="image.jpg")
+      let category = 'general';
+      let actualFileName = fileName;
+      
+      if (fileName.includes('/')) {
+        const parts = fileName.split('/');
+        category = parts[0];
+        actualFileName = parts.slice(1).join('/');
+      }
+      
+      console.log('Deleting file:', { fileName, category, actualFileName });
+      
+      const success = await deleteFileBase(actualFileName, category);
       if (success) {
         // Remove from local state immediately
         setFiles(prev => prev.filter(f => f !== fileName));
@@ -65,6 +77,7 @@ export function useMediaGallery(): UseMediaGalleryReturn {
       }
       return success;
     } catch (err) {
+      console.error('Delete file error:', err);
       setError(err instanceof Error ? err.message : 'Delete failed');
       return false;
     }

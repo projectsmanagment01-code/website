@@ -143,7 +143,9 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
       }
 
       setSelectedFiles([]);
-      refreshFilesRef.current();
+      
+      // Force refresh the file list from server
+      await refreshFilesRef.current();
       
       // Revalidate pages after bulk delete
       await refreshAfterChange(['recipes', 'home']);
@@ -196,12 +198,20 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
   const handleDeleteFile = async (fileName: string) => {
     if (window.confirm('Are you sure you want to delete this file?')) {
       try {
-        await deleteFile(fileName);
-        setSelectedFiles(prev => prev.filter(f => f !== fileName));
-        refreshFilesRef.current();
+        const success = await deleteFile(fileName);
         
-        // Revalidate pages after single file delete
-        await refreshAfterChange(['recipes', 'home']);
+        if (success) {
+          // Remove from selected files
+          setSelectedFiles(prev => prev.filter(f => f !== fileName));
+          
+          // Force refresh the file list from server
+          await refreshFilesRef.current();
+          
+          // Revalidate pages after single file delete
+          await refreshAfterChange(['recipes', 'home']);
+        } else {
+          alert('Failed to delete file. Please try again.');
+        }
       } catch (error) {
         console.error('Delete error:', error);
         alert('Error deleting file. Please try again.');
