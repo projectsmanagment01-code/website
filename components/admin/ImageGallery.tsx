@@ -45,7 +45,17 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
 
     const success = await deleteFile(file.name, file.category);
     if (success) {
+<<<<<<< Updated upstream
       setFiles(files.filter((f) => f.name !== file.name));
+=======
+      // Force refresh the file list from server to ensure accurate state
+      await loadFiles();
+      
+      // Revalidate recipes and home page since images are used there
+      await refreshAfterChange(['recipes', 'home']);
+    } else {
+      alert('Failed to delete file. Please try again.');
+>>>>>>> Stashed changes
     }
   };
 
