@@ -16,6 +16,7 @@ import {
   Image,
   Trash2,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface SiteSettings {
   logoType: "text" | "image";
@@ -268,12 +269,15 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
     }
   };
 
-  const handleImageDelete = (fieldKey: 'logoImage' | 'favicon') => {
+  const handleImageDelete = async (fieldKey: 'logoImage' | 'favicon') => {
     onUpdate(fieldKey, '');
     setMessage({
       type: "success",
       text: `${fieldKey === 'logoImage' ? 'Logo' : 'Favicon'} deleted successfully!`
     });
+    
+    // Revalidate site since logo/favicon appear on all pages
+    await refreshAfterChange(['site', 'home']);
   };
 
   return (

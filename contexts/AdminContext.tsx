@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { Recipe } from "@/outils/types";
 import { AdminRecipeService } from "@/lib/admin-recipe-service";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 // Admin State Interface
 interface AdminState {
@@ -196,6 +197,9 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
     try {
       await AdminRecipeService.deleteRecipe(id);
       dispatch({ type: "DELETE_RECIPE", payload: id });
+      
+      // Immediately revalidate affected pages
+      await refreshAfterChange(['recipes', 'categories', 'home']);
     } catch (error) {
       console.error("❌ Delete recipe error:", error);
       dispatch({ type: "SET_ERROR", payload: (error as Error).message });

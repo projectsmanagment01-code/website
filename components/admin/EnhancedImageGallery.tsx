@@ -3,6 +3,7 @@ import { useMediaGallery } from '@/lib/hooks/useMediaGallery';
 import { Eye, Trash2, Copy, Download, Link as LinkIcon, FileImage, Calendar, User } from 'lucide-react';
 import { MediaBulkOperations } from './MediaBulkOperations';
 import { MediaViewSwitcher, ViewMode } from './MediaViewSwitcher';
+import { refreshAfterChange } from '@/lib/revalidation-utils';
 
 interface EnhancedImageGalleryProps {
   category: string;
@@ -142,7 +143,13 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
       }
 
       setSelectedFiles([]);
-      refreshFilesRef.current();
+      
+      // Force refresh the file list from server
+      await refreshFilesRef.current();
+      
+      // Revalidate pages after bulk delete
+      await refreshAfterChange(['recipes', 'home']);
+      
       alert(result.message || `Successfully deleted ${selectedFiles.length} file${selectedFiles.length !== 1 ? 's' : ''}.`);
       
     } catch (error) {
@@ -191,9 +198,20 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
   const handleDeleteFile = async (fileName: string) => {
     if (window.confirm('Are you sure you want to delete this file?')) {
       try {
-        await deleteFile(fileName);
-        setSelectedFiles(prev => prev.filter(f => f !== fileName));
-        refreshFilesRef.current();
+        const success = await deleteFile(fileName);
+        
+        if (success) {
+          // Remove from selected files
+          setSelectedFiles(prev => prev.filter(f => f !== fileName));
+          
+          // Force refresh the file list from server
+          await refreshFilesRef.current();
+          
+          // Revalidate pages after single file delete
+          await refreshAfterChange(['recipes', 'home']);
+        } else {
+          alert('Failed to delete file. Please try again.');
+        }
       } catch (error) {
         console.error('Delete error:', error);
         alert('Error deleting file. Please try again.');

@@ -18,28 +18,39 @@ export async function POST(request: NextRequest) {
     }
 
     // Map page names to their public routes
-    const pageRoutes: { [key: string]: string } = {
+    const pageRoutes: { [key: string]: string | string[] } = {
       'privacy': '/privacy',
       'terms': '/terms',
       'about': '/about',
       'contact': '/contact',
       'faq': '/faq',
       'disclaimer': '/disclaimer',
-      'cookies': '/cookies'
+      'cookies': '/cookies',
+      'home': ['/', '/explore'],
+      'recipes': ['/recipes', '/explore', '/search'],
+      'categories': ['/categories', '/recipes', '/explore'],
+      'authors': ['/authors', '/recipes'],
+      'site': ['/', '/explore', '/recipes'],
+      'social': ['/'],
+      'all': ['/', '/recipes', '/explore', '/categories', '/authors', '/search', '/about', '/contact']
     };
 
-    const route = pageRoutes[page];
-    if (!route) {
+    const routes = pageRoutes[page];
+    if (!routes) {
       return NextResponse.json({ error: "Invalid page" }, { status: 400 });
     }
 
-    // Revalidate the page
-    revalidatePath(route);
+    // Revalidate the page(s)
+    if (Array.isArray(routes)) {
+      routes.forEach(route => revalidatePath(route));
+    } else {
+      revalidatePath(routes);
+    }
 
     return NextResponse.json({ 
       success: true, 
       message: `Page ${page} revalidated successfully`,
-      route: route
+      routes: Array.isArray(routes) ? routes : [routes]
     });
 
   } catch (error) {

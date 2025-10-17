@@ -13,6 +13,7 @@ import {
   Eye,
   ArrowLeft,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface DisclaimerContent {
   heroTitle: string;
@@ -157,6 +158,9 @@ export default function DisclaimerContentEditor({ onBack }: { onBack?: () => voi
           text: "Disclaimer content saved successfully!"
         });
         await loadContent();
+        
+        // Immediately revalidate disclaimer page
+        await refreshAfterChange(['disclaimer']);
       } else {
         throw new Error("Failed to save content");
       }

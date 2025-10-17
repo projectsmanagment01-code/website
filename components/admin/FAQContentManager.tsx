@@ -10,6 +10,7 @@ import {
   CheckCircle,
   Wand2,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
   const [content, setContent] = useState("");
@@ -74,6 +75,9 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
       if (response.ok) {
         setSaveStatus("success");
         setTimeout(() => setSaveStatus("idle"), 3000);
+        
+        // Immediately revalidate FAQ page
+        await refreshAfterChange(['faq']);
       } else {
         setSaveStatus("error");
         setTimeout(() => setSaveStatus("idle"), 3000);

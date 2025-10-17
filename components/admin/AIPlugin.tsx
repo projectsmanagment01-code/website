@@ -15,6 +15,7 @@ import {
   Settings,
   Unplug,
 } from "lucide-react";
+import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface AISettings {
   enabled: boolean;
@@ -139,6 +140,10 @@ export default function AIPlugin() {
 
       if (response.ok) {
         setMessage({ type: "success", text: "AI settings saved successfully!" });
+        
+        // Revalidate site settings since AI features may affect content generation
+        await refreshAfterChange(['site']);
+        
         setTimeout(() => setMessage(null), 3000);
       } else {
         setMessage({ type: "error", text: "Failed to save AI settings" });

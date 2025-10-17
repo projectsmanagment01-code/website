@@ -13,6 +13,7 @@ import {
   CheckCircle,
   RefreshCw
 } from 'lucide-react';
+import { refreshAfterChange } from '@/lib/revalidation-utils';
 
 interface ApiToken {
   id: string;
@@ -127,6 +128,8 @@ export default function ApiTokenManager() {
 
       if (response.ok) {
         fetchTokens();
+        
+        // Note: API token deletion doesn't affect frontend pages, no revalidation needed
       } else {
         const error = await response.json();
         alert(`Failed to revoke token: ${error.error}`);

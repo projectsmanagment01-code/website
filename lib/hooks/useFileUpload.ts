@@ -87,19 +87,22 @@ export function useFileUpload(): UseFileUploadReturn {
         throw new Error("Authentication required");
       }
 
-      const response = await fetch(
-        `/api/upload?file=${encodeURIComponent(
-          fileName
-        )}&category=${encodeURIComponent(category)}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const deleteUrl = `/api/upload?file=${encodeURIComponent(
+        fileName
+      )}&category=${encodeURIComponent(category)}`;
+      
+      console.log('Deleting file via API:', { fileName, category, url: deleteUrl });
+
+      const response = await fetch(deleteUrl, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const result = await response.json();
+      
+      console.log('Delete API response:', { status: response.status, result });
 
       if (!response.ok) {
         throw new Error(result.error || "Delete failed");
@@ -108,6 +111,7 @@ export function useFileUpload(): UseFileUploadReturn {
       return result.success;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Delete failed";
+      console.error('Delete file error:', errorMessage);
       setError(errorMessage);
       return false;
     }
