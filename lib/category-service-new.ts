@@ -157,6 +157,15 @@ export async function updateCategory(
  */
 export async function deleteCategory(id: string, force: boolean = false): Promise<void> {
   try {
+    // First, check if category exists
+    const category = await prisma.category.findUnique({
+      where: { id }
+    });
+    
+    if (!category) {
+      throw new Error('Category not found');
+    }
+    
     // Check if category has recipes
     const recipeCount = await prisma.recipe.count({
       where: { categoryId: id }

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 interface HeroContent {
   heroTitle: string;
@@ -53,17 +54,25 @@ export default async function HeroSection({ className }: HeroSectionProps) {
 
   return (
     <section
-      className={`relative bg-cover bg-center bg-no-repeat min-h-screen flex items-center ${
+      className={`relative min-h-screen flex items-center ${
         className || ""
       }`}
-      style={{
-        backgroundImage: `url('${heroContent.heroBackgroundImage}')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
     >
+      {/* Optimized background image with priority loading */}
+      <Image
+        src={heroContent.heroBackgroundImage}
+        alt={heroContent.heroTitle || "Hero background"}
+        fill
+        priority
+        quality={85}
+        sizes="100vw"
+        className="object-cover object-center"
+        placeholder="blur"
+        blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNjY2MiLz48L3N2Zz4="
+      />
+
       {/* Black transparent overlay */}
-      <div className="absolute inset-0 bg-black/50"></div>
+      <div className="absolute inset-0 bg-black/50 z-[1]"></div>
 
       <div className="container-lg relative z-10 text-center">
         <div className="space-y-8">

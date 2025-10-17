@@ -3,22 +3,23 @@ import { verifyAdminToken } from "@/lib/auth";
 import fs from "fs/promises";
 import path from "path";
 
-// Path to store content files
-const CONTENT_DIR = path.join(process.cwd(), "uploads", "content");
+// SECURE: Path to store content files - NOT publicly accessible
+const CONFIG_DIR = path.join(process.cwd(), "data", "config");
 
-// Ensure content directory exists
-async function ensureContentDir() {
+// Ensure config directory exists
+async function ensureConfigDir() {
   try {
-    await fs.access(CONTENT_DIR);
+    await fs.access(CONFIG_DIR);
   } catch {
-    await fs.mkdir(CONTENT_DIR, { recursive: true });
+    await fs.mkdir(CONFIG_DIR, { recursive: true });
+    console.log("✅ Created secure config directory");
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
-    await ensureContentDir();
-    const filePath = path.join(CONTENT_DIR, "home.json");
+    await ensureConfigDir();
+    const filePath = path.join(CONFIG_DIR, "home.json");
 
     try {
       const content = await fs.readFile(filePath, "utf-8");
@@ -64,11 +65,13 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     
-    await ensureContentDir();
-    const filePath = path.join(CONTENT_DIR, "home.json");
+    await ensureConfigDir();
+    const filePath = path.join(CONFIG_DIR, "home.json");
 
     // Save content to file
     await fs.writeFile(filePath, JSON.stringify(body, null, 2));
+
+    console.log("✅ Home content saved successfully to secure location");
 
     // Create response with cache invalidation headers
     const response = NextResponse.json({ success: true });
@@ -94,11 +97,13 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     
-    await ensureContentDir();
-    const filePath = path.join(CONTENT_DIR, "home.json");
+    await ensureConfigDir();
+    const filePath = path.join(CONFIG_DIR, "home.json");
 
     // Save content to file
     await fs.writeFile(filePath, JSON.stringify(body, null, 2));
+
+    console.log("✅ Home content saved successfully to secure location");
 
     // Create response with cache invalidation headers
     const response = NextResponse.json({ success: true });

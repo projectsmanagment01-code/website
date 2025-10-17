@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useFileUpload, UploadedFile } from "../../lib/hooks/useFileUpload";
 import { Trash2, Copy, Eye, Download, Link } from "lucide-react";
 import { RecipeImageLinker } from "./RecipeImageLinker";
@@ -8,12 +8,14 @@ interface ImageGalleryProps {
   category?: string;
   onImageSelect?: (imageUrl: string) => void;
   showSelectButton?: boolean;
+  refreshTrigger?: number;
 }
 
 export const ImageGallery: React.FC<ImageGalleryProps> = ({
   category,
   onImageSelect,
   showSelectButton = false,
+  refreshTrigger = 0,
 }) => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,9 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
   const [selectedImageForLinking, setSelectedImageForLinking] = useState<
     string | null
   >(null);
+  const [deletingFile, setDeletingFile] = useState<string | null>(null);
   const { listFiles, deleteFile, error } = useFileUpload();
+  const prevRefreshTrigger = useRef(0);
 
   const loadFiles = async () => {
     setLoading(true);
@@ -36,27 +40,34 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
     }
   };
 
+  // Load files on mount and when category changes
   useEffect(() => {
     loadFiles();
   }, [category]);
 
+  // Refresh files when trigger changes
+  useEffect(() => {
+    if (refreshTrigger > prevRefreshTrigger.current) {
+      prevRefreshTrigger.current = refreshTrigger;
+      loadFiles();
+    }
+  }, [refreshTrigger]);
+
   const handleDeleteFile = async (file: UploadedFile) => {
     if (!confirm(`Are you sure you want to delete ${file.name}?`)) return;
 
+    setDeletingFile(file.name);
     const success = await deleteFile(file.name, file.category);
     if (success) {
-<<<<<<< Updated upstream
+      // Immediately update local state for instant UI feedback
       setFiles(files.filter((f) => f.name !== file.name));
-=======
-      // Force refresh the file list from server to ensure accurate state
-      await loadFiles();
       
-      // Revalidate recipes and home page since images are used there
-      await refreshAfterChange(['recipes', 'home']);
+      // Then refresh from server to ensure consistency
+      await loadFiles();
     } else {
       alert('Failed to delete file. Please try again.');
->>>>>>> Stashed changes
     }
+    setDeletingFile(null);
   };
 
   const copyToClipboard = (text: string) => {
@@ -141,10 +152,12 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {files.map((file) => (
+        {files.map((file) => {
+          const isDeleting = deletingFile === file.name;
+          return (
           <div
             key={`${file.category}-${file.name}`}
-            className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            className={`bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
           >
             {/* Image */}
             <div className="aspect-square bg-gray-100 relative group">
@@ -153,6 +166,13 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
                 alt={file.name}
                 className="w-full h-full object-cover"
               />
+
+              {/* Deleting Overlay */}
+              {isDeleting && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                </div>
+              )}
 
               {/* Overlay */}
               <div className="absolute  flex items-center justify-center">
@@ -232,7 +252,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({
               </div>
             </div>
           </div>
-        ))}
+        );
+        })}
       </div>
 
       {/* Full Size Modal */}

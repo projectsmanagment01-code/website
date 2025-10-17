@@ -6,7 +6,9 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-const AI_SETTINGS_PATH = path.join(process.cwd(), "uploads", "ai-settings.json");
+// SECURE: AI settings with API keys stored in non-public directory
+const AI_SETTINGS_PATH = path.join(process.cwd(), "data", "config", "ai-settings.json");
+const OLD_AI_SETTINGS_PATH = path.join(process.cwd(), "uploads", "ai-settings.json");
 
 export interface AISettings {
   enabled: boolean;
@@ -31,9 +33,28 @@ export interface AISettings {
 /**
  * Load AI settings from admin configuration
  * Returns null if settings file doesn't exist
+ * Auto-migrates from old location if needed
  */
 export async function loadAISettings(): Promise<AISettings | null> {
   try {
+    // Try to migrate from old location
+    try {
+      await fs.access(OLD_AI_SETTINGS_PATH);
+      try {
+        await fs.access(AI_SETTINGS_PATH);
+        // New file exists, no migration needed
+      } catch {
+        // Migrate from old to new location
+        console.log("🔒 Migrating AI settings to secure location...");
+        await fs.mkdir(path.dirname(AI_SETTINGS_PATH), { recursive: true });
+        await fs.copyFile(OLD_AI_SETTINGS_PATH, AI_SETTINGS_PATH);
+        console.log("✅ AI settings migrated successfully");
+        console.warn("⚠️ Please delete old file manually:", OLD_AI_SETTINGS_PATH);
+      }
+    } catch {
+      // Old file doesn't exist
+    }
+    
     const data = await fs.readFile(AI_SETTINGS_PATH, "utf-8");
     return JSON.parse(data);
   } catch (error) {

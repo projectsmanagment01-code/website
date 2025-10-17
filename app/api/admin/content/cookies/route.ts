@@ -5,7 +5,8 @@ import fs from "fs";
 import path from "path";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-const CONTENT_FILE_PATH = path.join(process.cwd(), "uploads", "cookies-content.json");
+// SECURE: Cookies content stored in non-public directory
+const CONTENT_FILE_PATH = path.join(process.cwd(), "data", "config", "cookies-content.json");
 
 interface CookiesContent {
   heroTitle: string;

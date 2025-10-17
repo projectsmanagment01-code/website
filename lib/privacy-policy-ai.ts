@@ -42,8 +42,8 @@ export class PrivacyPolicyAIService {
       };
 
       try {
-        // Try to read from existing site.json file (from /admin/content/site)
-        const sitePath = path.join(process.cwd(), 'uploads', 'content', 'site.json');
+        // Read from secure site.json file (from /admin/content/site)
+        const sitePath = path.join(process.cwd(), 'data', 'config', 'site.json');
         const siteContent = await fs.readFile(sitePath, 'utf-8');
         const siteData = JSON.parse(siteContent);
         

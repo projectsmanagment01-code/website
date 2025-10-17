@@ -1,158 +1,118 @@
 /**
- * Admin Category Management API
+ * Category API Routes - Admin Only
  * 
- * Endpoints:
- * GET    /api/admin/categories - List all categories with pagination
- * POST   /api/admin/categories - Create new category
- * 
- * Protected: Requires admin authentication (JWT or API token)
+ * GET  /api/admin/categories - List all categories with pagination
+ * POST /api/admin/categories - Create new category
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuth } from '@/lib/api-auth';
-import {
-  getCategories,
-  getCategoriesPaginated,
-  createCategory,
-  searchCategories,
-  getCategoryStats,
-  reorderCategories
-} from '@/lib/category-service-new';
-
-// ============================================================================
-// GET - List Categories
-// ============================================================================
+import { createCategory, getCategoriesPaginated, searchCategories } from '@/lib/category-service-new';
+import { checkAuthOrRespond } from '@/lib/auth-standard';
 
 export async function GET(request: NextRequest) {
+  // Check authentication
+  const authCheck = await checkAuthOrRespond(request);
+  if (!authCheck.authorized) {
+    return authCheck.response;
+  }
   try {
-    // Verify authentication
-    const authResult = await verifyAuth(request);
-    if (!authResult) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
-    
-    // Parse query parameters
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const search = searchParams.get('search');
     const includeInactive = searchParams.get('includeInactive') === 'true';
-    const stats = searchParams.get('stats') === 'true';
-    
-    // Handle stats request
-    if (stats) {
-      const categoryStats = await getCategoryStats();
-      return NextResponse.json({
-        success: true,
-        stats: categoryStats
-      });
-    }
-    
-    // Handle search
+
+    // Handle search query
     if (search) {
       const categories = await searchCategories(search);
       return NextResponse.json({
-        success: true,
         categories,
         total: categories.length,
+        currentPage: 1,
+        totalPages: 1,
         page: 1,
-        limit: categories.length,
-        totalPages: 1
+        limit
       });
     }
-    
+
     // Handle pagination
     const result = await getCategoriesPaginated(page, limit, includeInactive);
     
     return NextResponse.json({
-      success: true,
-      ...result
+      categories: result.categories,
+      total: result.total,
+      currentPage: result.page,
+      totalPages: result.totalPages,
+      page: result.page,
+      limit: result.limit
     });
 
   } catch (error) {
-    console.error('❌ GET /api/admin/categories error:', error);
+    console.error('❌ Error in GET /api/admin/categories:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch categories',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
 }
 
-// ============================================================================
-// POST - Create Category
-// ============================================================================
-
 export async function POST(request: NextRequest) {
+  // Check authentication
+  const authCheck = await checkAuthOrRespond(request);
+  if (!authCheck.authorized) {
+    return authCheck.response;
+  }
+
   try {
-    // Verify authentication
-    const authResult = await verifyAuth(request);
-    if (!authResult) {
+    const body = await request.json();
+    const { name, description, image, icon, color, order, metaTitle, metaDescription } = body;
+
+    // Validate required fields
+    if (!name) {
       return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 401 }
+        { error: 'Name is required' },
+        { status: 400 }
       );
     }
 
-    const body = await request.json();
-    
-    // Handle reorder request
-    if (body.action === 'reorder' && body.orderedIds) {
-      await reorderCategories(body.orderedIds);
-      return NextResponse.json({
-        success: true,
-        message: 'Categories reordered successfully'
-      });
-    }
-    
-    // Validate required fields
-    const { name, image } = body;
-    
-    if (!name || !name.trim()) {
+    if (!image) {
       return NextResponse.json(
-        { error: 'Category name is required' },
+        { error: 'Image is required' },
         { status: 400 }
       );
     }
-    
-    if (!image || !image.trim()) {
-      return NextResponse.json(
-        { error: 'Category image is required' },
-        { status: 400 }
-      );
-    }
-    
+
     // Create category
     const category = await createCategory({
-      name: name.trim(),
-      description: body.description?.trim(),
-      image: image.trim(),
-      icon: body.icon?.trim(),
-      color: body.color?.trim(),
-      order: typeof body.order === 'number' ? body.order : undefined,
-      metaTitle: body.metaTitle?.trim(),
-      metaDescription: body.metaDescription?.trim()
+      name,
+      description,
+      image,
+      icon,
+      color,
+      order,
+      metaTitle,
+      metaDescription
     });
-    
+
+    console.log(`✅ Category created: ${name} (ID: ${category.id})`);
+
     return NextResponse.json({
-      success: true,
-      category,
-      message: `Category "${category.name}" created successfully`
+      message: 'Category created successfully',
+      category
     }, { status: 201 });
 
   } catch (error) {
-    console.error('❌ POST /api/admin/categories error:', error);
+    console.error('❌ Error in POST /api/admin/categories:', error);
+    
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { 
-        error: 'Failed to create category',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

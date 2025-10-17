@@ -3,22 +3,23 @@ import fs from "fs/promises";
 import path from "path";
 import { auth } from "@/lib/auth";
 
-// Path to store content files
-const CONTENT_DIR = path.join(process.cwd(), "uploads", "content");
+// SECURE: Path to store content files - NOT publicly accessible
+const CONFIG_DIR = path.join(process.cwd(), "data", "config");
 
-// Ensure content directory exists
-async function ensureContentDir() {
+// Ensure config directory exists
+async function ensureConfigDir() {
   try {
-    await fs.access(CONTENT_DIR);
+    await fs.access(CONFIG_DIR);
   } catch {
-    await fs.mkdir(CONTENT_DIR, { recursive: true });
+    await fs.mkdir(CONFIG_DIR, { recursive: true });
+    console.log("✅ Created secure config directory");
   }
 }
 
 export async function GET() {
   try {
-    await ensureContentDir();
-    const filePath = path.join(CONTENT_DIR, "site.json");
+    await ensureConfigDir();
+    const filePath = path.join(CONFIG_DIR, "site.json");
 
     try {
       const content = await fs.readFile(filePath, "utf-8");
@@ -73,15 +74,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await ensureContentDir();
+    await ensureConfigDir();
     
     const data = await request.json();
-    const filePath = path.join(CONTENT_DIR, "site.json");
+    const filePath = path.join(CONFIG_DIR, "site.json");
     
     // Write the data to file
     await fs.writeFile(filePath, JSON.stringify(data, null, 2));
     
-    console.log("✅ Site settings saved successfully");
+    console.log("✅ Site settings saved successfully to secure location");
     
     return NextResponse.json({ 
       success: true, 

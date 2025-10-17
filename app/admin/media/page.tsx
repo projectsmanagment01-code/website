@@ -22,12 +22,12 @@ export default function MediaLibraryPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<string>("gallery");
   const [showUpload, setShowUpload] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleFileUploaded = (fileUrl: string, fileName: string) => {
-    // You might want to refresh the gallery or show a success message
+    // Trigger a refresh of the gallery without reloading the entire page
     setShowUpload(false);
-    // Trigger a refresh of the gallery
-    window.location.reload(); // Simple approach, you could use state management instead
+    setRefreshTrigger(prev => prev + 1);
   };
 
   return (
@@ -141,6 +141,7 @@ export default function MediaLibraryPage() {
                     selectedCategory === "all" ? undefined : selectedCategory
                   }
                   showSelectButton={false}
+                  refreshTrigger={refreshTrigger}
                 />
               ) : (
                 <ImageUsageViewer />

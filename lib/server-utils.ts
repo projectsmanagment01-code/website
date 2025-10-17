@@ -3,9 +3,12 @@ import { promises as fs } from "fs";
 import path from "path";
 
 // This ensures this file can only be imported in server components/API routes
-// Content directory path
+// Content directory path - SECURE: Not publicly accessible via uploads
+const CONFIG_DIR = path.join(process.cwd(), "data", "config");
 const UPLOADS_DIR = path.join(process.cwd(), "uploads");
-const CONTENT_DIR = path.join(UPLOADS_DIR, "content");
+
+// Legacy - keeping for backward compatibility during migration
+const OLD_CONTENT_DIR = path.join(UPLOADS_DIR, "content");
 
 // Type definitions
 export interface HeroContent {
@@ -84,21 +87,56 @@ async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
   }
 }
 
+/**
+ * Migrates a JSON file from old uploads/content location to secure data/config location
+ */
+async function migrateConfigFile(filename: string): Promise<void> {
+  const oldPath = path.join(OLD_CONTENT_DIR, filename);
+  const newPath = path.join(CONFIG_DIR, filename);
+  
+  try {
+    // Check if old file exists and new one doesn't
+    await fs.access(oldPath);
+    try {
+      await fs.access(newPath);
+      // New file exists, no need to migrate
+      return;
+    } catch {
+      // New file doesn't exist, migrate
+      console.log(`🔒 Migrating ${filename} to secure location...`);
+      await fs.mkdir(CONFIG_DIR, { recursive: true });
+      await fs.copyFile(oldPath, newPath);
+      console.log(`✅ Migrated ${filename} successfully`);
+      
+      // Optionally delete old file (commented out for safety)
+      // await fs.unlink(oldPath);
+    }
+  } catch {
+    // Old file doesn't exist, no migration needed
+  }
+}
+
+/**
+ * Read config file with automatic migration from old location
+ */
+async function readConfigFile<T>(filename: string, fallback: T): Promise<T> {
+  await migrateConfigFile(filename);
+  const securePath = path.join(CONFIG_DIR, filename);
+  return readJsonFile(securePath, fallback);
+}
+
 // Server-side content fetchers
 export async function getHeroContent(): Promise<HeroContent> {
-  const homeJsonPath = path.join(CONTENT_DIR, "home.json");
-  return readJsonFile(homeJsonPath, DEFAULT_HERO_CONTENT);
+  return readConfigFile("home.json", DEFAULT_HERO_CONTENT);
 }
 
 export async function getLogoSettings(): Promise<LogoSettings> {
-  const siteJsonPath = path.join(CONTENT_DIR, "site.json");
-  const siteData = await readJsonFile(siteJsonPath, { logoSettings: DEFAULT_LOGO_SETTINGS });
+  const siteData = await readConfigFile("site.json", { logoSettings: DEFAULT_LOGO_SETTINGS });
   return siteData.logoSettings || DEFAULT_LOGO_SETTINGS;
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
-  const siteJsonPath = path.join(CONTENT_DIR, "site.json");
-  return readJsonFile(siteJsonPath, DEFAULT_SITE_SETTINGS);
+  return readConfigFile("site.json", DEFAULT_SITE_SETTINGS);
 }
 
 // Validated content getters (with image validation)

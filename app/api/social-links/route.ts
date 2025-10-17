@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 
-// Path to store content files
-const CONTENT_DIR = path.join(process.cwd(), "uploads", "content");
+// SECURE: Path to store content files - NOT publicly accessible
+const CONFIG_DIR = path.join(process.cwd(), "data", "config");
 
 export async function GET(request: NextRequest) {
   try {
-    const filePath = path.join(CONTENT_DIR, "home.json");
+    const filePath = path.join(CONFIG_DIR, "home.json");
 
     try {
       const content = await fs.readFile(filePath, "utf-8");

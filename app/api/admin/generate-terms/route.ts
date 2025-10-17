@@ -4,7 +4,8 @@ import { verifyAdminToken } from '@/lib/auth';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-const AI_SETTINGS_PATH = path.join(process.cwd(), "uploads", "ai-settings.json");
+// SECURE: AI settings stored in non-public directory
+const AI_SETTINGS_PATH = path.join(process.cwd(), "data", "config", "ai-settings.json");
 
 interface AISettings {
   enabled: boolean;

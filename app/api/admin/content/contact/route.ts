@@ -3,7 +3,8 @@ import { verifyAdminToken } from "@/lib/auth";
 import path from "path";
 import fs from "fs/promises";
 
-const SETTINGS_FILE = path.join(process.cwd(), "uploads", "contact-content.json");
+// SECURE: Contact content stored in non-public directory
+const SETTINGS_FILE = path.join(process.cwd(), "data", "config", "contact-content.json");
 
 // Default contact content
 const defaultContent = {

@@ -67,11 +67,11 @@ export function getHostname(): string {
     return process.env.VERCEL_URL;
   }
 
-  // 3. Try to read from site configuration file
+  // 3. Try to read from secure site configuration file
   try {
     const fs = require('fs');
     const path = require('path');
-    const siteConfigPath = path.join(process.cwd(), 'uploads', 'content', 'site.json');
+    const siteConfigPath = path.join(process.cwd(), 'data', 'config', 'site.json');
     
     if (fs.existsSync(siteConfigPath)) {
       const siteConfig = JSON.parse(fs.readFileSync(siteConfigPath, 'utf-8'));
