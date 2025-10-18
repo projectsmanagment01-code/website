@@ -71,8 +71,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate privacy policy using AI
+    console.log('=== STARTING PRIVACY POLICY GENERATION ===');
     const rawPolicy = await PrivacyPolicyAIService.generatePrivacyPolicy(apiKey, aiSettings.provider, aiSettings.model);
+    console.log('Raw policy length:', rawPolicy.length);
+    
     const formattedPolicy = PrivacyPolicyAIService.formatPrivacyPolicy(rawPolicy);
+    console.log('Formatted policy length:', formattedPolicy.length);
+    console.log('=== PRIVACY POLICY GENERATION COMPLETE ===');
 
     return NextResponse.json({
       success: true,

@@ -1,8 +1,5 @@
 // Privacy Policy AI Generation Service
-import { promises as fs } from 'fs';
-import path from 'path';
-import { getAdminSettings } from '@/lib/admin-settings';
-//dwedwedwdwdwdwdwdw
+import { getSiteInfo as getDbSiteInfo } from '@/lib/site-config-service';
 
 interface PrivacyPolicyData {
   title: string;
@@ -31,58 +28,31 @@ export class PrivacyPolicyAIService {
   
   static async getSiteInfo(): Promise<SiteInfo> {
     try {
-      // Get site information from existing admin content/site API
-      let siteInfo: SiteInfo = {
-        name: "Recipe Website",
-        domain: "example.com",
-        url: "https://example.com",
-        email: "contact@example.com",
-        description: "A recipe sharing website",
+      // Get site information from DATABASE (new system - prevents deployment overwrites)
+      console.log('🔍 Fetching site info from database...');
+      const dbSiteInfo = await getDbSiteInfo();
+      
+      const siteInfo: SiteInfo = {
+        name: dbSiteInfo.siteTitle || "Recipe Website",
+        domain: dbSiteInfo.siteDomain || "example.com",
+        url: dbSiteInfo.siteUrl || `https://${dbSiteInfo.siteDomain || "example.com"}`,
+        email: dbSiteInfo.siteEmail || "contact@example.com",
+        description: dbSiteInfo.siteDescription || "A recipe sharing website",
         socialLinks: [],
         contactInfo: {}
       };
 
-      try {
-        // Read from secure site.json file (from /admin/content/site)
-        const sitePath = path.join(process.cwd(), 'data', 'config', 'site.json');
-        const siteContent = await fs.readFile(sitePath, 'utf-8');
-        const siteData = JSON.parse(siteContent);
-        
-        // Use existing site settings if they exist and aren't defaults
-        if (siteData.siteTitle && siteData.siteTitle !== "Calama Team Recipes - Delicious Family-Friendly Recipes") {
-          siteInfo.name = siteData.siteTitle;
-        }
-        if (siteData.siteDomain && siteData.siteDomain !== "example.com") {
-          siteInfo.domain = siteData.siteDomain;
-          siteInfo.url = siteData.siteUrl || `https://${siteData.siteDomain}`;
-        }
-        if (siteData.siteEmail && siteData.siteEmail !== "hello@example.com") {
-          siteInfo.email = siteData.siteEmail;
-        }
-        if (siteData.siteDescription) {
-          siteInfo.description = siteData.siteDescription;
-        }
-
-        console.log('Loaded site info from existing site settings:', siteInfo);
-        
-      } catch (siteError) {
-        console.log('No existing site settings found, using environment variables or defaults');
-        
-        // Fallback to environment variables
-        if (process.env.SITE_NAME) siteInfo.name = process.env.SITE_NAME;
-        if (process.env.SITE_DOMAIN) {
-          siteInfo.domain = process.env.SITE_DOMAIN;
-          siteInfo.url = `https://${process.env.SITE_DOMAIN}`;
-        }
-        if (process.env.SITE_EMAIL) siteInfo.email = process.env.SITE_EMAIL;
-        if (process.env.SITE_DESCRIPTION) siteInfo.description = process.env.SITE_DESCRIPTION;
-      }
-
+      console.log('✅ Loaded site info from DATABASE:', {
+        name: siteInfo.name,
+        domain: siteInfo.domain,
+        email: siteInfo.email
+      });
+      
       return siteInfo;
 
     } catch (error) {
-      console.error('Error getting site info:', error);
-      // Return safe defaults
+      console.error('❌ Error getting site info from database, using defaults:', error);
+      // Return safe defaults only if database fails
       return {
         name: "Recipe Website",
         domain: "example.com", 
@@ -110,70 +80,168 @@ export class PrivacyPolicyAIService {
   private static buildPrompt(siteInfo: SiteInfo): string {
     const currentDate = new Date().toISOString().split('T')[0];
 
-    const socialPlatforms = siteInfo.socialLinks
-      .filter(link => link.enabled)
-      .map(link => link.platform)
-      .join(', ');
+    return `YOU ARE GENERATING A PRIVACY POLICY - NOT A DISCLAIMER OR ANY OTHER DOCUMENT.
+THIS MUST BE A PRIVACY POLICY ABOUT DATA COLLECTION, COOKIES, AND USER RIGHTS.
 
-    // Load JSON template synchronously (we're in an async context)
-    const fs = require('fs');
-    const path = require('path');
-    const templatePath = path.join(process.cwd(), 'jsonp.md');
-    const jsonTemplate = fs.readFileSync(templatePath, 'utf-8');
-
-    return `You are a JSON privacy policy generator. You MUST return a COMPLETE JSON object with ALL sections expanded.
+Generate a COMPLETE, FULLY-FORMATTED HTML PRIVACY POLICY.
 
 CRITICAL REQUIREMENTS:
-1. Generate ALL sections as shown in the template
-2. Each section must have 3-5 detailed sentences minimum
-3. Include ALL subsections (especially "Your Rights" and "Contact Us")
-4. Return ONLY pure JSON - no markdown, no explanations
-5. Start with { and end with } - nothing else
+1. Return COMPLETE HTML with ALL sections - DO NOT truncate or abbreviate ANYTHING
+2. Each section must have 4-6 detailed paragraphs minimum (write complete paragraphs, not bullet points only)
+3. Use proper HTML tags with Tailwind CSS classes
+4. Include ALL 13 mandatory sections listed below
+5. Return ONLY HTML - no markdown, no code blocks, no explanations
+6. Start with opening tags and end with closing tags
+7. THIS IS A PRIVACY POLICY - DO NOT generate disclaimer, terms, or any other content
 
-EXACT JSON TEMPLATE TO FOLLOW:
-${jsonTemplate}
+HTML STRUCTURE REQUIRED:
+<div class="privacy-policy-content">
+  <h1 class="text-3xl font-bold text-black mb-6">Privacy Policy</h1>
+  
+  <div class="text-sm text-gray-600 mb-6">
+    <p><strong>Effective Date:</strong> ${currentDate}</p>
+    <p><strong>Last Updated:</strong> ${currentDate}</p>
+    <p><strong>Company:</strong> ${siteInfo.name}</p>
+    <p><strong>Website:</strong> <a href="${siteInfo.url}" class="text-blue-600 hover:underline">${siteInfo.url}</a></p>
+    <p><strong>Contact:</strong> <a href="mailto:${siteInfo.email}" class="text-blue-600 hover:underline">${siteInfo.email}</a></p>
+  </div>
 
-WEBSITE DATA TO INSERT:
-- Company: "${siteInfo.name}"
-- Website: "${siteInfo.url}"
-- Domain: "${siteInfo.domain}"
-- Email: "${siteInfo.email}"
-- Description: "${siteInfo.description}"
-- Date: "${currentDate}"
+  <!-- Continue with ALL sections below -->
+</div>
 
-INTERNAL LINKS TO INCLUDE:
-- Home: ${siteInfo.url}
-- About: ${siteInfo.url}/about
-- Contact: ${siteInfo.url}/contact
-- Terms: ${siteInfo.url}/terms
-- Cookies: ${siteInfo.url}/cookies
+MANDATORY SECTIONS (Generate ALL with complete content):
 
-MANDATORY SECTION EXPANSION:
-You MUST generate ALL these sections with detailed content:
+1. SCOPE (h2 heading + 4-5 paragraphs)
+   - Overview of policy coverage
+   - GDPR and CCPA compliance statement
+   - Recipe website specific data practices
+   - User agreement terms
+   - Policy updates notification
 
-1. "Scope" - 4-5 sentences about policy coverage, GDPR/CCPA compliance, recipe website features
-2. "Information We Collect" - Detailed list of data types for recipe websites (accounts, comments, ratings, newsletter)
-3. "How We Collect Data" - Comprehensive methods (forms, cookies, user interactions, recipe submissions)
-4. "How We Use Data" - Detailed purposes (personalization, recommendations, marketing, analytics)
-5. "Cookies and Tracking Technologies" - Full explanation of cookie types and purposes
-6. "Sharing and Disclosure" - Complete third-party sharing details
-7. "Data Retention" - Specific timeframes for different data types
-8. "Data Security" - Detailed security measures and protocols
-9. "International Data Transfers" - Full cross-border transfer explanation
-10. "Your Rights" - MUST include both GDPR and CCPA subsections with all listed rights
-11. "Children's Privacy" - Complete COPPA compliance details
-12. "Changes to This Policy" - Full update process and notification methods
-13. "Contact Us" - Complete contact information with company, email, address
+2. INFORMATION WE COLLECT (h2 heading + detailed list)
+   - Personal Information (name, email, profile)
+   - Account Data (username, password, preferences)
+   - Recipe Interactions (saves, comments, ratings, reviews)
+   - Technical Data (IP, browser, device info)
+   - Cookie Data
+   - Newsletter Subscription Data
+   - Payment Information (if applicable)
 
-EXACT REPLACEMENTS:
-- "[Insert Date]" → "${currentDate}"
-- "Choco Fever Dream / Feast Forge LLC" → "${siteInfo.name}"
-- "https://chocofeverdream.com" → "${siteInfo.url}"
-- "privacy@chocofeverdream.com" → "${siteInfo.email}"
+3. HOW WE COLLECT DATA (h2 heading + 4-5 paragraphs)
+   - Registration and account creation
+   - Website forms and submissions
+   - Cookie and tracking technologies
+   - User interactions and engagement
+   - Third-party integrations
+   - Automated collection methods
 
-CRITICAL: Generate the COMPLETE JSON with ALL 13 sections. Do not abbreviate or skip any section. Each section must be fully expanded with recipe website specific details.
+4. HOW WE USE DATA (h2 heading + detailed list)
+   - Personalized recipe recommendations
+   - User authentication and account management
+   - Communication and newsletters
+   - Analytics and performance improvement
+   - Marketing and promotional content
+   - Legal compliance and security
 
-START YOUR RESPONSE WITH { AND END WITH } - RETURN COMPLETE JSON ONLY!`;
+5. COOKIES AND TRACKING TECHNOLOGIES (h2 heading + 5-6 paragraphs)
+   - Essential cookies explanation
+   - Analytics cookies (Google Analytics, etc.)
+   - Advertising cookies
+   - Social media cookies
+   - Cookie management and opt-out
+   - Third-party cookie policies
+
+6. SHARING AND DISCLOSURE (h2 heading + 4-5 paragraphs)
+   - Service providers and processors
+   - Analytics partners
+   - Advertising networks
+   - Legal requirements and law enforcement
+   - Business transfers
+   - User consent-based sharing
+
+7. DATA RETENTION (h2 heading + 4-5 paragraphs)
+   - Account data retention periods
+   - Content and recipe data storage
+   - Legal retention requirements
+   - Data deletion procedures
+   - Backup and archive policies
+
+8. DATA SECURITY (h2 heading + 5-6 paragraphs)
+   - Encryption and secure protocols
+   - Access controls and authentication
+   - Regular security audits
+   - Incident response procedures
+   - Third-party security measures
+   - User responsibility
+
+9. INTERNATIONAL DATA TRANSFERS (h2 heading + 4-5 paragraphs)
+   - Cross-border transfer mechanisms
+   - Privacy Shield or Standard Contractual Clauses
+   - EU and international user protections
+   - Data localization practices
+
+10. YOUR RIGHTS (h2 heading + TWO h3 subsections)
+    
+    A. GDPR RIGHTS (h3 + detailed list with descriptions)
+       - Right to access your data
+       - Right to rectification
+       - Right to erasure ("right to be forgotten")
+       - Right to restrict processing
+       - Right to data portability
+       - Right to object
+       - Rights related to automated decision-making
+       - How to exercise these rights
+    
+    B. CCPA/CPRA RIGHTS (h3 + detailed list with descriptions)
+       - Right to know what data is collected
+       - Right to delete personal information
+       - Right to opt-out of sale/sharing
+       - Right to non-discrimination
+       - Right to correct inaccurate data
+       - Right to limit use of sensitive data
+       - How to submit requests
+
+11. CHILDREN'S PRIVACY (h2 heading + 4-5 paragraphs)
+    - COPPA compliance (under 13)
+    - Parental consent requirements
+    - Data collection from minors
+    - Account deletion procedures for minors
+    - Parent/guardian rights
+
+12. CHANGES TO THIS POLICY (h2 heading + 3-4 paragraphs)
+    - Notification methods
+    - Material changes definition
+    - Effective date of updates
+    - User acceptance and continued use
+
+13. CONTACT US (h2 heading + contact details)
+    - Company name: ${siteInfo.name}
+    - Email: ${siteInfo.email}
+    - Website: ${siteInfo.url}
+    - Mailing address (if available)
+    - Data Protection Officer contact (if applicable)
+    - Response timeframe
+
+STYLING REQUIREMENTS:
+- All h1 tags: class="text-3xl font-bold text-black mb-6"
+- All h2 tags: class="text-2xl font-bold text-black mb-4 mt-8"
+- All h3 tags: class="text-xl font-bold text-black mb-4 mt-6"
+- All p tags: class="text-black mb-4"
+- All ul tags: class="list-disc pl-6 text-black mb-4"
+- All ol tags: class="list-decimal pl-6 text-black mb-4"
+- All li tags: class="mb-2"
+- All links: class="text-blue-600 hover:underline"
+
+CRITICAL INSTRUCTIONS:
+- Generate COMPLETE content - DO NOT use placeholders like "[Add more details]"
+- Every section must be FULLY written with comprehensive information
+- Total content should be 8000-12000 words
+- Use recipe website specific examples throughout
+- Include internal links where appropriate: ${siteInfo.url}/about, ${siteInfo.url}/contact, ${siteInfo.url}/terms
+- Return ONLY the HTML - no markdown code blocks, no explanations
+
+START YOUR RESPONSE WITH: <div class="privacy-policy-content">
+END YOUR RESPONSE WITH: </div>`;
   }
 
   private static async generateWithOpenAI(prompt: string, apiKey: string, model: string = 'gpt-4o-mini'): Promise<string> {
@@ -188,14 +256,14 @@ START YOUR RESPONSE WITH { AND END WITH } - RETURN COMPLETE JSON ONLY!`;
         messages: [
           {
             role: 'system',
-            content: 'You are a JSON privacy policy generator. You MUST return a COMPLETE JSON object with ALL 13 sections from the template. Each section must be fully expanded with 3-5 detailed sentences. DO NOT truncate or abbreviate ANY section. Return ONLY JSON starting with { and ending with }.'
+            content: 'You are a professional HTML PRIVACY POLICY generator - NOT a disclaimer generator. You ONLY generate PRIVACY POLICIES about data collection, cookies, and user rights. Generate COMPLETE, FULLY-FORMATTED HTML privacy policy content with ALL sections fully expanded. Write complete detailed paragraphs (4-6 per section), not just bullet points. DO NOT truncate, abbreviate, or use placeholders. Return ONLY HTML with proper Tailwind CSS classes. Total output should be 8000-12000 words of comprehensive privacy policy content. Start with <div class="privacy-policy-content"> and end with </div>. DO NOT generate disclaimers, terms of service, or any other document type.'
           },
           {
             role: 'user',
             content: prompt
           }
         ],
-        max_tokens: 8192,
+        max_tokens: 16000,
         temperature: 0.3,
       }),
     });
@@ -227,7 +295,7 @@ START YOUR RESPONSE WITH { AND END WITH } - RETURN COMPLETE JSON ONLY!`;
     return content;
   }
 
-  private static async generateWithGemini(prompt: string, apiKey: string, model: string = 'gemini-2.5-flash'): Promise<string> {
+  private static async generateWithGemini(prompt: string, apiKey: string, model: string = 'gemini-2.0-flash-exp'): Promise<string> {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
@@ -243,7 +311,12 @@ START YOUR RESPONSE WITH { AND END WITH } - RETURN COMPLETE JSON ONLY!`;
           temperature: 0.3,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 8192,
+          maxOutputTokens: 16000,
+        },
+        systemInstruction: {
+          parts: [{
+            text: 'You are a professional HTML PRIVACY POLICY generator - NOT a disclaimer generator. You ONLY generate PRIVACY POLICIES about data collection, cookies, GDPR, CCPA, and user privacy rights. Generate COMPLETE, FULLY-FORMATTED HTML privacy policy content with ALL sections fully expanded. Write complete detailed paragraphs (4-6 per section), not just bullet points. DO NOT truncate, abbreviate, or use placeholders. Return ONLY HTML with proper Tailwind CSS classes. Total output should be 8000-12000 words of comprehensive privacy policy content. Start with <div class="privacy-policy-content"> and end with </div>. NEVER generate disclaimers, terms of service, or any other document type - ONLY privacy policies.'
+          }]
         }
       }),
     });
@@ -295,151 +368,38 @@ START YOUR RESPONSE WITH { AND END WITH } - RETURN COMPLETE JSON ONLY!`;
   }
 
   static formatPrivacyPolicy(rawContent: string): string {
+    console.log('=== FORMAT PRIVACY POLICY START ===');
     console.log('Format Input Length:', rawContent.length);
-    console.log('Format Input Preview:', rawContent.substring(0, 200) + '...');
+    console.log('Format Input Preview:', rawContent.substring(0, 300) + '...');
+    console.log('Format Input End Preview:', '...' + rawContent.substring(Math.max(0, rawContent.length - 300)));
     
     try {
-      // Clean up the raw content first
+      // Clean up the raw content
       let cleanContent = rawContent.trim();
       
-      // Remove markdown code block markers if present
-      cleanContent = cleanContent.replace(/```json\n?/g, '');
+      // Remove any markdown code block markers
+      cleanContent = cleanContent.replace(/```html\n?/g, '');
       cleanContent = cleanContent.replace(/```\n?/g, '');
       cleanContent = cleanContent.replace(/^```/g, '');
       cleanContent = cleanContent.replace(/```$/g, '');
       
       console.log('After cleanup Length:', cleanContent.length);
+      console.log('After cleanup Preview:', cleanContent.substring(0, 300) + '...');
       
-      // Try to parse as JSON first
-      let jsonData;
-      try {
-        jsonData = JSON.parse(cleanContent);
-        console.log('JSON parsed successfully, sections count:', jsonData.sections?.length || 0);
-      } catch (jsonError) {
-        console.log('JSON parse failed:', jsonError);
-        // If it's not JSON, treat as HTML and apply formatting
-        return this.formatHtmlContent(cleanContent);
-      }
-
-      // Convert JSON to HTML
-      const htmlResult = this.convertJsonToHtml(jsonData);
-      console.log('Final HTML Length:', htmlResult.length);
+      // Since we're expecting HTML now, just clean it up and return
+      console.log('Content is HTML, returning as-is');
+      console.log('Final HTML Length:', cleanContent.length);
+      console.log('Final HTML Preview (first 300 chars):', cleanContent.substring(0, 300));
+      console.log('Final HTML Preview (last 300 chars):', cleanContent.substring(Math.max(0, cleanContent.length - 300)));
+      console.log('=== FORMAT PRIVACY POLICY END ===');
       
-      return htmlResult;
+      return cleanContent;
       
     } catch (error) {
       console.error('Error formatting privacy policy:', error);
-      // Fallback to basic HTML formatting
-      return this.formatHtmlContent(rawContent);
+      return rawContent;
     }
   }
 
-  private static convertJsonToHtml(jsonData: any): string {
-    let html = '<div class="privacy-policy-content">\n';
-    
-    // Add title
-    if (jsonData.title) {
-      html += `  <h1 class="text-3xl font-bold text-black mb-6">${jsonData.title}</h1>\n`;
-    }
-    
-    // Add effective date and last updated
-    if (jsonData.effectiveDate || jsonData.lastUpdated) {
-      html += '  <div class="text-sm text-gray-600 mb-6">\n';
-      if (jsonData.effectiveDate) {
-        html += `    <p><strong>Effective Date:</strong> ${jsonData.effectiveDate}</p>\n`;
-      }
-      if (jsonData.lastUpdated) {
-        html += `    <p><strong>Last Updated:</strong> ${jsonData.lastUpdated}</p>\n`;
-      }
-      html += '  </div>\n';
-    }
 
-    // Add company and website info
-    if (jsonData.company || jsonData.website) {
-      html += '  <div class="text-sm text-gray-600 mb-6">\n';
-      if (jsonData.company) {
-        html += `    <p><strong>Company:</strong> ${jsonData.company}</p>\n`;
-      }
-      if (jsonData.website) {
-        html += `    <p><strong>Website:</strong> <a href="${jsonData.website}" class="text-blue-600 hover:underline">${jsonData.website}</a></p>\n`;
-      }
-      html += '  </div>\n';
-    }
-
-    // Process sections
-    if (jsonData.sections && Array.isArray(jsonData.sections)) {
-      jsonData.sections.forEach((section: any) => {
-        if (section.heading) {
-          html += `  <h2 class="text-2xl font-bold text-black mb-4 mt-8">${section.heading}</h2>\n`;
-        }
-
-        if (typeof section.content === 'string') {
-          // Process internal links in content
-          let processedContent = this.processInternalLinks(section.content);
-          html += `  <p class="text-black mb-4">${processedContent}</p>\n`;
-        } else if (typeof section.content === 'object') {
-          // Handle nested content (like rights sections)
-          Object.keys(section.content).forEach(key => {
-            html += `  <h3 class="text-xl font-bold text-black mb-4 mt-6">${key}</h3>\n`;
-            
-            const content = section.content[key];
-            if (Array.isArray(content)) {
-              html += '  <ul class="list-disc pl-6 text-black mb-4">\n';
-              content.forEach(item => {
-                html += `    <li class="mb-2">${item}</li>\n`;
-              });
-              html += '  </ul>\n';
-            } else if (typeof content === 'object') {
-              // Handle contact info object
-              html += '  <div class="bg-gray-50 p-4 rounded-lg mb-4">\n';
-              Object.keys(content).forEach(subKey => {
-                if (subKey === 'email') {
-                  html += `    <p><strong>${subKey.charAt(0).toUpperCase() + subKey.slice(1)}:</strong> <a href="mailto:${content[subKey]}" class="text-blue-600 hover:underline">${content[subKey]}</a></p>\n`;
-                } else {
-                  html += `    <p><strong>${subKey.charAt(0).toUpperCase() + subKey.slice(1)}:</strong> ${content[subKey]}</p>\n`;
-                }
-              });
-              html += '  </div>\n';
-            } else {
-              html += `  <p class="text-black mb-4">${content}</p>\n`;
-            }
-          });
-        }
-      });
-    }
-
-    html += '</div>';
-    return html;
-  }
-
-  private static formatHtmlContent(content: string): string {
-    let formattedContent = content.trim();
-
-    // Remove any code block markers
-    formattedContent = formattedContent.replace(/```html\n?/g, '');
-    formattedContent = formattedContent.replace(/```\n?/g, '');
-
-    // Ensure proper HTML structure
-    if (!formattedContent.includes('<div') && !formattedContent.includes('<section')) {
-      formattedContent = `<div class="privacy-policy-content">\n${formattedContent}\n</div>`;
-    }
-
-    // Add proper styling classes
-    formattedContent = formattedContent.replace(/<h1>/g, '<h1 class="text-3xl font-bold text-black mb-6">');
-    formattedContent = formattedContent.replace(/<h2>/g, '<h2 class="text-2xl font-bold text-black mb-4 mt-8">');
-    formattedContent = formattedContent.replace(/<h3>/g, '<h3 class="text-xl font-bold text-black mb-4 mt-6">');
-    formattedContent = formattedContent.replace(/<p>/g, '<p class="text-black mb-4">');
-    formattedContent = formattedContent.replace(/<ul>/g, '<ul class="list-disc pl-6 text-black mb-4">');
-    formattedContent = formattedContent.replace(/<ol>/g, '<ol class="list-decimal pl-6 text-black mb-4">');
-    formattedContent = formattedContent.replace(/<li>/g, '<li class="mb-2">');
-    formattedContent = formattedContent.replace(/<strong>/g, '<strong class="font-semibold">');
-
-    return formattedContent;
-  }
-
-  private static processInternalLinks(content: string): string {
-    // Convert URLs in content to clickable links
-    const urlRegex = /(https?:\/\/[^\s<>"]+)/g;
-    return content.replace(urlRegex, '<a href="$1" class="text-blue-600 hover:underline">$1</a>');
-  }
 }

@@ -157,6 +157,12 @@ export default function AIPrivacyGenerator({ onGenerated, currentContent }: AIPr
       }
 
       const data = await response.json();
+      console.log('=== RECEIVED PRIVACY POLICY ===');
+      console.log('Privacy policy length:', data.privacyPolicy?.length || 0);
+      console.log('Privacy policy preview (first 300):', data.privacyPolicy?.substring(0, 300));
+      console.log('Privacy policy preview (last 300):', data.privacyPolicy?.substring(data.privacyPolicy.length - 300));
+      console.log('=== END RECEIVED ===');
+      
       setGeneratedContent(data.privacyPolicy);
       setPreviewMode(true);
       setMessage({
@@ -176,6 +182,11 @@ export default function AIPrivacyGenerator({ onGenerated, currentContent }: AIPr
   };
 
   const applyGeneratedPolicy = () => {
+    console.log('=== APPLYING GENERATED POLICY ===');
+    console.log('Generated content length before apply:', generatedContent.length);
+    console.log('Generated content preview (first 200):', generatedContent.substring(0, 200));
+    console.log('Generated content preview (last 200):', generatedContent.substring(generatedContent.length - 200));
+    
     onGenerated(generatedContent);
     setPreviewMode(false);
     setMessage({

@@ -19,18 +19,31 @@ import {
 import { refreshAfterChange } from "@/lib/revalidation-utils";
 
 interface SiteSettings {
+  // AI Context Fields
+  websiteName: string;
+  businessType: string;
+  ownerName: string;
+  country: string;
+  primaryLanguage: string;
+  
+  // Logo & Branding
   logoType: "text" | "image";
   logoText: string;
   logoTagline: string;
   logoImage: string;
   favicon: string;
+  
+  // Footer
   footerCopyright: string;
   footerVersion: string;
+  
+  // SEO & Meta
   siteTitle: string;
   siteDescription: string;
   siteDomain: string;
   siteUrl: string;
   siteEmail: string;
+  
   lastUpdated: string | null;
 }
 
@@ -93,44 +106,6 @@ const contentFields: ContentField[] = [
     contentType: "brand",
     icon: <Sparkles className="w-4 h-4" />,
     prompt: "Write a short, catchy tagline for a recipe website logo. Should complement the brand and describe what the site offers. Keep it under 50 characters and inspiring."
-  },
-  {
-    key: "siteUrl",
-    label: "Site URL",
-    description: "Main website URL (e.g., https://yoursite.com)",
-    seoImportance: "high",
-    contentType: "contact",
-    icon: <Globe className="w-4 h-4" />,
-    prompt: "Generate a professional website URL for a recipe website. Use a format like 'https://yourrecipesite.com' - make it brandable and related to food/cooking."
-  },
-  {
-    key: "siteEmail",
-    label: "Site Email",
-    description: "Contact email for your website",
-    seoImportance: "medium",
-    contentType: "contact",
-    icon: <Globe className="w-4 h-4" />,
-    prompt: "Create a professional contact email for a recipe website. Use formats like 'contact@yoursite.com' or 'hello@yoursite.com' - make it professional and brandable."
-  },
-
-  {
-    key: "footerCopyright",
-    label: "Footer Copyright",
-    description: "Copyright notice for website footer",
-    seoImportance: "medium",
-    contentType: "legal",
-    icon: <Copyright className="w-4 h-4" />,
-    prompt: "Generate ONLY a simple one-line copyright notice for a recipe website footer. Format: '© 2025 [Website Name] - All rights reserved.' Keep it simple and under 60 characters. Do not generate disclaimers or additional legal content."
-  },
-  {
-    key: "footerVersion",
-    label: "Footer Version/Info",
-    description: "Additional footer information or version",
-    seoImportance: "medium",
-    maxLength: 50,
-    contentType: "brand",
-    icon: <Copyright className="w-4 h-4" />,
-    prompt: "Create additional footer text for a recipe website. This could be a version number, tagline, or brief additional info to display in the footer. Keep it short, professional, and relevant to the brand."
   }
 ];
 
@@ -139,56 +114,34 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
   const [lastGenerated, setLastGenerated] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [aiProvider, setAiProvider] = useState<'openai' | 'gemini'>('gemini'); // Default to Gemini
 
   const generateContent = async (field: ContentField) => {
     try {
       setGenerating(field.key);
       setMessage(null);
 
+      // Prepare context for new AI service
       const context = {
-        websiteType,
-        businessName: businessName || settings.logoText || "Recipe Website",
-        targetAudience,
-        currentDomain: settings.siteDomain || "example.com",
-        currentTitle: settings.siteTitle,
-        currentDescription: settings.siteDescription,
+        websiteName: settings.websiteName || businessName || settings.logoText || "Recipe Website",
+        businessType: settings.businessType || "Recipe Blog",
+        ownerName: settings.ownerName || "Owner",
+        country: settings.country || "United States",
+        primaryLanguage: settings.primaryLanguage || "English",
+        siteDomain: settings.siteDomain || "example.com"
       };
 
-      const enhancedPrompt = `
-        Context: ${websiteType} called "${context.businessName}"
-        Target Audience: ${targetAudience}
-        Domain: ${context.currentDomain}
-        
-        Task: ${field.prompt}
-        
-        Requirements:
-        - SEO Importance: ${field.seoImportance}
-        ${field.maxLength ? `- Maximum length: ${field.maxLength} characters` : ""}
-        - Content type: ${field.contentType}
-        - Make it unique and engaging
-        - Include relevant keywords naturally
-        - Match the brand voice (friendly, approachable, food-focused)
-        
-        Current content for reference:
-        - Site Title: "${settings.siteTitle}"
-        - Site Description: "${settings.siteDescription}"
-        - Logo Text: "${settings.logoText}"
-        
-        Generate ONLY the content, no explanations or quotes.
-      `;
-
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await fetch("/api/admin/generate-site-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          prompt: enhancedPrompt,
           field: field.key,
-          maxLength: field.maxLength,
-          contentType: field.contentType,
+          context,
+          provider: aiProvider // Use selected provider
         }),
       });
 
@@ -198,9 +151,10 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
         const generatedContent = result.content.trim();
         setLastGenerated(prev => ({ ...prev, [field.key]: generatedContent }));
         onUpdate(field.key, generatedContent);
+        const providerName = aiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT-4';
         setMessage({
           type: "success",
-          text: `Generated ${field.label} successfully!`
+          text: `Generated ${field.label} successfully with ${providerName}! ✨`
         });
       } else {
         throw new Error(result.error || "Failed to generate content");
@@ -218,6 +172,7 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
 
   const generateAllContent = async () => {
     setMessage(null);
+    const providerName = aiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT-4';
     for (const field of contentFields) {
       await generateContent(field);
       // Small delay between generations
@@ -225,7 +180,7 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
     }
     setMessage({
       type: "success",
-      text: "Generated all content successfully!"
+      text: `Generated all content successfully with ${providerName}! 🎉`
     });
   };
 
@@ -294,18 +249,32 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
             </p>
           </div>
         </div>
-        <button
-          onClick={generateAllContent}
-          disabled={!!generating}
-          className="flex items-center gap-2 px-3 py-1.5 bg-[#303740] text-white rounded text-xs hover:bg-[#404854] hover:scale-105 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          {generating ? (
-            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <Wand2 className="w-3.5 h-3.5" />
-          )}
-          Generate All
-        </button>
+        <div className="flex items-center gap-3">
+          {/* AI Provider Selector */}
+          <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
+            <Sparkles className="w-4 h-4 text-gray-500" />
+            <select
+              value={aiProvider}
+              onChange={(e) => setAiProvider(e.target.value as 'openai' | 'gemini')}
+              className="text-sm border-none outline-none bg-transparent cursor-pointer font-medium text-gray-700"
+            >
+              <option value="gemini">Google Gemini (Default)</option>
+              <option value="openai">OpenAI GPT-4</option>
+            </select>
+          </div>
+          <button
+            onClick={generateAllContent}
+            disabled={!!generating}
+            className="flex items-center gap-2 px-3 py-1.5 bg-[#303740] text-white rounded text-xs hover:bg-[#404854] hover:scale-105 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            {generating ? (
+              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Wand2 className="w-3.5 h-3.5" />
+            )}
+            Generate All
+          </button>
+        </div>
       </div>
 
       {message && (

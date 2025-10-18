@@ -9,7 +9,6 @@ import {
   Edit3,
   FileText,
 } from "lucide-react";
-import AIPrivacyGenerator from "./AIPrivacyGenerator";
 
 interface AdminSettings {
   staticPages: {
@@ -139,13 +138,20 @@ export default function ContentManagement({ className }: ContentManagementProps)
   };
 
   const startEditingFile = () => {
+    let contentToEdit = '';
     if (activeTab === "hero") {
-      setFileEditValue(settings.hero.content);
+      contentToEdit = settings.hero.content;
     } else {
-      setFileEditValue(
-        settings.staticPages[activeTab as keyof typeof settings.staticPages]
-      );
+      contentToEdit = settings.staticPages[activeTab as keyof typeof settings.staticPages];
     }
+    
+    console.log('=== START EDITING FILE ===');
+    console.log('Active tab:', activeTab);
+    console.log('Content length:', contentToEdit?.length || 0);
+    console.log('First 200 chars:', contentToEdit?.substring(0, 200));
+    console.log('Last 200 chars:', contentToEdit?.substring(Math.max(0, (contentToEdit?.length || 0) - 200)));
+    
+    setFileEditValue(contentToEdit);
     setEditingFile(true);
   };
 
@@ -166,16 +172,6 @@ export default function ContentManagement({ className }: ContentManagementProps)
     }
     setEditingFile(false);
     setFileEditValue("");
-  };
-
-  const handleAIPrivacyGenerated = (content: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      staticPages: {
-        ...prev.staticPages,
-        privacy: content,
-      },
-    }));
   };
 
   const cancelFileEdit = () => {
@@ -310,14 +306,6 @@ export default function ContentManagement({ className }: ContentManagementProps)
 
         {/* Content Editor */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
-          {/* AI Privacy Generator for Privacy Policy */}
-          {activeTab === "privacy" && (
-            <AIPrivacyGenerator
-              onGenerated={handleAIPrivacyGenerated}
-              currentContent={settings.staticPages.privacy}
-            />
-          )}
-
           {/* Hero Section Page Selector */}
           {activeTab === "hero" && (
             <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
