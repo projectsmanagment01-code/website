@@ -4,8 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import Header from "./layout/Header";
 import Footer from "./layout/Footer";
-import CustomCodeInjector from "@/components/CustomCodeInjector";
-import RawHeadHtml from "@/components/RawHeadHtml";
+import InjectRawHtml from "@/components/InjectRawHtml";
 import { getAdminSettings } from "@/lib/admin-settings";
 import { Fragment } from "react";
 import { headers } from "next/headers";
@@ -167,22 +166,32 @@ export default async function RootLayout({
           name="title"
           content="Guelma Team Recipes - Delicious Family-Friendly Recipes"
         />
+        
+        {/* Header Code Injection - Server-side rendered, visible in view-source */}
+        {!excludeScripts && settings.header?.html && settings.header.html.length > 0 && (
+          <InjectRawHtml html={settings.header.html} location="head" />
+        )}
+        
+        {/* Header CSS */}
+        {!excludeScripts && settings.header?.css && settings.header.css.length > 0 && (
+          <style dangerouslySetInnerHTML={{ __html: settings.header.css.join('\n') }} suppressHydrationWarning />
+        )}
+        
+        {/* Header JavaScript */}
+        {!excludeScripts && settings.header?.javascript && settings.header.javascript.length > 0 && (
+          <script dangerouslySetInnerHTML={{ __html: settings.header.javascript.join('\n') }} suppressHydrationWarning />
+        )}
       </head>
       <body className="layout-container" suppressHydrationWarning>
-        {/* Custom Header Code Injection - Client-side injection into <head> */}
-        {!excludeScripts && settings.header?.html && (
-          <RawHeadHtml html={settings.header.html.join('\n')} />
-        )}
-
-        {/* Custom Body Code */}
+        {/* Body Code Injection - Server-side rendered */}
         {bodyCode.html && (
-          <div dangerouslySetInnerHTML={{ __html: bodyCode.html }} />
+          <InjectRawHtml html={settings.body.html} location="body" />
         )}
         {bodyCode.css && (
-          <style dangerouslySetInnerHTML={{ __html: bodyCode.css }} />
+          <style dangerouslySetInnerHTML={{ __html: bodyCode.css }} suppressHydrationWarning />
         )}
         {bodyCode.javascript && (
-          <script dangerouslySetInnerHTML={{ __html: bodyCode.javascript }} />
+          <script dangerouslySetInnerHTML={{ __html: bodyCode.javascript }} suppressHydrationWarning />
         )}
 
         {!excludeLayout && <Header />}
@@ -191,15 +200,15 @@ export default async function RootLayout({
         </main>
         {!excludeLayout && <Footer />}
 
-        {/* Custom Footer Code */}
+        {/* Footer Code Injection - Server-side rendered */}
         {footerCode.html && (
-          <div dangerouslySetInnerHTML={{ __html: footerCode.html }} />
+          <InjectRawHtml html={settings.footer.html} location="footer" />
         )}
         {footerCode.css && (
-          <style dangerouslySetInnerHTML={{ __html: footerCode.css }} />
+          <style dangerouslySetInnerHTML={{ __html: footerCode.css }} suppressHydrationWarning />
         )}
         {footerCode.javascript && (
-          <script dangerouslySetInnerHTML={{ __html: footerCode.javascript }} />
+          <script dangerouslySetInnerHTML={{ __html: footerCode.javascript }} suppressHydrationWarning />
         )}
       </body>
     </html>
