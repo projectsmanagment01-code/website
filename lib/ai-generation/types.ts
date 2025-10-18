@@ -15,6 +15,7 @@ export interface AIGenerationResult {
   success: boolean;
   content: string;
   error?: string;
+  provider?: AIProvider;
 }
 
 export type AIProvider = 'openai' | 'gemini';

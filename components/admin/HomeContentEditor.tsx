@@ -56,29 +56,10 @@ const contentFields: ContentField[] = [
     label: "Hero Description",
     description: "Supporting text that describes your website's value",
     seoImportance: "high",
-    maxLength: 200,
+    maxLength: 120,
     contentType: "description",
     icon: <Type className="w-4 h-4" />,
-    prompt: "Write an engaging hero description for a recipe website. Explain what visitors will find, focus on family meals, easy cooking, and delicious results. Make it warm and inviting, under 200 characters."
-  },
-  {
-    key: "heroButtonText",
-    label: "Call-to-Action Button",
-    description: "Text for the main action button",
-    seoImportance: "high",
-    maxLength: 25,
-    contentType: "button",
-    icon: <MousePointer className="w-4 h-4" />,
-    prompt: "Create compelling call-to-action button text for a recipe website. Should encourage visitors to explore recipes. Make it action-oriented and under 25 characters. Examples: 'Explore Recipes', 'Start Cooking', 'Browse All'."
-  },
-  {
-    key: "heroButtonLink",
-    label: "Button Link",
-    description: "URL where the button should redirect",
-    seoImportance: "medium",
-    contentType: "link",
-    icon: <Link className="w-4 h-4" />,
-    prompt: "Suggest the best URL path for a recipe website's main call-to-action button. Should lead to the most valuable page for new visitors. Examples: '/recipes', '/categories', '/popular'."
+    prompt: "Write an engaging hero description for a recipe website. Explain what visitors will find, focus on family meals, easy cooking, and delicious results. Make it warm and inviting, under 120 characters."
   },
   {
     key: "metaTitle",
@@ -120,11 +101,27 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<any>(null);
 
-  // Load content on mount
+  // Load content and site settings on mount
   useEffect(() => {
     loadContent();
+    loadSiteSettings();
   }, []);
+
+  const loadSiteSettings = async () => {
+    try {
+      const response = await fetch("/api/admin/content/site", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+        },
+      });
+      const data = await response.json();
+      setSiteSettings(data);
+    } catch (error) {
+      console.error("Error loading site settings:", error);
+    }
+  };
 
   const loadContent = async () => {
     try {
@@ -155,48 +152,27 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
       setGenerating(field.key);
       setMessage(null);
 
+      // Get context from AI Context Settings (Site Settings)
       const context = {
-        websiteType: "recipe website",
-        businessName: "Recipe Website",
-        targetAudience: "food lovers and home cooks",
-        currentTitle: content.heroTitle,
-        currentDescription: content.heroDescription,
+        websiteName: siteSettings?.websiteName || siteSettings?.logoText || "Recipe Website",
+        businessType: siteSettings?.businessType || "Recipe & Cooking",
+        ownerName: siteSettings?.ownerName || "Website Owner",
+        country: siteSettings?.country || "United States",
+        primaryLanguage: siteSettings?.primaryLanguage || "English",
+        siteDomain: siteSettings?.siteDomain || window.location.hostname || "recipeswebsite.com"
       };
 
-      const enhancedPrompt = `
-        Context: ${context.websiteType} called "${context.businessName}"
-        Target Audience: ${context.targetAudience}
-        
-        Task: ${field.prompt}
-        
-        Requirements:
-        - SEO Importance: ${field.seoImportance}
-        ${field.maxLength ? `- Maximum length: ${field.maxLength} characters` : ""}
-        - Content type: ${field.contentType}
-        - Make it unique and engaging
-        - Include relevant keywords naturally
-        - Match the brand voice (friendly, approachable, food-focused)
-        
-        Current content for reference:
-        - Hero Title: "${content.heroTitle}"
-        - Hero Description: "${content.heroDescription}"
-        - Meta Title: "${content.metaTitle}"
-        
-        Generate ONLY the content, no explanations or quotes.
-      `;
-
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await fetch("/api/admin/generate-homepage-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          prompt: enhancedPrompt,
           field: field.key,
-          maxLength: field.maxLength,
-          contentType: field.contentType,
+          context,
+          provider: "gemini"  // Default to Gemini
         }),
       });
 
@@ -208,7 +184,7 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
         updateField(field.key, generatedContent);
         setMessage({
           type: "success",
-          text: `Generated ${field.label} successfully!`
+          text: `Generated ${field.label} successfully with ${result.provider === 'gemini' ? 'Google Gemini' : 'OpenAI'}! ✨`
         });
       } else {
         throw new Error(result.error || "Failed to generate content");

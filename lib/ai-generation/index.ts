@@ -13,5 +13,8 @@
 // Site Settings
 export * from './site-settings';
 
+// Homepage
+export * from './homepage';
+
 // Shared Types
 export type { SiteContext, AIGenerationResult, AIProvider } from './types';
