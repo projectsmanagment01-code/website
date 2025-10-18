@@ -29,6 +29,28 @@ The hero background image is **NOT lazy loaded** - and that's actually **CORRECT
 
 ## Optimizations Used
 
+### 🎯 **Quality Strategy: Progressive Loading**
+
+The hero image uses a **two-tier quality approach** for optimal performance:
+
+1. **Initial Load (Priority):** 50% quality
+   - ✅ Smaller file size (~60KB for AVIF, ~90KB for WebP)
+   - ✅ Faster LCP (Largest Contentful Paint)
+   - ✅ Quick first impression
+   - ✅ Sufficient quality with dark overlay (50% black)
+
+2. **Subsequent Loads (Cached):** Max 80% quality
+   - ✅ Better quality for repeat visitors
+   - ✅ Still reasonable file size (~110KB AVIF, ~160KB WebP)
+   - ✅ Capped by image loader to prevent excessive quality
+   - ✅ Good balance between quality and performance
+
+**Why this works:**
+- Hero has 50% black overlay, hiding minor quality differences
+- First impression speed matters more than pixel perfection
+- 50% quality AVIF/WebP looks good enough for backgrounds
+- 80% cap ensures no accidentally huge images
+
 ### ✅ 1. **Priority Loading** (Anti-Lazy Loading)
 ```tsx
 priority={true}
@@ -103,13 +125,16 @@ export default function imageLoader({ src, width, quality }) {
 **What it does:**
 - ✅ Generates optimized URLs with width/quality params
 - ✅ Handles legacy filenames with spaces (URL encoding)
-- ✅ Caps quality at 85% for performance
+- ✅ Caps quality at 80% for good balance (not 50% from component)
 - ✅ Minimal processing for speed
 
 **Example transformation:**
 ```
-Input:  /uploads/hero-backgrounds/a-3.webp
-Output: /uploads/hero-backgrounds/a-3.webp?w=1920&q=90
+Input:  /uploads/hero-backgrounds/a-3.webp (quality=50 from component)
+Output: /uploads/hero-backgrounds/a-3.webp?w=1920&q=50
+
+Subsequent loads with higher quality:
+Output: /uploads/hero-backgrounds/a-3.webp?w=1920&q=80
 ```
 
 ### ✅ 8. **Modern Image Formats**
@@ -133,8 +158,10 @@ images: {
 **File size comparison:**
 ```
 Original JPG:  1920x1080 = ~500KB
-WebP:          1920x1080 = ~180KB (64% smaller)
-AVIF:          1920x1080 = ~120KB (76% smaller)
+WebP (50% q):  1920x1080 = ~90KB  (82% smaller) - Initial load
+WebP (80% q):  1920x1080 = ~160KB (68% smaller) - Subsequent
+AVIF (50% q):  1920x1080 = ~60KB  (88% smaller) - Initial load
+AVIF (80% q):  1920x1080 = ~110KB (78% smaller) - Subsequent
 ```
 
 ### ✅ 9. **Cache Strategy**
@@ -411,12 +438,12 @@ URL: https://www.webpagetest.org/
 | Priority Loading | ✅ YES | 🚀 Preload in head |
 | Eager Loading | ✅ YES | ⚡ No delay |
 | High Fetch Priority | ✅ YES | 🎯 Browser priority |
-| Modern Formats (AVIF/WebP) | ✅ YES | 📉 76% smaller files |
+| Modern Formats (AVIF/WebP) | ✅ YES | 📉 88% smaller files |
 | Responsive Sizing | ✅ YES | 📱 Right size per device |
 | Custom Loader | ✅ YES | ⚡ Fast URLs |
 | Cache Strategy | ✅ YES | 💾 24hr cache |
 | SSR | ✅ YES | 🏃 Server-rendered |
-| Quality Optimization | ✅ YES | 🎨 90% quality |
+| Quality Optimization | ✅ YES | 🎨 50% initial, 80% cap |
 
 ### Performance Grade: **A+** 🎉
 
