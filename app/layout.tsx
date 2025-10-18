@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "./layout/Header";
 import Footer from "./layout/Footer";
 import CustomCodeInjector from "@/components/CustomCodeInjector";
+import RawHeadHtml from "@/components/RawHeadHtml";
 import { getAdminSettings } from "@/lib/admin-settings";
 import { Fragment } from "react";
 import { headers } from "next/headers";
@@ -166,34 +167,13 @@ export default async function RootLayout({
           name="title"
           content="Guelma Team Recipes - Delicious Family-Friendly Recipes"
         />
-
-        {!excludeScripts &&
-          settings.header?.html?.map((script, index) => {
-            // If it's a script tag, parse src and other attributes
-            if (script.trim().startsWith("<script")) {
-              const srcMatch = script.match(/src=["']([^"']+)["']/);
-              const asyncMatch = script.includes("async");
-              const deferMatch = script.includes("defer");
-              const crossOriginMatch = script.match(
-                /crossorigin=["']([^"']+)["']/
-              ) as any;
-
-              if (srcMatch) {
-                return (
-                  <script
-                    key={`header-script-${index}`}
-                    src={srcMatch[1]}
-                    async={asyncMatch}
-                    defer={deferMatch}
-                    crossOrigin={crossOriginMatch[1]}
-                  />
-                );
-              }
-            }
-            return null;
-          })}
       </head>
       <body className="layout-container" suppressHydrationWarning>
+        {/* Custom Header Code Injection - Client-side injection into <head> */}
+        {!excludeScripts && settings.header?.html && (
+          <RawHeadHtml html={settings.header.html.join('\n')} />
+        )}
+
         {/* Custom Body Code */}
         {bodyCode.html && (
           <div dangerouslySetInnerHTML={{ __html: bodyCode.html }} />
