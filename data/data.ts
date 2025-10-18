@@ -725,56 +725,42 @@ function createCategoryFromName(
 }
 
 /**
- * Get all categories
+ * Get all categories - Uses new Category table
  */
 async function getCategories(): Promise<Category[]> {
   try {
     return await fetchWithFallback(
       async () => {
-        const prisma = await getPrisma();
-        const recipes = await prisma.recipe.findMany({
-          where: { href: { not: null } }, // Only count published recipes for categories
-          select: {
-            category: true,
-            categoryLink: true,
-            images: true,
-          },
+        // Import the new category service
+        const { getCategories: getCategoriesNew } = await import('@/lib/category-service-new');
+        
+        // Fetch categories from the new Category table
+        const dbCategories = await getCategoriesNew({
+          includeInactive: false,
+          includeCount: true,
+          orderBy: 'order',
+          orderDirection: 'asc'
         });
 
-        const categoryMap = new Map<
-          string,
-          { count: number; link: string; image?: string }
-        >();
+        console.log('📊 Fetched categories from DB:', dbCategories.length);
 
-        recipes.forEach((recipe) => {
-          if (recipe.category) {
-            const existing = categoryMap.get(recipe.category);
-            if (existing) {
-              existing.count += 1;
-              // Use first available image
-              if (!existing.image && recipe.images?.[0]) {
-                existing.image = recipe.images[0];
-              }
-            } else {
-              categoryMap.set(recipe.category, {
-                count: 1,
-                link: `/categories/${recipe.category
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")}`,
-                image: recipe.images?.[0],
-              });
-            }
-          }
-        });
+        // Transform to match old Category interface
+        const categories: Category[] = dbCategories.map((cat) => ({
+          id: cat.slug,
+          name: cat.name,
+          title: cat.name, // Add title property
+          slug: cat.slug,
+          description: cat.description || '',
+          image: cat.image,
+          alt: `${cat.name} recipes`,
+          href: `/categories/${cat.slug}`,
+          recipeCount: cat._count?.recipes || 0,
+          color: cat.color,
+          metaTitle: cat.metaTitle,
+          metaDescription: cat.metaDescription,
+        }));
 
-        const categories = Array.from(categoryMap.entries()).map(
-          ([categoryName, { count, link, image }]) =>
-            createCategoryFromName(categoryName, count, link, image)
-        );
-
-        return categories.sort(
-          (a, b) => (b.recipeCount || 0) - (a.recipeCount || 0)
-        );
+        return categories;
       },
       `${BASE_URL}/api/categories`,
       {

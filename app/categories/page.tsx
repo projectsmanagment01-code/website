@@ -1,4 +1,5 @@
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
+export const revalidate = 3600; // Revalidate every hour
 
 import React from "react";
 import Link from "next/link";
@@ -155,15 +156,24 @@ function Explore({ recipes }: any) {
 }
 
 export default async function CategoriesPage() {
-  const categories = (await getCategories()) as any;
+  try {
+    console.log("🔍 Fetching categories...");
+    const categories = (await getCategories()) as any;
+    
+    console.log(`✅ Fetched ${categories?.length || 0} categories`);
 
-  if (!categories || categories.length === 0) {
+    if (!categories || categories.length === 0) {
+      console.warn("⚠️ No categories found, showing 404");
+      notFound();
+    }
+
+    return (
+      <main className="container-md section-md">
+        <Categories categories={categories} />
+      </main>
+    );
+  } catch (error) {
+    console.error("❌ Error fetching categories:", error);
     notFound();
   }
-
-  return (
-    <main className="container-md section-md">
-      <Categories categories={categories} />
-    </main>
-  );
 }
