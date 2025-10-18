@@ -2,6 +2,7 @@ import React from "react";
 import { Article, Recipe } from "@/outils/types";
 import { getLatestArticles } from "@/data/data";
 import latestArticles from "@/data/articles";
+import { ArrowRight } from 'lucide-react';
 
 interface LatestArticlesSectionProps {
   className?: string;
@@ -47,9 +48,7 @@ export default async function LatestArticlesSection({
               title="All Articles"
               className="text-white font-bold items-center bg-neutral-900 box-border flex ml-4 my-4 p-2 rounded-[50%]"
             >
-              <svg className="w-3 h-3 text-white">
-                <use href="/symbols-v4.svg?#arrow-right"></use>
-              </svg>
+              <ArrowRight className="w-3 h-3 text-white" />
             </a>
           </div>
 

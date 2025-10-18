@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SocialShareButtons from "./Share";
 import Recipe from "@/outils/types";
-import React from "react";
+import { ChefHat, Info, Mail, Grid, HelpCircle } from 'lucide-react';
 import { hasHtmlTags, renderSafeHtml } from "@/lib/utils";
 import { Calendar, Clock } from "lucide-react";
 
@@ -89,9 +89,7 @@ export function RecipeHero({ recipe }: { recipe?: Recipe }) {
             <h1 className="leading-tight text-5xl text-black">All Recipes</h1>
           </div>
           <div className="landing__media hidden md:block">
-            <svg width="160" height="160" className="">
-              <use href="/symbols-v4.svg?#recipes"></use>
-            </svg>
+            <ChefHat size={160} className="text-orange-500" />
           </div>
         </div>
       </>
@@ -166,9 +164,7 @@ export function RecipeHero({ recipe }: { recipe?: Recipe }) {
         </div>
 
         <div className="landing__media hidden md:block md:flex-shrink-0">
-          <svg width="160" height="160" className="">
-            <use href="/symbols-v4.svg?#about"></use>
-          </svg>
+          <Info size={160} className="text-blue-500" />
         </div>
       </div>
     );
@@ -196,9 +192,7 @@ export function RecipeHero({ recipe }: { recipe?: Recipe }) {
         </div>
 
         <div className="landing__media hidden md:block md:flex-shrink-0">
-          <svg width="160" height="160" className="">
-            <use href="/symbols-v4.svg?#contact"></use>
-          </svg>
+          <Mail size={160} className="text-green-500" />
         </div>
       </div>
     );
@@ -223,12 +217,6 @@ export function RecipeHero({ recipe }: { recipe?: Recipe }) {
               </div>
             </div>
           </>
-        </div>
-
-        <div className="landing__media hidden md:block md:flex-shrink-0">
-          <svg width="160" height="160" className="">
-            <use href="/symbols-v4.svg?#categories"></use>
-          </svg>
         </div>
       </div>
     );
@@ -255,9 +243,7 @@ export function RecipeHero({ recipe }: { recipe?: Recipe }) {
         </div>
 
         <div className="landing__media hidden md:block md:flex-shrink-0">
-          <svg width="160" height="160" className="">
-            <use href="/symbols-v4.svg?#faq"></use>
-          </svg>
+          <HelpCircle size={160} className="text-indigo-500" />
         </div>
       </div>
     );

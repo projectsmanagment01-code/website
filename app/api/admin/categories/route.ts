@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, description, image, icon, color, order, metaTitle, metaDescription } = body;
+    const { name, description, image, color, order, metaTitle, metaDescription } = body;
 
     // Validate required fields
     if (!name) {
@@ -87,7 +87,6 @@ export async function POST(request: NextRequest) {
       name,
       description,
       image,
-      icon,
       color,
       order,
       metaTitle,

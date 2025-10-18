@@ -37,49 +37,50 @@ export default async function AuthorsPage() {
           </p>
         </div>
 
-        {/* Authors Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {authors.map((author) => {
+        {/* Authors List - One Per Line, Alternating Layout */}
+        <div className="space-y-16">
+          {authors.map((author, index) => {
             const imageUrl = getAuthorImageUrl(author);
+            const isEven = index % 2 === 0;
             
             return (
               <article 
                 key={author.id}
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-visible hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300"
               >
-                <div className="flex flex-col md:flex-row md:items-center p-8 gap-6">
-                  {/* Author Image - Perfect Circle */}
+                <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 p-8`}>
+                  {/* Author Image */}
                   <div className="flex-shrink-0 mx-auto md:mx-0">
                     <Image
                       src={imageUrl}
                       alt={author.name}
-                      width={224}
-                      height={224}
-                      className="rounded-full object-cover shadow-xl ring-4 ring-white"
-                      style={{ width: '224px', height: '224px', minWidth: '224px', minHeight: '224px' }}
-                      sizes="224px"
+                      width={300}
+                      height={300}
+                      className="rounded-2xl object-cover shadow-xl"
+                      style={{ width: '300px', height: '300px', minWidth: '300px', minHeight: '300px' }}
+                      sizes="300px"
                     />
                   </div>
 
                   {/* Author Info */}
-                  <div className="flex-1">
+                  <div className="flex-1 flex flex-col justify-center">
                     {/* Name & Stats */}
-                    <div className="mb-4">
-                      <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    <div className="mb-6">
+                      <h2 className="text-4xl font-bold text-gray-900 mb-3">
                         {author.name}
                       </h2>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <BookOpen className="w-4 h-4" />
+                      <div className="flex items-center gap-4 text-base text-gray-600">
+                        <span className="flex items-center gap-2">
+                          <BookOpen className="w-5 h-5" />
                           <strong>{author.recipeCount}</strong> {author.recipeCount === 1 ? 'Recipe' : 'Recipes'}
                         </span>
                       </div>
                     </div>
 
-                    {/* Bio */}
+                    {/* Bio - Full Text, No Truncation */}
                     {author.bio && (
                       <div className="mb-6">
-                        <p className="text-gray-700 leading-relaxed line-clamp-4">
+                        <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
                           {author.bio}
                         </p>
                       </div>
@@ -88,10 +89,10 @@ export default async function AuthorsPage() {
                     {/* Tags */}
                     {author.tags && author.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2">
-                        {author.tags.slice(0, 4).map((tag) => (
+                        {author.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full font-medium"
+                            className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-full font-medium"
                           >
                             {tag}
                           </span>

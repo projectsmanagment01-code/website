@@ -3,6 +3,7 @@ import { apiClient } from "@/lib/api-client";
 import latestArticles from "./articles";
 import { unstable_cache } from "next/cache";
 import { resolveRecipeAuthors, getRecipeWithAuthor } from "@/lib/enhanced-recipe-data";
+import { getAuthorImageUrl } from "@/lib/author-image";
 
 // Ensure Node.js types are available
 declare const process: {
@@ -315,6 +316,9 @@ async function getRecipesPaginated(
       const [recipes, totalCount] = await Promise.all([
         prisma.recipe.findMany({
           where: { href: { not: null } }, // Only show published recipes (with href)
+          include: {
+            authorRef: true  // ✅ Include author in same query
+          },
           orderBy: { createdAt: "desc" },
           skip: skip,
           take: limit,
@@ -322,8 +326,19 @@ async function getRecipesPaginated(
         prisma.recipe.count({ where: { href: { not: null } } }), // Count only published recipes
       ]);
 
+      // Map authorRef to author for compatibility
+      const recipesWithAuthors = recipes.map((recipe: any) => ({
+        ...recipe,
+        author: recipe.authorRef ? {
+          name: recipe.authorRef.name,
+          bio: recipe.authorRef.bio || '',
+          avatar: getAuthorImageUrl(recipe.authorRef),
+          link: recipe.authorRef.link || `/authors/${recipe.authorRef.slug}`
+        } : undefined
+      }));
+
       return {
-        recipes: recipes as unknown as Recipe[],
+        recipes: recipesWithAuthors as unknown as Recipe[],
         pagination: {
           page,
           limit,
@@ -364,7 +379,22 @@ async function getRecipe(slug: string): Promise<Recipe | null> {
               mode: "insensitive",
             },
           },
+          include: {
+            authorRef: true  // ✅ Include author in same query
+          }
         });
+        
+        // Map authorRef to author for compatibility
+        if (recipe && (recipe as any).authorRef) {
+          const authorRef = (recipe as any).authorRef;
+          (recipe as any).author = {
+            name: authorRef.name,
+            bio: authorRef.bio || '',
+            avatar: getAuthorImageUrl(authorRef),
+            link: authorRef.link || `/authors/${authorRef.slug}`
+          };
+        }
+        
         return recipe as unknown as Recipe | null;
       },
       `${BASE_URL}/api/recipe?slug=${encodeURIComponent(slug)}`,
@@ -374,12 +404,8 @@ async function getRecipe(slug: string): Promise<Recipe | null> {
       }
     );
 
-    // Resolve author data for the recipe
-    if (recipe) {
-      return await getRecipeWithAuthor(async () => recipe);
-    }
-
-    return null;
+    // No need to resolve author - already included in query
+    return recipe;
   } catch (error) {
     // Handle 404 case specifically
     if (error instanceof Error && error.message.includes("404")) {
@@ -405,6 +431,9 @@ async function getTrending(limit: number = 10): Promise<Recipe[]> {
             views: {
               gt: 0, // Only include recipes that have been viewed
             },
+          },
+          include: {
+            authorRef: true  // ✅ Include author in same query
           },
           orderBy: [
             { views: "desc" }, // Primary sort by views
@@ -434,6 +463,13 @@ async function getTrending(limit: number = 10): Promise<Recipe[]> {
               ...recipe,
               trendingScore,
               featuredText: "Trending Now",
+              // Map authorRef to author for compatibility
+              author: recipe.authorRef ? {
+                name: recipe.authorRef.name,
+                bio: recipe.authorRef.bio || '',
+                avatar: getAuthorImageUrl(recipe.authorRef),
+                link: recipe.authorRef.link || `/authors/${recipe.authorRef.slug}`
+              } : undefined
             };
           })
           .sort((a, b) => b.trendingScore - a.trendingScore) // Sort by trending score
@@ -453,8 +489,8 @@ async function getTrending(limit: number = 10): Promise<Recipe[]> {
       }
     );
 
-    // Resolve authors for trending recipes
-    return await resolveRecipeAuthors(recipes);
+    // No need to resolve authors - already included in query
+    return recipes;
   } catch (error) {
     console.error("❌ Failed to fetch trending recipes:", error);
     return [];
@@ -516,9 +552,12 @@ async function getRelated(
           console.log("⚠️ No category found, showing recent recipes");
         }
         
-        // Get recipes from the SAME CATEGORY
+        // Get recipes from the SAME CATEGORY with author included
         const recipes = await prisma.recipe.findMany({
           where: whereClause,
+          include: {
+            authorRef: true  // ✅ Include author in same query
+          },
           take: limit,
           orderBy: { createdAt: "desc" },
         });
@@ -528,6 +567,13 @@ async function getRelated(
         return recipes.map((recipe: any) => ({
           ...recipe,
           featuredText: "Related Recipe",
+          // Map authorRef to author for compatibility
+          author: recipe.authorRef ? {
+            name: recipe.authorRef.name,
+            bio: recipe.authorRef.bio || '',
+            avatar: getAuthorImageUrl(recipe.authorRef),
+            link: recipe.authorRef.link || `/authors/${recipe.authorRef.slug}`
+          } : undefined
         })) as Recipe[];
       },
       `${BASE_URL}/api/recipe/related?id=${encodeURIComponent(
@@ -539,8 +585,8 @@ async function getRelated(
       }
     );
 
-    // Resolve authors for related recipes
-    return await resolveRecipeAuthors(recipes);
+    // No need to resolve authors - already included in query
+    return recipes;
   } catch (error) {
     console.error("❌ Failed to fetch related recipes:", error);
     return [];
@@ -655,6 +701,13 @@ function createCategoryFromName(
 
   const slug = normalizedName.replace(/\s+/g, "-");
 
+  // Handle image URL - if it's a relative path, make it absolute
+  let imageUrl = image || "/images/categories/default.jpg";
+  
+  // If image starts with /uploads, it's from the database and should work as-is
+  // Next.js will handle it through the image optimization API
+  // No need to prepend domain - relative paths work better for cross-environment compatibility
+
   return {
     id: slug,
     slug,
@@ -664,7 +717,7 @@ function createCategoryFromName(
       .join(" "),
     href: link,
     description: `Discover ${count} delicious ${normalizedName} recipes`,
-    image: image || "/images/categories/default.jpg",
+    image: imageUrl,
     alt: `${normalizedName} recipes`,
     sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
     recipeCount: count,

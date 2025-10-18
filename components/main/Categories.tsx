@@ -1,5 +1,6 @@
 import { Category } from "@/outils/types";
 import React from "react";
+import Image from "next/image";
 
 export default function Categories({ categories }: any) {
   return (
@@ -25,13 +26,14 @@ export default function Categories({ categories }: any) {
                 title={category.description}
                 className="block relative overflow-hidden rounded-xl h-40 no-underline transform transition-transform duration-300 hover:scale-105"
               >
-                <img
+                <Image
                   className="w-full h-full object-cover object-left-center bg-stone-100 transition-transform duration-300 group-hover:scale-110"
                   height={160}
                   width={372}
                   alt={category.alt}
                   src={category.image}
                   loading="lazy"
+                  unoptimized={false}
                 />
                 <span
                   className="absolute bottom-0 left-4 text-xl font-black text-black"

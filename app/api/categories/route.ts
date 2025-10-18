@@ -91,39 +91,50 @@ export async function GET(request: Request) {
       
       // If we have categories in the database, use them
       if (dbCategories && dbCategories.length > 0) {
-        // HYBRID COUNT: Count recipes using BOTH new categoryId and old category string
-        // This ensures accurate counts during migration period
-        const categoriesWithHybridCount = await Promise.all(
-          dbCategories.map(async (cat) => {
-            // Count recipes with new categoryId relationship
-            const newSystemCount = cat._count?.recipes || 0;
-            
-            // Count recipes with old category string that matches this category's slug
-            const oldSystemCount = await prisma.recipe.count({
-              where: {
-                category: {
-                  equals: cat.slug,
-                  mode: 'insensitive'
-                }
-              }
-            });
-            
-            // Use whichever count is higher (handles partial migration)
-            const totalCount = Math.max(newSystemCount, oldSystemCount);
-            
-            return {
-              id: cat.id,
-              slug: cat.slug,
-              title: cat.name,
-              href: `/categories/${cat.slug}`,
-              alt: `${cat.name} recipes`,
-              description: cat.description || `Discover ${totalCount} delicious ${cat.name} recipes`,
-              image: safeImageUrl(cat.image),
-              sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
-              recipeCount: totalCount
-            };
-          })
-        );
+        // ✅ OPTIMIZED: Get old system counts in ONE batched query
+        const oldSystemCounts = await prisma.recipe.groupBy({
+          by: ['category'],
+          where: {
+            category: {
+              not: ''
+            }
+          },
+          _count: {
+            id: true
+          }
+        });
+
+        // Create lookup map for O(1) access
+        const oldCountMap = new Map<string, number>();
+        oldSystemCounts.forEach((group) => {
+          if (group.category && group._count && typeof group._count === 'object' && 'id' in group._count) {
+            oldCountMap.set(group.category.toLowerCase(), group._count.id);
+          }
+        });
+
+        // HYBRID COUNT: Use BOTH new categoryId and old category string
+        const categoriesWithHybridCount = dbCategories.map((cat) => {
+          // Count recipes with new categoryId relationship
+          const newSystemCount = cat._count?.recipes || 0;
+          
+          // Count recipes with old category string (from batched query)
+          const oldSystemCount = oldCountMap.get(cat.slug.toLowerCase()) || 0;
+          
+          // Use whichever count is higher (handles partial migration)
+          const totalCount = Math.max(newSystemCount, oldSystemCount);
+          
+          return {
+            id: cat.id,
+            slug: cat.slug,
+            title: cat.name,
+            href: `/categories/${cat.slug}`,
+            alt: `${cat.name} recipes`,
+            description: cat.description || `Discover ${totalCount} delicious ${cat.name} recipes`,
+            image: safeImageUrl(cat.image),
+            sizes: "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
+            recipeCount: totalCount
+          };
+        });
         
         return NextResponse.json(categoriesWithHybridCount);
       }

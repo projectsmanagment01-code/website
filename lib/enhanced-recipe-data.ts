@@ -47,13 +47,60 @@ async function resolveRecipeAuthor(recipe: Recipe): Promise<Recipe> {
 
 /**
  * Resolve authors for multiple recipes in batch
+ * ✅ OPTIMIZED: Fetches all unique authors in ONE query instead of N queries
  */
 export async function resolveRecipeAuthors(recipes: Recipe[]): Promise<Recipe[]> {
-  const resolvedRecipes = await Promise.all(
-    recipes.map(recipe => resolveRecipeAuthor(recipe))
-  );
+  // Step 1: Get unique author IDs
+  const authorIds = [...new Set(
+    recipes
+      .map(r => r.authorId)
+      .filter((id): id is string => id !== null && id !== undefined)
+  )];
+
+  if (authorIds.length === 0) {
+    return recipes; // No authors to resolve
+  }
+
+  // Step 2: Fetch ALL authors in ONE query (instead of N queries)
+  const prisma = (await import('@/lib/prisma')).default;
   
-  return resolvedRecipes;
+  const authors = await prisma.author.findMany({
+    where: {
+      id: { in: authorIds }
+    }
+  });
+
+  // Step 3: Create lookup map for O(1) access
+  const authorMap = new Map(authors.map((a: any) => [a.id, a]));
+
+  // Step 4: Resolve authors (no additional database queries)
+  return recipes.map(recipe => {
+    // If recipe already has author data, return as-is
+    if (recipe.author && !recipe.authorId) {
+      return recipe;
+    }
+
+    if (!recipe.authorId) {
+      return recipe;
+    }
+    
+    const authorEntity = authorMap.get(recipe.authorId);
+    if (!authorEntity) {
+      return recipe;
+    }
+
+    const author: Author = {
+      name: authorEntity.name,
+      bio: authorEntity.bio || '',
+      avatar: getAuthorImageUrl(authorEntity),
+      link: authorEntity.link || `/authors/${authorEntity.slug}`
+    };
+
+    return {
+      ...recipe,
+      author
+    };
+  });
 }
 
 /**
