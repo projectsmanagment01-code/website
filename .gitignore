@@ -33,6 +33,24 @@ yarn-error.log*
 # uploads directory (contains settings but not secrets anymore)
 /uploads/ai-settings.json
 
+# Configuration files that should be stored in database
+# These are generated from DB and should not be committed
+data/config/home.json
+data/config/site.json
+data/config/contact-content.json
+data/config/cookies-content.json
+data/config/*-content.json
+
+# Page content files - stored in database, not in Git
+uploads/content/privacy.json
+uploads/content/terms.json
+uploads/content/about.json
+uploads/content/contact.json
+uploads/content/faq.json
+uploads/content/disclaimer.json
+uploads/content/cookies.json
+uploads/content/*.json
+
 # vercel
 .vercel
 

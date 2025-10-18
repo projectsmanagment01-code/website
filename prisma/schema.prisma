@@ -129,6 +129,38 @@ model AdminSettings {
   updatedBy String?
 }
 
+// Store site configuration (hero content, site info, social links)
+// This prevents config from being overwritten on deployments
+model SiteConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique // "hero", "site", "social_links"
+  data      Json     // Store the entire config object as JSON
+  updatedAt DateTime @updatedAt
+  updatedBy String?  // Track who made changes
+  
+  @@map("site_config")
+}
+
+// Store all page content (privacy, terms, about, contact, faq, disclaimer, cookies, etc.)
+// This prevents content from being overwritten on deployments
+model PageContent {
+  id              String   @id @default(cuid())
+  page            String   @unique // "privacy", "terms", "about", "contact", "faq", "disclaimer", "cookies"
+  title           String?  @db.Text
+  heroTitle       String?  @db.Text
+  heroDescription String?  @db.Text
+  heroIntro       String?  @db.Text
+  content         String?  @db.Text // HTML or JSON content
+  metaTitle       String?  @db.Text
+  metaDescription String?  @db.Text
+  data            Json?    // Additional structured data (e.g., contact cards, FAQ items)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  updatedBy       String?  // Track who made changes
+  
+  @@map("page_content")
+}
+
 model ApiToken {
   id          String    @id @default(cuid())
   name        String

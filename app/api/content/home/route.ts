@@ -1,61 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { getHeroConfig, getSiteInfo } from "@/lib/site-config-service";
 
-// SECURE: Path to store content files - NOT publicly accessible
-const CONFIG_DIR = path.join(process.cwd(), "data", "config");
-
-// Ensure config directory exists
-async function ensureConfigDir() {
-  try {
-    await fs.access(CONFIG_DIR);
-  } catch {
-    await fs.mkdir(CONFIG_DIR, { recursive: true });
-    console.log("✅ Created secure config directory");
-  }
-}
-
+/**
+ * GET /api/content/home
+ * Returns hero content and basic site info from database
+ * Previously read from JSON files which were overwritten on deployment
+ */
 export async function GET() {
   try {
-    await ensureConfigDir();
-    const filePath = path.join(CONFIG_DIR, "home.json");
+    // Fetch from database instead of JSON files
+    const [heroConfig, siteInfo] = await Promise.all([
+      getHeroConfig(),
+      getSiteInfo(),
+    ]);
 
-    try {
-      const content = await fs.readFile(filePath, "utf-8");
-      const data = JSON.parse(content);
-      
-      // Return only the fields needed for the public website
-      return NextResponse.json({
-        heroTitle: data.heroTitle || "",
-        heroDescription: data.heroDescription || "",
-        heroButtonText: data.heroButtonText || "",
-        heroButtonLink: data.heroButtonLink || "",
-        heroBackgroundImage: data.heroBackgroundImage || "",
-        logoType: data.logoType || "text",
-        logoText: data.logoText || "",
-        logoTagline: data.logoTagline || "",
-        logoImage: data.logoImage || "",
-        favicon: data.favicon || "",
-        footerCopyright: data.footerCopyright || "",
-        footerVersion: data.footerVersion || "",
-      });
-    } catch (error) {
-      // Return empty content if file doesn't exist
-      return NextResponse.json({
-        heroTitle: "",
-        heroDescription: "",
-        heroButtonText: "",
-        heroButtonLink: "",
-        heroBackgroundImage: "",
-        logoType: "text",
-        logoText: "",
-        logoTagline: "",
-        logoImage: "",
-        favicon: "",
-        footerCopyright: "",
-        footerVersion: "",
-      });
-    }
+    // Return combined data for public website
+    return NextResponse.json({
+      heroTitle: heroConfig.title || "",
+      heroDescription: heroConfig.description || "",
+      heroButtonText: heroConfig.buttonText || "",
+      heroButtonLink: heroConfig.buttonLink || "",
+      heroBackgroundImage: heroConfig.backgroundImage || "",
+      logoType: siteInfo.logoType || "text",
+      logoText: siteInfo.logoText || "",
+      logoTagline: siteInfo.logoTagline || "",
+      logoImage: siteInfo.logoImage || "",
+      favicon: siteInfo.favicon || "",
+      footerCopyright: siteInfo.footerCopyright || "",
+      footerVersion: siteInfo.footerVersion || "",
+    });
   } catch (error) {
     console.error("Error loading home content:", error);
     
