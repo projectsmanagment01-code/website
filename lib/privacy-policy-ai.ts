@@ -2,6 +2,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { getAdminSettings } from '@/lib/admin-settings';
+//dwedwedwdwdwdwdwdw
 
 interface PrivacyPolicyData {
   title: string;
