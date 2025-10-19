@@ -12,11 +12,12 @@ import HomeContentEditor from "@/components/admin/HomeContentEditor";
 import SiteSettingsEditor from "@/components/admin/SiteSettingsEditor";
 import AboutContentEditor from "@/components/admin/AboutContentEditor";
 import ContactContentEditor from "@/components/admin/ContactContentEditor";
-import DisclaimerContentEditor from "@/components/admin/DisclaimerContentEditor";
-import CookiesContentEditor from "@/components/admin/CookiesContentEditor";
 import FAQContentManager from "@/components/admin/FAQContentManager";
 import SocialMediaManager from "@/components/admin/SocialMediaManager";
 import PrivacyPolicyCMS from "@/components/admin/PrivacyPolicyCMS";
+import DisclaimerPolicyCMS from "@/components/admin/DisclaimerPolicyCMS";
+import TermsPolicyCMS from "@/components/admin/TermsPolicyCMS";
+import CookiesPolicyCMS from "@/components/admin/CookiesPolicyCMS";
 import Settings from "@/components/admin/Settings";
 import AIPlugin from "@/components/admin/AIPlugin";
 import AuthorManagement from "@/components/admin/authors/AuthorManagement";
@@ -99,21 +100,13 @@ function AdminDashboardContent() {
       case "content-privacy":
         return <PrivacyPolicyCMS onBack={() => setActiveSection("content")} />;
       case "content-terms":
-        return (
-          <GenericContentEditor
-            pageId="terms"
-            pageTitle="Terms of Service"
-            pageDescription="Terms of service and legal conditions"
-            previewPath="/terms"
-            onBack={() => setActiveSection("content")}
-          />
-        );
+        return <TermsPolicyCMS onBack={() => setActiveSection("content")} />;
       case "content-faq":
         return <FAQContentManager onBack={() => setActiveSection("content")} />;
       case "content-disclaimer":
-        return <DisclaimerContentEditor onBack={() => setActiveSection("content")} />;
+        return <DisclaimerPolicyCMS onBack={() => setActiveSection("content")} />;
       case "content-cookies":
-        return <CookiesContentEditor onBack={() => setActiveSection("content")} />;
+        return <CookiesPolicyCMS onBack={() => setActiveSection("content")} />;
       case "backup":
         return <BackupManager />;
       case "seo-reports":

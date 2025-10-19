@@ -120,7 +120,8 @@ export default function SiteSettingsEditor({ onBack }: SiteSettingsEditorProps) 
     setSaveStatus("saving");
 
     try {
-      const response = await fetch("/api/admin/content/site", {
+      // Save to site settings
+      const siteResponse = await fetch("/api/admin/content/site", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -132,7 +133,27 @@ export default function SiteSettingsEditor({ onBack }: SiteSettingsEditorProps) 
         }),
       });
 
-      if (response.ok) {
+      // Also save AI Context Settings to admin_settings for CMS components
+      // Use PATCH for partial update (doesn't require header/body/footer sections)
+      const aiContextResponse = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+        },
+        body: JSON.stringify({
+          aiContextSettings: {
+            websiteName: settings.websiteName || "",
+            businessType: settings.businessType || "",
+            ownerName: settings.ownerName || "",
+            country: settings.country || "",
+            primaryLanguage: settings.primaryLanguage || "",
+            siteDomain: settings.siteDomain || "",
+          }
+        }),
+      });
+
+      if (siteResponse.ok && aiContextResponse.ok) {
         setSaveStatus("success");
         setSettings((prev) => ({
           ...prev,
@@ -144,6 +165,13 @@ export default function SiteSettingsEditor({ onBack }: SiteSettingsEditorProps) 
         
         setTimeout(() => setSaveStatus("idle"), 3000);
       } else {
+        // Log which request failed for debugging
+        if (!siteResponse.ok) {
+          console.error("Site settings save failed:", await siteResponse.text());
+        }
+        if (!aiContextResponse.ok) {
+          console.error("AI Context settings save failed:", await aiContextResponse.text());
+        }
         setSaveStatus("error");
         setTimeout(() => setSaveStatus("idle"), 3000);
       }

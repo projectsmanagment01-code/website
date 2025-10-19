@@ -5,52 +5,53 @@ export default async function Terms() {
   const settings = await getAdminSettings();
   const termsPageContent = settings.termsPageContent;
 
-  // If structured content exists, render it stylishly
+  // If structured content exists, render it
   if (termsPageContent && termsPageContent.sections && termsPageContent.sections.length > 0) {
     return (
-      <div className="w-full mx-auto">
+      <div className="max-w-6xl mx-auto py-8 px-4">
         {/* Hero Section */}
         {(termsPageContent.heroTitle || termsPageContent.heroSubtitle) && (
           <div className="text-center mb-12">
             {termsPageContent.heroTitle && (
-              <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
                 {termsPageContent.heroTitle}
               </h1>
             )}
             {termsPageContent.heroSubtitle && (
-              <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl opacity-80 leading-relaxed">
                 {termsPageContent.heroSubtitle}
               </p>
             )}
           </div>
         )}
 
-        {/* Content Sections */}
-        <div className="space-y-8">
-          {termsPageContent.sections.map((section, index) => (
-            <div
-              key={section.id}
-              className="bg-stone-100 box-border border border-dashed border-black rounded-[40px] overflow-hidden p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
-            >
-              <h2 className="text-2xl md:text-3xl font-bold text-black mb-4">
-                {section.title}
-              </h2>
-              <div
-                className="prose prose-lg max-w-none text-black"
-                dangerouslySetInnerHTML={{ __html: section.content }}
-              />
-            </div>
-          ))}
-        </div>
-
         {/* Last Updated */}
         {termsPageContent.lastUpdated && (
-          <div className="text-center mt-12 text-gray-600">
-            <p className="text-sm">
-              Last updated: {new Date(termsPageContent.lastUpdated).toLocaleDateString()}
+          <div className="text-center mb-8 pb-8 border-b">
+            <p className="text-sm font-semibold opacity-70">
+              Last Updated: {new Date(termsPageContent.lastUpdated).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
             </p>
           </div>
         )}
+
+        {/* Content Sections */}
+        <div className="space-y-10">
+          {termsPageContent.sections.map((section, index) => (
+            <section key={section.id} className="scroll-mt-8 bg-stone-100 border border-dashed border-black rounded-[40px] p-8 md:p-10">
+              <h2 className="text-2xl md:text-3xl font-bold mb-6 leading-tight">
+                {index + 1}. {section.title}
+              </h2>
+              <div 
+                className="prose prose-lg max-w-none leading-relaxed [&>p]:mb-4 [&>ul]:mb-4 [&>ul]:pl-6 [&>ul]:list-disc [&>ol]:mb-4 [&>ol]:pl-6 [&>ol]:list-decimal [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-6 [&>h3]:mb-3 [&>strong]:font-semibold"
+                dangerouslySetInnerHTML={{ __html: section.content }} 
+              />
+            </section>
+          ))}
+        </div>
       </div>
     );
   }
@@ -59,199 +60,57 @@ export default async function Terms() {
   const termsContent = settings.staticPages.terms;
   if (termsContent && termsContent.trim()) {
     return (
-      <div className="w-full mx-auto">
-        <div className="bg-stone-100 box-border border border-dashed border-black rounded-[40px] overflow-hidden py-8 pr-8 pl-4 shadow-lg mb-12">
-          <div
-            className="prose prose-lg max-w-none text-black"
-            dangerouslySetInnerHTML={{ __html: termsContent }}
+      <div className="max-w-6xl mx-auto py-8 px-4">
+        <div className="bg-stone-100 border border-dashed border-black rounded-[40px] p-8 md:p-10">
+          <div 
+            className="prose prose-lg max-w-none leading-relaxed [&>p]:mb-4 [&>ul]:mb-4 [&>ul]:pl-6 [&>ul]:list-disc [&>ol]:mb-4 [&>ol]:pl-6 [&>ol]:list-decimal [&>h1]:text-3xl [&>h1]:font-bold [&>h1]:mb-6 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:mb-4 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mb-3"
+            dangerouslySetInnerHTML={{ __html: termsContent }} 
           />
         </div>
       </div>
     );
   }
 
-  // Fallback to default content
+  // Default fallback content
   return (
-    <div className="w-full mx-auto">
-      <div className="bg-stone-100 box-border border border-dashed border-black rounded-[40px] overflow-hidden py-8 pr-8 pl-4 shadow-lg mb-12">
-        <div className="text-center mb-8">
-          <h2 className="text-[2.28rem] font-bold text-black mb-4">
-            Terms & Conditions
-          </h2>
-          <p className="text-lg text-black">
-            Terms and conditions for using our food blog and services.
+    <div className="max-w-6xl mx-auto py-8 px-4">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">Terms of Service</h1>
+        <p className="text-lg md:text-xl opacity-80">
+          Terms and conditions for using our website and services.
+        </p>
+      </div>
+
+      <div className="text-center mb-8 pb-8 border-b">
+        <p className="text-sm font-semibold opacity-70">
+          Last Updated: October 2025
+        </p>
+      </div>
+
+      <div className="space-y-10">
+        <section className="bg-stone-100 border border-dashed border-black rounded-[40px] p-8 md:p-10">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">1. Agreement to Terms</h2>
+          <p className="leading-relaxed">
+            By accessing our website, you accept and agree to be bound by these terms. 
+            If you do not agree, please do not use this service.
           </p>
-        </div>
+        </section>
 
-        <div className="prose prose-lg max-w-none text-black">
-          <p className="text-gray-600 mb-6">
-            <strong>Last updated:</strong> January 2025
+        <section className="bg-stone-100 border border-dashed border-black rounded-[40px] p-8 md:p-10">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">2. Use License</h2>
+          <p className="leading-relaxed">
+            Permission is granted for personal, non-commercial use only. 
+            You may not modify, distribute, or commercially exploit our content.
           </p>
+        </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Agreement to Terms
-            </h2>
-            <p className="text-gray-700 mb-4">
-              By accessing and using Recipes by Clare, you accept and agree to
-              be bound by the terms and provision of this agreement. If you do
-              not agree to abide by the above, please do not use this service.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Use License
-            </h2>
-            <p className="text-gray-700 mb-4">
-              Permission is granted to temporarily download one copy of the
-              materials on Recipes by Clare for personal, non-commercial
-              transitory viewing only. This is the grant of a license, not a
-              transfer of title, and under this license you may not:
-            </p>
-            <ul className="list-disc pl-6 text-gray-700 mb-4">
-              <li>Modify or copy the materials</li>
-              <li>
-                Use the materials for any commercial purpose or for any public
-                display
-              </li>
-              <li>
-                Attempt to reverse engineer any software contained on the
-                website
-              </li>
-              <li>
-                Remove any copyright or other proprietary notations from the
-                materials
-              </li>
-            </ul>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Recipe Usage
-            </h2>
-            <p className="text-gray-700 mb-4">
-              Our recipes are provided for personal, non-commercial use. You
-              may:
-            </p>
-            <ul className="list-disc pl-6 text-gray-700 mb-4">
-              <li>Cook and prepare recipes for personal and family use</li>
-              <li>
-                Share recipes with friends and family with proper attribution
-              </li>
-              <li>Adapt recipes to your dietary needs and preferences</li>
-            </ul>
-            <p className="text-gray-700 mb-4">
-              You may not republish, distribute, or use our recipes for
-              commercial purposes without written permission.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              User Content
-            </h2>
-            <p className="text-gray-700 mb-4">
-              By submitting content to our website (comments, reviews, photos),
-              you grant us a non-exclusive, royalty-free license to use,
-              reproduce, modify, and display such content. You represent that:
-            </p>
-            <ul className="list-disc pl-6 text-gray-700 mb-4">
-              <li>
-                You own or have the necessary rights to the content you submit
-              </li>
-              <li>Your content does not infringe on any third party rights</li>
-              <li>Your content is not offensive, harmful, or inappropriate</li>
-            </ul>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Prohibited Uses
-            </h2>
-            <p className="text-gray-700 mb-4">You may not use our website:</p>
-            <ul className="list-disc pl-6 text-gray-700 mb-4">
-              <li>
-                For any unlawful purpose or to solicit others to perform
-                unlawful acts
-              </li>
-              <li>
-                To violate any international, federal, provincial, or state
-                regulations, rules, laws, or local ordinances
-              </li>
-              <li>
-                To infringe upon or violate our intellectual property rights or
-                the intellectual property rights of others
-              </li>
-              <li>
-                To harass, abuse, insult, harm, defame, slander, disparage,
-                intimidate, or discriminate
-              </li>
-              <li>To submit false or misleading information</li>
-            </ul>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Disclaimer
-            </h2>
-            <p className="text-gray-700 mb-4">
-              The materials on Recipes by Clare are provided on an as is basis.
-              Recipes by Clare makes no warranties, expressed or implied, and
-              hereby disclaims and negates all other warranties including
-              without limitation, implied warranties or conditions of
-              merchantability, fitness for a particular purpose, or
-              non-infringement of intellectual property or other violation of
-              rights.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Limitations
-            </h2>
-            <p className="text-gray-700 mb-4">
-              In no event shall Recipes by Clare or its suppliers be liable for
-              any damages (including, without limitation, damages for loss of
-              data or profit, or due to business interruption) arising out of
-              the use or inability to use the materials on Recipes by Clare,
-              even if Recipes by Clare or an authorized representative has been
-              notified orally or in writing of the possibility of such damage.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Privacy Policy
-            </h2>
-            <p className="text-gray-700 mb-4">
-              Your privacy is important to us. Please review our Privacy Policy,
-              which also governs your use of the website, to understand our
-              practices.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Changes to Terms
-            </h2>
-            <p className="text-gray-700 mb-4">
-              Recipes by Clare may revise these terms of service at any time
-              without notice. By using this website, you are agreeing to be
-              bound by the then current version of these terms of service.
-            </p>
-          </section>
-
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Contact Information
-            </h2>
-            <p className="text-gray-700 mb-4">
-              If you have any questions about these Terms & Conditions, please
-              contact us through our contact page.
-            </p>
-          </section>
-        </div>
+        <section className="bg-stone-100 border border-dashed border-black rounded-[40px] p-8 md:p-10">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">3. User Responsibilities</h2>
+          <p className="leading-relaxed">
+            Users must not engage in unlawful activities, infringe intellectual property, 
+            or submit harmful or offensive content.
+          </p>
+        </section>
       </div>
     </div>
   );
