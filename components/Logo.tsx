@@ -14,10 +14,27 @@ interface LogoProps {
 // Server-side function to fetch logo settings
 async function getLogoSettings(): Promise<LogoSettings> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/content/site`, {
-      cache: 'force-cache'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/content/site`, {
+      next: { 
+        revalidate: 0, // Always fetch fresh data (ISR with 0 seconds = always revalidate)
+        tags: ['site-settings'] // Allow manual revalidation by tag
+      },
+      cache: 'no-store' // Don't cache in development/production
     });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch site settings');
+    }
+    
     const data = await response.json();
+    
+    console.log('Logo settings loaded:', {
+      logoType: data.logoType,
+      logoText: data.logoText,
+      hasImage: !!data.logoImage
+    });
+    
     return {
       logoType: data.logoType || "text",
       logoText: data.logoText || "",
