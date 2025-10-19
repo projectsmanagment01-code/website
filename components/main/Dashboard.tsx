@@ -16,6 +16,7 @@ import DisclaimerContentEditor from "@/components/admin/DisclaimerContentEditor"
 import CookiesContentEditor from "@/components/admin/CookiesContentEditor";
 import FAQContentManager from "@/components/admin/FAQContentManager";
 import SocialMediaManager from "@/components/admin/SocialMediaManager";
+import PrivacyPolicyCMS from "@/components/admin/PrivacyPolicyCMS";
 import Settings from "@/components/admin/Settings";
 import AIPlugin from "@/components/admin/AIPlugin";
 import AuthorManagement from "@/components/admin/authors/AuthorManagement";
@@ -96,15 +97,7 @@ function AdminDashboardContent() {
       case "content-contact":
         return <ContactContentEditor onBack={() => setActiveSection("content")} />;
       case "content-privacy":
-        return (
-          <GenericContentEditor
-            pageId="privacy"
-            pageTitle="Privacy Policy"
-            pageDescription="Privacy policy and data protection information"
-            previewPath="/privacy"
-            onBack={() => setActiveSection("content")}
-          />
-        );
+        return <PrivacyPolicyCMS onBack={() => setActiveSection("content")} />;
       case "content-terms":
         return (
           <GenericContentEditor

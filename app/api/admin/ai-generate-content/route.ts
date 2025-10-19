@@ -168,12 +168,35 @@ export async function POST(request: NextRequest) {
     // Generate content using the configured provider
     let generatedContent: string;
 
+    // Calculate appropriate max tokens based on maxLength
+    // Rule of thumb: 1 token ≈ 4 characters, so we need maxLength/4 tokens + 20% buffer
+    const calculatedMaxTokens = maxLength 
+      ? Math.ceil((maxLength / 3.5) * 1.2) // More generous token allocation
+      : settings.maxTokens || 1000;
+    
+    // Override settings with calculated tokens for this request
+    const requestSettings = {
+      ...settings,
+      maxTokens: Math.max(calculatedMaxTokens, settings.maxTokens || 1000) // Use whichever is larger
+    };
+
+    console.log('AI Generation:', {
+      field,
+      contentType,
+      maxLength,
+      calculatedMaxTokens,
+      finalMaxTokens: requestSettings.maxTokens,
+      provider: settings.provider
+    });
+
     try {
       if (settings.provider === "gemini") {
-        generatedContent = await generateWithGemini(prompt, settings);
+        generatedContent = await generateWithGemini(prompt, requestSettings);
       } else {
-        generatedContent = await generateWithOpenAI(prompt, settings);
+        generatedContent = await generateWithOpenAI(prompt, requestSettings);
       }
+
+      console.log('Generated content length:', generatedContent.length);
 
       // Post-process: trim to max length if specified
       if (maxLength && generatedContent.length > maxLength) {
@@ -183,6 +206,18 @@ export async function POST(request: NextRequest) {
         if (lastSpace > maxLength * 0.8) {
           generatedContent = generatedContent.substring(0, lastSpace);
         }
+      }
+
+      // Check if content is empty and return error
+      if (!generatedContent || generatedContent.trim().length === 0) {
+        console.error('Generated content is empty!');
+        return NextResponse.json(
+          {
+            error: "Generated content is empty. Please try again.",
+            details: "The AI returned an empty response. This might be due to API limits or prompt issues."
+          },
+          { status: 500 }
+        );
       }
 
       return NextResponse.json({

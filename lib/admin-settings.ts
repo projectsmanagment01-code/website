@@ -39,6 +39,45 @@ export interface ContactPageContent {
   lastUpdated: string | null;
 }
 
+export interface PrivacyPageContent {
+  heroTitle: string;
+  heroSubtitle: string;
+  sections: {
+    id: string;
+    title: string;
+    content: string;
+  }[];
+  metaTitle: string;
+  metaDescription: string;
+  lastUpdated: string | null;
+}
+
+export interface TermsPageContent {
+  heroTitle: string;
+  heroSubtitle: string;
+  sections: {
+    id: string;
+    title: string;
+    content: string;
+  }[];
+  metaTitle: string;
+  metaDescription: string;
+  lastUpdated: string | null;
+}
+
+export interface DisclaimerPageContent {
+  heroTitle: string;
+  heroSubtitle: string;
+  sections: {
+    id: string;
+    title: string;
+    content: string;
+  }[];
+  metaTitle: string;
+  metaDescription: string;
+  lastUpdated: string | null;
+}
+
 export interface AdminSettingsData {
   header: {
     html: string[];
@@ -74,6 +113,9 @@ export interface AdminSettingsData {
   };
   aboutPageContent?: AboutPageContent;
   contactPageContent?: ContactPageContent;
+  privacyPageContent?: PrivacyPageContent;
+  termsPageContent?: TermsPageContent;
+  disclaimerPageContent?: DisclaimerPageContent;
   lastUpdated: string | null;
   updatedBy: string | null;
 }
@@ -152,6 +194,15 @@ Allow: /search`,
             : undefined,
           contactPageContent: settingsMap.get("contactPageContent") 
             ? JSON.parse(settingsMap.get("contactPageContent")!) 
+            : undefined,
+          privacyPageContent: settingsMap.get("privacyPageContent") 
+            ? JSON.parse(settingsMap.get("privacyPageContent")!) 
+            : undefined,
+          termsPageContent: settingsMap.get("termsPageContent") 
+            ? JSON.parse(settingsMap.get("termsPageContent")!) 
+            : undefined,
+          disclaimerPageContent: settingsMap.get("disclaimerPageContent") 
+            ? JSON.parse(settingsMap.get("disclaimerPageContent")!) 
             : undefined,
           lastUpdated: settingsMap.get("lastUpdated") || null,
           updatedBy: settingsMap.get("updatedBy") || null,
@@ -253,6 +304,18 @@ export async function saveAdminSettings(
       { 
         key: "contactPageContent", 
         value: settings.contactPageContent ? JSON.stringify(settings.contactPageContent) : "" 
+      },
+      { 
+        key: "privacyPageContent", 
+        value: settings.privacyPageContent ? JSON.stringify(settings.privacyPageContent) : "" 
+      },
+      { 
+        key: "termsPageContent", 
+        value: settings.termsPageContent ? JSON.stringify(settings.termsPageContent) : "" 
+      },
+      { 
+        key: "disclaimerPageContent", 
+        value: settings.disclaimerPageContent ? JSON.stringify(settings.disclaimerPageContent) : "" 
       },
       { key: "lastUpdated", value: new Date().toISOString() },
       { key: "updatedBy", value: updatedBy || "admin" },

@@ -3,11 +3,62 @@ import { getAdminSettings } from "@/lib/admin-settings";
 
 export default async function Disclaimer() {
   const settings = await getAdminSettings();
+  const disclaimerPageContent = settings.disclaimerPageContent;
+
+  // If structured content exists, render it stylishly
+  if (disclaimerPageContent && disclaimerPageContent.sections && disclaimerPageContent.sections.length > 0) {
+    return (
+      <div className="w-full mx-auto">
+        {/* Hero Section */}
+        {(disclaimerPageContent.heroTitle || disclaimerPageContent.heroSubtitle) && (
+          <div className="text-center mb-12">
+            {disclaimerPageContent.heroTitle && (
+              <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
+                {disclaimerPageContent.heroTitle}
+              </h1>
+            )}
+            {disclaimerPageContent.heroSubtitle && (
+              <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+                {disclaimerPageContent.heroSubtitle}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Content Sections */}
+        <div className="space-y-8">
+          {disclaimerPageContent.sections.map((section, index) => (
+            <div
+              key={section.id}
+              className="bg-stone-100 box-border border border-dashed border-black rounded-[40px] overflow-hidden p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
+            >
+              <h2 className="text-2xl md:text-3xl font-bold text-black mb-4">
+                {section.title}
+              </h2>
+              <div
+                className="prose prose-lg max-w-none text-black"
+                dangerouslySetInnerHTML={{ __html: section.content }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Last Updated */}
+        {disclaimerPageContent.lastUpdated && (
+          <div className="text-center mt-12 text-gray-600">
+            <p className="text-sm">
+              Last updated: {new Date(disclaimerPageContent.lastUpdated).toLocaleDateString()}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Fallback to old content if exists
   const heroTitle = settings.staticPages.disclaimerHeroTitle || "Disclaimer";
   const heroIntro = settings.staticPages.disclaimerHeroIntro || "Important disclaimers for using our food blog and recipes.";
   const disclaimerContent = settings.staticPages.disclaimer;
-
-  console.log("Disclaimer hero data:", { heroTitle, heroIntro }); // Debug log
 
   return (
     <div className="w-full mx-auto">
@@ -22,16 +73,15 @@ export default async function Disclaimer() {
         </div>
         <div className="max-w-4xl mx-auto">
           {disclaimerContent && disclaimerContent.trim() ? (
-            <div 
+            <div
               className="prose prose-lg max-w-none text-black"
-              dangerouslySetInnerHTML={{ __html: disclaimerContent }} 
+              dangerouslySetInnerHTML={{ __html: disclaimerContent }}
             />
           ) : (
             <div className="prose prose-lg max-w-none text-black">
               <p className="text-gray-600 mb-6">
                 <strong>Last updated:</strong> January 2025
               </p>
-              {/* Default disclaimer content would go here */}
             </div>
           )}
         </div>

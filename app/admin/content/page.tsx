@@ -15,83 +15,109 @@ import {
   Settings,
 } from "lucide-react";
 
+// Import all CMS components
+import AboutContentEditor from "@/components/admin/AboutContentEditor";
+import PrivacyPolicyCMS from "@/components/admin/PrivacyPolicyCMS";
+
 const contentPages = [
   {
     id: "site",
     label: "Site Settings",
     icon: Settings,
-    path: "/admin/content/site",
+    component: null, // Will route to separate page
     description: "Manage site branding, logo, favicon and footer",
   },
   {
     id: "home",
     label: "Home Page",
     icon: Home,
-    path: "/admin/content/home",
+    component: null, // Will route to separate page
     description: "Manage homepage content and hero section",
   },
   {
     id: "about",
     label: "About",
     icon: FileText,
-    path: "/admin/content/about",
+    component: AboutContentEditor,
     description: "About page content and company information",
   },
   {
     id: "contact",
     label: "Contact",
     icon: Mail,
-    path: "/admin/content/contact",
+    component: null, // Will route to separate page
     description: "Contact page content and information",
   },
   {
     id: "privacy",
     label: "Privacy Policy",
     icon: Shield,
-    path: "/admin/content/privacy",
+    component: PrivacyPolicyCMS,
     description: "Privacy policy and data protection information",
   },
   {
     id: "terms",
     label: "Terms of Service",
     icon: Scale,
-    path: "/admin/content/terms",
+    component: null, // Will route to separate page
     description: "Terms of service and legal conditions",
   },
   {
     id: "faq",
     label: "FAQ",
     icon: HelpCircle,
-    path: "/admin/content/faq",
+    component: null, // Will route to separate page
     description: "Frequently asked questions and answers",
   },
   {
     id: "disclaimer",
     label: "Disclaimer",
     icon: AlertTriangle,
-    path: "/admin/content/disclaimer",
+    component: null, // Will route to separate page
     description: "Legal disclaimers and liability information",
   },
   {
     id: "cookies",
     label: "Cookie Policy",
     icon: Cookie,
-    path: "/admin/content/cookies",
+    component: null, // Will route to separate page
     description: "Cookie usage and tracking information",
   },
 ];
 
 export default function ContentManagementPage() {
   const router = useRouter();
+  const [selectedPage, setSelectedPage] = useState<string | null>(null);
 
-  const handlePageClick = (path: string) => {
-    router.push(path);
+  const handlePageClick = (pageId: string) => {
+    const page = contentPages.find(p => p.id === pageId);
+    
+    // If page has component, show inline. Otherwise route to separate page.
+    if (page?.component) {
+      setSelectedPage(pageId);
+    } else {
+      router.push(`/admin/content/${pageId}`);
+    }
   };
 
   const handleBackToDashboard = () => {
     router.push("/admin");
   };
 
+  const handleBackToGrid = () => {
+    setSelectedPage(null);
+  };
+
+  // If a page is selected, show its component
+  if (selectedPage) {
+    const page = contentPages.find(p => p.id === selectedPage);
+    if (page?.component) {
+      const Component = page.component;
+      return <Component onBack={handleBackToGrid} />;
+    }
+  }
+
+  // Otherwise show the grid
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -128,7 +154,7 @@ export default function ContentManagementPage() {
             return (
               <div
                 key={page.id}
-                onClick={() => handlePageClick(page.path)}
+                onClick={() => handlePageClick(page.id)}
                 className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-200 cursor-pointer group"
               >
                 <div className="flex items-center gap-3 mb-4">

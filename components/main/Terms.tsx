@@ -3,9 +3,60 @@ import { getAdminSettings } from "@/lib/admin-settings";
 
 export default async function Terms() {
   const settings = await getAdminSettings();
-  const termsContent = settings.staticPages.terms;
+  const termsPageContent = settings.termsPageContent;
 
-  // If content exists in settings, render it as HTML with proper styling
+  // If structured content exists, render it stylishly
+  if (termsPageContent && termsPageContent.sections && termsPageContent.sections.length > 0) {
+    return (
+      <div className="w-full mx-auto">
+        {/* Hero Section */}
+        {(termsPageContent.heroTitle || termsPageContent.heroSubtitle) && (
+          <div className="text-center mb-12">
+            {termsPageContent.heroTitle && (
+              <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
+                {termsPageContent.heroTitle}
+              </h1>
+            )}
+            {termsPageContent.heroSubtitle && (
+              <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+                {termsPageContent.heroSubtitle}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Content Sections */}
+        <div className="space-y-8">
+          {termsPageContent.sections.map((section, index) => (
+            <div
+              key={section.id}
+              className="bg-stone-100 box-border border border-dashed border-black rounded-[40px] overflow-hidden p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
+            >
+              <h2 className="text-2xl md:text-3xl font-bold text-black mb-4">
+                {section.title}
+              </h2>
+              <div
+                className="prose prose-lg max-w-none text-black"
+                dangerouslySetInnerHTML={{ __html: section.content }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Last Updated */}
+        {termsPageContent.lastUpdated && (
+          <div className="text-center mt-12 text-gray-600">
+            <p className="text-sm">
+              Last updated: {new Date(termsPageContent.lastUpdated).toLocaleDateString()}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Fallback to old content if no structured data
+  const termsContent = settings.staticPages.terms;
   if (termsContent && termsContent.trim()) {
     return (
       <div className="w-full mx-auto">

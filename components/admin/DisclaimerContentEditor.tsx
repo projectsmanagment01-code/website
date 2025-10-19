@@ -76,22 +76,66 @@ export default function DisclaimerContentEditor({ onBack }: { onBack?: () => voi
       setGenerating(field);
       setMessage(null);
 
+      // Get AI Context Settings
+      const websiteName = siteSettings?.websiteName || siteSettings?.logoText || "Recipe Website";
+      const businessType = siteSettings?.businessType || "Recipe Blog";
+      const ownerName = siteSettings?.ownerName || "Website Owner";
+      const country = siteSettings?.country || "United States";
+      const primaryLanguage = siteSettings?.primaryLanguage || "English";
+
+      const contextInfo = `Website: "${websiteName}"
+Business Type: ${businessType}
+Owner: ${ownerName}
+Language: ${primaryLanguage}
+Country: ${country}`;
+
       let prompt = "";
+      let maxLength = 200;
+
       switch (field) {
         case "heroTitle":
-          prompt = "Generate a professional, clear hero title for a disclaimer page on a recipe website. Should be direct and legally appropriate. Keep it under 60 characters.";
+          prompt = `Generate a professional 1-3 word title for a Disclaimer page. Direct and legally appropriate.`;
+          maxLength = 60;
           break;
         case "heroDescription":
-          prompt = "Generate a brief, welcoming hero description for a disclaimer page. Should explain the purpose of the page in a friendly, accessible way. Keep it under 150 characters.";
+          prompt = `Generate a brief 15-25 word description for a Disclaimer page on ${websiteName} (${businessType}). Explain the page contains legal disclaimers. Professional tone.`;
+          maxLength = 150;
           break;
         case "mainContent":
-          prompt = "Generate comprehensive legal disclaimer content for a recipe and cooking website. Include sections on: 1) Recipe accuracy and results disclaimer, 2) Food safety and preparation warnings, 3) Nutritional information accuracy, 4) Health and dietary considerations, 5) Liability limitations, 6) User responsibility, 7) Website content disclaimers. Make it legally sound but user-friendly. Use proper HTML formatting with headers, paragraphs, and lists.";
+          prompt = `Write comprehensive legal disclaimer content for ${websiteName}, a ${businessType} in ${country} (MINIMUM 600 words).
+
+Include these sections:
+
+1. Recipe Results Disclaimer (100-150 words): No guarantee of outcomes, variations in ingredients/equipment/techniques, cooking results differ, user skill variations, environmental factors.
+
+2. Food Safety & Preparation (100-150 words): User's responsibility, proper handling/storage, temperature guidelines, cross-contamination warnings, expiration dates.
+
+3. Nutritional Information (80-120 words): Approximate data, calculated from databases, may not reflect actual values, not nutritional advice, ingredient variations.
+
+4. Allergies & Dietary Restrictions (100-150 words): Users check ingredients, allergen warnings, cross-contamination, dietary considerations, not medical advice, consult professionals.
+
+5. Health & Medical Disclaimers (80-120 words): Not medical/health advice, consult healthcare professionals, individual needs vary, medication interactions possible.
+
+6. Website Content & Accuracy (60-80 words): Content "as is", no accuracy guarantee, information may be outdated, errors possible.
+
+7. Third-Party Content & Links (60-80 words): External links for convenience, no endorsement, not responsible for external sites.
+
+8. Liability Limitations (100-150 words): ${ownerName} and ${websiteName} not liable for damages, use at own risk, no liability for adverse reactions/injuries, ${country} liability limitations.
+
+9. User Responsibility (60-80 words): Users responsible for actions, due diligence required, common sense, seek professional advice.
+
+10. Changes to Disclaimer (40-60 words): Right to modify, continued use = acceptance, check regularly.
+
+Use proper HTML: <h2> for section titles, <p> for paragraphs, <ul><li> for lists, <strong> for emphasis. Write FULL paragraphs (not summaries). Make it legally comprehensive for ${businessType} in ${country}. Language: ${primaryLanguage}.`;
+          maxLength = 15000; // disclaimer needs enough room for all sections
           break;
         case "metaTitle":
-          prompt = "Generate an SEO-optimized meta title for a disclaimer page on a recipe website. Include relevant keywords, keep under 60 characters.";
+          prompt = `Generate SEO meta title (50-60 chars) for ${websiteName} Disclaimer page. Include site name and "Disclaimer" or "Legal Notice".`;
+          maxLength = 60;
           break;
         case "metaDescription":
-          prompt = "Generate an SEO-optimized meta description for a disclaimer page. Should describe the legal disclaimers and liability information. Keep under 160 characters.";
+          prompt = `Generate SEO meta description (150-160 chars) for Disclaimer page. Describe legal disclaimers, liability limitations, user responsibilities for ${websiteName}.`;
+          maxLength = 160;
           break;
       }
 
@@ -105,20 +149,26 @@ export default function DisclaimerContentEditor({ onBack }: { onBack?: () => voi
         body: JSON.stringify({
           prompt,
           field,
-          contentType: field === "metaTitle" ? "title" : field === "metaDescription" ? "description" : field === "mainContent" ? "legal" : "text",
-          maxLength: field === "metaTitle" ? 60 : field === "metaDescription" ? 160 : field === "heroTitle" ? 60 : field === "heroDescription" ? 150 : 8000,
+          contentType: field === "metaTitle" || field === "heroTitle" ? "title" : field === "metaDescription" || field === "heroDescription" ? "description" : "legal",
+          maxLength,
         }),
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
-        const generatedContent = result.content.trim();
+        const generatedContent = result.content?.trim() || "";
+        
+        // Check if content is actually empty
+        if (!generatedContent || generatedContent.length === 0) {
+          throw new Error("Generated content is empty. Please try again.");
+        }
+        
         setLastGenerated(prev => ({ ...prev, [field]: generatedContent }));
         updateField(field, generatedContent);
         setMessage({
           type: "success",
-          text: `Generated ${field} successfully!`
+          text: `Generated ${field} with ${result.provider === 'gemini' ? 'Google Gemini' : 'OpenAI'}! ✨ (${generatedContent.length} characters)`
         });
       } else {
         throw new Error(result.error || "Failed to generate content");

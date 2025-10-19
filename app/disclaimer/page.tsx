@@ -1,37 +1,28 @@
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 import React from "react";
 import { getAdminSettings } from "@/lib/admin-settings";
 import { Metadata } from "next";
 import Disclaimer from "@/components/main/Disclaimer";
 
-// Function to get disclaimer data for metadata
-async function getDisclaimerData() {
+export async function generateMetadata(): Promise<Metadata> {
   try {
     const settings = await getAdminSettings();
-    return {
-      heroTitle: settings.staticPages.disclaimerHeroTitle || "Disclaimer",
-      heroIntro: settings.staticPages.disclaimerHeroIntro || "Important disclaimers for using our food blog and recipes.",
-      metaTitle: "Disclaimer | Recipe Website Legal Notice",
-      metaDescription: "Read our disclaimer covering cooking results, nutritional information, food safety, and liability limitations for our recipe website.",
-    };
-  } catch {
-    return {
-      heroTitle: "Disclaimer",
-      heroIntro: "Important disclaimers for using our food blog and recipes.",
-      metaTitle: "Disclaimer | Recipe Website Legal Notice", 
-      metaDescription: "Read our disclaimer covering cooking results, nutritional information, food safety, and liability limitations for our recipe website.",
-    };
-  }
-}
+    const disclaimerPageContent = settings.disclaimerPageContent;
 
-// Generate metadata for the page
-export async function generateMetadata(): Promise<Metadata> {
-  const disclaimerData = await getDisclaimerData();
-  
+    if (disclaimerPageContent && disclaimerPageContent.metaTitle) {
+      return {
+        title: disclaimerPageContent.metaTitle,
+        description: disclaimerPageContent.metaDescription || "Read important disclaimers about our recipes and content.",
+      };
+    }
+  } catch (error) {
+    console.error("Error generating disclaimer metadata:", error);
+  }
+
   return {
-    title: disclaimerData.metaTitle,
-    description: disclaimerData.metaDescription,
+    title: "Disclaimer",
+    description: "Read important disclaimers about our recipes and content.",
   };
 }
 
