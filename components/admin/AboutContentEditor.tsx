@@ -48,6 +48,13 @@ interface WebsiteContext {
   currentUrl: string;
   currentYear: number;
   existingContent: string;
+  // AI Context Settings
+  websiteName?: string;
+  businessType?: string;
+  ownerName?: string;
+  country?: string;
+  primaryLanguage?: string;
+  siteDomain?: string;
 }
 
 export default function AboutContentEditor({ onBack }: { onBack?: () => void }) {
@@ -92,11 +99,29 @@ export default function AboutContentEditor({ onBack }: { onBack?: () => void }) 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [settings, setSettings] = useState<any>(null);
+  const [siteSettings, setSiteSettings] = useState<any>(null); // AI Context Settings
 
   // Load current settings and content
   useEffect(() => {
     loadContent();
+    loadSiteSettings(); // Load AI Context Settings
   }, []);
+
+  const loadSiteSettings = async () => {
+    try {
+      const response = await fetch("/api/admin/content/site", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSiteSettings(data);
+      }
+    } catch (error) {
+      console.error("Error loading site settings:", error);
+    }
+  };
 
   const handleBack = () => {
     router.push("/admin/content");
@@ -130,13 +155,25 @@ export default function AboutContentEditor({ onBack }: { onBack?: () => void }) 
   };
 
   const getWebsiteContext = (): WebsiteContext => {
+    // Use AI Context Settings from Site Settings for better AI generation
+    const aiContext = {
+      websiteName: siteSettings?.websiteName || siteSettings?.logoText || settings?.logoText || "Recipe Website",
+      businessType: siteSettings?.businessType || "Recipe Blog",
+      ownerName: siteSettings?.ownerName || "Website Owner",
+      country: siteSettings?.country || "United States",
+      primaryLanguage: siteSettings?.primaryLanguage || "English",
+      siteDomain: siteSettings?.siteDomain || settings?.siteDomain || window?.location?.hostname || ""
+    };
+
     return {
-      currentBrandName: settings?.logoText || "Recipe Website",
-      currentDescription: settings?.siteDescription || "",
-      currentDomain: settings?.siteDomain || window?.location?.hostname || "",
-      currentUrl: settings?.siteUrl || window?.location?.origin || "",
+      currentBrandName: aiContext.websiteName,
+      currentDescription: siteSettings?.siteDescription || settings?.siteDescription || "",
+      currentDomain: aiContext.siteDomain,
+      currentUrl: siteSettings?.siteUrl || settings?.siteUrl || window?.location?.origin || "",
       currentYear: new Date().getFullYear(),
       existingContent: "",
+      // Include AI Context for better generation
+      ...aiContext
     };
   };
 
@@ -146,51 +183,92 @@ export default function AboutContentEditor({ onBack }: { onBack?: () => void }) 
       setError(null);
 
       const websiteContext = getWebsiteContext();
+      
+      // Build context-aware base prompt with AI Context Settings
+      const contextInfo = `Website: "${websiteContext.websiteName || websiteContext.currentBrandName}"
+Business Type: ${websiteContext.businessType || "Recipe Blog"}
+Owner: ${websiteContext.ownerName || "Website Owner"}
+Language: ${websiteContext.primaryLanguage || "English"}
+Country: ${websiteContext.country || "United States"}`;
+
       let prompt = "";
 
-      // Create field-specific prompts
+      // Create field-specific prompts enriched with AI Context
       switch (fieldName) {
         case "heroTitle":
-          prompt = `Generate a compelling 3-4 word hero title for the About page of "${websiteContext.currentBrandName}" recipe website. Should be warm and inviting. No explanations, just the title:`;
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a compelling 3-4 word hero title for the About page. Should reflect the business type, be warm and inviting, and match the ${websiteContext.primaryLanguage || "English"} language style. No explanations, just the title:`;
           break;
           
         case "heroSubtitle":
-          prompt = `Generate a 15-20 word subtitle for the About page hero section of "${websiteContext.currentBrandName}". Should explain what visitors will discover. No explanations, just the subtitle:`;
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a 15-20 word subtitle for the About page hero section. Should explain what visitors will discover about this ${websiteContext.businessType || "recipe blog"}, written by ${websiteContext.ownerName || "the owner"}. No explanations, just the subtitle:`;
           break;
           
         case "metaTitle":
-          prompt = `Generate a 50-60 character SEO meta title for the About page of "${websiteContext.currentBrandName}" recipe website. Should include brand name and be search-optimized. No explanations, just the title:`;
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a 50-60 character SEO meta title for the About page. Should include "${websiteContext.websiteName || websiteContext.currentBrandName}", be optimized for ${websiteContext.country || "United States"} search results, and reflect the ${websiteContext.businessType || "recipe blog"} nature. No explanations, just the title:`;
           break;
           
         case "metaDescription":
-          prompt = `Generate a 150-160 character SEO meta description for the About page of "${websiteContext.currentBrandName}". Should summarize what visitors will learn about the brand/author and encourage clicks. No explanations, just the description:`;
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a 150-160 character SEO meta description for the About page. Should introduce ${websiteContext.ownerName || "the owner"}, explain what "${websiteContext.websiteName || websiteContext.currentBrandName}" offers, and be optimized for ${websiteContext.country || "United States"} searchers interested in ${websiteContext.businessType || "recipes"}. No explanations, just the description:`;
           break;
           
         case "recipesCardTitle":
-          prompt = `Generate a 5-8 word section title asking what visitors will find on "${websiteContext.currentBrandName}". Should be question format. No explanations, just the title:`;
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a 5-8 word section title asking what visitors will find on "${websiteContext.websiteName || websiteContext.currentBrandName}". Should be in question format and reflect the ${websiteContext.businessType || "recipe blog"} focus. No explanations, just the title:`;
           break;
           
         case "recipesCardItems":
-          const recipesTitle = content.recipesCardTitle || "What Will You Find on Recipes by Clare?";
-          prompt = `Generate one compelling bullet point specifically related to "${recipesTitle}" for "${websiteContext.currentBrandName}" recipe website. The content should directly answer or support what's mentioned in the title "${recipesTitle}". Focus on specific benefits, features, or content types. 8-12 words. No explanations, just the bullet point:`;
+          const recipesTitle = content.recipesCardTitle || "What Will You Find?";
+          prompt = `Context:
+${contextInfo}
+Section Title: "${recipesTitle}"
+
+Task: Generate one compelling bullet point that answers "${recipesTitle}" for this ${websiteContext.businessType || "recipe blog"}. Focus on what makes "${websiteContext.websiteName || websiteContext.currentBrandName}" unique. 8-12 words. No explanations, just the bullet point:`;
           break;
           
         case "meetAuthorCardTitle":
-          prompt = `Generate a 2-3 word title to introduce the main author/chef of "${websiteContext.currentBrandName}". Should be personal and welcoming. No explanations, just the title:`;
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a 2-3 word title to introduce ${websiteContext.ownerName || "the main author/chef"}. Should be personal, welcoming, and appropriate for ${websiteContext.primaryLanguage || "English"} speakers. No explanations, just the title:`;
           break;
           
         case "meetAuthorCardItems":
-          const authorTitle = content.meetAuthorCardTitle || "Meet Clare";
-          prompt = `Generate one bullet point about the author/chef mentioned in "${authorTitle}" for "${websiteContext.currentBrandName}". The content should relate to what "${authorTitle}" suggests - describing their personality, expertise, or background. 8-12 words. No explanations, just the bullet point:`;
+          const authorTitle = content.meetAuthorCardTitle || "Meet the Author";
+          prompt = `Context:
+${contextInfo}
+Section Title: "${authorTitle}"
+
+Task: Generate one bullet point about ${websiteContext.ownerName || "the author"} related to "${authorTitle}". Should describe their personality, expertise with ${websiteContext.businessType || "recipes"}, or background in ${websiteContext.country || "their country"}. 8-12 words. No explanations, just the bullet point:`;
           break;
           
         case "missionCardTitle":
-          prompt = `Generate a 2-3 word title about the mission/purpose of "${websiteContext.currentBrandName}". Should be inspiring. No explanations, just the title:`;
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a 2-3 word title about the mission/purpose of "${websiteContext.websiteName || websiteContext.currentBrandName}". Should be inspiring and reflect the ${websiteContext.businessType || "recipe blog"} nature. No explanations, just the title:`;
           break;
           
         case "missionCardItems":
           const missionTitle = content.missionCardTitle || "My Mission";
-          prompt = `Generate one bullet point that supports and explains "${missionTitle}" for "${websiteContext.currentBrandName}" recipe website. The content should directly relate to what "${missionTitle}" implies about the website's purpose or goals. 8-12 words. No explanations, just the bullet point:`;
+          prompt = `Context:
+${contextInfo}
+Section Title: "${missionTitle}"
+
+Task: Generate one bullet point that supports "${missionTitle}" for this ${websiteContext.businessType || "recipe blog"} by ${websiteContext.ownerName || "the owner"}. Should reflect goals relevant to ${websiteContext.country || "the target audience"}. 8-12 words. No explanations, just the bullet point:`;
           break;
           
         default:
@@ -214,32 +292,115 @@ export default function AboutContentEditor({ onBack }: { onBack?: () => void }) 
         body: JSON.stringify(requestData),
       });
 
+      console.log('🌐 API Response Status:', response.status, response.statusText);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ API Error:', errorData);
         throw new Error(errorData.error || "Failed to generate content");
       }
 
       const data = await response.json();
-      const generatedContent = data.content || "";
+      let generatedContent = data.content || "";
+
+      // Ensure we have content
+      if (!generatedContent || generatedContent.trim() === "") {
+        console.warn('⚠️ Empty content received from AI API:', data);
+        throw new Error("AI returned empty content. Please try again.");
+      }
+
+      generatedContent = generatedContent.trim();
+
+      console.log('🎯 AI Generated Content:', {
+        fieldName,
+        itemIndex,
+        generatedContent,
+        generatedContentPreview: generatedContent.substring(0, 100),
+        provider: data.provider,
+        contentLength: generatedContent.length,
+        dataReceived: data
+      });
 
       // Update the specific field with generated content
       if (fieldName.includes("Items") && itemIndex !== undefined) {
-        setContent(prev => ({
-          ...prev,
-          [fieldName]: (prev[fieldName as keyof AboutPageContent] as string[]).map((item: string, index: number) => 
+        setContent(prev => {
+          const currentItems = prev[fieldName as keyof AboutPageContent] as string[];
+          const newItems = currentItems.map((item: string, index: number) => 
             index === itemIndex ? generatedContent : item
-          )
-        }));
+          );
+          console.log('📝 Updated Items Array:', { 
+            fieldName, 
+            itemIndex, 
+            oldItem: currentItems[itemIndex],
+            newItem: generatedContent,
+            newItems,
+            fullContent: { ...prev, [fieldName]: newItems }
+          });
+          return {
+            ...prev,
+            [fieldName]: newItems
+          };
+        });
       } else {
-        setContent(prev => ({
-          ...prev,
-          [fieldName]: generatedContent
-        }));
+        setContent(prev => {
+          const oldValue = prev[fieldName as keyof AboutPageContent];
+          console.log('📝 Updated Field:', { 
+            fieldName, 
+            oldValue, 
+            newValue: generatedContent,
+            fullContent: { ...prev, [fieldName]: generatedContent }
+          });
+          return {
+            ...prev,
+            [fieldName]: generatedContent
+          };
+        });
       }
+
+      // Force a re-render by updating a timestamp or similar
+      console.log('✅ State Update Complete - Content should now display in UI');
+
+      // Show success message with provider info
+      setSuccess(`Generated with ${data.provider === 'gemini' ? 'Google Gemini' : 'OpenAI'}! ✨`);
+      setTimeout(() => setSuccess(null), 3000);
 
     } catch (err) {
       console.error("Content generation error:", err);
       setError(err instanceof Error ? err.message : "Failed to generate content");
+    } finally {
+      setGeneratingField(null);
+    }
+  };
+
+  // Bulk generation for card sections
+  const generateBulkCardContent = async (cardType: 'recipes' | 'meetAuthor' | 'mission') => {
+    try {
+      setGeneratingField(`bulk_${cardType}`);
+      setError(null);
+      
+      const titleField = `${cardType}CardTitle`;
+      const itemsField = `${cardType}CardItems`;
+      
+      // Generate title first
+      await generateFieldContent(titleField);
+      
+      // Wait a bit for title to be set
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Generate all items
+      const itemsArray = content[itemsField as keyof AboutPageContent] as string[];
+      for (let i = 0; i < itemsArray.length; i++) {
+        await generateFieldContent(itemsField, i);
+        // Small delay between generations to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      setSuccess(`Generated all content for ${cardType} card! ✨`);
+      setTimeout(() => setSuccess(null), 3000);
+      
+    } catch (err) {
+      console.error("Bulk generation error:", err);
+      setError(err instanceof Error ? err.message : "Failed to generate bulk content");
     } finally {
       setGeneratingField(null);
     }
@@ -1128,9 +1289,30 @@ Generate the JSON array:`;
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {/* Recipes Card */}
             <div className="rounded border-2 border-gray-300 p-4 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300" style={{backgroundColor: '#f0f0f0'}}>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                What Will You Find Section
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  What Will You Find Section
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => generateBulkCardContent('recipes')}
+                  disabled={generatingField === 'bulk_recipes'}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 hover:scale-105 rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Generate all content for this section with AI"
+                >
+                  {generatingField === 'bulk_recipes' ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Generating All...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="w-3 h-3" />
+                      Bulk Generate
+                    </>
+                  )}
+                </button>
+              </div>
               
               <div className="space-y-3">
               {renderFieldWithAI(
@@ -1163,9 +1345,30 @@ Generate the JSON array:`;
 
             {/* Meet Author Card */}
             <div className="rounded border-2 border-gray-300 p-4 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300" style={{backgroundColor: '#f0f0f0'}}>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Meet Author Section  
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Meet Author Section  
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => generateBulkCardContent('meetAuthor')}
+                  disabled={generatingField === 'bulk_meetAuthor'}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 hover:scale-105 rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Generate all content for this section with AI"
+                >
+                  {generatingField === 'bulk_meetAuthor' ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Generating All...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="w-3 h-3" />
+                      Bulk Generate
+                    </>
+                  )}
+                </button>
+              </div>
               
               <div className="space-y-3">
               {renderFieldWithAI(
@@ -1201,9 +1404,30 @@ Generate the JSON array:`;
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {/* Mission Card */}
             <div className="rounded border-2 border-gray-300 p-4 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300" style={{backgroundColor: '#f0f0f0'}}>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Mission Section
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Mission Section
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => generateBulkCardContent('mission')}
+                  disabled={generatingField === 'bulk_mission'}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 hover:scale-105 rounded transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Generate all content for this section with AI"
+                >
+                  {generatingField === 'bulk_mission' ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Generating All...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="w-3 h-3" />
+                      Bulk Generate
+                    </>
+                  )}
+                </button>
+              </div>
               
               <div className="space-y-3">
               {renderFieldWithAI(

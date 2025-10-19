@@ -31,6 +31,14 @@ export interface AboutPageContent {
   customSections?: AboutPageSection[];
 }
 
+export interface ContactPageContent {
+  heroTitle: string;
+  heroSubtitle: string;
+  metaTitle: string;
+  metaDescription: string;
+  lastUpdated: string | null;
+}
+
 export interface AdminSettingsData {
   header: {
     html: string[];
@@ -65,6 +73,7 @@ export interface AdminSettingsData {
     cookies: string;
   };
   aboutPageContent?: AboutPageContent;
+  contactPageContent?: ContactPageContent;
   lastUpdated: string | null;
   updatedBy: string | null;
 }
@@ -140,6 +149,9 @@ Allow: /search`,
           },
           aboutPageContent: settingsMap.get("aboutPageContent") 
             ? JSON.parse(settingsMap.get("aboutPageContent")!) 
+            : undefined,
+          contactPageContent: settingsMap.get("contactPageContent") 
+            ? JSON.parse(settingsMap.get("contactPageContent")!) 
             : undefined,
           lastUpdated: settingsMap.get("lastUpdated") || null,
           updatedBy: settingsMap.get("updatedBy") || null,
@@ -237,6 +249,10 @@ export async function saveAdminSettings(
       { 
         key: "aboutPageContent", 
         value: settings.aboutPageContent ? JSON.stringify(settings.aboutPageContent) : "" 
+      },
+      { 
+        key: "contactPageContent", 
+        value: settings.contactPageContent ? JSON.stringify(settings.contactPageContent) : "" 
       },
       { key: "lastUpdated", value: new Date().toISOString() },
       { key: "updatedBy", value: updatedBy || "admin" },

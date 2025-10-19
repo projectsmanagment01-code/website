@@ -5,6 +5,9 @@ import Contact from "@/components/main/Contact";
 export default async function ContactPage() {
   return (
     <main className="container-md section-md">
+      {/* Hero Section from Admin */}
+      <Contact />
+
       {/* Contact Form */}
       <section className="bg-stone-100 border border-dashed border-black rounded-[40px] p-8 shadow-lg mb-12">
         <header className="text-center mb-8">
@@ -98,9 +101,6 @@ export default async function ContactPage() {
             </div>
           </form>
         </section>
-
-      {/* Additional Contact Information */}
-      <Contact />
     </main>
   );
 }

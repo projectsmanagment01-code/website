@@ -196,7 +196,7 @@ const IceCreamIcon = () => (
 
 // ---------- Component Definitions ----------
 const StyledList = ({ children }: any) => (
-  <ol className="list-[circle] pl-6 text-lg text-left marker:text-black marker:font-normal marker:tabular-nums">
+  <ol className="list-[circle] pl-6 text-base md:text-lg text-left marker:text-black marker:font-normal marker:tabular-nums space-y-2">
     {children}
   </ol>
 );
@@ -206,7 +206,7 @@ const AboutCard = ({ icon, title, children, position = "left" }: any) => {
   
   return (
     <li
-      className={`col-span-1 md:col-span-10 ${isRight ? 'md:col-start-3' : 'md:col-start-1'} bg-stone-100 rounded-3xl overflow-hidden transition-all duration-300 outline outline-1 outline-dashed outline-black text-black w-full shadow-lg`}
+      className={`col-span-1 md:col-span-11 ${isRight ? 'md:col-start-2' : 'md:col-start-1'} bg-stone-100 rounded-3xl overflow-hidden transition-all duration-300 outline outline-1 outline-dashed outline-black text-black w-full shadow-lg`}
       style={{ outlineOffset: "calc(-0.5rem)" }}
     >
       {/* Mobile Layout - Stack vertically with icon on top */}
@@ -215,24 +215,28 @@ const AboutCard = ({ icon, title, children, position = "left" }: any) => {
           {icon}
         </div>
         <div className="p-6 gap-4 flex flex-col">
-          <h2 className="text-xl font-semibold">{title}</h2>
-          {children}
+          <h2 className="text-xl font-semibold break-words">{title}</h2>
+          <div className="break-words">
+            {children}
+          </div>
         </div>
       </div>
       
       {/* Desktop Layout - Side by side */}
-      <div className={`hidden md:grid ${isRight ? 'grid-cols-[3fr_1fr]' : 'grid-cols-[1fr_3fr]'}`}>
+      <div className={`hidden md:grid ${isRight ? 'grid-cols-[1fr_120px]' : 'grid-cols-[120px_1fr]'}`}>
         {!isRight && (
-          <div className="p-6 bg-stone-200 flex items-center justify-center">
+          <div className="p-6 bg-stone-200 flex items-center justify-center flex-shrink-0">
             {icon}
           </div>
         )}
-        <div className="p-6 gap-4 flex flex-col">
-          <h2 className="text-xl font-semibold">{title}</h2>
-          {children}
+        <div className="p-6 gap-4 flex flex-col min-w-0">
+          <h2 className="text-xl font-semibold break-words">{title}</h2>
+          <div className="break-words overflow-wrap-anywhere">
+            {children}
+          </div>
         </div>
         {isRight && (
-          <div className="p-6 bg-stone-200 flex items-center justify-center">
+          <div className="p-6 bg-stone-200 flex items-center justify-center flex-shrink-0">
             {icon}
           </div>
         )}
@@ -250,7 +254,7 @@ export default async function About() {
   // If structured content exists in settings, use it
   if (aboutPageContent) {
     return (
-      <div className="flex flex-col gap-12 max-w-6xl mx-auto px-4">
+      <div className="flex flex-col gap-12 w-full max-w-7xl mx-auto px-4">
         {/* Hero Section */}
         {(aboutPageContent.heroTitle || aboutPageContent.heroSubtitle) && (
           <div className="text-center space-y-4 py-8">
@@ -260,7 +264,7 @@ export default async function About() {
               </h1>
             )}
             {aboutPageContent.heroSubtitle && (
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-4xl mx-auto">
                 {aboutPageContent.heroSubtitle}
               </p>
             )}
@@ -268,7 +272,7 @@ export default async function About() {
         )}
 
         {/* Cards Section */}
-        <ul className="grid grid-cols-1 md:grid-cols-12 auto-rows-auto gap-8 p-0">
+        <ul className="grid grid-cols-1 md:grid-cols-12 auto-rows-auto gap-8 p-0 w-full">
           {/* First Card */}
           <AboutCard
             icon={getIconComponent(aboutPageContent.recipesCardIcon || "flame")}
@@ -277,7 +281,7 @@ export default async function About() {
           >
             <StyledList>
               {aboutPageContent.recipesCardItems?.map((item: string, index: number) => (
-                <li key={index}>{item}</li>
+                <li key={index} className="break-words leading-relaxed">{item}</li>
               ))}
             </StyledList>
           </AboutCard>
@@ -290,7 +294,7 @@ export default async function About() {
           >
             <StyledList>
               {aboutPageContent.meetAuthorCardItems?.map((item: string, index: number) => (
-                <li key={index}>{item}</li>
+                <li key={index} className="break-words leading-relaxed">{item}</li>
               ))}
             </StyledList>
           </AboutCard>
@@ -303,7 +307,7 @@ export default async function About() {
           >
             <StyledList>
               {aboutPageContent.missionCardItems?.map((item: string, index: number) => (
-                <li key={index}>{item}</li>
+                <li key={index} className="break-words leading-relaxed">{item}</li>
               ))}
             </StyledList>
           </AboutCard>
@@ -318,7 +322,7 @@ export default async function About() {
             >
               <StyledList>
                 {section.items?.map((item: string, index: number) => (
-                  <li key={index}>{item}</li>
+                  <li key={index} className="break-words leading-relaxed">{item}</li>
                 ))}
               </StyledList>
             </AboutCard>
@@ -340,36 +344,36 @@ export default async function About() {
 
   // Fallback to default content
   return (
-    <div className="flex flex-col gap-12 max-w-6xl mx-auto px-4">
-      <ul className="grid grid-cols-1 md:grid-cols-12 auto-rows-auto gap-8 p-0">
+    <div className="flex flex-col gap-12 w-full max-w-7xl mx-auto px-4">
+      <ul className="grid grid-cols-1 md:grid-cols-12 auto-rows-auto gap-8 p-0 w-full">
         <AboutCard
           icon={<FlameIcon />}
           title="What Will You Find on Recipes by Clare?"
           position="left"
         >
           <StyledList>
-            <li>Time-tested family recipes that work every time</li>
-            <li>Practical cooking tips from years of kitchen experience</li>
-            <li>Personal stories behind favorite family dishes</li>
-            <li>Kitchen wisdom for cooks of all skill levels</li>
+            <li className="break-words leading-relaxed">Time-tested family recipes that work every time</li>
+            <li className="break-words leading-relaxed">Practical cooking tips from years of kitchen experience</li>
+            <li className="break-words leading-relaxed">Personal stories behind favorite family dishes</li>
+            <li className="break-words leading-relaxed">Kitchen wisdom for cooks of all skill levels</li>
           </StyledList>
         </AboutCard>
 
         <AboutCard icon={<ChefIcon />} title="Meet Clare" position="right">
           <StyledList>
-            <li>A passionate home cook sharing tried-and-true recipes</li>
-            <li>Creator of RecipesByClare.com</li>
-            <li>Dedicated to making cooking accessible and enjoyable</li>
-            <li>Bringing families together through shared meals</li>
+            <li className="break-words leading-relaxed">A passionate home cook sharing tried-and-true recipes</li>
+            <li className="break-words leading-relaxed">Creator of RecipesByClare.com</li>
+            <li className="break-words leading-relaxed">Dedicated to making cooking accessible and enjoyable</li>
+            <li className="break-words leading-relaxed">Bringing families together through shared meals</li>
           </StyledList>
         </AboutCard>
 
         <AboutCard icon={<HandIcon />} title="My Mission" position="left">
           <StyledList>
-            <li>Help you feel confident in your kitchen</li>
-            <li>Share reliable, delicious recipes for every occasion</li>
-            <li>Create joyful cooking experiences</li>
-            <li>Build a community of happy home cooks</li>
+            <li className="break-words leading-relaxed">Help you feel confident in your kitchen</li>
+            <li className="break-words leading-relaxed">Share reliable, delicious recipes for every occasion</li>
+            <li className="break-words leading-relaxed">Create joyful cooking experiences</li>
+            <li className="break-words leading-relaxed">Build a community of happy home cooks</li>
           </StyledList>
         </AboutCard>
       </ul>
