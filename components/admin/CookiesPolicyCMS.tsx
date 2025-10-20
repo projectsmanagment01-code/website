@@ -456,7 +456,7 @@ HTML: <p>, <strong>, <a href> for mailto links. ${websiteContext.primaryLanguage
       };
 
       const response = await fetch("/api/admin/settings", {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
@@ -467,7 +467,8 @@ HTML: <p>, <strong>, <a href> for mailto links. ${websiteContext.primaryLanguage
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save content");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save content");
       }
 
       setContent(updatedContent);

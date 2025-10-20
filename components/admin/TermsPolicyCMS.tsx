@@ -251,7 +251,7 @@ Domain: ${websiteContext.siteDomain}`;
       };
 
       const response = await fetch("/api/admin/settings", {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
@@ -262,7 +262,8 @@ Domain: ${websiteContext.siteDomain}`;
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save");
       }
 
       setContent(updatedContent);
