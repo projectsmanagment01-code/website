@@ -9,6 +9,7 @@ export interface BackupMetadata {
   version: string;
   includeDatabase: boolean;
   includeFiles: boolean;
+  includeConfiguration: boolean; // Include site config, page content, admin settings
   filename?: string; // Actual ZIP filename for reliable lookup
   contentSummary: {
     recipes: number;
@@ -34,6 +35,7 @@ export interface RawBackupMetadata {
   version: string;
   includeDatabase: boolean;
   includeFiles: boolean;
+  includeConfiguration?: boolean; // Optional for backward compatibility
   filename?: string; // Actual ZIP filename for reliable lookup
   contentSummary: {
     recipes: number;
@@ -78,6 +80,7 @@ export interface RestoreJob {
 export interface RestoreOptions {
   includeDatabase: boolean;
   includeFiles: boolean;
+  includeConfiguration: boolean; // Restore site config, page content, admin settings
   cleanExisting: boolean;
   skipConflicts: boolean;
   overwriteExisting?: boolean;

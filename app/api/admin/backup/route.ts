@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
       description,
       includeDatabase = true,
       includeFiles = true,
+      includeConfiguration = true,
       type = 'full'
     } = body;
 
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
     const job = await backupService.createBackup(name, description, {
       includeDatabase,
       includeFiles,
+      includeConfiguration,
       type
     });
 

@@ -36,6 +36,7 @@ export class BackupService {
     options: {
       includeDatabase?: boolean;
       includeFiles?: boolean;
+      includeConfiguration?: boolean;
       type?: 'full' | 'content' | 'files';
     } = {}
   ): Promise<BackupJob> {
@@ -54,6 +55,7 @@ export class BackupService {
       const {
         includeDatabase = true,
         includeFiles = true,
+        includeConfiguration = true,
         type = 'full'
       } = options;
 
@@ -71,6 +73,7 @@ export class BackupService {
         version: '1.0.0',
         includeDatabase,
         includeFiles,
+        includeConfiguration,
         contentSummary: {
           recipes: 0,
           authors: 0,
@@ -93,7 +96,7 @@ export class BackupService {
         job.message = 'Backing up database...';
         job.progress = Math.round((progress / totalPhases) * 100);
 
-        const databaseData = await this.databaseService.exportDatabase();
+        const databaseData = await this.databaseService.exportDatabase({ includeConfiguration });
         
         // Update content summary
         metadata.contentSummary.recipes = databaseData.recipes?.length || 0;
@@ -210,6 +213,7 @@ export class BackupService {
             const normalizedMetadata: BackupMetadata = {
               ...metadata,
               createdAt: metadata.createdAt instanceof Date ? metadata.createdAt : new Date(metadata.createdAt),
+              includeConfiguration: metadata.includeConfiguration ?? true, // Default to true for old backups
               contentSummary: {
                 recipes: metadata.contentSummary?.recipes || 0,
                 authors: metadata.contentSummary?.authors || 0,
@@ -378,6 +382,7 @@ export class BackupService {
         version: '1.0.0',
         includeDatabase: true,
         includeFiles: true,
+        includeConfiguration: true,
         contentSummary: {
           recipes: 0,
           authors: 0,
@@ -533,7 +538,8 @@ export class BackupService {
             });
             
             await this.databaseService.restoreDatabase(databaseData, {
-              cleanExisting: options.cleanExisting || false
+              cleanExisting: options.cleanExisting || false,
+              includeConfiguration: options.includeConfiguration ?? true
             });
             console.log('✅ Database restoration completed');
           } catch (dbError) {

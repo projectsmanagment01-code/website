@@ -16,7 +16,7 @@ export class DatabaseBackupService {
   /**
    * Export all database content to JSON
    */
-  async exportDatabase(): Promise<{
+  async exportDatabase(options?: { includeConfiguration?: boolean }): Promise<{
     recipes: any[];
     authors: any[];
     categories: any[];
@@ -39,7 +39,9 @@ export class DatabaseBackupService {
     };
   }> {
     try {
+      const includeConfiguration = options?.includeConfiguration ?? true; // Default to true for backward compatibility
       console.log('📊 Exporting database content...');
+      console.log(`⚙️ Configuration data: ${includeConfiguration ? 'INCLUDED' : 'EXCLUDED'}`);
 
       // Export recipes with all relationships
       const recipes = await this.prisma.recipe.findMany();
@@ -57,34 +59,52 @@ export class DatabaseBackupService {
         categories = [];
       }
 
-      // Export admin settings
+      // Export admin settings (CONFIGURATION DATA)
       let adminSettings: any[] = [];
-      try {
-        adminSettings = await this.prisma.adminSettings.findMany();
-        console.log(`⚙️ Found ${adminSettings.length} admin settings to backup`);
-      } catch (error) {
-        console.log('⚠️ No admin settings found, skipping...');
-        adminSettings = [];
+      if (includeConfiguration) {
+        try {
+          adminSettings = await this.prisma.adminSettings.findMany();
+          console.log(`⚙️ Found ${adminSettings.length} admin settings to backup`);
+        } catch (error) {
+          console.log('⚠️ No admin settings found, skipping...');
+          adminSettings = [];
+        }
+      } else {
+        console.log('⏭️ Skipping admin settings (configuration disabled)');
       }
 
-      // Export site config
+      // Export site config (hero, logo, site info, social links, etc.)
       let siteConfig: any[] = [];
-      try {
-        siteConfig = await this.prisma.siteConfig.findMany();
-        console.log(`🌐 Found ${siteConfig.length} site config entries to backup`);
-      } catch (error) {
-        console.log('⚠️ No site config found, skipping...');
-        siteConfig = [];
+      if (includeConfiguration) {
+        try {
+          siteConfig = await this.prisma.siteConfig.findMany();
+          console.log(`🌐 Found ${siteConfig.length} site config entries to backup`);
+          siteConfig.forEach(config => {
+            console.log(`  - ${config.key}: ${JSON.stringify(config.data).substring(0, 100)}...`);
+          });
+        } catch (error) {
+          console.log('⚠️ No site config found, skipping...');
+          siteConfig = [];
+        }
+      } else {
+        console.log('⏭️ Skipping site config (configuration disabled)');
       }
 
-      // Export page content
+      // Export page content (disclaimer, terms, FAQs, about, contact, etc.)
       let pageContent: any[] = [];
-      try {
-        pageContent = await this.prisma.pageContent.findMany();
-        console.log(`📄 Found ${pageContent.length} page content entries to backup`);
-      } catch (error) {
-        console.log('⚠️ No page content found, skipping...');
-        pageContent = [];
+      if (includeConfiguration) {
+        try {
+          pageContent = await this.prisma.pageContent.findMany();
+          console.log(`📄 Found ${pageContent.length} page content entries to backup`);
+          pageContent.forEach(page => {
+            console.log(`  - ${page.page}: ${page.title || 'No title'}`);
+          });
+        } catch (error) {
+          console.log('⚠️ No page content found, skipping...');
+          pageContent = [];
+        }
+      } else {
+        console.log('⏭️ Skipping page content (configuration disabled)');
       }
 
       // Export API tokens (without sensitive data)
@@ -225,17 +245,19 @@ export class DatabaseBackupService {
     pageContent?: any[];
     apiTokens?: any[];
     media?: any[];
-  }, options: Partial<{ cleanExisting: boolean }> = {}): Promise<void> {
+  }, options: Partial<{ cleanExisting: boolean; includeConfiguration: boolean }> = {}): Promise<void> {
     try {
+      const includeConfiguration = options.includeConfiguration ?? true; // Default to true
       console.log('📥 Starting database restoration...');
+      console.log(`⚙️ Configuration data: ${includeConfiguration ? 'WILL BE RESTORED' : 'WILL BE SKIPPED'}`);
       console.log('📊 Data to restore:', {
         recipes: data.recipes?.length || 0,
         authors: data.authors?.length || 0,
         categories: data.categories?.length || 0,
         settings: data.settings?.length || 0,
-        adminSettings: data.adminSettings?.length || 0,
-        siteConfig: data.siteConfig?.length || 0,
-        pageContent: data.pageContent?.length || 0,
+        adminSettings: includeConfiguration ? (data.adminSettings?.length || 0) : 0,
+        siteConfig: includeConfiguration ? (data.siteConfig?.length || 0) : 0,
+        pageContent: includeConfiguration ? (data.pageContent?.length || 0) : 0,
         apiTokens: data.apiTokens?.length || 0,
         media: data.media?.length || 0,
       });
@@ -399,8 +421,8 @@ export class DatabaseBackupService {
           console.log('✅ Recipes restored');
         }
 
-        // Restore admin settings
-        if (data.adminSettings && data.adminSettings.length > 0) {
+        // Restore admin settings (CONFIGURATION DATA)
+        if (includeConfiguration && data.adminSettings && data.adminSettings.length > 0) {
           console.log(`⚙️ Restoring ${data.adminSettings.length} admin settings...`);
           
           for (const setting of data.adminSettings) {
@@ -427,14 +449,17 @@ export class DatabaseBackupService {
           }
           
           console.log('✅ Admin settings restored');
+        } else if (!includeConfiguration) {
+          console.log('⏭️ Skipping admin settings (configuration restore disabled)');
         }
 
-        // Restore site config
-        if (data.siteConfig && data.siteConfig.length > 0) {
+        // Restore site config (hero, logo, site info, social links)
+        if (includeConfiguration && data.siteConfig && data.siteConfig.length > 0) {
           console.log(`🌐 Restoring ${data.siteConfig.length} site config entries...`);
           
           for (const config of data.siteConfig) {
             try {
+              console.log(`  - Restoring config: ${config.key}`);
               await tx.siteConfig.upsert({
                 where: { id: config.id },
                 update: {
@@ -456,15 +481,18 @@ export class DatabaseBackupService {
             }
           }
           
-          console.log('✅ Site config restored');
+          console.log('✅ Site config restored (hero, logo, site settings)');
+        } else if (!includeConfiguration) {
+          console.log('⏭️ Skipping site config (configuration restore disabled)');
         }
 
-        // Restore page content
-        if (data.pageContent && data.pageContent.length > 0) {
+        // Restore page content (disclaimer, terms, FAQs, about, contact, etc.)
+        if (includeConfiguration && data.pageContent && data.pageContent.length > 0) {
           console.log(`📄 Restoring ${data.pageContent.length} page content entries...`);
           
           for (const page of data.pageContent) {
             try {
+              console.log(`  - Restoring page: ${page.page}`);
               await tx.pageContent.upsert({
                 where: { id: page.id },
                 update: {
@@ -501,7 +529,9 @@ export class DatabaseBackupService {
             }
           }
           
-          console.log('✅ Page content restored');
+          console.log('✅ Page content restored (disclaimer, terms, FAQs, etc.)');
+        } else if (!includeConfiguration) {
+          console.log('⏭️ Skipping page content (configuration restore disabled)');
         }
 
         // Restore media metadata

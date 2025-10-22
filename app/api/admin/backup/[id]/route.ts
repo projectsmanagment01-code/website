@@ -21,6 +21,7 @@ export async function POST(
     const {
       includeDatabase = true,
       includeFiles = true,
+      includeConfiguration = true,
       cleanExisting = false,
       skipConflicts = true
     } = body;
@@ -28,6 +29,7 @@ export async function POST(
     console.log('📋 Restore options:', {
       includeDatabase,
       includeFiles,
+      includeConfiguration,
       cleanExisting,
       skipConflicts
     });
@@ -35,6 +37,7 @@ export async function POST(
     const restoreOptions = {
       includeDatabase,
       includeFiles,
+      includeConfiguration,
       cleanExisting,
       skipConflicts
     };
