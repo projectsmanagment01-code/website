@@ -259,21 +259,39 @@ const CategoryManagement: React.FC = () => {
 
         {/* Category ID List */}
         {showIdList && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-900">Category IDs</h3>
+          <div className="mt-6 p-6 bg-white rounded-lg border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Category IDs</h3>
+                <p className="text-sm text-gray-500">List of all category identifiers ({categories.length} total)</p>
+              </div>
               <button
                 onClick={copyAllIds}
-                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                className="flex items-center px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
               >
-                <Copy className="h-4 w-4 mr-1" />
+                <Copy className="h-4 w-4 mr-2" />
                 Copy All
               </button>
             </div>
-            <div className="max-h-32 overflow-y-auto">
-              <pre className="text-xs text-gray-600 whitespace-pre-wrap">
-                {categories.map(cat => `${cat.id} - ${cat.name} (${cat.type})`).join('\\n')}
-              </pre>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
+                    <Tag className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-mono text-gray-600 truncate mb-1" title={category.id}>
+                      {category.id}
+                    </div>
+                    <div className="text-sm font-medium text-gray-900 truncate">
+                      {category.name}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

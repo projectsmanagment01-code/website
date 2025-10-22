@@ -14,7 +14,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, GripVertical, Search, Image as ImageIcon, Eye, EyeOff, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, GripVertical, Search, Image as ImageIcon, Eye, EyeOff, Upload, Copy, ChevronDown, ChevronUp, Tag, Download } from 'lucide-react';
 import { refreshAfterChange } from '@/lib/revalidation-utils';
 
 // ============================================================================
@@ -82,6 +82,9 @@ export default function CategoryManager() {
   
   // Image upload
   const [uploadingImage, setUploadingImage] = useState(false);
+  
+  // Category IDs toggle
+  const [showIdList, setShowIdList] = useState(false);
 
   // ========================================================================
   // Data Fetching
@@ -266,6 +269,43 @@ export default function CategoryManager() {
   );
 
   // ========================================================================
+  // Copy category IDs to clipboard
+  // ========================================================================
+  
+  const copyIdsToClipboard = () => {
+    const ids = categories.map(cat => cat.id).join('\\n');
+    navigator.clipboard.writeText(ids);
+    alert(`Copied ${categories.length} category IDs to clipboard`);
+  };
+
+  // ========================================================================
+  // Export category IDs to CSV
+  // ========================================================================
+  
+  const exportToCSV = () => {
+    // Create CSV content with proper line breaks
+    const header = 'Category Name,Category ID\n';
+    const rows = categories.map(cat => 
+      `"${cat.name.replace(/"/g, '""')}",${cat.id}`
+    ).join('\n');
+    
+    const csvContent = header + rows;
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `category-ids-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // ========================================================================
   // Render
   // ========================================================================
 
@@ -275,6 +315,88 @@ export default function CategoryManager() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Category Management</h1>
         <p className="text-gray-600">Manage recipe categories, images, and SEO settings</p>
+      </div>
+
+      {/* Category IDs List - At the top */}
+      <div className="bg-white rounded-xl border border-gray-200">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Category IDs</h3>
+              <p className="text-sm text-gray-500">List of all category identifiers ({categories.length} total)</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {showIdList && categories.length > 0 && (
+                <>
+                  <button
+                    onClick={exportToCSV}
+                    className="px-3 py-1 text-sm bg-green-100 hover:bg-green-200 text-green-700 rounded-md transition-colors flex items-center gap-1"
+                    title="Export to CSV"
+                  >
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                  </button>
+                  <button
+                    onClick={copyIdsToClipboard}
+                    className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors flex items-center gap-1"
+                    title="Copy all IDs to clipboard"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy All
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => setShowIdList(!showIdList)}
+                className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition-colors flex items-center gap-1"
+              >
+                {showIdList ? (
+                  <>
+                    <ChevronUp className="w-4 h-4" />
+                    Hide IDs
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    Show IDs
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {showIdList && (
+            <div className="border-t border-gray-200 pt-4">
+              {categories.length === 0 ? (
+                <p className="text-gray-500 text-sm italic">No categories found</p>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {categories.map((category) => (
+                      <div
+                        key={category.id}
+                        className="bg-white rounded-lg px-4 py-3 text-sm font-mono text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer group shadow-sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(category.id);
+                          alert(`Copied: ${category.id}`);
+                        }}
+                        title="Click to copy ID"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Tag className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs text-gray-500 mb-1">{category.name}</div>
+                            <div className="text-xs truncate group-hover:text-blue-600">{category.id}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Toolbar */}

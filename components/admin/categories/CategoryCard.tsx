@@ -66,8 +66,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
               </p>
             )}
             
-            <div className="text-xs text-gray-500">
-              Slug: <code className="bg-gray-100 px-1 py-0.5 rounded">{category.slug}</code>
+            <div className="flex flex-col gap-1 text-xs text-gray-500">
+              <div>
+                ID: <code className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono">{category.id}</code>
+              </div>
+              <div>
+                Slug: <code className="bg-gray-100 px-2 py-0.5 rounded">{category.slug}</code>
+              </div>
             </div>
           </div>
           
