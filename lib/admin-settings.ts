@@ -78,6 +78,19 @@ export interface DisclaimerPageContent {
   lastUpdated: string | null;
 }
 
+export interface CookiesPageContent {
+  heroTitle: string;
+  heroSubtitle: string;
+  metaTitle: string;
+  metaDescription: string;
+  sections: {
+    id: string;
+    title: string;
+    content: string;
+  }[];
+  lastUpdated: string | null;
+}
+
 export interface AdminSettingsData {
   header: {
     html: string[];
@@ -116,6 +129,15 @@ export interface AdminSettingsData {
   privacyPageContent?: PrivacyPageContent;
   termsPageContent?: TermsPageContent;
   disclaimerPageContent?: DisclaimerPageContent;
+  cookiesPageContent?: CookiesPageContent;
+  aiContextSettings?: {
+    websiteName: string;
+    businessType: string;
+    ownerName: string;
+    country: string;
+    primaryLanguage: string;
+    siteDomain: string;
+  };
   lastUpdated: string | null;
   updatedBy: string | null;
 }
@@ -204,6 +226,12 @@ Allow: /search`,
           disclaimerPageContent: settingsMap.get("disclaimerPageContent") 
             ? JSON.parse(settingsMap.get("disclaimerPageContent")!) 
             : undefined,
+          cookiesPageContent: settingsMap.get("cookiesPageContent")
+            ? JSON.parse(settingsMap.get("cookiesPageContent")!)
+            : undefined,
+          aiContextSettings: settingsMap.get("aiContextSettings")
+            ? JSON.parse(settingsMap.get("aiContextSettings")!)
+            : undefined,
           lastUpdated: settingsMap.get("lastUpdated") || null,
           updatedBy: settingsMap.get("updatedBy") || null,
         };
@@ -250,6 +278,8 @@ Allow: /search`,
             cookies: "",
           },
           aboutPageContent: undefined,
+          cookiesPageContent: undefined,
+          aiContextSettings: undefined,
           lastUpdated: null,
           updatedBy: null,
         };
@@ -316,6 +346,14 @@ export async function saveAdminSettings(
       { 
         key: "disclaimerPageContent", 
         value: settings.disclaimerPageContent ? JSON.stringify(settings.disclaimerPageContent) : "" 
+      },
+      { 
+        key: "cookiesPageContent", 
+        value: settings.cookiesPageContent ? JSON.stringify(settings.cookiesPageContent) : "" 
+      },
+      { 
+        key: "aiContextSettings", 
+        value: settings.aiContextSettings ? JSON.stringify(settings.aiContextSettings) : "" 
       },
       { key: "lastUpdated", value: new Date().toISOString() },
       { key: "updatedBy", value: updatedBy || "admin" },

@@ -69,6 +69,8 @@ export default function DisclaimerPolicyCMS({ onBack }: { onBack?: () => void })
       });
       if (response.ok) {
         const data = await response.json();
+        console.log("DisclaimerCMS - Loaded settings:", data);
+        console.log("DisclaimerCMS - aiContextSettings:", data.aiContextSettings);
         setSettings(data);
       }
     } catch (error) {
@@ -119,7 +121,12 @@ export default function DisclaimerPolicyCMS({ onBack }: { onBack?: () => void })
     const aiLanguage = settings?.aiContextSettings?.primaryLanguage;
     const aiDomain = settings?.aiContextSettings?.siteDomain;
     
-    return {
+    console.log("DisclaimerCMS - getWebsiteContext called");
+    console.log("DisclaimerCMS - settings:", settings);
+    console.log("DisclaimerCMS - aiContextSettings:", settings?.aiContextSettings);
+    console.log("DisclaimerCMS - aiWebsiteName:", aiWebsiteName);
+    
+    const context = {
       websiteName: aiWebsiteName || settings?.logoText || "Your Website",
       businessType: aiBusinessType || "Recipe Blog",
       ownerName: aiOwnerName || "Website Owner",
@@ -127,6 +134,9 @@ export default function DisclaimerPolicyCMS({ onBack }: { onBack?: () => void })
       primaryLanguage: aiLanguage || "English",
       siteDomain: aiDomain || settings?.siteDomain || window?.location?.hostname || ""
     };
+    
+    console.log("DisclaimerCMS - returning context:", context);
+    return context;
   };
 
   const generateFieldContent = async (fieldName: string, sectionId?: string) => {

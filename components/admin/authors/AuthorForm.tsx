@@ -54,11 +54,32 @@ export default function AuthorForm({
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [existingImages, setExistingImages] = useState<Array<{name: string; url: string; size: number; modified: string}>>([]);
   const [loadingImages, setLoadingImages] = useState(false);
+  const [settings, setSettings] = useState<any>(null);
   
   // File upload hook
   const { uploadFile, uploading: imageUploading, error: uploadError } = useFileUpload();
 
   const isEditMode = !!author;
+
+  // Load AI Context Settings
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch("/api/admin/settings", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    };
+    loadSettings();
+  }, []);
 
   // Initialize form data
   useEffect(() => {
@@ -261,46 +282,82 @@ export default function AuthorForm({
     setTimeout(() => setSuccess(null), 3000);
   };
 
+  const getWebsiteContext = () => {
+    const aiWebsiteName = settings?.aiContextSettings?.websiteName;
+    const aiBusinessType = settings?.aiContextSettings?.businessType;
+    const aiCountry = settings?.aiContextSettings?.country;
+    const aiLanguage = settings?.aiContextSettings?.primaryLanguage;
+    const aiDomain = settings?.aiContextSettings?.siteDomain;
+    
+    return {
+      websiteName: aiWebsiteName || settings?.logoText || "Your Website",
+      businessType: aiBusinessType || "Recipe Blog",
+      country: aiCountry || "United States",
+      primaryLanguage: aiLanguage || "English",
+      siteDomain: aiDomain || settings?.siteDomain || ""
+    };
+  };
+
   const generateFieldContent = async (fieldName: keyof AuthorFormData) => {
     try {
       setGeneratingField(fieldName);
       setError(null);
 
+      const websiteCtx = getWebsiteContext();
+      const contextInfo = `Website: "${websiteCtx.websiteName}"
+Business Type: ${websiteCtx.businessType}
+Language: ${websiteCtx.primaryLanguage}
+Country: ${websiteCtx.country}
+Domain: ${websiteCtx.siteDomain}`;
+
       // Create context-aware prompts based on field type
       let prompt = '';
-      const websiteContext = `This content is for a recipe blog/website focused on cooking and food content.`;
       
       switch (fieldName) {
         case 'name':
-          prompt = `Generate a realistic human first name only for a food blogger/recipe creator. Requirements:
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a realistic human first name only for a food blogger/recipe creator for ${websiteCtx.websiteName}. Requirements:
 - Must be a real human first name (like "Sarah", "Michael", "Emma", "David")
 - No last names, no titles, no descriptions
-- Suitable for a professional food blogger
-- Easy to pronounce and remember
+- Suitable for a professional ${websiteCtx.businessType} author
+- Easy to pronounce and remember in ${websiteCtx.primaryLanguage}
+- Culturally appropriate for ${websiteCtx.country}
 - Maximum 15 characters
 - Return ONLY the first name, nothing else`;
           break;
           
         case 'bio':
           const authorName = formData.name || 'the author';
-          prompt = `${websiteContext} Write a compelling author bio for ${authorName}, a food blogger and recipe creator. The bio should be:
+          prompt = `Context:
+${contextInfo}
+
+Task: Write a compelling author bio for ${authorName}, a food blogger and recipe creator at ${websiteCtx.websiteName} (${websiteCtx.businessType}). The bio should be:
 - 100-200 words
 - Professional yet approachable
-- Highlight culinary expertise and passion
-- Mention experience with recipe development
+- Highlight culinary expertise and passion for ${websiteCtx.businessType}
+- Mention experience with recipe development and ${websiteCtx.websiteName}
 - Include connection with readers/food community
 - Written in third person
+- In ${websiteCtx.primaryLanguage} language
+- Relevant to ${websiteCtx.country} audience
 Return only the bio text, no additional formatting.`;
           break;
           
         case 'link':
           const linkName = formData.name || 'food-blogger';
           const slugifiedName = linkName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-          prompt = `${websiteContext} Generate a professional social media handle or website URL for author "${linkName}". Options could include:
+          const domain = websiteCtx.siteDomain ? websiteCtx.siteDomain.replace(/^https?:\/\//, '').replace(/\/$/, '') : 'example.com';
+          prompt = `Context:
+${contextInfo}
+
+Task: Generate a professional social media handle or website URL for author "${linkName}" at ${websiteCtx.websiteName}. Options could include:
 - Instagram handle (e.g., @${slugifiedName}_kitchen)
-- Website URL (e.g., ${slugifiedName}recipes.com)
+- Website URL (e.g., https://${domain}/author/${slugifiedName})
 - YouTube channel (e.g., youtube.com/c/${slugifiedName}cooks)
-Return only one clean URL or handle, no additional text.`;
+- Twitter/X handle (e.g., @${slugifiedName}recipes)
+Return only one clean URL or handle that fits ${websiteCtx.businessType}, no additional text.`;
           break;
           
         default:
@@ -312,7 +369,7 @@ Return only one clean URL or handle, no additional text.`;
         field: fieldName,
         maxLength: fieldName === 'name' ? 50 : fieldName === 'bio' ? 200 : 100,
         contentType: fieldName === 'bio' ? 'description' : 'title',
-        websiteContext: websiteContext,
+        websiteContext: websiteCtx,
       };
 
       const response = await fetch('/api/admin/ai-generate-content', {

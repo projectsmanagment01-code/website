@@ -3,7 +3,7 @@
   "provider": "gemini",
   "apiKeys": {
     "openai": "",
-    "gemini": "AIzaSyCKAzoz9jTVBo0sIcHAsQ93b8xEw6zXzms"
+    "gemini": "AIzaSyCiygNKeW7VKHtAK8tSzYTpU0mfpjISeJ4"
   },
   "model": "gemini-2.5-flash",
   "temperature": 0.7,
@@ -18,6 +18,6 @@
   },
   "lastTested": "2025-10-18T21:02:09.115Z",
   "connectionStatus": "connected",
-  "lastUpdated": "2025-10-19T14:35:11.007Z",
+  "lastUpdated": "2025-10-22T12:20:42.056Z",
   "updatedBy": "admin@yourrecipesite.com"
 }

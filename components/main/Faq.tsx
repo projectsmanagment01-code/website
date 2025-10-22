@@ -43,7 +43,7 @@ interface FAQData {
 export default function Component({ faqData }: { faqData: FAQData }) {
 
   // If content exists and is HTML, render it directly
-  if (faqData.content && faqData.content.trim() && faqData.content.includes('<div')) {
+  if (faqData.content && faqData.content.trim() && faqData.content.includes('<')) {
     return (
       <div className="w-full mx-auto">
         {/* Hero Section */}

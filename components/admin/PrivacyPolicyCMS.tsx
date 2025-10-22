@@ -240,8 +240,14 @@ Task: Generate a clear 2-6 word section title for a Privacy Policy section about
         const sectionPrompts: Record<string, string> = {
           'intro': `Write a comprehensive introduction for ${websiteContext.websiteName}'s Privacy Policy (300-500 words).
 
+CRITICAL INSTRUCTIONS:
+- Use "${websiteContext.websiteName}" as the website name - DO NOT use placeholders like [Your Website Name] or [Website Name]
+- Use "${websiteContext.siteDomain}" as the website URL - DO NOT use placeholders like [Your Website URL]
+- Replace ALL placeholders with actual values provided in context
+- Be specific and use the actual website name throughout the content
+
 Include:
-- Welcome and purpose of this privacy policy
+- Welcome and purpose of this privacy policy for ${websiteContext.websiteName}
 - Commitment to protecting user privacy and data
 - What information is covered in this policy
 - Effective date and compliance with ${websiteContext.country} privacy laws
@@ -250,6 +256,8 @@ Include:
 Use HTML formatting: <p> tags for paragraphs, <strong> for emphasis. Write in ${websiteContext.primaryLanguage}. Professional, transparent, legally appropriate tone.`,
           
           'info-collect': `Write detailed content about what information ${websiteContext.websiteName} collects (400-600 words).
+
+CRITICAL: Use "${websiteContext.websiteName}" as the website name - NO placeholders like [Your Website] or [Website Name]. Be specific.
 
 Cover:
 - Personal information (name, email, contact details)
@@ -263,6 +271,8 @@ Cover:
 Use HTML: <p> paragraphs, <ul><li> lists, <strong> emphasis. ${websiteContext.primaryLanguage} language. Clear, comprehensive, legally sound.`,
           
           'how-use': `Write comprehensive content about how ${websiteContext.websiteName} uses collected data (400-600 words).
+
+CRITICAL: Use "${websiteContext.websiteName}" explicitly - NO placeholders. Be specific with the actual website name.
 
 Explain uses:
 - Providing and improving ${websiteContext.businessType} services
@@ -278,8 +288,10 @@ HTML format: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Transpa
           
           'cookies': `Write detailed cookie policy content for ${websiteContext.websiteName} (400-600 words).
 
+CRITICAL: Use "${websiteContext.websiteName}" as the actual website name - NO placeholders or brackets.
+
 Cover:
-- What cookies are and why we use them
+- What cookies are and why ${websiteContext.websiteName} uses them
 - Types of cookies: essential, analytics, advertising, preferences
 - First-party vs third-party cookies
 - Specific services: Google Analytics, AdSense, social media
@@ -291,7 +303,9 @@ HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Thorough, user
           
           'third-party': `Write comprehensive third-party services section for ${websiteContext.websiteName} (400-600 words).
 
-List and explain services used:
+CRITICAL: Use "${websiteContext.websiteName}" explicitly throughout - NO placeholders like [Website Name].
+
+List and explain services used by ${websiteContext.websiteName}:
 - Google Analytics (traffic analysis)
 - Google AdSense (advertising)
 - Social media platforms (sharing, embedding)
@@ -306,21 +320,25 @@ HTML: <p>, <ul><li>, <strong>, <a href> for privacy policy links. ${websiteConte
           
           'data-security': `Write detailed data security section for ${websiteContext.websiteName} (300-500 words).
 
+CRITICAL: Use "${websiteContext.websiteName}" as the actual name - NO placeholders.
+
 Cover:
-- Technical security measures (encryption, secure servers, SSL)
+- Technical security measures used by ${websiteContext.websiteName} (encryption, secure servers, SSL)
 - Access controls and authentication
 - Regular security updates and monitoring
 - Data breach notification procedures
 - Limitations (no system is 100% secure)
 - ${websiteContext.country} security standards and compliance
-- How long data is retained
+- How long ${websiteContext.websiteName} retains data
 - Data storage locations
 
 HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Reassuring yet realistic, professionally worded.`,
           
           'your-rights': `Write comprehensive user rights section for ${websiteContext.websiteName} (400-600 words).
 
-Detail privacy rights:
+CRITICAL: Use "${websiteContext.websiteName}" explicitly - NO placeholders or brackets.
+
+Detail privacy rights at ${websiteContext.websiteName}:
 - Right to access personal data
 - Right to correction/rectification
 - Right to deletion (right to be forgotten)
@@ -336,7 +354,9 @@ HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Empowering, cl
           
           'contact': `Write contact information section for privacy concerns at ${websiteContext.websiteName} (200-300 words).
 
-Include:
+CRITICAL: Use "${websiteContext.websiteName}" as the actual website name - NO placeholders.
+
+Include for ${websiteContext.websiteName}:
 - How to contact about privacy matters
 - Email address for privacy inquiries
 - Postal address (if available)
@@ -350,9 +370,12 @@ HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Accessible, he
         };
 
         prompt = `Context: ${websiteContext.websiteName} (${websiteContext.businessType}) in ${websiteContext.country}
+Website Domain: ${websiteContext.siteDomain}
 Section: "${sectionTitle}"
 
-${sectionPrompts[sectionId] || `Write comprehensive, legally appropriate content for the "${sectionTitle}" section of a Privacy Policy (300-500 words). Include transparency about data practices, user rights, and compliance with ${websiteContext.country} laws. Use HTML <p> and <ul><li> tags. ${websiteContext.primaryLanguage} language.`}
+CRITICAL INSTRUCTION: You MUST use "${websiteContext.websiteName}" as the website name throughout the content. DO NOT use ANY placeholders like [Your Website], [Website Name], [Your Website URL], or any text in brackets. Use the actual website name "${websiteContext.websiteName}" and domain "${websiteContext.siteDomain}" provided above.
+
+${sectionPrompts[sectionId] || `Write comprehensive, legally appropriate content for the "${sectionTitle}" section of a Privacy Policy for ${websiteContext.websiteName} (300-500 words). Include transparency about data practices, user rights, and compliance with ${websiteContext.country} laws. Use HTML <p> and <ul><li> tags. ${websiteContext.primaryLanguage} language. Use "${websiteContext.websiteName}" explicitly - NO placeholders.`}
 
 Generate the content now:`;
         maxLength = 6000;

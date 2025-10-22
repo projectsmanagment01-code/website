@@ -23,10 +23,30 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingField, setGeneratingField] = useState<string | null>(null);
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     loadContent();
+    loadSettings();
   }, []);
+
+  const loadSettings = async () => {
+    try {
+      const response = await fetch("/api/admin/settings", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("FAQ CMS - Loaded settings:", data);
+        console.log("FAQ CMS - aiContextSettings:", data.aiContextSettings);
+        setSettings(data);
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+    }
+  };
 
   const loadContent = async () => {
     try {
@@ -108,8 +128,19 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
       const aiSettings = await aiSettingsResponse.json();
       const provider = aiSettings.apiKeys.gemini ? 'gemini' : 'openai';
       
+      const websiteContext = getWebsiteContext();
+      
       const promptLines = [
-        "Generate a complete FAQ page in HTML format for a recipe website.",
+        `CRITICAL INSTRUCTIONS - READ CAREFULLY:`,
+        `- Website Name: "${websiteContext.websiteName}"`,
+        `- Business Type: ${websiteContext.businessType}`,
+        `- Owner: ${websiteContext.ownerName}`,
+        `- Country: ${websiteContext.country}`,
+        ``,
+        `YOU MUST use "${websiteContext.websiteName}" in your responses.`,
+        `DO NOT use placeholders like "[Website Name]", "[Your Website]", "Your Website", or "localhost".`,
+        ``,
+        `Generate a complete FAQ page in HTML format for ${websiteContext.websiteName}, a ${websiteContext.businessType}.`,
         "",
         "You must create EXACTLY 5 categories with 4-5 questions each.",
         "",
@@ -137,7 +168,7 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
         'Start output with: <div class="bg-white min-h-screen mt-4"><div class="my-12 space-y-12 flex flex-col">',
         'End output with: </div></div>',
         "",
-        "Generate all 5 categories completely. Keep answers brief (1-2 sentences)."
+        `Generate all 5 categories completely for ${websiteContext.websiteName}. Keep answers brief (1-2 sentences).`
       ];
       
       const prompt = promptLines.join('\n');
@@ -179,6 +210,24 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
     }
   };
 
+  const getWebsiteContext = () => {
+    const aiWebsiteName = settings?.aiContextSettings?.websiteName;
+    const aiBusinessType = settings?.aiContextSettings?.businessType;
+    const aiOwnerName = settings?.aiContextSettings?.ownerName;
+    const aiCountry = settings?.aiContextSettings?.country;
+    const aiLanguage = settings?.aiContextSettings?.primaryLanguage;
+    const aiDomain = settings?.aiContextSettings?.siteDomain;
+    
+    return {
+      websiteName: aiWebsiteName || settings?.logoText || "Your Website",
+      businessType: aiBusinessType || "Recipe Blog",
+      ownerName: aiOwnerName || "Website Owner",
+      country: aiCountry || "United States",
+      primaryLanguage: aiLanguage || "English",
+      siteDomain: aiDomain || settings?.siteDomain || window?.location?.hostname || ""
+    };
+  };
+
   const generateFieldContent = async (fieldType: string) => {
     setGeneratingField(fieldType);
     
@@ -196,24 +245,39 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
       const aiSettings = await aiSettingsResponse.json();
       const provider = aiSettings.apiKeys.gemini ? 'gemini' : 'openai';
       
+      const websiteContext = getWebsiteContext();
+      const contextInfo = `
+CRITICAL INSTRUCTIONS - READ CAREFULLY:
+- Website Name: "${websiteContext.websiteName}"
+- Business Type: ${websiteContext.businessType}
+- Owner: ${websiteContext.ownerName}
+- Country: ${websiteContext.country}
+- Language: ${websiteContext.primaryLanguage}
+- Domain: ${websiteContext.siteDomain}
+
+YOU MUST use the actual website name "${websiteContext.websiteName}" in your response.
+DO NOT use placeholders like "[Website Name]", "[Your Website]", "Your Website", "localhost", or any generic terms.
+ALWAYS use the specific website name provided above.
+`;
+      
       let prompt = "";
       let maxLength = 150;
       
       switch (fieldType) {
         case "heroTitle":
-          prompt = "Generate a compelling 4-6 word title for a FAQ page on a recipe website. Make it welcoming and informative. Return only the title, no quotes or extra text.";
+          prompt = `${contextInfo}\n\nGenerate a compelling 4-6 word title for a FAQ page. Make it welcoming and informative. Return only the title, no quotes or extra text.`;
           maxLength = 60;
           break;
         case "heroIntro":
-          prompt = "Write a friendly 2-sentence introduction for a FAQ page on a recipe website. Explain what users can find and encourage them to browse. Return only the intro text.";
+          prompt = `${contextInfo}\n\nWrite a friendly 2-sentence introduction for a FAQ page for ${websiteContext.websiteName}. Explain what users can find and encourage them to browse. Return only the intro text.`;
           maxLength = 200;
           break;
         case "metaTitle":
-          prompt = "Generate an SEO-optimized meta title (under 60 characters) for a FAQ page on a recipe website. Include keywords like 'FAQ', 'recipes', 'cooking'. Return only the title.";
+          prompt = `${contextInfo}\n\nGenerate an SEO-optimized meta title (under 60 characters) for FAQ page. Include "${websiteContext.websiteName}" and "FAQ". Return only the title.`;
           maxLength = 60;
           break;
         case "metaDescription":
-          prompt = "Write an SEO meta description (under 160 characters) for a FAQ page on a recipe website. Mention that users can find answers about recipes, cooking tips, and website features. Return only the description.";
+          prompt = `${contextInfo}\n\nWrite an SEO meta description (under 160 characters) for ${websiteContext.websiteName}'s FAQ page. Mention that users can find answers about recipes, cooking tips, and website features. Return only the description.`;
           maxLength = 160;
           break;
       }
