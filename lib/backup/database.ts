@@ -269,38 +269,52 @@ export class DatabaseBackupService {
           
           // Delete in correct order to handle foreign keys
           await tx.recipe.deleteMany();
+          console.log('  ✓ Recipes cleaned');
+          
           await tx.author.deleteMany();
+          console.log('  ✓ Authors cleaned');
           
           // Clean categories if they exist
           try {
             await tx.category.deleteMany();
+            console.log('  ✓ Categories cleaned');
           } catch (error) {
-            console.log('⚠️ Categories table not found or already empty');
+            console.log('  ⚠️ Categories table not found or already empty');
           }
 
-          // Clean other tables if they exist
-          try {
-            await tx.adminSettings.deleteMany();
-          } catch (error) {
-            console.log('⚠️ AdminSettings table not found or already empty');
-          }
+          // Clean configuration tables ONLY if includeConfiguration is true
+          if (includeConfiguration) {
+            console.log('  🗑️ Cleaning configuration data (includeConfiguration is enabled)...');
+            
+            try {
+              await tx.adminSettings.deleteMany();
+              console.log('  ✓ Admin settings cleaned');
+            } catch (error) {
+              console.log('  ⚠️ AdminSettings table not found or already empty');
+            }
 
-          try {
-            await tx.siteConfig.deleteMany();
-          } catch (error) {
-            console.log('⚠️ SiteConfig table not found or already empty');
-          }
+            try {
+              await tx.siteConfig.deleteMany();
+              console.log('  ✓ Site config cleaned');
+            } catch (error) {
+              console.log('  ⚠️ SiteConfig table not found or already empty');
+            }
 
-          try {
-            await tx.pageContent.deleteMany();
-          } catch (error) {
-            console.log('⚠️ PageContent table not found or already empty');
-          }
+            try {
+              await tx.pageContent.deleteMany();
+              console.log('  ✓ Page content cleaned');
+            } catch (error) {
+              console.log('  ⚠️ PageContent table not found or already empty');
+            }
 
-          try {
-            await tx.media.deleteMany();
-          } catch (error) {
-            console.log('⚠️ Media table not found or already empty');
+            try {
+              await tx.media.deleteMany();
+              console.log('  ✓ Media metadata cleaned');
+            } catch (error) {
+              console.log('  ⚠️ Media table not found or already empty');
+            }
+          } else {
+            console.log('  ⏭️ Preserving existing configuration data (includeConfiguration is disabled)');
           }
           
           console.log('✅ Existing data cleaned');
