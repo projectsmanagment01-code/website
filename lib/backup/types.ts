@@ -15,6 +15,11 @@ export interface BackupMetadata {
     authors: number;
     categories: number;
     files: number;
+    adminSettings: number;
+    siteConfig: number;
+    pageContent: number;
+    apiTokens: number;
+    media: number;
   };
 }
 
@@ -35,6 +40,11 @@ export interface RawBackupMetadata {
     authors: number;
     categories: number;
     files: number;
+    adminSettings?: number;
+    siteConfig?: number;
+    pageContent?: number;
+    apiTokens?: number;
+    media?: number;
   };
 }
 
@@ -82,6 +92,11 @@ export interface BackupContents {
     authors: any[];
     categories: any[];
     settings: any[];
+    adminSettings: any[];
+    siteConfig: any[];
+    pageContent: any[];
+    apiTokens: any[];
+    media: any[];
   };
   files?: {
     path: string;

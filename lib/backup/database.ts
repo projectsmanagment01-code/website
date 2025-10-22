@@ -21,11 +21,21 @@ export class DatabaseBackupService {
     authors: any[];
     categories: any[];
     settings: any[];
+    adminSettings: any[];
+    siteConfig: any[];
+    pageContent: any[];
+    apiTokens: any[];
+    media: any[];
     summary: {
       recipes: number;
       authors: number;
       categories: number;
       settings: number;
+      adminSettings: number;
+      siteConfig: number;
+      pageContent: number;
+      apiTokens: number;
+      media: number;
     };
   }> {
     try {
@@ -37,39 +47,101 @@ export class DatabaseBackupService {
       // Export authors
       const authors = await this.prisma.author.findMany();
 
-      // Export any category data if exists
+      // Export categories (new system)
       let categories: any[] = [];
       try {
-        // Check if categories table exists
-        categories = await this.prisma.$queryRaw`SELECT * FROM information_schema.tables WHERE table_name = 'categories'`;
-        if (categories.length > 0) {
-          categories = await this.prisma.$queryRaw`SELECT * FROM categories`;
-        } else {
-          categories = [];
-        }
+        categories = await this.prisma.category.findMany();
+        console.log(`📂 Found ${categories.length} categories to backup`);
       } catch (error) {
-        console.log('No categories table found, skipping...');
+        console.log('⚠️ No categories table found or error accessing it, skipping...', error);
         categories = [];
       }
 
-      // Export settings or configuration data
+      // Export admin settings
+      let adminSettings: any[] = [];
+      try {
+        adminSettings = await this.prisma.adminSettings.findMany();
+        console.log(`⚙️ Found ${adminSettings.length} admin settings to backup`);
+      } catch (error) {
+        console.log('⚠️ No admin settings found, skipping...');
+        adminSettings = [];
+      }
+
+      // Export site config
+      let siteConfig: any[] = [];
+      try {
+        siteConfig = await this.prisma.siteConfig.findMany();
+        console.log(`🌐 Found ${siteConfig.length} site config entries to backup`);
+      } catch (error) {
+        console.log('⚠️ No site config found, skipping...');
+        siteConfig = [];
+      }
+
+      // Export page content
+      let pageContent: any[] = [];
+      try {
+        pageContent = await this.prisma.pageContent.findMany();
+        console.log(`📄 Found ${pageContent.length} page content entries to backup`);
+      } catch (error) {
+        console.log('⚠️ No page content found, skipping...');
+        pageContent = [];
+      }
+
+      // Export API tokens (without sensitive data)
+      let apiTokens: any[] = [];
+      try {
+        apiTokens = await this.prisma.apiToken.findMany({
+          select: {
+            id: true,
+            name: true,
+            createdAt: true,
+            expiresAt: true,
+            isActive: true,
+            lastUsedAt: true,
+            createdBy: true,
+            description: true,
+            // Exclude the actual token for security
+          }
+        });
+        console.log(`🔑 Found ${apiTokens.length} API tokens to backup (without sensitive data)`);
+      } catch (error) {
+        console.log('⚠️ No API tokens found, skipping...');
+        apiTokens = [];
+      }
+
+      // Export media metadata (file references)
+      let media: any[] = [];
+      try {
+        media = await this.prisma.media.findMany();
+        console.log(`🖼️ Found ${media.length} media entries to backup`);
+      } catch (error) {
+        console.log('⚠️ No media table found, skipping...');
+        media = [];
+      }
+
+      // Export legacy settings (if exists)
       let settings: any[] = [];
       try {
-        // Check if settings table exists
+        // Check if legacy settings table exists
         const settingsCheck = await this.prisma.$queryRaw`SELECT * FROM information_schema.tables WHERE table_name = 'settings'`;
         if (Array.isArray(settingsCheck) && settingsCheck.length > 0) {
           settings = await this.prisma.$queryRaw`SELECT * FROM settings`;
         }
       } catch (error) {
-        console.log('No settings table found, skipping...');
+        console.log('⚠️ No legacy settings table found, skipping...');
         settings = [];
       }
 
       const summary = {
         recipes: recipes.length,
         authors: authors.length,
-        categories: Array.isArray(categories) ? categories.length : 0,
+        categories: categories.length,
         settings: Array.isArray(settings) ? settings.length : 0,
+        adminSettings: adminSettings.length,
+        siteConfig: siteConfig.length,
+        pageContent: pageContent.length,
+        apiTokens: apiTokens.length,
+        media: media.length,
       };
 
       console.log(`✅ Database export completed:`, summary);
@@ -77,8 +149,13 @@ export class DatabaseBackupService {
       return {
         recipes,
         authors,
-        categories: Array.isArray(categories) ? categories : [],
+        categories,
         settings: Array.isArray(settings) ? settings : [],
+        adminSettings,
+        siteConfig,
+        pageContent,
+        apiTokens,
+        media,
         summary,
       };
     } catch (error) {
@@ -143,6 +220,11 @@ export class DatabaseBackupService {
     authors: any[];
     categories?: any[];
     settings?: any[];
+    adminSettings?: any[];
+    siteConfig?: any[];
+    pageContent?: any[];
+    apiTokens?: any[];
+    media?: any[];
   }, options: Partial<{ cleanExisting: boolean }> = {}): Promise<void> {
     try {
       console.log('📥 Starting database restoration...');
@@ -151,10 +233,15 @@ export class DatabaseBackupService {
         authors: data.authors?.length || 0,
         categories: data.categories?.length || 0,
         settings: data.settings?.length || 0,
+        adminSettings: data.adminSettings?.length || 0,
+        siteConfig: data.siteConfig?.length || 0,
+        pageContent: data.pageContent?.length || 0,
+        apiTokens: data.apiTokens?.length || 0,
+        media: data.media?.length || 0,
       });
 
       // Start transaction for atomic restoration
-      await this.prisma.$transaction(async (tx) => {
+      await this.prisma.$transaction(async (tx: any) => {
         if (options.cleanExisting) {
           console.log('🗑️ Cleaning existing data...');
           
@@ -162,10 +249,87 @@ export class DatabaseBackupService {
           await tx.recipe.deleteMany();
           await tx.author.deleteMany();
           
+          // Clean categories if they exist
+          try {
+            await tx.category.deleteMany();
+          } catch (error) {
+            console.log('⚠️ Categories table not found or already empty');
+          }
+
+          // Clean other tables if they exist
+          try {
+            await tx.adminSettings.deleteMany();
+          } catch (error) {
+            console.log('⚠️ AdminSettings table not found or already empty');
+          }
+
+          try {
+            await tx.siteConfig.deleteMany();
+          } catch (error) {
+            console.log('⚠️ SiteConfig table not found or already empty');
+          }
+
+          try {
+            await tx.pageContent.deleteMany();
+          } catch (error) {
+            console.log('⚠️ PageContent table not found or already empty');
+          }
+
+          try {
+            await tx.media.deleteMany();
+          } catch (error) {
+            console.log('⚠️ Media table not found or already empty');
+          }
+          
           console.log('✅ Existing data cleaned');
         }
 
-        // Restore authors first (recipes depend on authors)
+        // Restore categories first (recipes may depend on them)
+        if (data.categories && data.categories.length > 0) {
+          console.log(`📂 Restoring ${data.categories.length} categories...`);
+          
+          for (const category of data.categories) {
+            try {
+              await tx.category.upsert({
+                where: { id: category.id },
+                update: {
+                  name: category.name,
+                  slug: category.slug,
+                  description: category.description,
+                  image: category.image,
+                  icon: category.icon,
+                  color: category.color,
+                  order: category.order || 0,
+                  isActive: category.isActive !== undefined ? category.isActive : true,
+                  metaTitle: category.metaTitle,
+                  metaDescription: category.metaDescription,
+                },
+                create: {
+                  id: category.id,
+                  name: category.name,
+                  slug: category.slug,
+                  description: category.description,
+                  image: category.image,
+                  icon: category.icon,
+                  color: category.color,
+                  order: category.order || 0,
+                  isActive: category.isActive !== undefined ? category.isActive : true,
+                  metaTitle: category.metaTitle,
+                  metaDescription: category.metaDescription,
+                  createdAt: category.createdAt ? new Date(category.createdAt) : new Date(),
+                  updatedAt: category.updatedAt ? new Date(category.updatedAt) : new Date(),
+                },
+              });
+            } catch (error) {
+              console.error(`Failed to restore category ${category.id}:`, error);
+              throw error;
+            }
+          }
+          
+          console.log('✅ Categories restored');
+        }
+
+        // Restore authors (recipes may depend on authors)
         if (data.authors && data.authors.length > 0) {
           console.log(`👥 Restoring ${data.authors.length} authors...`);
           
@@ -180,6 +344,7 @@ export class DatabaseBackupService {
                   avatar: author.avatar,
                   slug: author.slug,
                   link: author.link,
+                  tags: author.tags || [],
                 },
                 create: {
                   id: author.id,
@@ -189,6 +354,7 @@ export class DatabaseBackupService {
                   avatar: author.avatar,
                   slug: author.slug,
                   link: author.link,
+                  tags: author.tags || [],
                   createdAt: author.createdAt ? new Date(author.createdAt) : new Date(),
                   updatedAt: author.updatedAt ? new Date(author.updatedAt) : new Date(),
                 },
@@ -231,6 +397,177 @@ export class DatabaseBackupService {
           }
           
           console.log('✅ Recipes restored');
+        }
+
+        // Restore admin settings
+        if (data.adminSettings && data.adminSettings.length > 0) {
+          console.log(`⚙️ Restoring ${data.adminSettings.length} admin settings...`);
+          
+          for (const setting of data.adminSettings) {
+            try {
+              await tx.adminSettings.upsert({
+                where: { id: setting.id },
+                update: {
+                  key: setting.key,
+                  value: setting.value,
+                  updatedBy: setting.updatedBy,
+                },
+                create: {
+                  id: setting.id,
+                  key: setting.key,
+                  value: setting.value,
+                  updatedAt: setting.updatedAt ? new Date(setting.updatedAt) : new Date(),
+                  updatedBy: setting.updatedBy,
+                },
+              });
+            } catch (error) {
+              console.error(`Failed to restore admin setting ${setting.id}:`, error);
+              throw error;
+            }
+          }
+          
+          console.log('✅ Admin settings restored');
+        }
+
+        // Restore site config
+        if (data.siteConfig && data.siteConfig.length > 0) {
+          console.log(`🌐 Restoring ${data.siteConfig.length} site config entries...`);
+          
+          for (const config of data.siteConfig) {
+            try {
+              await tx.siteConfig.upsert({
+                where: { id: config.id },
+                update: {
+                  key: config.key,
+                  data: config.data,
+                  updatedBy: config.updatedBy,
+                },
+                create: {
+                  id: config.id,
+                  key: config.key,
+                  data: config.data,
+                  updatedAt: config.updatedAt ? new Date(config.updatedAt) : new Date(),
+                  updatedBy: config.updatedBy,
+                },
+              });
+            } catch (error) {
+              console.error(`Failed to restore site config ${config.id}:`, error);
+              throw error;
+            }
+          }
+          
+          console.log('✅ Site config restored');
+        }
+
+        // Restore page content
+        if (data.pageContent && data.pageContent.length > 0) {
+          console.log(`📄 Restoring ${data.pageContent.length} page content entries...`);
+          
+          for (const page of data.pageContent) {
+            try {
+              await tx.pageContent.upsert({
+                where: { id: page.id },
+                update: {
+                  page: page.page,
+                  title: page.title,
+                  heroTitle: page.heroTitle,
+                  heroDescription: page.heroDescription,
+                  heroIntro: page.heroIntro,
+                  content: page.content,
+                  metaTitle: page.metaTitle,
+                  metaDescription: page.metaDescription,
+                  data: page.data,
+                  updatedBy: page.updatedBy,
+                },
+                create: {
+                  id: page.id,
+                  page: page.page,
+                  title: page.title,
+                  heroTitle: page.heroTitle,
+                  heroDescription: page.heroDescription,
+                  heroIntro: page.heroIntro,
+                  content: page.content,
+                  metaTitle: page.metaTitle,
+                  metaDescription: page.metaDescription,
+                  data: page.data,
+                  createdAt: page.createdAt ? new Date(page.createdAt) : new Date(),
+                  updatedAt: page.updatedAt ? new Date(page.updatedAt) : new Date(),
+                  updatedBy: page.updatedBy,
+                },
+              });
+            } catch (error) {
+              console.error(`Failed to restore page content ${page.id}:`, error);
+              throw error;
+            }
+          }
+          
+          console.log('✅ Page content restored');
+        }
+
+        // Restore media metadata
+        if (data.media && data.media.length > 0) {
+          console.log(`🖼️ Restoring ${data.media.length} media entries...`);
+          
+          for (const media of data.media) {
+            try {
+              await tx.media.upsert({
+                where: { id: media.id },
+                update: {
+                  filename: media.filename,
+                  originalName: media.originalName,
+                  path: media.path,
+                  url: media.url,
+                  category: media.category,
+                  mimeType: media.mimeType,
+                  size: media.size,
+                  width: media.width,
+                  height: media.height,
+                  thumbnailUrl: media.thumbnailUrl,
+                  alt: media.alt,
+                  caption: media.caption,
+                  tags: media.tags || [],
+                  recipeId: media.recipeId,
+                  authorId: media.authorId,
+                  categoryId: media.categoryId,
+                  uploadedBy: media.uploadedBy,
+                  deletedAt: media.deletedAt ? new Date(media.deletedAt) : null,
+                },
+                create: {
+                  id: media.id,
+                  filename: media.filename,
+                  originalName: media.originalName,
+                  path: media.path,
+                  url: media.url,
+                  category: media.category,
+                  mimeType: media.mimeType,
+                  size: media.size,
+                  width: media.width,
+                  height: media.height,
+                  thumbnailUrl: media.thumbnailUrl,
+                  alt: media.alt,
+                  caption: media.caption,
+                  tags: media.tags || [],
+                  recipeId: media.recipeId,
+                  authorId: media.authorId,
+                  categoryId: media.categoryId,
+                  uploadedBy: media.uploadedBy,
+                  uploadedAt: media.uploadedAt ? new Date(media.uploadedAt) : new Date(),
+                  updatedAt: media.updatedAt ? new Date(media.updatedAt) : new Date(),
+                  deletedAt: media.deletedAt ? new Date(media.deletedAt) : null,
+                },
+              });
+            } catch (error) {
+              console.error(`Failed to restore media ${media.id}:`, error);
+              throw error;
+            }
+          }
+          
+          console.log('✅ Media entries restored');
+        }
+
+        // Note: API tokens are not restored for security reasons
+        if (data.apiTokens && data.apiTokens.length > 0) {
+          console.log(`⚠️ Skipping ${data.apiTokens.length} API tokens for security reasons`);
         }
 
         console.log('✅ Database restoration completed successfully');

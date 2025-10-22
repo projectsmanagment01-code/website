@@ -75,7 +75,12 @@ export class BackupService {
           recipes: 0,
           authors: 0,
           categories: 0,
-          files: 0
+          files: 0,
+          adminSettings: 0,
+          siteConfig: 0,
+          pageContent: 0,
+          apiTokens: 0,
+          media: 0
         }
       };
 
@@ -93,6 +98,12 @@ export class BackupService {
         // Update content summary
         metadata.contentSummary.recipes = databaseData.recipes?.length || 0;
         metadata.contentSummary.authors = databaseData.authors?.length || 0;
+        metadata.contentSummary.categories = databaseData.categories?.length || 0;
+        metadata.contentSummary.adminSettings = databaseData.adminSettings?.length || 0;
+        metadata.contentSummary.siteConfig = databaseData.siteConfig?.length || 0;
+        metadata.contentSummary.pageContent = databaseData.pageContent?.length || 0;
+        metadata.contentSummary.apiTokens = databaseData.apiTokens?.length || 0;
+        metadata.contentSummary.media = databaseData.media?.length || 0;
 
         // Save database backup
         const dbBackupPath = path.join(tempDir, 'database.json');
@@ -195,10 +206,21 @@ export class BackupService {
         try {
           const metadata = await this.getBackupMetadata(filePath);
           if (metadata) {
-            // Ensure createdAt is a Date object
+            // Ensure createdAt is a Date object and fill missing fields with defaults
             const normalizedMetadata: BackupMetadata = {
               ...metadata,
-              createdAt: metadata.createdAt instanceof Date ? metadata.createdAt : new Date(metadata.createdAt)
+              createdAt: metadata.createdAt instanceof Date ? metadata.createdAt : new Date(metadata.createdAt),
+              contentSummary: {
+                recipes: metadata.contentSummary?.recipes || 0,
+                authors: metadata.contentSummary?.authors || 0,
+                categories: metadata.contentSummary?.categories || 0,
+                files: metadata.contentSummary?.files || 0,
+                adminSettings: metadata.contentSummary?.adminSettings || 0,
+                siteConfig: metadata.contentSummary?.siteConfig || 0,
+                pageContent: metadata.contentSummary?.pageContent || 0,
+                apiTokens: metadata.contentSummary?.apiTokens || 0,
+                media: metadata.contentSummary?.media || 0,
+              }
             };
             backups.push(normalizedMetadata);
           }
@@ -360,7 +382,12 @@ export class BackupService {
           recipes: 0,
           authors: 0,
           categories: 0,
-          files: 0
+          files: 0,
+          adminSettings: 0,
+          siteConfig: 0,
+          pageContent: 0,
+          apiTokens: 0,
+          media: 0
         }
       };
     } catch (error) {
