@@ -27,6 +27,7 @@ import BackupManager from "@/components/admin/BackupManager";
 import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
+import AdsManager from "@/components/admin/AdsManager";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -107,6 +108,8 @@ function AdminDashboardContent() {
         return <DisclaimerPolicyCMS onBack={() => setActiveSection("content")} />;
       case "content-cookies":
         return <CookiesPolicyCMS onBack={() => setActiveSection("content")} />;
+      case "ads":
+        return <AdsManager />;
       case "backup":
         return <BackupManager />;
       case "seo-reports":

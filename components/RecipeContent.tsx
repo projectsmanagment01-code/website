@@ -7,6 +7,7 @@ import { Card } from "./Card";
 import { getHostname, renderSafeHtml, hasHtmlTags } from "@/lib/utils";
 import { PinterestPinButton } from "./PinterestPinButton";
 import { getSiteSettings } from "@/lib/server-utils";
+import AdSlot from "./ads/AdSlot";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -84,6 +85,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       )}
 
+      {/* Ad below featured image */}
+      <AdSlot placement="recipe_below_image" className="my-8" />
+
       {/* Story */}
       <div className="prose prose-lg max-w-none">
         {hasHtmlTags(recipe.story) ? (
@@ -117,6 +121,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </p>
         )}
       </div>
+
+      {/* Ad in content - First position */}
+      <AdSlot placement="recipe_in_content_1" className="my-8" />
 
       {/* Essential Ingredient Guide */}
       <EssentialIngredients essIngredientGuide={recipe.essIngredientGuide} />
@@ -152,6 +159,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
       {/* Complete Cooking Process */}
       <CompleteCookingProcess completeProcess={recipe.completeProcess} />
+
+      {/* Ad in content - Second position */}
+      <AdSlot placement="recipe_in_content_2" className="my-8" />
 
       {/* 3. Mixing/Cooking Image - After cooking process */}
       {mixingImage && (
@@ -294,6 +304,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           ))}
         </div>
       </div>
+
+      {/* Ad in content - Third position */}
+      <AdSlot placement="recipe_in_content_3" className="my-8" />
 
       {/* 4. Final Presentation Image - Just before recipe card */}
       {finalImage && (

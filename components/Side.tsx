@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getAuthorById } from '@/lib/author-integration';
 import { getAuthorImageUrl } from '@/lib/author-image';
+import AdSlot from "@/components/ads/AdSlot";
 
 async function AuthorCard({ recipe }: { recipe: any }) {
   let authorData = null;
@@ -114,9 +115,19 @@ export default function Side({ recipe, relatedRecipes = [] }: any) {
 
   return (
     <div className="relative text-black">
+      {/* Ad Slot - Sidebar Top */}
+      <div className="mb-8">
+        <AdSlot placement="recipe_sidebar_top" className="w-full" />
+      </div>
+
       {/* Author Card Section */}
       <div className="mb-8">
         <AuthorCard recipe={recipe} />
+      </div>
+
+      {/* Ad Slot - Sidebar Middle */}
+      <div className="mb-8">
+        <AdSlot placement="recipe_sidebar_middle" className="w-full" />
       </div>
 
       <div className="bg-white">
@@ -189,6 +200,11 @@ export default function Side({ recipe, relatedRecipes = [] }: any) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Ad Slot - Sidebar Bottom */}
+      <div className="mt-8">
+        <AdSlot placement="recipe_sidebar_bottom" className="w-full" />
       </div>
     </div>
   );
