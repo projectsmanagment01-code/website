@@ -100,7 +100,7 @@ export default function AdsManager({ onBack }: { onBack?: () => void }) {
       const url = editingAd
         ? `/api/admin/ads/${editingAd.id}`
         : "/api/admin/ads";
-      const method = editingAd ? "PUT" : "POST";
+      const method = editingAd ? "PATCH" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -115,7 +115,8 @@ export default function AdsManager({ onBack }: { onBack?: () => void }) {
         await loadAds();
         resetForm();
       } else {
-        alert("Failed to save ad");
+        const errorData = await response.json();
+        alert(`Failed to save ad: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Error saving ad:", error);
@@ -393,17 +394,42 @@ export default function AdsManager({ onBack }: { onBack?: () => void }) {
           </div>
 
           {/* Active Status */}
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="isActive"
-              checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              className="w-5 h-5"
-            />
-            <label htmlFor="isActive" className="text-sm font-medium">
-              Active (show this ad)
-            </label>
+          <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <label htmlFor="isActive" className="text-sm font-semibold block mb-1">
+                  Ad Status
+                </label>
+                <p className="text-xs text-gray-600">
+                  {formData.isActive 
+                    ? "This ad will be visible and active on your site" 
+                    : "This ad will be hidden and not shown to visitors"}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-sm font-medium ${formData.isActive ? 'text-gray-400' : 'text-gray-900'}`}>
+                  Disabled
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                    formData.isActive 
+                      ? 'bg-green-600 focus:ring-green-500' 
+                      : 'bg-gray-300 focus:ring-gray-400'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                      formData.isActive ? 'translate-x-7' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span className={`text-sm font-medium ${formData.isActive ? 'text-green-600' : 'text-gray-400'}`}>
+                  Active
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}
@@ -522,11 +548,12 @@ export default function AdsManager({ onBack }: { onBack?: () => void }) {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
                     onClick={() => toggleStatus(ad.id)}
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium transition-colors hover:opacity-80 ${
                       ad.isActive
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
+                        ? "bg-green-100 text-green-800 hover:bg-green-200"
+                        : "bg-red-100 text-red-800 hover:bg-red-200"
                     }`}
+                    title={ad.isActive ? "Click to deactivate" : "Click to activate"}
                   >
                     {ad.isActive ? (
                       <>
@@ -536,7 +563,7 @@ export default function AdsManager({ onBack }: { onBack?: () => void }) {
                     ) : (
                       <>
                         <EyeOff className="w-4 h-4" />
-                        Inactive
+                        Disabled
                       </>
                     )}
                   </button>

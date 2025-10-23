@@ -10,7 +10,7 @@ import {
 // GET - Get single ad
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authResult = await verifyAdminToken(request);
@@ -18,7 +18,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const ad = await getAdById(params.id);
+    const { id } = await params;
+    const ad = await getAdById(id);
     if (!ad) {
       return NextResponse.json({ error: 'Ad not found' }, { status: 404 });
     }
@@ -36,7 +37,7 @@ export async function GET(
 // PATCH - Update ad
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authResult = await verifyAdminToken(request);
@@ -44,8 +45,9 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const body = await request.json();
-    const ad = await updateAd(params.id, body);
+    const ad = await updateAd(id, body);
 
     return NextResponse.json({ 
       success: true, 
@@ -64,7 +66,7 @@ export async function PATCH(
 // DELETE - Delete ad
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authResult = await verifyAdminToken(request);
@@ -72,7 +74,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await deleteAd(params.id);
+    const { id } = await params;
+    await deleteAd(id);
 
     return NextResponse.json({ 
       success: true, 

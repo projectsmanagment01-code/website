@@ -5,7 +5,7 @@ import { toggleAdStatus } from '@/lib/ad-service';
 // POST - Toggle ad active status
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const authResult = await verifyAdminToken(request);
@@ -13,7 +13,8 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const ad = await toggleAdStatus(params.id);
+    const { id } = await params;
+    const ad = await toggleAdStatus(id);
 
     return NextResponse.json({ 
       success: true, 
