@@ -14,6 +14,7 @@ import {
   X,
   Archive,
   Sparkles,
+  Link2,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -53,6 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "authors", label: "Authors", icon: Users },
     { id: "media", label: "Media Library", icon: Image },
     { id: "content", label: "Content Management", icon: Edit },
+    { id: "internal-links", label: "Internal Links", icon: Link2 },
     { id: "backup", label: "Backup & Restore", icon: Archive },
     { id: "seo-reports", label: "AI SEO Reports", icon: Sparkles },
     { id: "google-search", label: "Google Search", icon: Bot },

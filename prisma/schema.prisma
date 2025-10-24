@@ -63,6 +63,11 @@ model Recipe {
   authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])
   categoryRef         Category? @relation("CategoryRecipes", fields: [categoryId], references: [id], onDelete: SetNull)
   
+  // Internal linking relations
+  sourceLinkSuggestions InternalLinkSuggestion[] @relation("SourceSuggestions")
+  targetLinkSuggestions InternalLinkSuggestion[] @relation("TargetSuggestions")
+  orphanPageData        OrphanPage?
+  
   @@index([categoryId])
   @@index([status])
   @@index([createdAt])
@@ -240,4 +245,51 @@ model Media {
   @@unique([category, filename]) // Prevent duplicate filenames within same category
   
   @@map("media")
+}
+
+// Internal Link Suggestion - Stores link opportunities before they are applied
+model InternalLinkSuggestion {
+  id              String    @id @default(cuid())
+  sourceRecipeId  String
+  targetRecipeId  String
+  anchorText      String    // The keyword/phrase to be linked
+  fieldName       String    // Which field: 'intro', 'story', 'description', 'instructions'
+  sentenceContext String    @db.Text // Full sentence containing the keyword for preview
+  position        Int       // Character position in the field
+  relevanceScore  Float     // 0-100 score indicating link quality
+  status          String    @default("pending") // pending, applied
+  appliedAt       DateTime?
+  appliedBy       String?   // Admin user who applied it
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  sourceRecipe    Recipe    @relation("SourceSuggestions", fields: [sourceRecipeId], references: [id], onDelete: Cascade)
+  targetRecipe    Recipe    @relation("TargetSuggestions", fields: [targetRecipeId], references: [id], onDelete: Cascade)
+  
+  @@index([sourceRecipeId])
+  @@index([targetRecipeId])
+  @@index([status])
+  @@index([relevanceScore])
+  @@map("internal_link_suggestions")
+}
+
+// Orphan Page Detection - Tracks recipes with insufficient internal links
+model OrphanPage {
+  id              String    @id @default(cuid())
+  recipeId        String    @unique
+  incomingLinks   Int       @default(0)
+  outgoingLinks   Int       @default(0)
+  isOrphan        Boolean   @default(false) // True if incoming links < threshold
+  priority        String    @default("medium") // high, medium, low
+  lastChecked     DateTime  @default(now())
+  suggestions     String[]  @default([]) // Suggested keywords to generate links
+  
+  // Relations
+  recipe          Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  @@index([isOrphan])
+  @@index([priority])
+  @@index([lastChecked])
+  @@map("orphan_pages")
 }

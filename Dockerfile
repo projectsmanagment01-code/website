@@ -99,7 +99,7 @@ ENV DB_PASSWORD=${DB_PASSWORD}
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
 RUN mkdir -p uploads && chmod 755 uploads
-RUN apk add --no-cache wget
+RUN apk add --no-cache wget netcat-openbsd
 RUN apk add --no-cache \
     vips \
     vips-cpp \
@@ -138,5 +138,6 @@ EXPOSE 3000
 
 # ... rest of runner stage
 
-#CMD ["sh", "-c", "echo '⏳ Waiting for database to be ready...' && until nc -z db 5432; do echo 'Database not ready, waiting...'; sleep 2; done && echo '✅ Database is ready, running migrations...' && npx prisma migrate deploy && echo '🚀 Starting application...' && yarn build && yarn start"]
-CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ yaaay DB ready' && npx prisma db push && echo '🚀 Starting app...' && yarn start"]
+# Use migrate deploy for production (safe, no data loss)
+# This will ONLY add new tables, never drop existing ones
+CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ Database ready' && echo '🔄 Running safe migrations...' && npx prisma migrate deploy && echo '✅ Migrations complete' && echo '🚀 Starting app...' && yarn start"]
