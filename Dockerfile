@@ -117,6 +117,9 @@ RUN apk add --no-cache \
 
 COPY --from=builder /app .
 
+# Copy startup script and make executable
+COPY scripts/start-production.sh /start-production.sh
+RUN chmod +x /start-production.sh
 
 EXPOSE 3000
 
@@ -138,6 +141,5 @@ EXPOSE 3000
 
 # ... rest of runner stage
 
-# Use migrate deploy for production (safe, no data loss)
-# This will ONLY add new tables, never drop existing ones
-CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ Database ready' && echo '🔄 Running safe migrations...' && npx prisma migrate deploy && echo '✅ Migrations complete' && echo '🚀 Starting app...' && yarn start"]
+# Use safe startup script that handles baselining
+CMD ["/start-production.sh"]
