@@ -36,5 +36,15 @@ if ! npx prisma migrate deploy 2>&1 | tee /tmp/migrate.log; then
 fi
 
 echo "✅ All migrations complete"
+
+# Emergency: Ensure internal linking tables exist
+echo "🔧 Verifying internal linking tables..."
+if ! PGPASSWORD=$DB_PASSWORD psql -h db -U postgres -d recipes -c "SELECT 1 FROM internal_link_suggestions LIMIT 1" >/dev/null 2>&1; then
+  echo "⚠️  Internal linking tables missing - creating now..."
+  sh /app/scripts/create-internal-linking-tables.sh
+else
+  echo "✅ Internal linking tables verified"
+fi
+
 echo "🚀 Starting application..."
 exec yarn start

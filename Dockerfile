@@ -99,7 +99,7 @@ ENV DB_PASSWORD=${DB_PASSWORD}
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
 RUN mkdir -p uploads && chmod 755 uploads
-RUN apk add --no-cache wget netcat-openbsd
+RUN apk add --no-cache wget netcat-openbsd postgresql-client
 RUN apk add --no-cache \
     vips \
     vips-cpp \
