@@ -4,8 +4,12 @@ set -e
 
 echo "🔧 Emergency table creation script"
 
+# Extract password from DATABASE_URL
+# Format: postgresql://user:password@host:port/database
+DB_PASS=$(echo $DATABASE_URL | sed -n 's/.*:\/\/.*:\(.*\)@.*/\1/p')
+
 # Create tables directly using psql
-PGPASSWORD=$DB_PASSWORD psql -h db -U postgres -d recipes <<'EOF'
+PGPASSWORD=$DB_PASS psql -h db -U postgres -d recipes <<'EOF'
 -- Create internal_link_suggestions table if not exists
 CREATE TABLE IF NOT EXISTS "internal_link_suggestions" (
     "id" TEXT NOT NULL,

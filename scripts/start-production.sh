@@ -39,7 +39,10 @@ echo "✅ All migrations complete"
 
 # Emergency: Ensure internal linking tables exist
 echo "🔧 Verifying internal linking tables..."
-if ! PGPASSWORD=$DB_PASSWORD psql -h db -U postgres -d recipes -c "SELECT 1 FROM internal_link_suggestions LIMIT 1" >/dev/null 2>&1; then
+# Extract password from DATABASE_URL
+DB_PASS=$(echo $DATABASE_URL | sed -n 's/.*:\/\/.*:\(.*\)@.*/\1/p')
+
+if ! PGPASSWORD=$DB_PASS psql -h db -U postgres -d recipes -c "SELECT 1 FROM internal_link_suggestions LIMIT 1" >/dev/null 2>&1; then
   echo "⚠️  Internal linking tables missing - creating now..."
   sh /app/scripts/create-internal-linking-tables.sh
 else
