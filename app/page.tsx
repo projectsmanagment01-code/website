@@ -5,6 +5,7 @@ import LatestRecipesSection from "@/components/main/LatestRecipesSection";
 import TrendingSection from "@/components/main/TrendingSection";
 import SubscriptionSection from "@/components/main/SubscriptionSection";
 import BackToTop from "@/components/BackToTop";
+import AdSlot from "@/components/ads/AdSlot";
 
 // Function to get home content for metadata
 async function getHomeContent() {
@@ -60,6 +61,11 @@ export default function HomePage() {
       <section className="bg-stone-100">
         <HeroSection />
       </section>
+
+      {/* Ad below hero section */}
+      <div className="container-wide">
+        <AdSlot placement="home_hero_below" className="my-8" />
+      </div>
 
       {/* Main Content - Wide width with reasonable max-width */}
       <main className="container-wide section-md">

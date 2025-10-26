@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { getRecipes } from "@/data/data";
 import { RecipeHero } from "@/components/RecipeHero";
 import Search from "@/components/Search";
+import AdSlot from "@/components/ads/AdSlot";
 
 const Pagination = ({ currentPage = 1, totalPages = 311 }) => {
   const isFirstPage = currentPage === 1;
@@ -170,6 +171,9 @@ export default async function Page({ params }: { params: { id: string } }) {
   return (
     <>
       <div className="container-lg section-md">
+        {/* Ad at top of search page */}
+        <AdSlot placement="search_top" className="my-8" />
+        
         <main>
           <Search />
         </main>

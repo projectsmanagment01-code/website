@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { getCategories, getRecipesByCategory } from "@/data/data";
 import Link from "next/link";
 import ExploreWithPagination from "@/components/ExploreWithPagination";
+import AdSlot from "@/components/ads/AdSlot";
 
 const Pagination = ({ currentPage = 1, totalPages = 311, basePath = "" }) => {
   const isFirstPage = currentPage === 1;
@@ -184,6 +185,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
   return (
     <>
       <div className="container-lg section-md">
+        {/* Ad at top of category page */}
+        <AdSlot placement="category_top" className="my-8" />
+        
         <main>
           <ExploreWithPagination
             recipes={allRecipes}

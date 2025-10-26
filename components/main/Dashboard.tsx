@@ -28,6 +28,7 @@ import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import InternalLinksManager from "@/components/admin/internal-links/InternalLinksManager";
+import AdsManager from "@/components/admin/AdsManager";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -110,6 +111,8 @@ function AdminDashboardContent() {
         return <CookiesPolicyCMS onBack={() => setActiveSection("content")} />;
       case "internal-links":
         return <InternalLinksManager />;
+      case "ads":
+        return <AdsManager />;
       case "backup":
         return <BackupManager />;
       case "seo-reports":

@@ -247,6 +247,10 @@ model Media {
   @@map("media")
 }
 
+// ==========================================
+// INTERNAL LINKING SYSTEM
+// ==========================================
+
 // Internal Link Suggestion - Stores link opportunities before they are applied
 model InternalLinkSuggestion {
   id              String    @id @default(cuid())
@@ -281,9 +285,9 @@ model OrphanPage {
   incomingLinks   Int       @default(0)
   outgoingLinks   Int       @default(0)
   isOrphan        Boolean   @default(false) // True if incoming links < threshold
-  priority        String    @default("medium") // high, medium, low
+  priority        Int       @default(0) // Numeric priority score
   lastChecked     DateTime  @default(now())
-  suggestions     String[]  @default([]) // Suggested keywords to generate links
+  suggestions     Json?     // Suggested keywords to generate links
   
   // Relations
   recipe          Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
@@ -293,3 +297,55 @@ model OrphanPage {
   @@index([lastChecked])
   @@map("orphan_pages")
 }
+
+// ==========================================
+// AD MANAGEMENT SYSTEM
+// ==========================================
+
+enum AdType {
+  GOOGLE_ADSENSE
+  CUSTOM_HTML
+  IMAGE
+  SCRIPT
+}
+
+enum AdPlacement {
+  recipe_sidebar_top
+  recipe_sidebar_middle
+  recipe_sidebar_bottom
+  recipe_below_image
+  recipe_in_content_1
+  recipe_in_content_2
+  recipe_in_content_3
+  recipe_card_top
+  recipe_card_bottom
+  home_hero_below
+  category_top
+  search_top
+  article_sidebar
+  article_in_content
+}
+
+model Ad {
+  id               String      @id @default(cuid())
+  name             String
+  type             AdType
+  placement        AdPlacement
+  content          String      @db.Text // Ad code/HTML/Script
+  imageUrl         String?     // For IMAGE type
+  linkUrl          String?     // For IMAGE type
+  width            Int?        // Ad dimensions
+  height           Int?
+  priority         Int         @default(0) // Higher priority shows first
+  isActive         Boolean     @default(true)
+  startDate        DateTime?   // Optional scheduling
+  endDate          DateTime?
+  clickCount       Int         @default(0)
+  impressionCount  Int         @default(0)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  createdBy        String?
+
+  @@index([placement, isActive, priority])
+}
+

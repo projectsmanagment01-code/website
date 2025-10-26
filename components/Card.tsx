@@ -14,6 +14,7 @@ import NextLink from "next/link";
 import IngredientsList from "./Ingredients";
 import Instruction from "./Instruction";
 import { hasHtmlTags, renderSafeHtml } from "@/lib/utils";
+import AdSlot from "@/components/ads/AdSlot";
 
 import { Recipe } from "@/outils/types";
 
@@ -28,6 +29,9 @@ export const Card: React.FC<{
         background: 'linear-gradient(135deg, #E8F5EA 0%, #F5F9F6 100%)'
       }}
     >
+      {/* Ad at top of recipe card */}
+      <AdSlot placement="recipe_card_top" className="my-6" />
+
       {/* Header with Image */}
       <div className="flex flex-col md:flex-row gap-6 mb-8 p-6 rounded-lg" style={{ 
         background: 'linear-gradient(135deg, #3F7D58 0%, #2D5A42 100%)'
@@ -262,6 +266,9 @@ export const Card: React.FC<{
           </ul>
         </div>
       </div>
+
+      {/* Ad at bottom of recipe card */}
+      <AdSlot placement="recipe_card_bottom" className="my-6" />
     </section>
   );
 };
