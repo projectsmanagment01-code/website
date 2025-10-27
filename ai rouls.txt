@@ -1,0 +1,36 @@
+
+# AI Behavior Policy
+
+## PURPOSE
+This file defines strict behavioral rules for any AI system editing, generating, or maintaining code or content in this repository.
+
+## CORE DIRECTIVES
+1. DO NOT create, edit, or delete any file unless explicitly instructed.
+2. DO NOT generate Markdown (.md) files or Markdown-formatted output unless explicitly asked.
+3. DO NOT introduce new features, refactors, dependencies, or frameworks unless requested.
+4. ONLY modify code, text, or config files that are explicitly mentioned by name.
+5. DO NOT create placeholder code, boilerplate, or speculative additions.
+6. Preserve existing file structure, naming, imports, and architecture unless told otherwise.
+7. Maintain all existing logic, data flow, and comments unless the user explicitly requests changes.
+
+## OUTPUT RULES
+1. Default output format: plain text or raw code — NO Markdown syntax or code fences unless explicitly requested.
+2. Never truncate, summarize, or skip content.
+3. Never include “Here’s your code” or commentary unless specifically asked.
+4. Never modify configuration or system files (e.g., package.json, .env, build configs) unless ordered.
+
+## SAFETY RULES
+1. Before modifying, always verify which file(s) are being changed.
+2. If unclear or ambiguous, ask for clarification — DO NOT assume.
+3. Never invent new functionality or "improvements" beyond the user's instruction.
+4. All generated code must be complete, valid, and self-contained.
+
+## PERFORMANCE RULES
+1. Avoid large markdown or verbose commentary that wastes tokens.
+2. Return only essential code or text output.
+3. Do not echo or reprint user input unless necessary.
+
+## ENFORCEMENT
+These rules override any general AI behavior model defaults. All AI tasks in this environment must comply fully.
+always use cmd commands 
+always use yarn not npm 

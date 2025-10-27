@@ -59,10 +59,29 @@ CREATE INDEX IF NOT EXISTS "orphan_pages_priority_idx" ON "orphan_pages"("priori
 CREATE INDEX IF NOT EXISTS "orphan_pages_lastChecked_idx" ON "orphan_pages"("lastChecked");
 
 -- AddForeignKey
-ALTER TABLE "internal_link_suggestions" ADD CONSTRAINT IF NOT EXISTS "internal_link_suggestions_sourceRecipeId_fkey" FOREIGN KEY ("sourceRecipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'internal_link_suggestions_sourceRecipeId_fkey'
+  ) THEN
+    ALTER TABLE "internal_link_suggestions" ADD CONSTRAINT "internal_link_suggestions_sourceRecipeId_fkey" FOREIGN KEY ("sourceRecipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "internal_link_suggestions" ADD CONSTRAINT IF NOT EXISTS "internal_link_suggestions_targetRecipeId_fkey" FOREIGN KEY ("targetRecipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'internal_link_suggestions_targetRecipeId_fkey'
+  ) THEN
+    ALTER TABLE "internal_link_suggestions" ADD CONSTRAINT "internal_link_suggestions_targetRecipeId_fkey" FOREIGN KEY ("targetRecipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "orphan_pages" ADD CONSTRAINT IF NOT EXISTS "orphan_pages_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'orphan_pages_recipeId_fkey'
+  ) THEN
+    ALTER TABLE "orphan_pages" ADD CONSTRAINT "orphan_pages_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
+

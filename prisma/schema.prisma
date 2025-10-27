@@ -115,12 +115,20 @@ model Category {
   order       Int      @default(0) // Display order (lower = shown first)
   isActive    Boolean  @default(true) // Active/inactive toggle
   
-  // SEO fields
-  metaTitle       String?  @db.Text
-  metaDescription String?  @db.Text
+  // Admin-specific fields (optional, used by admin components)
+  type        String?  // Category type: CUISINE, MEAL_TIME, DIETARY, etc.
+  parentId    String?  // Optional parent category for hierarchy
+  
+  // SEO fields (supporting both naming conventions)
+  metaTitle       String?  @db.Text // API uses this
+  metaDescription String?  @db.Text // API uses this
+  seoTitle        String?  @db.Text // Admin components use this (can be same as metaTitle)
+  seoDescription  String?  @db.Text // Admin components use this (can be same as metaDescription)
   
   // Relations
   recipes     Recipe[] @relation("CategoryRecipes")
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryHierarchy")
   
   // Timestamps
   createdAt   DateTime @default(now())
@@ -129,6 +137,8 @@ model Category {
   @@index([slug])
   @@index([isActive])
   @@index([order])
+  @@index([type])
+  @@index([parentId])
   @@map("categories")
 }
 

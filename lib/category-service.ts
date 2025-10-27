@@ -1,31 +1,53 @@
 /**
- * Category Service
+ * Category Service - Clean Implementation
  * 
- * Business logic for Category CRUD operations
- * Following project context and admin authentication patterns
+ * Handles all category CRUD operations with proper validation and relationships
  */
 
 import { prisma } from './prisma';
+import { Category, Recipe } from '@prisma/client';
 
-export interface CategoryEntity {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  href: string;
-  image: string;
-  alt: string;
-  sizes?: string;
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+export interface CategoryWithCount extends Category {
+  _count?: {
+    recipes: number;
+  };
 }
 
-export interface CreateCategoryData {
-  name: string;
-  description: string;
-  href: string;
-  image: string;
-  alt: string;
-  sizes?: string;
+export interface CategoryWithRecipes extends Category {
+  recipes: Recipe[];
 }
+
+export interface CreateCategoryInput {
+  name: string;
+  description?: string;
+  image: string;
+  icon?: string;
+  color?: string;
+  order?: number;
+  metaTitle?: string;
+  metaDescription?: string;
+  // Admin-specific fields
+  type?: string;
+  parentId?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+}
+
+export interface UpdateCategoryInput extends Partial<CreateCategoryInput> {
+  isActive?: boolean;
+  type?: string;
+  parentId?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+}
+
+// ============================================================================
+// Slug Generation
+// ============================================================================
 
 /**
  * Generate URL-friendly slug from category name
@@ -33,357 +55,396 @@ export interface CreateCategoryData {
 export function generateCategorySlug(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+    .replace(/\s+/g, '-')          // Spaces to hyphens
+    .replace(/-+/g, '-')           // Collapse multiple hyphens
+    .replace(/^-+|-+$/g, '');      // Remove leading/trailing hyphens
 }
+
+/**
+ * Ensure slug is unique by appending counter if needed
+ */
+async function ensureUniqueSlug(baseSlug: string, excludeId?: string): Promise<string> {
+  let slug = baseSlug;
+  let counter = 1;
+  
+  while (true) {
+    const existing = await prisma.category.findUnique({
+      where: { slug },
+      select: { id: true }
+    });
+    
+    // If no match or it's the same category being updated, slug is available
+    if (!existing || (excludeId && existing.id === excludeId)) {
+      return slug;
+    }
+    
+    // Try next variant
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+}
+
+// ============================================================================
+// CRUD Operations
+// ============================================================================
 
 /**
  * Create a new category
  */
-export async function createCategory(data: CreateCategoryData): Promise<CategoryEntity> {
-  // Generate slug from name
-  let slug = generateCategorySlug(data.name);
+export async function createCategory(input: CreateCategoryInput): Promise<Category> {
+  // Generate and ensure unique slug
+  const baseSlug = generateCategorySlug(input.name);
+  const slug = await ensureUniqueSlug(baseSlug);
   
-  // Ensure slug is unique
-  let counter = 1;
-  let uniqueSlug = slug;
-  
-  while (await prisma.category.findUnique({ where: { slug: uniqueSlug } })) {
-    uniqueSlug = `${slug}-${counter}`;
-    counter++;
-  }
-
   try {
     const category = await prisma.category.create({
       data: {
-        name: data.name,
-        slug: uniqueSlug,
-        description: data.description,
-        type: data.type,
-        img: data.img,
-        avatar: data.avatar,
-        color: data.color,
-        seoTitle: data.seoTitle,
-        seoDescription: data.seoDescription,
-        featuredText: data.featuredText
+        name: input.name,
+        slug,
+        title: input.name, // Use name as title for backward compatibility
+        href: `/categories/${slug}`,
+        description: input.description || `Explore our collection of ${input.name} recipes`,
+        image: input.image,
+        alt: input.name ? `${input.name} recipes` : undefined,
+        icon: input.icon,
+        color: input.color,
+        order: input.order ?? 0,
+        metaTitle: input.metaTitle || input.seoTitle || `${input.name} Recipes`,
+        metaDescription: input.metaDescription || input.seoDescription || `Discover delicious ${input.name} recipes with step-by-step instructions`,
+        seoTitle: input.seoTitle || input.metaTitle || `${input.name} Recipes`,
+        seoDescription: input.seoDescription || input.metaDescription || `Discover delicious ${input.name} recipes with step-by-step instructions`,
+        type: input.type,
+        parentId: input.parentId,
+        isActive: true,
       }
     });
-
-    return {
-      id: category.id,
-      name: (category as any).name || (category as any).title,
-      slug: category.slug,
-      description: category.description,
-      type: (category as any).type || 'OTHER',
-      img: (category as any).img || (category as any).image,
-      avatar: (category as any).avatar,
-      color: (category as any).color,
-      isActive: (category as any).isActive !== false,
-      seoTitle: (category as any).seoTitle,
-      seoDescription: (category as any).seoDescription,
-      featuredText: (category as any).featuredText,
-      createdAt: (category as any).createdAt,
-      updatedAt: (category as any).updatedAt
-    };
+    
+    console.log(`✅ Created category: ${category.name} (${category.slug})`);
+    return category;
   } catch (error) {
     console.error('❌ Error creating category:', error);
-    throw new Error(`Failed to create category: ${error}`);
+    throw new Error(`Failed to create category: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
 /**
- * Get categories with pagination
+ * Update an existing category
  */
-export async function getCategories(
-  page: number = 1, 
-  limit: number = 20,
-  options: {
-    type?: CategoryType;
-    isActive?: boolean;
-    search?: string;
-  } = {}
-): Promise<{
-  categories: CategoryEntity[];
-  total: number;
-  currentPage: number;
-  totalPages: number;
-}> {
-  const { type, isActive, search } = options;
-
-  const where: any = {};
-
-  if (type) {
-    where.type = type;
-  }
-
-  if (isActive !== undefined) {
-    where.isActive = isActive;
-  }
-
-  if (search) {
-    where.OR = [
-      { name: { contains: search, mode: 'insensitive' } },
-      { description: { contains: search, mode: 'insensitive' } }
-    ];
-  }
-
-  // Get total count for pagination
-  const total = await prisma.category.count({ where });
-
-  // Calculate pagination
-  const skip = (page - 1) * limit;
-  const totalPages = Math.ceil(total / limit);
-
-  const categories = await prisma.category.findMany({
-    where,
-    orderBy: [
-      { name: 'asc' }
-    ],
-    skip,
-    take: limit
-  });
-
-  const categoriesData = categories.map(category => ({
-    id: category.id,
-    name: (category as any).name || (category as any).title,
-    slug: category.slug,
-    description: category.description,
-    type: (category as any).type || 'OTHER',
-    img: (category as any).img || (category as any).image,
-    avatar: (category as any).avatar,
-    color: (category as any).color,
-    isActive: (category as any).isActive !== false,
-    seoTitle: (category as any).seoTitle,
-    seoDescription: (category as any).seoDescription,
-    featuredText: (category as any).featuredText,
-    createdAt: (category as any).createdAt,
-    updatedAt: (category as any).updatedAt,
-    // Legacy compatibility
-    title: (category as any).title || (category as any).name,
-    href: (category as any).href || `/categories/${category.slug}`,
-    image: (category as any).image || (category as any).img,
-    alt: (category as any).alt || `${(category as any).name || (category as any).title} recipes`,
-    sizes: (category as any).sizes
-  }));
-
-  return {
-    categories: categoriesData,
-    total,
-    currentPage: page,
-    totalPages
-  };
-}
-
-/**
- * Get category by slug
- */
-export async function getCategoryBySlug(slug: string): Promise<CategoryEntity | null> {
-  const category = await prisma.category.findUnique({
-    where: { slug }
-  });
-
-  if (!category) {
-    return null;
-  }
-
-  return {
-    id: category.id,
-    name: (category as any).name || (category as any).title,
-    slug: category.slug,
-    description: category.description,
-    type: (category as any).type || 'OTHER',
-    img: (category as any).img || (category as any).image,
-    avatar: (category as any).avatar,
-    color: (category as any).color,
-    isActive: (category as any).isActive !== false,
-    seoTitle: (category as any).seoTitle,
-    seoDescription: (category as any).seoDescription,
-    featuredText: (category as any).featuredText,
-    createdAt: (category as any).createdAt,
-    updatedAt: (category as any).updatedAt
-  };
-}
-
-/**
- * Search categories by name or description
- */
-export async function searchCategories(
-  query: string, 
-  limit: number = 20
-): Promise<CategoryEntity[]> {
-  const result = await getCategories(1, limit, { search: query });
-  return result.categories;
-}
-
-/**
- * Get category statistics
- */
-export async function getCategoryStats(): Promise<{
-  totalCategories: number;
-  activeCategories: number;
-  categoriesByType: Record<CategoryType, number>;
-  topCategories: Array<{ name: string; recipeCount: number; type: CategoryType }>;
-}> {
+export async function updateCategory(
+  id: string, 
+  input: UpdateCategoryInput
+): Promise<Category> {
   try {
-    const [
-      totalCategories,
-      activeCategories,
-      allCategories
-    ] = await Promise.all([
-      prisma.category.count(),
-      prisma.category.count({ where: { isActive: true } }),
-      prisma.category.findMany({ 
-        select: { type: true }
-      })
-    ]);
-
-    // Count categories by type
-    const typeStats = {} as Record<CategoryType, number>;
+    // If name is being changed, regenerate slug
+    let slug: string | undefined;
+    if (input.name) {
+      const baseSlug = generateCategorySlug(input.name);
+      slug = await ensureUniqueSlug(baseSlug, id);
+    }
     
-    // Initialize all types with 0
-    Object.values(CategoryType).forEach(type => {
-      typeStats[type as CategoryType] = 0;
-    });
-
-    // Count actual categories
-    allCategories.forEach(category => {
-      if (category.type && category.type in typeStats) {
-        typeStats[category.type as CategoryType]++;
+    const category = await prisma.category.update({
+      where: { id },
+      data: {
+        ...(input.name && { name: input.name }),
+        ...(slug && { slug }),
+        ...(input.description !== undefined && { description: input.description }),
+        ...(input.image && { image: input.image }),
+        ...(input.icon !== undefined && { icon: input.icon }),
+        ...(input.color !== undefined && { color: input.color }),
+        ...(input.order !== undefined && { order: input.order }),
+        ...(input.metaTitle !== undefined && { metaTitle: input.metaTitle }),
+        ...(input.metaDescription !== undefined && { metaDescription: input.metaDescription }),
+        ...(input.isActive !== undefined && { isActive: input.isActive }),
       }
     });
-
-    return {
-      totalCategories,
-      activeCategories,
-      categoriesByType: typeStats,
-      topCategories: [] // TODO: Implement when we have recipe relationships
-    };
-  } catch (error) {
-    console.error('❌ Error getting category stats:', error);
-    return {
-      totalCategories: 0,
-      activeCategories: 0,
-      categoriesByType: {} as Record<CategoryType, number>,
-      topCategories: []
-    };
-  }
-}
-
-// Simple function to get all categories
-export async function getAllCategories() {
-  try {
-    console.log('📂 Getting all categories...');
     
-    const categories = await prisma.category.findMany({
-      orderBy: [
-        { name: 'asc' }
-      ]
-    });
-    
-    console.log(`✅ Found ${categories.length} categories`);
-    return categories.map(category => ({
-      id: category.id,
-      name: category.title,
-      slug: category.slug,
-      href: category.href,
-      description: category.description,
-      image: category.image,
-      alt: category.alt,
-      sizes: category.sizes
-    }));
+    console.log(`✅ Updated category: ${category.name}`);
+    return category;
   } catch (error) {
-    console.error('❌ Error getting all categories:', error);
-    return [];
+    console.error('❌ Error updating category:', error);
+    throw new Error(`Failed to update category: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
 /**
- * Get category by ID
+ * Delete a category (with safety checks)
  */
-export async function getCategoryById(id: string) {
+export async function deleteCategory(id: string, force: boolean = false): Promise<void> {
   try {
-    console.log(`📂 Getting category by ID: ${id}`);
-    
+    // First, check if category exists
     const category = await prisma.category.findUnique({
       where: { id }
     });
     
     if (!category) {
-      console.log(`❌ Category not found: ${id}`);
-      return null;
+      throw new Error('Category not found');
     }
     
-    console.log(`✅ Found category: ${category.title}`);
-    return {
-      id: category.id,
-      name: category.title,
-      slug: category.slug,
-      href: category.href,
-      description: category.description,
-      image: category.image,
-      alt: category.alt,
-      sizes: category.sizes
-    };
-  } catch (error) {
-    console.error('❌ Error getting category by ID:', error);
-    return null;
-  }
-}
-
-/**
- * Update category
- */
-export async function updateCategory(id: string, data: any) {
-  try {
-    console.log(`📝 Updating category: ${id}`);
-    
-    const category = await prisma.category.update({
-      where: { id },
-      data: {
-        title: data.name,
-        slug: data.slug || generateCategorySlug(data.name),
-        description: data.description,
-        image: data.image,
-        alt: data.alt,
-        sizes: data.sizes,
-        href: data.href
-      }
+    // Check if category has recipes
+    const recipeCount = await prisma.recipe.count({
+      where: { categoryId: id }
     });
     
-    console.log(`✅ Updated category: ${category.title}`);
-    return {
-      id: category.id,
-      name: category.title,
-      slug: category.slug,
-      href: category.href,
-      description: category.description,
-      image: category.image,
-      alt: category.alt,
-      sizes: category.sizes
-    };
-  } catch (error) {
-    console.error('❌ Error updating category:', error);
-    throw error;
-  }
-}
-
-/**
- * Delete category
- */
-export async function deleteCategory(id: string) {
-  try {
-    console.log(`🗑️ Deleting category: ${id}`);
+    if (recipeCount > 0 && !force) {
+      throw new Error(
+        `Cannot delete category: ${recipeCount} recipe(s) are assigned to it. ` +
+        `Please reassign recipes first or use force=true to set recipes to null.`
+      );
+    }
+    
+    // If forcing, set all recipe categoryIds to null
+    if (force && recipeCount > 0) {
+      await prisma.recipe.updateMany({
+        where: { categoryId: id },
+        data: { categoryId: null }
+      });
+      console.log(`⚠️ Removed category from ${recipeCount} recipe(s)`);
+    }
     
     await prisma.category.delete({
       where: { id }
     });
     
     console.log(`✅ Deleted category: ${id}`);
-    return true;
   } catch (error) {
     console.error('❌ Error deleting category:', error);
-    throw error;
+    throw new Error(`Failed to delete category: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+// ============================================================================
+// Read Operations
+// ============================================================================
+
+/**
+ * Get all categories with optional filtering and recipe counts
+ */
+export async function getCategories(options: {
+  includeInactive?: boolean;
+  includeCount?: boolean;
+  orderBy?: 'name' | 'order' | 'createdAt' | 'recipeCount';
+  orderDirection?: 'asc' | 'desc';
+} = {}): Promise<CategoryWithCount[]> {
+  const {
+    includeInactive = false,
+    includeCount = true,
+    orderBy = 'order',
+    orderDirection = 'asc'
+  } = options;
+  
+  try {
+    const categories = await prisma.category.findMany({
+      where: includeInactive ? {} : { isActive: true },
+      include: includeCount ? {
+        _count: {
+          select: { recipes: true }
+        }
+      } : undefined,
+      orderBy: orderBy === 'recipeCount' 
+        ? undefined // Will sort manually
+        : { [orderBy]: orderDirection }
+    });
+    
+    // Manual sort for recipe count
+    if (orderBy === 'recipeCount' && includeCount) {
+      categories.sort((a, b) => {
+        const countA = a._count?.recipes || 0;
+        const countB = b._count?.recipes || 0;
+        return orderDirection === 'asc' ? countA - countB : countB - countA;
+      });
+    }
+    
+    return categories;
+  } catch (error) {
+    console.error('❌ Error fetching categories:', error);
+    throw new Error('Failed to fetch categories');
+  }
+}
+
+/**
+ * Get a single category by slug
+ */
+export async function getCategoryBySlug(
+  slug: string,
+  includeRecipes: boolean = false
+): Promise<CategoryWithRecipes | Category | null> {
+  try {
+    const category = await prisma.category.findUnique({
+      where: { slug },
+      include: includeRecipes ? {
+        recipes: {
+          where: { status: 'published' },
+          orderBy: { createdAt: 'desc' },
+          take: 50 // Limit for performance
+        }
+      } : undefined
+    });
+    
+    return category;
+  } catch (error) {
+    console.error('❌ Error fetching category by slug:', error);
+    return null;
+  }
+}
+
+/**
+ * Get a single category by ID
+ */
+export async function getCategoryById(
+  id: string,
+  includeRecipes: boolean = false
+): Promise<CategoryWithRecipes | Category | null> {
+  try {
+    const category = await prisma.category.findUnique({
+      where: { id },
+      include: includeRecipes ? {
+        recipes: {
+          where: { status: 'published' },
+          orderBy: { createdAt: 'desc' }
+        }
+      } : undefined
+    });
+    
+    return category;
+  } catch (error) {
+    console.error('❌ Error fetching category by ID:', error);
+    return null;
+  }
+}
+
+/**
+ * Search categories by name
+ */
+export async function searchCategories(query: string): Promise<CategoryWithCount[]> {
+  try {
+    const categories = await prisma.category.findMany({
+      where: {
+        AND: [
+          { isActive: true },
+          {
+            OR: [
+              { name: { contains: query, mode: 'insensitive' } },
+              { description: { contains: query, mode: 'insensitive' } },
+              { slug: { contains: query, mode: 'insensitive' } }
+            ]
+          }
+        ]
+      },
+      include: {
+        _count: {
+          select: { recipes: true }
+        }
+      },
+      orderBy: { name: 'asc' }
+    });
+    
+    return categories;
+  } catch (error) {
+    console.error('❌ Error searching categories:', error);
+    return [];
+  }
+}
+
+/**
+ * Get categories with pagination
+ */
+export async function getCategoriesPaginated(
+  page: number = 1,
+  limit: number = 20,
+  includeInactive: boolean = false
+) {
+  const skip = (page - 1) * limit;
+  
+  try {
+    const [categories, total] = await Promise.all([
+      prisma.category.findMany({
+        where: includeInactive ? {} : { isActive: true },
+        include: {
+          _count: {
+            select: { recipes: true }
+          }
+        },
+        orderBy: { order: 'asc' },
+        skip,
+        take: limit
+      }),
+      prisma.category.count({
+        where: includeInactive ? {} : { isActive: true }
+      })
+    ]);
+    
+    return {
+      categories,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
+  } catch (error) {
+    console.error('❌ Error fetching paginated categories:', error);
+    throw new Error('Failed to fetch categories');
+  }
+}
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
+/**
+ * Reorder categories
+ */
+export async function reorderCategories(orderedIds: string[]): Promise<void> {
+  try {
+    const updates = orderedIds.map((id, index) =>
+      prisma.category.update({
+        where: { id },
+        data: { order: index }
+      })
+    );
+    
+    await prisma.$transaction(updates);
+    console.log(`✅ Reordered ${orderedIds.length} categories`);
+  } catch (error) {
+    console.error('❌ Error reordering categories:', error);
+    throw new Error('Failed to reorder categories');
+  }
+}
+
+/**
+ * Get category statistics
+ */
+export async function getCategoryStats() {
+  try {
+    const [total, active, inactive, withRecipes] = await Promise.all([
+      prisma.category.count(),
+      prisma.category.count({ where: { isActive: true } }),
+      prisma.category.count({ where: { isActive: false } }),
+      prisma.category.count({
+        where: {
+          recipes: {
+            some: {}
+          }
+        }
+      })
+    ]);
+    
+    return {
+      total,
+      active,
+      inactive,
+      withRecipes,
+      empty: total - withRecipes
+    };
+  } catch (error) {
+    console.error('❌ Error fetching category stats:', error);
+    return {
+      total: 0,
+      active: 0,
+      inactive: 0,
+      withRecipes: 0,
+      empty: 0
+    };
   }
 }
