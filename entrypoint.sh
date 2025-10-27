@@ -8,7 +8,19 @@ wait_for_db() {
         echo "Database not ready, waiting..."
         sleep 2
     done
-    echo "Database is ready!"
+    echo "Database port is open!"
+    
+    # Wait additional time for PostgreSQL to fully initialize
+    echo "Waiting for PostgreSQL to be ready for connections..."
+    sleep 5
+    
+    # Test actual database connection
+    until npx prisma db execute --stdin <<< "SELECT 1;" 2>/dev/null; do
+        echo "Database not accepting connections yet, waiting..."
+        sleep 2
+    done
+    
+    echo "✅ Database is ready!"
 }
 
 resolve_failed_migrations() {
@@ -100,5 +112,9 @@ start_app() {
 }
 
 wait_for_db
+
+echo "Generating Prisma Client..."
+npx prisma generate
+
 run_migrations
 start_app
