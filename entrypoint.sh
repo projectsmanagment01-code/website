@@ -17,6 +17,41 @@ resolve_failed_migrations() {
     npx prisma migrate deploy 2>&1 | tee /tmp/migrate.log
     DEPLOY_EXIT=$?
     
+    # Handle P3005 - Database not empty, needs baselining
+    if grep -q "P3005" /tmp/migrate.log; then
+        echo "=========================================="
+        echo "DETECTED P3005 - DATABASE NEEDS BASELINING"
+        echo "=========================================="
+        echo "Database has schema but no migration history"
+        echo "Marking all migrations as applied (baseline)..."
+        echo ""
+        
+        # Mark ALL migrations as applied (baseline)
+        MIGRATION_COUNT=0
+        for migration in $(ls -1 prisma/migrations 2>/dev/null | sort); do
+            MIGRATION_COUNT=$((MIGRATION_COUNT + 1))
+            echo "[$MIGRATION_COUNT] Marking $migration as applied..."
+            npx prisma migrate resolve --applied "$migration" 2>&1 | grep -v "npm notice" || true
+        done
+        
+        echo ""
+        echo "Marked $MIGRATION_COUNT migrations as applied"
+        sleep 2
+        
+        echo "Retrying migration deploy..."
+        if npx prisma migrate deploy 2>&1 | tee /tmp/migrate2.log | grep -v "npm notice"; then
+            echo ""
+            echo "✅ BASELINE SUCCESSFUL - Migrations completed"
+            return 0
+        else
+            echo ""
+            echo "❌ BASELINE FAILED - Migrations still failing"
+            cat /tmp/migrate2.log
+            exit 1
+        fi
+    fi
+    
+    # Handle P3009 - Failed migration
     if grep -q "P3009" /tmp/migrate.log || grep -q "failed migrations" /tmp/migrate.log; then
         echo "Detected P3009 failed migration error. Attempting auto-recovery..."
         
