@@ -60,7 +60,7 @@ RUN yarn
 RUN yarn add --force @img/sharp-linuxmusl-x64
 
 COPY prisma ./prisma
-# Prisma generate moved to runtime (entrypoint.sh)
+RUN npx prisma generate
 
 COPY . .
 

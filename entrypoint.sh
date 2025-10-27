@@ -113,8 +113,11 @@ start_app() {
 
 wait_for_db
 
-echo "Generating Prisma Client..."
+echo "Regenerating Prisma Client with live DB connection..."
 npx prisma generate
+
+echo "Rebuilding Next.js application..."
+yarn build
 
 run_migrations
 start_app
