@@ -731,8 +731,8 @@ async function getCategories(): Promise<Category[]> {
   try {
     return await fetchWithFallback(
       async () => {
-        // Import the new category service
-        const { getCategories: getCategoriesNew } = await import('@/lib/category-service-new');
+        // Import the category service
+        const { getCategories: getCategoriesNew } = await import('@/lib/category-service');
         
         // Fetch categories from the new Category table
         const dbCategories = await getCategoriesNew({
