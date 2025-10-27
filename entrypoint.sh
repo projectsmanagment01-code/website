@@ -14,8 +14,8 @@ wait_for_db() {
     echo "Waiting for PostgreSQL to be ready for connections..."
     sleep 5
     
-    # Test actual database connection
-    until npx prisma db execute --stdin <<< "SELECT 1;" 2>/dev/null; do
+    # Test actual database connection with simple query
+    until echo "SELECT 1;" | npx prisma db execute --stdin 2>/dev/null; do
         echo "Database not accepting connections yet, waiting..."
         sleep 2
     done
