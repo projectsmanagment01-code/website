@@ -11,7 +11,7 @@ model Recipe {
   id                  String    @id @default(cuid())
   title               String
   category            String    // DEPRECATED: Keep temporarily for backward compatibility
-  categoryId          String?   // NEW: Foreign key to Category model
+  categoryId          String?   // NEW: Foreign key to Category model (fixes database error)
   description         String
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -59,14 +59,25 @@ model Recipe {
   authorId            String?
   status              String    @default("published")
   
-  // Relations
+  // SEO enhancement fields (from fix branch)
+  lastSEOAnalysis     DateTime?
+  seoScore            Float?    // Overall SEO score 0-100
+  aiEnhancementsCount Int       @default(0)
+  
+  // Relations - Combined from both branches
   authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])
   categoryRef         Category? @relation("CategoryRecipes", fields: [categoryId], references: [id], onDelete: SetNull)
   
-  // Internal linking relations
+  // Internal linking relations (from final-merge)
   sourceLinkSuggestions InternalLinkSuggestion[] @relation("SourceSuggestions")
   targetLinkSuggestions InternalLinkSuggestion[] @relation("TargetSuggestions")
   orphanPageData        OrphanPage?
+  
+  // SEO enhancement relations (from fix branch - essential for database errors)
+  seoEnhancements     SEOEnhancement[]
+  seoMetadata         SEOMetadata[]
+  seoImageData        SEOImageData[]
+  seoPerformance      SEOPerformance[]
   
   @@index([categoryId])
   @@index([status])
@@ -93,8 +104,12 @@ model Category {
   id          String   @id @default(cuid())
   name        String   // Display name (e.g., "Evening Meals", "Desserts")
   slug        String   @unique // URL-friendly (e.g., "evening-meals", "desserts")
+  title       String   // Alternative title field for compatibility
+  href        String   // URL/path for category page
   description String?  @db.Text // Full description for category page
   image       String   // Dedicated category image (stored in uploads/categories/)
+  alt         String?  // Alt text for image
+  sizes       String?  // Image sizes attribute
   icon        String?  // Optional icon identifier for UI
   color       String?  // Brand color for category (hex code)
   order       Int      @default(0) // Display order (lower = shown first)
@@ -134,38 +149,6 @@ model AdminSettings {
   updatedBy String?
 }
 
-// Store site configuration (hero content, site info, social links)
-// This prevents config from being overwritten on deployments
-model SiteConfig {
-  id        String   @id @default(cuid())
-  key       String   @unique // "hero", "site", "social_links"
-  data      Json     // Store the entire config object as JSON
-  updatedAt DateTime @updatedAt
-  updatedBy String?  // Track who made changes
-  
-  @@map("site_config")
-}
-
-// Store all page content (privacy, terms, about, contact, faq, disclaimer, cookies, etc.)
-// This prevents content from being overwritten on deployments
-model PageContent {
-  id              String   @id @default(cuid())
-  page            String   @unique // "privacy", "terms", "about", "contact", "faq", "disclaimer", "cookies"
-  title           String?  @db.Text
-  heroTitle       String?  @db.Text
-  heroDescription String?  @db.Text
-  heroIntro       String?  @db.Text
-  content         String?  @db.Text // HTML or JSON content
-  metaTitle       String?  @db.Text
-  metaDescription String?  @db.Text
-  data            Json?    // Additional structured data (e.g., contact cards, FAQ items)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  updatedBy       String?  // Track who made changes
-  
-  @@map("page_content")
-}
-
 model ApiToken {
   id          String    @id @default(cuid())
   name        String
@@ -201,6 +184,208 @@ model SEOEnhancementReport {
   @@index([recipeId])
   @@index([status])
   @@index([createdAt])
+}
+
+model SEOEnhancement {
+  id                String   @id @default(cuid())
+  type              String   // 'metadata' | 'image' | 'internal-link' | 'schema' | 'content'
+  status            String   @default("pending") // 'pending' | 'approved' | 'rejected' | 'applied'
+  confidence        Float    // 0-1 confidence score from AI
+  originalContent   String?  // Original content being replaced
+  suggestedContent  String   // AI-generated content
+  reasoning         String   // Why this change is suggested
+  keywords          String[] // Related keywords
+  estimatedImpact   String   // 'low' | 'medium' | 'high'
+  
+  // Relations
+  recipeId          String?
+  recipe            Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  // Admin management
+  reviewedBy        String?  // Admin who reviewed
+  reviewedAt        DateTime?
+  appliedBy         String?  // Admin who applied
+  appliedAt         DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("seo_enhancements")
+}
+
+model SEOMetadata {
+  id                String   @id @default(cuid())
+  
+  // Page identification
+  pageType          String   // 'recipe' | 'category' | 'author' | 'static'
+  pageId            String   // ID of the specific page
+  slug              String   @unique
+  
+  // AI-generated metadata
+  aiTitle           String?
+  aiDescription     String?
+  aiKeywords        String[]
+  aiOgTitle         String?
+  aiOgDescription   String?
+  aiTwitterTitle    String?
+  aiTwitterDescription String?
+  
+  // Current live metadata
+  currentTitle      String?
+  currentDescription String?
+  currentKeywords   String[]
+  
+  // Performance tracking
+  generatedAt       DateTime @default(now())
+  lastApplied       DateTime?
+  performanceScore  Float?   // CTR, impressions, etc.
+  
+  // Relations
+  recipeId          String?
+  recipe            Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("seo_metadata")
+}
+
+model SEOImageData {
+  id                String   @id @default(cuid())
+  
+  // Image identification
+  imageUrl          String   @unique
+  imageHash         String?  // For detecting duplicates
+  
+  // AI-generated content
+  aiAltText         String?
+  aiCaption         String?
+  aiTitle           String?
+  aiStructuredData  Json?
+  
+  // Current content
+  currentAltText    String?
+  currentCaption    String?
+  currentTitle      String?
+  
+  // Context
+  pageType          String   // Where this image appears
+  pageId            String
+  imageContext      String   // 'hero' | 'ingredient' | 'step' | 'final-result'
+  
+  // Performance
+  generatedAt       DateTime @default(now())
+  lastApplied       DateTime?
+  
+  // Relations
+  recipeId          String?
+  recipe            Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("seo_image_data")
+}
+
+model SEOInternalLink {
+  id                String   @id @default(cuid())
+  
+  // Source page
+  sourcePage        String   // URL where link should be added
+  sourcePageType    String   // 'recipe' | 'category' | 'static'
+  sourcePageId      String
+  
+  // Target page
+  targetPage        String   // URL being linked to
+  targetPageType    String
+  targetPageId      String
+  targetPageTitle   String
+  
+  // Link details
+  anchorText        String
+  contextBefore     String
+  contextAfter      String
+  linkType          String   // 'related-recipe' | 'category' | 'ingredient' | 'technique'
+  relevanceScore    Float
+  
+  // Status
+  status            String   @default("pending") // 'pending' | 'approved' | 'rejected' | 'applied'
+  appliedAt         DateTime?
+  
+  // Performance tracking
+  clickThrough      Int      @default(0)
+  impressions       Int      @default(0)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("seo_internal_links")
+}
+
+model SEOPerformance {
+  id                String   @id @default(cuid())
+  
+  // Page identification
+  pageUrl           String
+  pageType          String
+  pageId            String
+  
+  // SEO metrics
+  organicImpressions Int     @default(0)
+  organicClicks     Int     @default(0)
+  organicCTR        Float   @default(0)
+  averagePosition   Float   @default(0)
+  
+  // AI enhancement impact
+  beforeEnhancement Json?   // Metrics before AI changes
+  afterEnhancement  Json?   // Metrics after AI changes
+  improvementScore  Float?  // Calculated improvement
+  
+  // Time period
+  dateFrom          DateTime
+  dateTo            DateTime
+  
+  // Relations
+  recipeId          String?
+  recipe            Recipe?  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([pageUrl, dateFrom, dateTo])
+  @@map("seo_performance")
+}
+
+// Store site configuration (hero content, site info, social links)
+// This prevents config from being overwritten on deployments
+model SiteConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique // "hero", "site", "social_links"
+  data      Json     // Store the entire config object as JSON
+  updatedAt DateTime @updatedAt
+  updatedBy String?  // Track who made changes
+  
+  @@map("site_config")
+}
+
+// Store all page content (privacy, terms, about, contact, faq, disclaimer, cookies, etc.)
+// This prevents content from being overwritten on deployments
+model PageContent {
+  id              String   @id @default(cuid())
+  page            String   @unique // "privacy", "terms", "about", "contact", "faq", "disclaimer", "cookies"
+  title           String?  @db.Text
+  heroTitle       String?  @db.Text
+  heroDescription String?  @db.Text
+  heroIntro       String?  @db.Text
+  content         String?  @db.Text // HTML or JSON content
+  metaTitle       String?  @db.Text
+  metaDescription String?  @db.Text
+  data            Json?    // Additional structured data (e.g., contact cards, FAQ items)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  updatedBy       String?  // Track who made changes
+  
+  @@map("page_content")
 }
 
 // Media Management System - Tracks all uploaded files with metadata
@@ -348,4 +533,3 @@ model Ad {
 
   @@index([placement, isActive, priority])
 }
-

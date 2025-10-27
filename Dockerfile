@@ -1,7 +1,7 @@
 # ========================
 # Builder (deps + prisma client)
 # ========================
-FROM node:20-alpine3.18 AS builder
+FROM node:21-alpine3.18 AS builder
 WORKDIR /app
 
 # build-time args
@@ -64,12 +64,13 @@ RUN npx prisma generate
 
 COPY . .
 
+# Build the application in the builder stage
 RUN yarn build
 
 # ========================
 # Runner (runtime only)
 # ========================
-FROM node:20-alpine3.18 AS runner
+FROM node:21-alpine3.18 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -99,7 +100,7 @@ ENV DB_PASSWORD=${DB_PASSWORD}
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
 RUN mkdir -p uploads && chmod 755 uploads
-RUN apk add --no-cache wget netcat-openbsd postgresql-client
+RUN apk add --no-cache wget
 RUN apk add --no-cache \
     vips \
     vips-cpp \
@@ -117,9 +118,6 @@ RUN apk add --no-cache \
 
 COPY --from=builder /app .
 
-# Copy startup script and make executable
-COPY scripts/start-production.sh /start-production.sh
-RUN chmod +x /start-production.sh
 
 EXPOSE 3000
 
@@ -141,5 +139,5 @@ EXPOSE 3000
 
 # ... rest of runner stage
 
-# Use safe startup script that handles baselining
-CMD ["/start-production.sh"]
+#CMD ["sh", "-c", "echo '⏳ Waiting for database to be ready...' && until nc -z db 5432; do echo 'Database not ready, waiting...'; sleep 2; done && echo '✅ Database is ready, running migrations...' && npx prisma migrate deploy && echo '🚀 Starting application...' && yarn build && yarn start"]
+CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ Database ready' && npx prisma migrate deploy && echo '🚀 Starting app...' && yarn start"]
