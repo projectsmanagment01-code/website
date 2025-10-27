@@ -9,6 +9,14 @@ The VPS was experiencing database errors due to schema mismatches:
 ## Solution Applied
 Updated Prisma schema and created migration `20251027085412_add_seo_models_and_missing_fields` that adds:
 
+### 🔄 **Automatic Database Migration**
+The application now includes an `entrypoint.sh` script that automatically:
+1. Waits for database to be ready
+2. Runs `npx prisma migrate deploy` 
+3. Starts the Next.js application
+
+This eliminates the need to manually run migrations on the VPS!
+
 ### Added to Recipe Model:
 - `categoryId` field (String?, optional foreign key to Category)
 - `cookingImage`, `featureImage`, `preparationImage`, `finalPresentationImage` fields
@@ -40,14 +48,19 @@ git pull origin main
 npm install
 ```
 
-### 3. Apply Database Migration
+### 3. Build and Deploy (Automatic Migration)
 ```bash
-# Apply the new migration
-npx prisma migrate deploy
+# The Docker container now handles migrations automatically!
+# Just rebuild and restart the containers
+docker-compose build
+docker-compose up -d
 
-# Generate updated Prisma client
-npx prisma generate
+# Or if using individual Docker commands:
+docker build -t your-app-name .
+docker run -d your-app-name
 ```
+
+**Note:** Database migrations now run automatically when the container starts, so you don't need to run `npx prisma migrate deploy` manually.
 
 ### 4. Restart Application
 ```bash

@@ -46,7 +46,8 @@ RUN apk add --no-cache \
     python3 \
     make \
     g++ \
-    build-base
+    build-base \
+    netcat-openbsd
 
 # Force Sharp to use correct platform
 ENV npm_config_platform=linuxmusl
@@ -100,8 +101,9 @@ ENV DB_PASSWORD=${DB_PASSWORD}
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
 RUN mkdir -p uploads && chmod 755 uploads
-RUN apk add --no-cache wget
 RUN apk add --no-cache \
+    wget \
+    netcat-openbsd \
     vips \
     vips-cpp \
     libjpeg-turbo \
@@ -118,26 +120,11 @@ RUN apk add --no-cache \
 
 COPY --from=builder /app .
 
+# Copy and make entrypoint script executable
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 3000
 
-
-
-# ========================
-# Builder (deps + prisma client)
-# ========================
-
-# Install ALL Sharp dependencies for Alpine
-
-# ... rest of builder stage
-
-# ========================
-# Runner (runtime only)
-# ========================
-
-# Install RUNTIME Sharp dependencies for Alpine
-
-# ... rest of runner stage
-
-#CMD ["sh", "-c", "echo '⏳ Waiting for database to be ready...' && until nc -z db 5432; do echo 'Database not ready, waiting...'; sleep 2; done && echo '✅ Database is ready, running migrations...' && npx prisma migrate deploy && echo '🚀 Starting application...' && yarn build && yarn start"]
-CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ Database ready' && npx prisma migrate deploy && echo '🚀 Starting app...' && yarn start"]
+# Use entrypoint script that handles database migration and app startup
+ENTRYPOINT ["/entrypoint.sh"]
