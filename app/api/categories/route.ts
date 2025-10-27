@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { Category } from "@/outils/types";
 import { prisma } from "@/lib/prisma";
 import { safeImageUrl } from "@/lib/utils";
-import { getCategories, getCategoryBySlug as getNewCategoryBySlug } from "@/lib/category-service-new";
+import { getCategories, getCategoryBySlug } from "@/lib/category-service";
 
 // Helper function to create category from recipe data
 function createCategoryFromName(
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
     // If slug is provided, get specific category with details
     if (slug) {
-      const category = await getNewCategoryBySlug(slug, true); // Include recipes
+      const category = await getCategoryBySlug(slug, true); // Include recipes
       
       if (!category) {
         return NextResponse.json(

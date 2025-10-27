@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createCategory, getCategoriesPaginated, searchCategories } from '@/lib/category-service-new';
+import { createCategory, getCategoriesPaginated, searchCategories } from '@/lib/category-service';
 import { checkAuthOrRespond } from '@/lib/auth-standard';
 
 export async function GET(request: NextRequest) {

@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getCategoryStats } from '@/lib/category-service-new';
+import { getCategoryStats } from '@/lib/category-service';
 
 export async function GET(request: NextRequest) {
   try {

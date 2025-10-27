@@ -15,7 +15,7 @@ import {
   getCategoryById,
   updateCategory,
   deleteCategory
-} from '@/lib/category-service-new';
+} from '@/lib/category-service';
 
 export async function GET(
   request: NextRequest,

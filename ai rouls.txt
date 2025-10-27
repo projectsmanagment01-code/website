@@ -34,3 +34,4 @@ This file defines strict behavioral rules for any AI system editing, generating,
 These rules override any general AI behavior model defaults. All AI tasks in this environment must comply fully.
 always use cmd commands 
 always use yarn not npm 
+do not ever start a commit or try to without been told to 
