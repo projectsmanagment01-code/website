@@ -93,9 +93,6 @@ export default async function CategoriesSection({
                   sizes="(min-width: 1024px) 192px, 144px"
                   quality={100}
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  onError={(e) => {
-                    console.error('Failed to load category image:', category.title, category.image);
-                  }}
                 />
               </div>
               <h3 className="text-sm lg:text-base font-semibold text-gray-900 text-center leading-tight max-w-[150px] group-hover:text-orange-600 transition-colors duration-300">
@@ -123,9 +120,6 @@ export default async function CategoriesSection({
                   sizes="120px"
                   quality={100}
                   className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  onError={(e) => {
-                    console.error('Failed to load category image:', category.title, category.image);
-                  }}
                 />
               </div>
               <h3 className="text-sm font-semibold text-gray-900 text-center leading-tight max-w-[120px] group-hover:text-orange-600 transition-colors duration-300">
