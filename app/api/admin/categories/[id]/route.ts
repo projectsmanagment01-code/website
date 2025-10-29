@@ -16,6 +16,12 @@ import {
   updateCategory,
   deleteCategory
 } from '@/lib/category-service-new';
+import { revalidateAdminPaths } from '@/lib/cache-busting';
+
+// Aggressive cache-busting configuration
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(
   request: NextRequest,
@@ -97,6 +103,9 @@ export async function PUT(
       isActive: typeof body.isActive === 'boolean' ? body.isActive : undefined
     });
     
+    // CRITICAL: Revalidate cache after mutation
+    await revalidateAdminPaths();
+    
     return NextResponse.json({
       success: true,
       category,
@@ -143,6 +152,9 @@ export async function DELETE(
     
     // Delete category
     await deleteCategory(id, force);
+    
+    // CRITICAL: Revalidate cache after mutation
+    await revalidateAdminPaths();
     
     return NextResponse.json({
       success: true,

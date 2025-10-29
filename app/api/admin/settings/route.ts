@@ -7,10 +7,12 @@ import {
   saveAdminSettings,
   AdminSettingsData,
 } from "@/lib/admin-settings";
+import { revalidateAdminPaths } from "@/lib/cache-busting";
 
-// Force dynamic rendering - disable caching
+// Aggressive cache-busting configuration
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 // GET - Retrieve current settings
 export async function GET() {
@@ -143,6 +145,7 @@ export async function POST(request: NextRequest) {
 
     // Revalidate cached admin settings
     revalidateTag("admin-settings");
+    await revalidateAdminPaths();
 
     return NextResponse.json({
       success: true,
@@ -214,6 +217,7 @@ export async function PUT(request: NextRequest) {
 
     // Revalidate cached admin settings
     revalidateTag("admin-settings");
+    await revalidateAdminPaths();
 
     return NextResponse.json({
       success: true,
@@ -266,6 +270,7 @@ export async function PATCH(request: NextRequest) {
 
     // Revalidate cached admin settings
     revalidateTag("admin-settings");
+    await revalidateAdminPaths();
 
     return NextResponse.json({
       success: true,

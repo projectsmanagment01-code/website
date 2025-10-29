@@ -10,10 +10,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAuthor, getAuthors, searchAuthors } from '@/lib/author-service';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { prisma } from '@/lib/prisma';
+import { revalidateAdminPaths } from '@/lib/cache-busting';
 
-// Force dynamic rendering - disable caching
+// Aggressive cache-busting configuration (per Next.js docs)
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(request: NextRequest) {
   // Check authentication (supports both JWT and API tokens)
@@ -149,6 +151,9 @@ export async function POST(request: NextRequest) {
     });
 
     console.log(`✅ Author created: ${author.name} (ID: ${author.id}) with ${author.tags?.length || 0} tags`);
+
+    // CRITICAL: Revalidate cache after mutation
+    await revalidateAdminPaths();
 
     return NextResponse.json({
       message: 'Author created successfully',

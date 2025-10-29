@@ -1,5 +1,8 @@
+// Aggressive cache-busting configuration
 export const dynamic = "force-dynamic";
-//export const revalidate = 60;
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 // Updated main recipe route with better error handling
 // app/api/recipe/route.ts (Enhanced version)
 import { NextResponse, NextRequest } from "next/server";
@@ -9,6 +12,7 @@ import prisma from "@/lib/prisma";
 import { withRetry } from "@/lib/prisma-helpers";
 import { revalidateTag, revalidatePath } from "next/cache";
 import { processRecipeAuthor } from "@/lib/author-integration";
+import { revalidateAdminPaths } from "@/lib/cache-busting";
 
 // Ensure Node.js types are available
 declare const process: {
@@ -344,6 +348,9 @@ export async function POST(request: NextRequest) {
       console.warn("❌ Failed to auto-revalidate:", revalidateError);
     }
 
+    // CRITICAL: Revalidate admin paths
+    await revalidateAdminPaths();
+
     return NextResponse.json(createdRecipe);
   } catch (error) {
     // Detailed error logging and response
@@ -555,6 +562,9 @@ export async function PUT(request: NextRequest) {
       console.warn("❌ Failed to auto-revalidate:", revalidateError);
     }
 
+    // CRITICAL: Revalidate admin paths
+    await revalidateAdminPaths();
+
     return NextResponse.json(updatedRecipe);
   } catch (error) {
     // Detailed error logging for UPDATE operations
@@ -694,6 +704,9 @@ export async function DELETE(request: NextRequest) {
     } catch (revalidateError) {
       console.warn("❌ Failed to auto-revalidate:", revalidateError);
     }
+
+    // CRITICAL: Revalidate admin paths
+    await revalidateAdminPaths();
 
     return NextResponse.json({ message: "Recipe deleted successfully" });
   } catch (error) {

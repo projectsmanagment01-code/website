@@ -3,9 +3,10 @@ import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { getAuthorByCategory } from '@/lib/author-category-helper';
 import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 
-// Disable caching completely
+// Aggressive cache-busting configuration
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 /**
  * GET /api/admin/authors/by-category?categoryId=xxx

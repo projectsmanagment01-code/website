@@ -9,6 +9,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthorById, updateAuthor, deleteAuthor } from '@/lib/author-service';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
+import { revalidateAdminPaths } from '@/lib/cache-busting';
+
+// Aggressive cache-busting configuration
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(
   request: NextRequest,
@@ -83,6 +89,9 @@ export async function PUT(
 
     console.log(`✅ Author updated: ${author.name} (ID: ${author.id}) with ${author.tags?.length || 0} tags`);
 
+    // CRITICAL: Revalidate cache after mutation
+    await revalidateAdminPaths();
+
     return NextResponse.json({
       message: 'Author updated successfully',
       author
@@ -127,6 +136,9 @@ export async function DELETE(
     }
 
     console.log(`✅ Author deleted: ID ${id}`);
+
+    // CRITICAL: Revalidate cache after mutation
+    await revalidateAdminPaths();
 
     return NextResponse.json({
       message: 'Author deleted successfully'

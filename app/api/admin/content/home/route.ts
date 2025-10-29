@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminToken } from "@/lib/auth";
 import { getHeroConfig, updateHeroConfig, getSocialLinks, updateSocialLinks } from "@/lib/site-config-service";
+import { revalidateAdminPaths } from "@/lib/cache-busting";
+
+// Aggressive cache-busting configuration
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 /**
  * GET /api/admin/content/home
@@ -67,6 +73,9 @@ export async function POST(request: NextRequest) {
     ]);
 
     console.log("✅ Home content saved successfully to database");
+
+    // CRITICAL: Revalidate admin paths and home page
+    await revalidateAdminPaths('/');
 
     // Create response with cache invalidation headers
     const response = NextResponse.json({ success: true });
