@@ -11,6 +11,10 @@ import { createAuthor, getAuthors, searchAuthors } from '@/lib/author-service';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { prisma } from '@/lib/prisma';
 
+// Force dynamic rendering - disable caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   // Check authentication (supports both JWT and API tokens)
   const authCheck = await checkHybridAuthOrRespond(request);

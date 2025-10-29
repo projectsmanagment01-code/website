@@ -8,6 +8,10 @@ import {
   AdminSettingsData,
 } from "@/lib/admin-settings";
 
+// Force dynamic rendering - disable caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // GET - Retrieve current settings
 export async function GET() {
   try {

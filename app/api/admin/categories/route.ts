@@ -7,11 +7,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createCategory, getCategoriesPaginated, searchCategories } from '@/lib/category-service-new';
-import { checkAuthOrRespond } from '@/lib/auth-standard';
+import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
-  // Check authentication
-  const authCheck = await checkAuthOrRespond(request);
+  // Check authentication (supports both JWT and API tokens)
+  const authCheck = await checkHybridAuthOrRespond(request);
   if (!authCheck.authorized) {
     return authCheck.response;
   }
@@ -57,8 +60,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Check authentication
-  const authCheck = await checkAuthOrRespond(request);
+  // Check authentication (supports both JWT and API tokens)
+  const authCheck = await checkHybridAuthOrRespond(request);
   if (!authCheck.authorized) {
     return authCheck.response;
   }

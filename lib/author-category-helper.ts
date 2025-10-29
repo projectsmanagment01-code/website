@@ -116,6 +116,14 @@ export async function getAuthorByCategory(categoryId: string) {
       };
     }
 
+    console.log('🔍 Category lookup:', { id: category.id, name: category.name, slug: category.slug });
+
+    // DEBUG: Show all authors and their tags
+    const allAuthors = await prisma.author.findMany({
+      select: { id: true, name: true, tags: true }
+    });
+    console.log('📋 All authors with tags:', JSON.stringify(allAuthors, null, 2));
+
     // Check tag-based match (ID, name, or slug)
     const authorByTag = await prisma.author.findFirst({
       where: {
@@ -148,12 +156,20 @@ export async function getAuthorByCategory(categoryId: string) {
       else if (authorByTag.tags.includes(category.name.toLowerCase())) matchedTag = `name: "${category.name.toLowerCase()}"`;
       else if (authorByTag.tags.includes(category.slug.toLowerCase())) matchedTag = `slug: "${category.slug.toLowerCase()}"`;
 
+      console.log('✅ Found author by tag:', {
+        authorName: authorByTag.name,
+        authorTags: authorByTag.tags,
+        matchedBy: matchedTag
+      });
+
       return {
         author: authorByTag,
         matchMethod: 'tag',
         message: `Author "${authorByTag.name}" is tagged for category "${category.name}" (matched by ${matchedTag})`
       };
     }
+
+    console.log('⚠️ No author found by tags, falling back...');
 
     // Check recipe-based match
     const authorWithRecipes = await prisma.recipe.groupBy({
