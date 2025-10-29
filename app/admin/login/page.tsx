@@ -25,6 +25,13 @@ export default function AdminLogin() {
   });
   const [recaptchaLoading, setRecaptchaLoading] = useState(true);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetToken, setResetToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newUsername, setNewUsername] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
+  const [resetSuccess, setResetSuccess] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -90,6 +97,46 @@ export default function AdminLogin() {
 
   const handleRecaptchaChange = (token: string | null) => {
     setRecaptchaToken(token);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setResetError("");
+    setResetSuccess("");
+
+    try {
+      const response = await fetch("/api/admin/reset-credentials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          resetToken,
+          newPassword,
+          newUsername: newUsername || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setResetSuccess("Password reset successfully! You can now login with your new credentials.");
+        setTimeout(() => {
+          setShowResetModal(false);
+          setResetToken("");
+          setNewPassword("");
+          setNewUsername("");
+          setResetSuccess("");
+        }, 3000);
+      } else {
+        setResetError(data.error || "Failed to reset password");
+      }
+    } catch (err) {
+      setResetError("Network error. Please try again.");
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   if (recaptchaLoading) {
@@ -175,11 +222,109 @@ export default function AdminLogin() {
             </button>
           </div>
 
-          <div className="text-center text-sm text-gray-600">
-            <p>Change your password from the Login Settings in the admin dashboard</p>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={() => setShowResetModal(true)}
+              className="w-full text-sm text-orange-600 hover:text-orange-700 underline"
+            >
+              Forgot password? Reset with emergency token
+            </button>
+            <p className="text-center text-sm text-gray-600">
+              Change your password from the Login Settings in the admin dashboard
+            </p>
           </div>
         </form>
       </div>
+
+      {/* Reset Password Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-4">Emergency Password Reset</h3>
+            
+            {resetSuccess && (
+              <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                {resetSuccess}
+              </div>
+            )}
+            
+            {resetError && (
+              <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {resetError}
+              </div>
+            )}
+            
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reset Token (ADMIN_SECRET or MASTER_RESET_TOKEN)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={resetToken}
+                  onChange={(e) => setResetToken(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  placeholder="Enter your reset token"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  placeholder="Enter new password"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Username (optional)
+                </label>
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  placeholder="Enter new username (optional)"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {resetLoading ? "Resetting..." : "Reset Password"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowResetModal(false);
+                    setResetError("");
+                    setResetSuccess("");
+                  }}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+            
+            <p className="mt-4 text-xs text-gray-500">
+              The reset token is your ADMIN_SECRET or MASTER_RESET_TOKEN from environment variables.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
