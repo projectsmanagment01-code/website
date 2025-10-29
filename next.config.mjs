@@ -90,15 +90,17 @@ const nextConfig = {
           },
         ],
       },
-      {
-        source: "/api/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, s-maxage=60, stale-while-revalidate=30",
-          },
-        ],
-      },
+      // REMOVED: Global API caching - causes admin dashboard to show stale data
+      // Admin routes now use route-specific no-cache headers
+      // {
+      //   source: "/api/:path*",
+      //   headers: [
+      //     {
+      //       key: "Cache-Control",
+      //       value: "public, s-maxage=60, stale-while-revalidate=30",
+      //     },
+      //   ],
+      // },
       {
         source: "/(.*\\.(?:jpg|jpeg|png|webp|avif|svg|gif))",
         headers: [
