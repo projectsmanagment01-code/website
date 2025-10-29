@@ -12,6 +12,7 @@ import { Plus, Search, FolderOpen, FileText, Calendar, AlertCircle, X, ChevronDo
 import CategoryList from './CategoryList';
 import CategoryForm from './CategoryForm';
 import { CategoryEntity } from '@/lib/category-service';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface CategoryStats {
   totalCategories: number;
@@ -58,7 +59,7 @@ const CategoryManagement: React.FC = () => {
       if (search) params.append('search', search);
       if (type) params.append('type', type);
 
-      const response = await fetch(`/api/admin/categories?${params}`, {
+      const response = await adminFetch(`/api/admin/categories?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -89,7 +90,7 @@ const CategoryManagement: React.FC = () => {
       
       if (!token) return;
 
-      const response = await fetch('/api/admin/categories/stats', {
+      const response = await adminFetch('/api/admin/categories/stats', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

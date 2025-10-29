@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ImageIcon } from "lucide-react";
 import { FileUpload } from "../FileUpload";
+import { adminFetch } from "@/lib/admin-fetch";
 
 interface BasicInfoFormProps {
   title: string;
@@ -26,7 +27,7 @@ export const BasicInfoForm: React.FC<BasicInfoFormProps> = ({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("/api/categories");
+        const response = await adminFetch("/api/categories");
         if (response.ok) {
           const categories = await response.json();
           setAvailableCategories(categories);

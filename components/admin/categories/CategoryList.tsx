@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { Edit2, Trash2, ChevronLeft, ChevronRight, Tag, ExternalLink, AlertCircle, CheckCircle } from 'lucide-react';
 import { CategoryEntity } from '@/lib/category-service';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface CategoryListProps {
   categories: (CategoryEntity & { recipeCount: number; authorCount: number })[];
@@ -45,7 +46,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
         return;
       }
 
-      const response = await fetch(`/api/admin/categories/${categoryId}`, {
+      const response = await adminFetch(`/api/admin/categories/${categoryId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

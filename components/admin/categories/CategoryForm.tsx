@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, X, AlertCircle } from 'lucide-react';
 import { CategoryEntity } from '@/lib/category-service';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface CategoryFormProps {
   category?: CategoryEntity | null;
@@ -54,7 +55,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
         const token = localStorage.getItem('admin_token');
         if (!token) return;
 
-        const response = await fetch('/api/admin/categories?limit=100', {
+        const response = await adminFetch('/api/admin/categories?limit=100', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -105,7 +106,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       
       const method = category ? 'PUT' : 'POST';
 
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`,

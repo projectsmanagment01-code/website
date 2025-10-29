@@ -16,6 +16,7 @@ import {
 import { AuthorEntity } from '@/outils/types';
 import { useFileUpload } from '@/lib/hooks/useFileUpload';
 import CategoryTagSelector from './SimpleCategorySelector';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface AuthorFormData {
   name: string;
@@ -65,7 +66,7 @@ export default function AuthorForm({
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const response = await fetch("/api/admin/settings", {
+        const response = await adminFetch("/api/admin/settings", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
           },
@@ -179,7 +180,7 @@ export default function AuthorForm({
 
       const method = isEditMode ? 'PUT' : 'POST';
 
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -251,7 +252,7 @@ export default function AuthorForm({
       setLoadingImages(true);
       const token = localStorage.getItem('admin_token');
       
-      const response = await fetch('/api/admin/author-images', {
+      const response = await adminFetch('/api/admin/author-images', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -372,7 +373,7 @@ Return only one clean URL or handle that fits ${websiteCtx.businessType}, no add
         websiteContext: websiteCtx,
       };
 
-      const response = await fetch('/api/admin/ai-generate-content', {
+      const response = await adminFetch('/api/admin/ai-generate-content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
