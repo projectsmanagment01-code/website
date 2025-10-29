@@ -6,6 +6,7 @@ import { StatusBadge } from "./StatusBadge";
 import { SEOScoreIndicator } from "./SEOScoreIndicator";
 import { AdvancedFilters } from "./AdvancedFilters";
 import { BulkOperations } from "./BulkOperations";
+import { adminFetch } from "@/lib/admin-fetch";
 
 interface RecipeTableProps {
   recipes: Recipe[];
@@ -126,7 +127,7 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
           throw new Error('Authentication required');
         }
 
-        const response = await fetch('/api/recipe/bulk-update', {
+        const response = await adminFetch('/api/recipe/bulk-update', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -165,7 +166,7 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('/api/recipe/bulk-update', {
+      const response = await adminFetch('/api/recipe/bulk-update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -218,7 +219,7 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
         const recipe = recipes.find(r => r.id === recipeId);
         
         try {
-          const response = await fetch('/api/seo/generate', {
+          const response = await adminFetch('/api/seo/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recipeId })

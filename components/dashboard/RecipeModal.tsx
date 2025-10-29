@@ -14,6 +14,7 @@ import { Recipe } from "@/outils/types";
 import { useAdmin } from "@/contexts/AdminContext";
 import { AUTHOR_HERO_IMAGES } from "@/data/author-hero-images";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from "@/lib/admin-fetch";
 
 // Import modular forms
 import { BasicInfoForm } from "@/components/admin/forms/BasicInfoForm";
@@ -272,7 +273,7 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
           throw new Error("Authentication required");
         }
 
-        const response = await fetch("/api/upload", {
+        const response = await adminFetch("/api/upload", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -409,7 +410,7 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
   const loadSampleJson = async () => {
     try {
       // Fetch the actual recipe.json file from your project
-      const response = await fetch('/api/recipe/sample');
+      const response = await adminFetch('/api/recipe/sample');
       if (!response.ok) {
         throw new Error('Failed to fetch sample recipe');
       }
