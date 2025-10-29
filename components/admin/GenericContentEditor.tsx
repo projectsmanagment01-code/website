@@ -12,6 +12,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface StaticPageContent {
   title: string;
@@ -64,7 +65,7 @@ export default function GenericContentEditor({
 
   const loadContent = async () => {
     try {
-      const response = await fetch(`/api/admin/content/${pageId}`, {
+      const response = await adminFetch(`/api/admin/content/${pageId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -104,7 +105,7 @@ export default function GenericContentEditor({
     setSaveStatus("saving");
 
     try {
-      const response = await fetch(`/api/admin/content/${pageId}`, {
+      const response = await adminFetch(`/api/admin/content/${pageId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -174,7 +175,7 @@ export default function GenericContentEditor({
         },
       };
       
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await adminFetch("/api/admin/ai-generate-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

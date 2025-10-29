@@ -11,6 +11,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface ContactContent {
   heroTitle: string;
@@ -42,7 +43,7 @@ export default function ContactContentEditor({ onBack }: { onBack?: () => void }
 
   const loadSiteSettings = async () => {
     try {
-      const response = await fetch("/api/admin/content/site", {
+      const response = await adminFetch("/api/admin/content/site", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -59,7 +60,7 @@ export default function ContactContentEditor({ onBack }: { onBack?: () => void }
   const loadContent = async () => {
     try {
       console.log('📥 Loading contact content from /api/admin/settings...');
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -143,7 +144,7 @@ Task: Generate a 150-160 character SEO meta description for the Contact page. Sh
       }
 
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await adminFetch("/api/admin/ai-generate-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -199,7 +200,7 @@ Task: Generate a 150-160 character SEO meta description for the Contact page. Sh
       console.log('💾 Saving contact content:', JSON.stringify(dataToSave, null, 2));
 
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

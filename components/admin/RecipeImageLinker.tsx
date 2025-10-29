@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, Link, Unlink, Image as ImageIcon, X } from "lucide-react";
 import { Recipe } from "@/outils/types";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface RecipeImageLinkerProps {
   imageUrl: string;
@@ -48,7 +49,7 @@ export const RecipeImageLinker: React.FC<RecipeImageLinkerProps> = ({
 
   const loadRecipes = async () => {
     try {
-      const response = await fetch("/api/recipe");
+      const response = await adminFetch("/api/recipe");
       if (response.ok) {
         const data = await response.json();
         setRecipes(data);
@@ -88,7 +89,7 @@ export const RecipeImageLinker: React.FC<RecipeImageLinkerProps> = ({
           break;
       }
 
-      const response = await fetch(`/api/recipe`, {
+      const response = await adminFetch(`/api/recipe`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -140,7 +141,7 @@ export const RecipeImageLinker: React.FC<RecipeImageLinkerProps> = ({
           break;
       }
 
-      const response = await fetch(`/api/recipe`, {
+      const response = await adminFetch(`/api/recipe`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

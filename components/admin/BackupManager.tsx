@@ -21,6 +21,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { refreshAfterChange } from '@/lib/revalidation-utils';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface BackupMetadata {
   id: string;
@@ -93,7 +94,7 @@ const BackupManager: React.FC = () => {
 
   const loadBackups = async () => {
     try {
-      const response = await fetch('/api/admin/backup', {
+      const response = await adminFetch('/api/admin/backup', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
@@ -114,7 +115,7 @@ const BackupManager: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const response = await fetch('/api/admin/backup/stats', {
+      const response = await adminFetch('/api/admin/backup/stats', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
@@ -139,7 +140,7 @@ const BackupManager: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/admin/backup', {
+      const response = await adminFetch('/api/admin/backup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +177,7 @@ const BackupManager: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/admin/backup/${backupId}`, {
+      const response = await adminFetch(`/api/admin/backup/${backupId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +212,7 @@ const BackupManager: React.FC = () => {
     try {
       console.log('Deleting backup:', backupId);
       
-      const response = await fetch(`/api/admin/backup/${backupId}`, {
+      const response = await adminFetch(`/api/admin/backup/${backupId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
@@ -272,7 +273,7 @@ const BackupManager: React.FC = () => {
     setDownloadLoading(backupId);
 
     try {
-      const response = await fetch(`/api/admin/backup/${backupId}/download`, {
+      const response = await adminFetch(`/api/admin/backup/${backupId}/download`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
@@ -319,7 +320,7 @@ const BackupManager: React.FC = () => {
         setError('Import timed out after 55 minutes. This may happen with very large files (>2GB) on slower connections.');
       }, 55 * 60 * 1000); // 55 minutes timeout for very large files
 
-      const response = await fetch('/api/admin/backup/import', {
+      const response = await adminFetch('/api/admin/backup/import', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

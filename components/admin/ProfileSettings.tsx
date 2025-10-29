@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Save, Settings as SettingsIcon, Key } from "lucide-react";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface ProfileSettingsProps {
   onClose?: () => void;
@@ -47,7 +48,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/auth/profile", {
+      const response = await adminFetch("/api/auth/profile", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -68,7 +69,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
   const fetchRecaptchaSettings = async () => {
     try {
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/recaptcha-settings", {
+      const response = await adminFetch("/api/admin/recaptcha-settings", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -102,7 +103,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
 
     try {
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/auth/change-password", {
+      const response = await adminFetch("/api/auth/change-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -146,7 +147,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
 
     try {
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/auth/change-username", {
+      const response = await adminFetch("/api/auth/change-username", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -182,7 +183,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
 
     try {
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/recaptcha-settings", {
+      const response = await adminFetch("/api/admin/recaptcha-settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

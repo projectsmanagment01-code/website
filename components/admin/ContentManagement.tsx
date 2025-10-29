@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
+import { adminFetch } from '@/lib/admin-fetch';
   Save,
   RefreshCw,
   AlertCircle,
@@ -78,7 +79,7 @@ export default function ContentManagement({ className }: ContentManagementProps)
       }
 
       // Load settings from API
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -109,7 +110,7 @@ export default function ContentManagement({ className }: ContentManagementProps)
         return;
       }
 
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

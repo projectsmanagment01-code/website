@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Wand2, RefreshCw, Save, Eye, AlertCircle, CheckCircle, Info, ArrowLeft } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface AboutPageSection {
   id: string;
@@ -109,7 +110,7 @@ export default function AboutContentEditor({ onBack }: { onBack?: () => void }) 
 
   const loadSiteSettings = async () => {
     try {
-      const response = await fetch("/api/admin/content/site", {
+      const response = await adminFetch("/api/admin/content/site", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -134,7 +135,7 @@ export default function AboutContentEditor({ onBack }: { onBack?: () => void }) 
   const loadContent = async () => {
     try {
       // Load admin settings
-      const settingsResponse = await fetch("/api/admin/settings", {
+      const settingsResponse = await adminFetch("/api/admin/settings", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -283,7 +284,7 @@ Task: Generate one bullet point that supports "${missionTitle}" for this ${websi
         websiteContext,
       };
 
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await adminFetch("/api/admin/ai-generate-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -448,7 +449,7 @@ Task: Generate one bullet point that supports "${missionTitle}" for this ${websi
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -615,7 +616,7 @@ Generate the JSON array:`;
         websiteContext: context,
       };
 
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await adminFetch("/api/admin/ai-generate-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

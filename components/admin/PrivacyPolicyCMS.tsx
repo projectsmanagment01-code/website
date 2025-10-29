@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Wand2, RefreshCw, Save, Eye, AlertCircle, CheckCircle, ArrowLeft, Trash2, Plus } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface PrivacySection {
   id: string;
@@ -105,7 +106,7 @@ export default function PrivacyPolicyCMS({ onBack }: { onBack?: () => void }) {
 
   const loadSettings = async () => {
     try {
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -133,7 +134,7 @@ export default function PrivacyPolicyCMS({ onBack }: { onBack?: () => void }) {
 
   const loadContent = async () => {
     try {
-      const settingsResponse = await fetch("/api/admin/settings", {
+      const settingsResponse = await adminFetch("/api/admin/settings", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -389,7 +390,7 @@ Generate the content now:`;
         websiteContext,
       };
 
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await adminFetch("/api/admin/ai-generate-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -492,7 +493,7 @@ Generate the content now:`;
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -15,6 +15,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface SocialMediaLink {
   platform: string;
@@ -114,7 +115,7 @@ export default function SocialMediaManager({ onBack }: SocialMediaManagerProps) 
     try {
       setLoading(true);
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/content/home", {
+      const response = await adminFetch("/api/admin/content/home", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -195,7 +196,7 @@ export default function SocialMediaManager({ onBack }: SocialMediaManagerProps) 
       }
 
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/content/home", {
+      const response = await adminFetch("/api/admin/content/home", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

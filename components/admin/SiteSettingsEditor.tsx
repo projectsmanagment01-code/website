@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import AIContentAssistant from "./AIContentAssistant";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface SiteSettings {
   // AI Context Fields (used for content generation)
@@ -87,7 +88,7 @@ export default function SiteSettingsEditor({ onBack }: SiteSettingsEditorProps) 
 
   const loadSettings = async () => {
     try {
-      const response = await fetch("/api/admin/content/site", {
+      const response = await adminFetch("/api/admin/content/site", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -121,7 +122,7 @@ export default function SiteSettingsEditor({ onBack }: SiteSettingsEditorProps) 
 
     try {
       // Save to site settings
-      const siteResponse = await fetch("/api/admin/content/site", {
+      const siteResponse = await adminFetch("/api/admin/content/site", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -135,7 +136,7 @@ export default function SiteSettingsEditor({ onBack }: SiteSettingsEditorProps) 
 
       // Also save AI Context Settings to admin_settings for CMS components
       // Use PATCH for partial update (doesn't require header/body/footer sections)
-      const aiContextResponse = await fetch("/api/admin/settings", {
+      const aiContextResponse = await adminFetch("/api/admin/settings", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

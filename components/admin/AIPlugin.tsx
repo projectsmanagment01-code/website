@@ -16,6 +16,7 @@ import {
   Unplug,
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface AISettings {
   enabled: boolean;
@@ -98,7 +99,7 @@ export default function AIPlugin() {
         return;
       }
 
-      const response = await fetch("/api/admin/ai-settings", {
+      const response = await adminFetch("/api/admin/ai-settings", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -129,7 +130,7 @@ export default function AIPlugin() {
         return;
       }
 
-      const response = await fetch("/api/admin/ai-settings", {
+      const response = await adminFetch("/api/admin/ai-settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -171,7 +172,7 @@ export default function AIPlugin() {
       setSettings(prev => ({ ...prev, connectionStatus: "testing" }));
       
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/ai-test", {
+      const response = await adminFetch("/api/admin/ai-test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -236,7 +237,7 @@ export default function AIPlugin() {
         return;
       }
 
-      const response = await fetch("/api/admin/ai-settings", {
+      const response = await adminFetch("/api/admin/ai-settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

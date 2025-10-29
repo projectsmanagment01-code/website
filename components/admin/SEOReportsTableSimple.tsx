@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface SEOReport {
   id: string;
@@ -30,7 +31,7 @@ export default function SEOReportsTable() {
         ? '/api/seo/reports' 
         : `/api/seo/reports?status=${filter}`;
       
-      const response = await fetch(url);
+      const response = await adminFetch(url);
       
       if (!response.ok) {
         throw new Error('Failed to fetch reports');

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+import { adminFetch } from '@/lib/admin-fetch';
   Search,
   Image as ImageIcon,
   Plus,
@@ -36,7 +37,7 @@ export const QuickImageSelector: React.FC<QuickImageSelectorProps> = ({
       }
 
       // This could be enhanced to load from a dedicated images API
-      const response = await fetch("/api/upload/list?category=recipes", {
+      const response = await adminFetch("/api/upload/list?category=recipes", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

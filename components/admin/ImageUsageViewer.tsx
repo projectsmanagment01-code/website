@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Recipe } from "@/outils/types";
 import { Image as ImageIcon, Link, Unlink, Search } from "lucide-react";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface ImageUsageViewerProps {
   onImageSelect?: (imageUrl: string) => void;
@@ -32,7 +33,7 @@ export const ImageUsageViewer: React.FC<ImageUsageViewerProps> = ({
   const loadData = async () => {
     try {
       // Load all recipes
-      const response = await fetch("/api/recipe");
+      const response = await adminFetch("/api/recipe");
       if (response.ok) {
         const recipesData = await response.json();
         setRecipes(recipesData);

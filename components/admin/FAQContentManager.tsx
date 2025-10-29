@@ -11,6 +11,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
   const [content, setContent] = useState("");
@@ -32,7 +33,7 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
 
   const loadSettings = async () => {
     try {
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -50,7 +51,7 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
 
   const loadContent = async () => {
     try {
-      const response = await fetch("/api/admin/content/faq", {
+      const response = await adminFetch("/api/admin/content/faq", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -76,7 +77,7 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
     setSaveStatus("saving");
     
     try {
-      const response = await fetch("/api/admin/content/faq", {
+      const response = await adminFetch("/api/admin/content/faq", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +118,7 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
     try {
       const token = localStorage.getItem("admin_token");
       
-      const aiSettingsResponse = await fetch("/api/admin/ai-settings", {
+      const aiSettingsResponse = await adminFetch("/api/admin/ai-settings", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -173,7 +174,7 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
       
       const prompt = promptLines.join('\n');
 
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await adminFetch("/api/admin/ai-generate-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -234,7 +235,7 @@ export default function FAQContentManager({ onBack }: { onBack?: () => void }) {
     try {
       const token = localStorage.getItem("admin_token");
       
-      const aiSettingsResponse = await fetch("/api/admin/ai-settings", {
+      const aiSettingsResponse = await adminFetch("/api/admin/ai-settings", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -282,7 +283,7 @@ ALWAYS use the specific website name provided above.
           break;
       }
 
-      const response = await fetch("/api/admin/ai-generate-content", {
+      const response = await adminFetch("/api/admin/ai-generate-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

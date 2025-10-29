@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
 import SEOReportModal from './SEOReportModal';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface SEOReport {
   id: string;
@@ -39,7 +40,7 @@ export default function SEOReportsView() {
         ? '/api/seo/reports' 
         : `/api/seo/reports?status=${filter}`;
       
-      const response = await fetch(url);
+      const response = await adminFetch(url);
       
       if (!response.ok) {
         throw new Error('Failed to fetch reports');

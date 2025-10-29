@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { Recipe } from '@/outils/types';
 import { RecipeTable as BaseRecipeTable } from './RecipeTable';
 import { Loader2, Sparkles } from 'lucide-react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface RecipeTableWithSEOProps {
   recipes: Recipe[];
@@ -42,7 +43,7 @@ export const RecipeTableWithSEO: React.FC<RecipeTableWithSEOProps> = (props) => 
   const fetchSEOScores = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/seo/reports');
+      const response = await adminFetch('/api/seo/reports');
       
       if (response.ok) {
         const data = await response.json();
@@ -117,7 +118,7 @@ export const RecipeTableWithSEO: React.FC<RecipeTableWithSEOProps> = (props) => 
         });
 
         try {
-          const response = await fetch('/api/seo/generate', {
+          const response = await adminFetch('/api/seo/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recipeId })

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
+import { adminFetch } from '@/lib/admin-fetch';
 
 export default function CustomCodeInjector() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch("/api/admin/settings");
+        const response = await adminFetch("/api/admin/settings");
         if (response.ok) {
           const settings = await response.json();
           const htmlStrings = settings.header?.html || [];

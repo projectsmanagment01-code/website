@@ -17,6 +17,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface HomeContent {
   heroTitle: string;
@@ -111,7 +112,7 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
 
   const loadSiteSettings = async () => {
     try {
-      const response = await fetch("/api/admin/content/site", {
+      const response = await adminFetch("/api/admin/content/site", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -125,7 +126,7 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
 
   const loadContent = async () => {
     try {
-      const response = await fetch("/api/admin/content/home", {
+      const response = await adminFetch("/api/admin/content/home", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
         },
@@ -163,7 +164,7 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
       };
 
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/generate-homepage-content", {
+      const response = await adminFetch("/api/admin/generate-homepage-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -223,7 +224,7 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
       formData.append('category', 'hero-backgrounds');
 
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/upload", {
+      const response = await adminFetch("/api/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -267,7 +268,7 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
       setMessage(null);
 
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/content/home", {
+      const response = await adminFetch("/api/admin/content/home", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

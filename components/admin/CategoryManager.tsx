@@ -16,6 +16,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, GripVertical, Search, Image as ImageIcon, Eye, EyeOff, Upload, Copy, ChevronDown, ChevronUp, Tag, Download } from 'lucide-react';
 import { refreshAfterChange } from '@/lib/revalidation-utils';
+import { adminFetch } from '@/lib/admin-fetch';
 
 // ============================================================================
 // Types
@@ -99,7 +100,7 @@ export default function CategoryManager() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/admin/categories?includeInactive=${showInactive}`, {
+      const response = await adminFetch(`/api/admin/categories?includeInactive=${showInactive}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
@@ -159,7 +160,7 @@ export default function CategoryManager() {
       
       const method = editingCategory ? 'PUT' : 'POST';
       
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +192,7 @@ export default function CategoryManager() {
     try {
       const url = `/api/admin/categories/${deleteConfirm.id}${deleteForce ? '?force=true' : ''}`;
       
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
@@ -239,7 +240,7 @@ export default function CategoryManager() {
       formData.append('file', file);
       formData.append('type', 'categories');
       
-      const response = await fetch('/api/upload', {
+      const response = await adminFetch('/api/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`

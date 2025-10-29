@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { X, Tag } from 'lucide-react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface CategoryTagSelectorProps {
   selectedTags: string[];
@@ -17,7 +18,7 @@ export default function CategoryTagSelector({ selectedTags, onChange }: Category
   // Fetch categories from API
   useEffect(() => {
     console.log('Fetching categories...');
-    fetch('/api/categories')
+    adminFetch('/api/categories')
       .then(res => res.json())
       .then(data => {
         console.log('Raw API response:', data);

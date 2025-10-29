@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, Save, Loader2 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface GoogleSearchConfig {
   cx: string;
@@ -21,7 +22,7 @@ export default function GoogleSearchSettings() {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch("/api/google-search-settings");
+      const response = await adminFetch("/api/google-search-settings");
       if (response.ok) {
         const data = await response.json();
         setConfig(data);
@@ -40,7 +41,7 @@ export default function GoogleSearchSettings() {
 
     try {
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/google-search-settings", {
+      const response = await adminFetch("/api/google-search-settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

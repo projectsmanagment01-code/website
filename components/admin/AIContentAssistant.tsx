@@ -17,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface SiteSettings {
   // AI Context Fields
@@ -132,7 +133,7 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
       };
 
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/admin/generate-site-content", {
+      const response = await adminFetch("/api/admin/generate-site-content", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -194,7 +195,7 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
       formData.append('category', fieldKey === 'logoImage' ? 'logos' : 'favicon');
 
       const token = localStorage.getItem("admin_token");
-      const response = await fetch("/api/upload", {
+      const response = await adminFetch("/api/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

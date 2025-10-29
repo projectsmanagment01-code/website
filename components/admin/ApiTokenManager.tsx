@@ -14,6 +14,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { refreshAfterChange } from '@/lib/revalidation-utils';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface ApiToken {
   id: string;
@@ -60,7 +61,7 @@ export default function ApiTokenManager() {
 
   const fetchTokens = async () => {
     try {
-      const response = await fetch('/api/admin/tokens', {
+      const response = await adminFetch('/api/admin/tokens', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
@@ -87,7 +88,7 @@ export default function ApiTokenManager() {
 
     setCreating(true);
     try {
-      const response = await fetch('/api/admin/tokens', {
+      const response = await adminFetch('/api/admin/tokens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +127,7 @@ export default function ApiTokenManager() {
     }
 
     try {
-      const response = await fetch(`/api/admin/tokens?id=${tokenId}`, {
+      const response = await adminFetch(`/api/admin/tokens?id=${tokenId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
@@ -154,7 +155,7 @@ export default function ApiTokenManager() {
 
   const toggleTokenStatus = async (tokenId: string, isActive: boolean) => {
     try {
-      const response = await fetch('/api/admin/tokens', {
+      const response = await adminFetch('/api/admin/tokens', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -15,6 +15,7 @@ import {
   Upload,
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface CodeSection {
   html: string[];
@@ -78,7 +79,7 @@ export default function Settings({ className }: SettingsProps) {
         return;
       }
 
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -112,7 +113,7 @@ export default function Settings({ className }: SettingsProps) {
         return;
       }
 
-      const response = await fetch("/api/admin/settings", {
+      const response = await adminFetch("/api/admin/settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import { Eye, Trash2, Copy, Download, Link as LinkIcon, FileImage, Calendar, Use
 import { MediaBulkOperations } from './MediaBulkOperations';
 import { MediaViewSwitcher, ViewMode } from './MediaViewSwitcher';
 import { refreshAfterChange } from '@/lib/revalidation-utils';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface EnhancedImageGalleryProps {
   category: string;
@@ -127,7 +128,7 @@ export const EnhancedImageGallery: React.FC<EnhancedImageGalleryProps> = ({
       }
 
       // Use bulk delete endpoint
-      const response = await fetch('/api/upload/bulk', {
+      const response = await adminFetch('/api/upload/bulk', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

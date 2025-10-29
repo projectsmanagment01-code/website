@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface SEOEnhancement {
   id: string;
@@ -73,7 +74,7 @@ export default function AISeODashboard() {
         instructions: ['Mix ingredients', 'Bake for 20 minutes', 'Cool and serve']
       };
 
-      const response = await fetch('/api/seo/generate', {
+      const response = await adminFetch('/api/seo/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface CategoryTagSelectorProps {
   selectedTags: string[];
@@ -16,7 +17,7 @@ export default function CategoryTagSelector({ selectedTags, onChange }: Category
     console.log('🚀 Starting to fetch categories...');
     
     // Try to fetch categories
-    fetch('/api/categories')
+    adminFetch('/api/categories')
       .then(res => {
         console.log('📡 Response status:', res.status);
         console.log('📡 Response ok:', res.ok);
@@ -59,7 +60,7 @@ export default function CategoryTagSelector({ selectedTags, onChange }: Category
         
         // Try alternative approach - direct fetch to port 3002
         console.log('🔄 Trying alternative URL...');
-        fetch('http://localhost:3002/api/categories')
+        adminFetch('http://localhost:3002/api/categories')
           .then(res => res.json())
           .then(data => {
             console.log('🆘 Alternative fetch result:', data);

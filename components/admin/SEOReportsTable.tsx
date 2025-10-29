@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface EnhancementReport {
   id: string;
@@ -46,7 +47,7 @@ export default function SEOEnhancementReports() {
     setLoading(true);
     try {
       // In production, fetch from API
-      const response = await fetch(`/api/seo/reports?filter=${filter}&sortBy=${sortBy}`);
+      const response = await adminFetch(`/api/seo/reports?filter=${filter}&sortBy=${sortBy}`);
       const data = await response.json();
       
       // Mock data for demonstration
