@@ -16,8 +16,12 @@ interface HeroSectionProps {
 // Server-side data fetching
 async function getHeroContent(): Promise<HeroContent> {
   try {
+    // Use ISR: Cache for 1 hour with tag-based revalidation
     const response = await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/content/home`, {
-      cache: 'force-cache'
+      next: { 
+        revalidate: 3600, // 1 hour
+        tags: ['home-content']
+      }
     });
     
     if (response.ok) {

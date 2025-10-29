@@ -101,6 +101,10 @@ export async function POST(request: NextRequest) {
 
     // CRITICAL: Revalidate cache after mutation
     await revalidateAdminPaths();
+    
+    // CRITICAL: Revalidate frontend cache tags for instant updates
+    const { revalidateByTags } = await import('@/lib/cache-busting');
+    await revalidateByTags(['categories', 'all-categories']);
 
     return jsonResponseNoCache({
       message: 'Category created successfully',

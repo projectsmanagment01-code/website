@@ -1,60 +1,50 @@
-"use client";
+// SERVER COMPONENT - Fast, cached, SEO-friendly
+// Revalidates on-demand when admin saves categories
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Category } from "@/outils/types";
-import Icon from "@/components/Icon";
 import Image from "next/image";
 
 interface CategoriesSectionProps {
   className?: string;
 }
 
-const getOptimizedImageUrl = (
-  src: string,
-  width: number,
-  quality = 65,
-  format = "webp"
-) => {
-  // Remove existing query parameters
-  const cleanSrc = src.split("?")[0];
-  return `${cleanSrc}?w=${width}&q=${quality}&f=${format}`;
-};
+// Server-side data fetching with ISR + on-demand revalidation
+async function getCategories(): Promise<Category[]> {
+  try {
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
+    
+    const response = await fetch(`${baseUrl}/api/categories`, {
+      next: { 
+        revalidate: 3600, // Cache for 1 hour
+        tags: ['categories'] // Tag for on-demand revalidation
+      }
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+    
+    console.error('Failed to load categories:', response.status);
+    return [];
+  } catch (err) {
+    console.error("Failed to fetch categories:", err);
+    return [];
+  }
+}
 
-export default function CategoriesSection({
+export default async function CategoriesSection({
   className,
 }: CategoriesSectionProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const categories = await getCategories();
 
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await fetch('/api/categories');
-        if (response.ok) {
-          const data = await response.json();
-          setCategories(data);
-        } else {
-          console.error('Failed to load categories:', response.status);
-          setError(true);
-        }
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCategories();
-  }, []);
-
-  // Loading state
-  if (loading) {
+  // No categories fallback
+  if (categories.length === 0) {
     return (
       <section className={`py-12 ${className || ""}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Title with horizontal lines */}
           <div className="flex items-center justify-center mb-12">
             <div className="flex-grow h-px bg-gray-300"></div>
             <h2 className="px-6 text-2xl md:text-3xl font-bold text-gray-900">
@@ -62,31 +52,6 @@ export default function CategoriesSection({
             </h2>
             <div className="flex-grow h-px bg-gray-300"></div>
           </div>
-
-          {/* Loading message */}
-          <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">Loading categories...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Error or no categories
-  if (error || categories.length === 0) {
-    return (
-      <section className={`py-12 ${className || ""}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Title with horizontal lines */}
-          <div className="flex items-center justify-center mb-12">
-            <div className="flex-grow h-px bg-gray-300"></div>
-            <h2 className="px-6 text-2xl md:text-3xl font-bold text-gray-900">
-              Categories
-            </h2>
-            <div className="flex-grow h-px bg-gray-300"></div>
-          </div>
-
-          {/* Fallback message */}
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">Categories are being prepared...</p>
             <p className="text-sm text-gray-500">Check back soon for recipe categories!</p>
@@ -96,7 +61,6 @@ export default function CategoriesSection({
     );
   }
 
-  // Display categories
   const displayCategories = categories;
 
   return (

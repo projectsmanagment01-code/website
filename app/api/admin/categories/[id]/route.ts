@@ -93,6 +93,10 @@ export async function PUT(
     // CRITICAL: Revalidate cache after mutation
     await revalidateAdminPaths();
     
+    // CRITICAL: Revalidate frontend cache tags for instant updates
+    const { revalidateByTags } = await import('@/lib/cache-busting');
+    await revalidateByTags(['categories', 'all-categories', `category-${category.slug}`]);
+    
     return jsonResponseNoCache({
       success: true,
       category,
@@ -106,11 +110,7 @@ export async function PUT(
       return errorResponseNoCache('Category not found', 404);
     }
     
-    return jsonResponseNoCache({ 
-        error: 'Failed to update category',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 });
+    return errorResponseNoCache('Failed to update category', 500);
   }
 }
 
@@ -135,6 +135,10 @@ export async function DELETE(
     // CRITICAL: Revalidate cache after mutation
     await revalidateAdminPaths();
     
+    // CRITICAL: Revalidate frontend cache tags for instant updates
+    const { revalidateByTags } = await import('@/lib/cache-busting');
+    await revalidateByTags(['categories', 'all-categories']);
+    
     return jsonResponseNoCache({
       success: true,
       message: 'Category deleted successfully'
@@ -149,18 +153,10 @@ export async function DELETE(
       }
       
       if (error.message.includes('Cannot delete category')) {
-        return jsonResponseNoCache({ 
-            error: error.message,
-            canForce: true
-          },
-          { status: 400 });
+        return errorResponseNoCache(error.message, 400);
       }
     }
     
-    return jsonResponseNoCache({ 
-        error: 'Failed to delete category',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 });
+    return errorResponseNoCache('Failed to delete category', 500);
   }
 }

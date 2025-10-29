@@ -186,7 +186,14 @@ export async function GET(request: Request) {
       (a, b) => (b.recipeCount || 0) - (a.recipeCount || 0)
     );
 
-    return NextResponse.json(sortedCategories);
+    // PUBLIC API: Enable caching for performance
+    return NextResponse.json(sortedCategories, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        'CDN-Cache-Control': 'public, max-age=3600',
+        'Cache-Tag': 'categories',
+      },
+    });
   } catch (error) {
     console.error("Error fetching categories:", error);
     
@@ -239,6 +246,11 @@ export async function GET(request: Request) {
     ];
     
     console.log("🔄 Using fallback categories due to database error");
-    return NextResponse.json(fallbackCategories);
+    return NextResponse.json(fallbackCategories, {
+      headers: {
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=600',
+        'CDN-Cache-Control': 'public, max-age=300',
+      },
+    });
   }
 }
