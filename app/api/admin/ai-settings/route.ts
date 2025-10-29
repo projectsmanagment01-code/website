@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
 import { promises as fs } from "fs";
 import path from "path";
@@ -100,10 +101,7 @@ export async function GET(request: NextRequest) {
   try {
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const settings = await loadAISettings();
@@ -117,13 +115,10 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    return NextResponse.json(safeSettings);
+    return jsonResponseNoCache(safeSettings);
   } catch (error) {
     console.error("Error loading AI settings:", error);
-    return NextResponse.json(
-      { error: "Failed to load AI settings" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to load AI settings', 500);
   }
 }
 
@@ -131,10 +126,7 @@ export async function POST(request: NextRequest) {
   try {
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body = await request.json();
@@ -155,15 +147,12 @@ export async function POST(request: NextRequest) {
 
     await saveAISettings(updatedSettings);
 
-    return NextResponse.json({ 
+    return jsonResponseNoCache({ 
       success: true, 
       message: "AI settings saved successfully"
     });
   } catch (error) {
     console.error("Error saving AI settings:", error);
-    return NextResponse.json(
-      { error: "Failed to save AI settings" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to save AI settings', 500);
   }
 }

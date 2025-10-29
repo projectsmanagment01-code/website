@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { createAuthor, getAuthors, searchAuthors } from '@/lib/author-service';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { prisma } from '@/lib/prisma';
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
           recipeCount: author.recipeCount
         }));
 
-        return NextResponse.json({
+        return jsonResponseNoCache({
           authors: authorsWithCount,
           total: authorsWithCount.length,
           currentPage: 1,
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
         });
       } catch (tagError) {
         console.error('❌ Error filtering authors by tag:', tagError);
-        return NextResponse.json(
+        return jsonResponseNoCache(
           { error: 'Failed to filter authors by tag', details: tagError instanceof Error ? tagError.message : 'Unknown error' },
           { status: 500 }
         );
@@ -92,7 +93,7 @@ export async function GET(request: NextRequest) {
     // Handle search query
     if (search) {
       const authors = await searchAuthors(search, limit);
-      return NextResponse.json({
+      return jsonResponseNoCache({
         authors,
         total: authors.length,
         currentPage: 1,
@@ -102,14 +103,11 @@ export async function GET(request: NextRequest) {
 
     // Handle pagination
     const result = await getAuthors(page, limit);
-    return NextResponse.json(result);
+    return jsonResponseNoCache(result);
 
   } catch (error) {
     console.error('❌ Error in GET /api/admin/authors:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
 
@@ -126,18 +124,12 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!name) {
-      return NextResponse.json(
-        { error: 'Name is required' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Name is required', 400);
     }
 
     // Validate tags if provided
     if (tags && !Array.isArray(tags)) {
-      return NextResponse.json(
-        { error: 'tags must be an array' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('tags must be an array', 400);
     }
 
     // Create author
@@ -155,24 +147,19 @@ export async function POST(request: NextRequest) {
     // CRITICAL: Revalidate cache after mutation
     await revalidateAdminPaths();
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       message: 'Author created successfully',
       author
-    }, { status: 201 });
+    }, 201);
 
   } catch (error) {
     console.error('❌ Error in POST /api/admin/authors:', error);
     
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return jsonResponseNoCache(
+        { error: error.message }, 400);
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }

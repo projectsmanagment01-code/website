@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
 import { promises as fs } from "fs";
 import path from "path";
@@ -135,34 +136,25 @@ export async function POST(request: NextRequest) {
     // Verify admin authentication
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body = await request.json();
     const { prompt, field, maxLength, contentType, websiteContext } = body;
 
     if (!prompt) {
-      return NextResponse.json(
-        { error: "Prompt is required" },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Prompt is required', 400);
     }
 
     // Load AI settings
     const settings = await loadAISettings();
 
     if (!settings.enabled) {
-      return NextResponse.json(
-        { error: "AI content generation is disabled. Enable it in AI Plugin settings." },
-        { status: 403 }
-      );
+      return errorResponseNoCache('AI content generation is disabled. Enable it in AI Plugin settings.', 403);
     }
 
     if (!settings.features.contentGeneration) {
-      return NextResponse.json(
-        { error: "Content generation feature is disabled in AI settings." },
-        { status: 403 }
-      );
+      return errorResponseNoCache('Content generation feature is disabled in AI settings.', 403);
     }
 
     // Generate content using the configured provider
@@ -211,16 +203,14 @@ export async function POST(request: NextRequest) {
       // Check if content is empty and return error
       if (!generatedContent || generatedContent.trim().length === 0) {
         console.error('Generated content is empty!');
-        return NextResponse.json(
-          {
+        return jsonResponseNoCache({
             error: "Generated content is empty. Please try again.",
             details: "The AI returned an empty response. This might be due to API limits or prompt issues."
           },
-          { status: 500 }
-        );
+          { status: 500 });
       }
 
-      return NextResponse.json({
+      return jsonResponseNoCache({
         success: true,
         content: generatedContent,
         provider: settings.provider,
@@ -229,19 +219,14 @@ export async function POST(request: NextRequest) {
       });
     } catch (aiError) {
       console.error("AI generation error:", aiError);
-      return NextResponse.json(
-        {
+      return jsonResponseNoCache({
           error: aiError instanceof Error ? aiError.message : "AI generation failed",
           details: "Check your AI API keys and settings",
         },
-        { status: 500 }
-      );
+        { status: 500 });
     }
   } catch (error) {
     console.error("Content generation error:", error);
-    return NextResponse.json(
-      { error: "Failed to generate content" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to generate content', 500);
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import fs from "fs";
 import path from "path";
 import { checkAuthOrRespond } from "@/lib/auth-standard";
@@ -18,24 +19,18 @@ export async function POST(request: NextRequest) {
     const { content } = body;
 
     if (typeof content !== "string") {
-      return NextResponse.json(
-        { error: "Content must be a string" },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Content must be a string', 400);
     }
 
     // Write content to robots.txt file
     fs.writeFileSync(ROBOTS_FILE_PATH, content, "utf8");
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       message: "Robots.txt saved successfully",
     });
   } catch (error) {
     console.error("Error saving robots.txt:", error);
-    return NextResponse.json(
-      { error: "Failed to save robots.txt" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to save robots.txt', 500);
   }
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { BackupService } from '@/lib/backup/backup-service';
 import { BackupError } from '@/lib/backup/types';
 import { checkAuthOrRespond } from '@/lib/auth-standard';
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
   try {
     const backups = await backupService.listBackups();
     
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       data: backups
     });
@@ -23,13 +24,11 @@ export async function GET(request: NextRequest) {
     console.error('Error listing backups:', error);
     
     const statusCode = error instanceof BackupError ? 400 : 500;
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to list backups'
       },
-      { status: statusCode }
-    );
+      { status: statusCode });
   }
 }
 
@@ -52,13 +51,11 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!name || typeof name !== 'string') {
-      return NextResponse.json(
-        {
+      return jsonResponseNoCache({
           success: false,
           error: 'Backup name is required'
         },
-        { status: 400 }
-      );
+        { status: 400 });
     }
 
     const job = await backupService.createBackup(name, description, {
@@ -68,7 +65,7 @@ export async function POST(request: NextRequest) {
       type
     });
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       data: job
     });
@@ -77,12 +74,10 @@ export async function POST(request: NextRequest) {
     console.error('Error creating backup:', error);
     
     const statusCode = error instanceof BackupError ? 400 : 500;
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create backup'
       },
-      { status: statusCode }
-    );
+      { status: statusCode });
   }
 }

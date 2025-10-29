@@ -7,6 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { getAuthorById, updateAuthor, deleteAuthor } from '@/lib/author-service';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { revalidateAdminPaths } from '@/lib/cache-busting';
@@ -30,20 +31,14 @@ export async function GET(
     const author = await getAuthorById(id);
 
     if (!author) {
-      return NextResponse.json(
-        { error: 'Author not found' },
-        { status: 404 }
-      );
+      return errorResponseNoCache('Author not found', 404);
     }
 
-    return NextResponse.json(author);
+    return jsonResponseNoCache(author);
 
   } catch (error) {
     console.error(`❌ Error in GET /api/admin/authors/${params?.id}:`, error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
 
@@ -64,10 +59,7 @@ export async function PUT(
 
     // Validate tags if provided
     if (tags !== undefined && !Array.isArray(tags)) {
-      return NextResponse.json(
-        { error: 'tags must be an array' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('tags must be an array', 400);
     }
 
     // Update author
@@ -81,10 +73,7 @@ export async function PUT(
     });
 
     if (!author) {
-      return NextResponse.json(
-        { error: 'Author not found' },
-        { status: 404 }
-      );
+      return errorResponseNoCache('Author not found', 404);
     }
 
     console.log(`✅ Author updated: ${author.name} (ID: ${author.id}) with ${author.tags?.length || 0} tags`);
@@ -92,7 +81,7 @@ export async function PUT(
     // CRITICAL: Revalidate cache after mutation
     await revalidateAdminPaths();
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       message: 'Author updated successfully',
       author
     });
@@ -101,16 +90,11 @@ export async function PUT(
     console.error(`❌ Error in PUT /api/admin/authors/${params?.id}:`, error);
     
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return jsonResponseNoCache(
+        { error: error.message }, 400);
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
 
@@ -129,10 +113,7 @@ export async function DELETE(
     const deleted = await deleteAuthor(id);
 
     if (!deleted) {
-      return NextResponse.json(
-        { error: 'Author not found' },
-        { status: 404 }
-      );
+      return errorResponseNoCache('Author not found', 404);
     }
 
     console.log(`✅ Author deleted: ID ${id}`);
@@ -140,7 +121,7 @@ export async function DELETE(
     // CRITICAL: Revalidate cache after mutation
     await revalidateAdminPaths();
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       message: 'Author deleted successfully'
     });
 
@@ -148,15 +129,10 @@ export async function DELETE(
     console.error(`❌ Error in DELETE /api/admin/authors/${params?.id}:`, error);
     
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return jsonResponseNoCache(
+        { error: error.message }, 400);
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }

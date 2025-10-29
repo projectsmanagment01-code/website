@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
@@ -10,10 +11,7 @@ export async function POST(request: NextRequest) {
     const { resetToken, newPassword, newUsername } = body;
 
     if (!resetToken) {
-      return NextResponse.json(
-        { error: 'Reset token is required' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Reset token is required', 400);
     }
 
     // Verify the reset token against API tokens in database
@@ -22,31 +20,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (!apiToken) {
-      return NextResponse.json(
-        { error: 'Invalid reset token' },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Invalid reset token', 401);
     }
 
     if (!apiToken.isActive) {
-      return NextResponse.json(
-        { error: 'This API token is inactive' },
-        { status: 401 }
-      );
+      return errorResponseNoCache('This API token is inactive', 401);
     }
 
     if (new Date() > apiToken.expiresAt) {
-      return NextResponse.json(
-        { error: 'This API token has expired' },
-        { status: 401 }
-      );
+      return errorResponseNoCache('This API token has expired', 401);
     }
 
     if (!newPassword) {
-      return NextResponse.json(
-        { error: 'newPassword is required' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('newPassword is required', 400);
     }
 
     const adminEmail = "admin@yourrecipesite.com";
@@ -84,7 +70,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       message: 'Admin credentials reset successfully',
       email: adminEmail,
@@ -94,10 +80,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Admin reset error:', error);
-    return NextResponse.json(
-      { error: 'Failed to reset admin credentials', details: (error as Error).message },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to reset admin credentials', 500);
   } finally {
     await prisma.$disconnect();
   }

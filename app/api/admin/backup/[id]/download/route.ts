@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { BackupService } from '@/lib/backup/backup-service';
 import { BackupError } from '@/lib/backup/types';
 import fs from 'fs-extra';
@@ -19,25 +20,21 @@ export async function GET(
     const backupPath = await backupService.findBackupFilePath(id);
     
     if (!backupPath) {
-      return NextResponse.json(
-        {
+      return jsonResponseNoCache({
           success: false,
           error: 'Backup not found'
         },
-        { status: 404 }
-      );
+        { status: 404 });
     }
 
     // Check if file exists
     if (!await fs.pathExists(backupPath)) {
       console.error('❌ Backup file not found at:', backupPath);
-      return NextResponse.json(
-        {
+      return jsonResponseNoCache({
           success: false,
           error: 'Backup file not found'
         },
-        { status: 404 }
-      );
+        { status: 404 });
     }
 
     // Read file and return as download
@@ -68,12 +65,10 @@ export async function GET(
     console.error('❌ Error downloading backup:', error);
     
     const statusCode = error instanceof BackupError ? 400 : 500;
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to download backup'
       },
-      { status: statusCode }
-    );
+      { status: statusCode });
   }
 }

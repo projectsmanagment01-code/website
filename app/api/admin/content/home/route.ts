@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
 import { getHeroConfig, updateHeroConfig, getSocialLinks, updateSocialLinks } from "@/lib/site-config-service";
 import { revalidateAdminPaths } from "@/lib/cache-busting";
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Return data in format expected by admin panel
-    return NextResponse.json({
+    return jsonResponseNoCache({
       heroTitle: heroConfig.title,
       heroDescription: heroConfig.description,
       heroButtonText: heroConfig.buttonText,
@@ -33,10 +34,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error loading home content from database:", error);
-    return NextResponse.json(
-      { error: "Failed to load content" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to load content', 500);
   }
 }
 
@@ -49,7 +47,7 @@ export async function POST(request: NextRequest) {
     // Verify admin token
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body = await request.json();
@@ -76,18 +74,16 @@ export async function POST(request: NextRequest) {
 
     // CRITICAL: Revalidate admin paths and home page
     await revalidateAdminPaths('/');
-
-    // Create response with cache invalidation headers
-    const response = NextResponse.json({ success: true });
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     
-    return response;
+    // CRITICAL: Revalidate cache tags for instant frontend updates
+    const { revalidateByTags } = await import('@/lib/cache-busting');
+    await revalidateByTags(['home-content']);
+
+    // Return response with cache invalidation headers
+    return jsonResponseNoCache({ success: true });
   } catch (error) {
     console.error("Error saving home content to database:", error);
-    return NextResponse.json(
-      { error: "Failed to save content" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to save content', 500);
   }
 }
 

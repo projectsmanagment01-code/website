@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import fs from 'fs/promises';
 import path from 'path';
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
     } catch {
       // Directory doesn't exist, return empty array
       console.log('⚠️  Authors directory not found:', uploadsDir);
-      return NextResponse.json({ images: [] });
+      return jsonResponseNoCache({ images: [] });
     }
 
     // Read directory
@@ -56,16 +57,13 @@ export async function GET(request: NextRequest) {
       new Date(b.modified).getTime() - new Date(a.modified).getTime()
     );
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       images: imagesWithStats,
       total: imagesWithStats.length
     });
 
   } catch (error) {
     console.error('❌ Error listing author images:', error);
-    return NextResponse.json(
-      { error: 'Failed to list author images' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to list author images', 500);
   }
 }

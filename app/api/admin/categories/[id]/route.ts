@@ -10,6 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAuth } from '@/lib/api-auth';
 import {
   getCategoryById,
@@ -31,10 +32,7 @@ export async function GET(
     // Verify authentication
     const authResult = await verifyAuth(request);
     if (!authResult) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Unauthorized. Admin access required.', 401);
     }
 
     const { id } = await context.params;
@@ -42,26 +40,21 @@ export async function GET(
     const category = await getCategoryById(id, true); // Include recipes
     
     if (!category) {
-      return NextResponse.json(
-        { error: 'Category not found' },
-        { status: 404 }
-      );
+      return errorResponseNoCache('Category not found', 404);
     }
     
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       category
     });
 
   } catch (error) {
     console.error('❌ GET /api/admin/categories/[id] error:', error);
-    return NextResponse.json(
-      { 
+    return jsonResponseNoCache({ 
         error: 'Failed to fetch category',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
-      { status: 500 }
-    );
+      { status: 500 });
   }
 }
 
@@ -73,10 +66,7 @@ export async function PUT(
     // Verify authentication
     const authResult = await verifyAuth(request);
     if (!authResult) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Unauthorized. Admin access required.', 401);
     }
 
     const { id } = await context.params;
@@ -84,10 +74,7 @@ export async function PUT(
     
     // Validate at least one field to update
     if (Object.keys(body).length === 0) {
-      return NextResponse.json(
-        { error: 'No fields provided for update' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('No fields provided for update', 400);
     }
     
     // Update category
@@ -106,7 +93,7 @@ export async function PUT(
     // CRITICAL: Revalidate cache after mutation
     await revalidateAdminPaths();
     
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       category,
       message: `Category "${category.name}" updated successfully`
@@ -116,19 +103,14 @@ export async function PUT(
     console.error('❌ PUT /api/admin/categories/[id] error:', error);
     
     if (error instanceof Error && error.message.includes('not found')) {
-      return NextResponse.json(
-        { error: 'Category not found' },
-        { status: 404 }
-      );
+      return errorResponseNoCache('Category not found', 404);
     }
     
-    return NextResponse.json(
-      { 
+    return jsonResponseNoCache({ 
         error: 'Failed to update category',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
-      { status: 500 }
-    );
+      { status: 500 });
   }
 }
 
@@ -140,10 +122,7 @@ export async function DELETE(
     // Verify authentication
     const authResult = await verifyAuth(request);
     if (!authResult) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Unauthorized. Admin access required.', 401);
     }
 
     const { id } = await context.params;
@@ -156,7 +135,7 @@ export async function DELETE(
     // CRITICAL: Revalidate cache after mutation
     await revalidateAdminPaths();
     
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       message: 'Category deleted successfully'
     });
@@ -166,29 +145,22 @@ export async function DELETE(
     
     if (error instanceof Error) {
       if (error.message.includes('not found')) {
-        return NextResponse.json(
-          { error: 'Category not found' },
-          { status: 404 }
-        );
+        return errorResponseNoCache('Category not found', 404);
       }
       
       if (error.message.includes('Cannot delete category')) {
-        return NextResponse.json(
-          { 
+        return jsonResponseNoCache({ 
             error: error.message,
             canForce: true
           },
-          { status: 400 }
-        );
+          { status: 400 });
       }
     }
     
-    return NextResponse.json(
-      { 
+    return jsonResponseNoCache({ 
         error: 'Failed to delete category',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
-      { status: 500 }
-    );
+      { status: 500 });
   }
 }

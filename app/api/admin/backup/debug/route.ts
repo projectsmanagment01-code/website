@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import fs from 'fs-extra';
 import path from 'path';
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
       };
     }
     
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       data: {
         backupDir,
@@ -107,12 +108,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error debugging backup system:', error);
     
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to debug backup system'
       },
-      { status: 500 }
-    );
+      { status: 500 });
   }
 }

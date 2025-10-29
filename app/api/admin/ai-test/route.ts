@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
 
 interface TestRequest {
@@ -95,20 +96,15 @@ export async function POST(request: NextRequest) {
   try {
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body: TestRequest = await request.json();
     const { provider, apiKey, model } = body;
 
     if (!apiKey) {
-      return NextResponse.json(
-        { success: false, error: `${provider} API key is required` },
-        { status: 400 }
-      );
+      return jsonResponseNoCache({ success: false, error: `${provider} API key is required` },
+        { status: 400 });
     }
 
     let testResponse: string;
@@ -119,13 +115,11 @@ export async function POST(request: NextRequest) {
       } else if (provider === "gemini") {
         testResponse = await testGemini(apiKey, model);
       } else {
-        return NextResponse.json(
-          { success: false, error: "Unsupported AI provider" },
-          { status: 400 }
-        );
+        return jsonResponseNoCache({ success: false, error: "Unsupported AI provider" },
+          { status: 400 });
       }
 
-      return NextResponse.json({
+      return jsonResponseNoCache({
         success: true,
         testResponse: testResponse.trim(),
         provider,
@@ -134,21 +128,17 @@ export async function POST(request: NextRequest) {
       });
     } catch (error) {
       console.error(`${provider} API test failed:`, error);
-      return NextResponse.json(
-        { 
+      return jsonResponseNoCache({ 
           success: false, 
           error: error instanceof Error ? error.message : "API test failed",
           provider,
           model 
         },
-        { status: 400 }
-      );
+        { status: 400 });
     }
   } catch (error) {
     console.error("Error testing AI connection:", error);
-    return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
-    );
+    return jsonResponseNoCache({ success: false, error: "Internal server error" },
+      { status: 500 });
   }
 }

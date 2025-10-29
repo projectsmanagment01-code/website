@@ -33,4 +33,5 @@ This file defines strict behavioral rules for any AI system editing, generating,
 6. always and i mean it allways take refrences, nots, and read the specice files that related to the issue you are solving.
 7. take your time thinking, investigating, analysing the problom and the code contect befor any changing youe about to make.
 ## ENFORCEMENT
+1- do not commit or ask for commit do not puch any changes the user will take care of this 
 These rules override any general AI behavior model defaults. All AI tasks in this environment must comply fully.

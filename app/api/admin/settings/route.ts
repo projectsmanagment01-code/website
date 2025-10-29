@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { headers } from "next/headers";
 import { revalidateTag } from "next/cache";
 import { verifyAuth } from "@/lib/api-auth";
@@ -18,13 +19,10 @@ export const fetchCache = 'force-no-store';
 export async function GET() {
   try {
     const settings = await getAdminSettings();
-    return NextResponse.json(settings);
+    return jsonResponseNoCache(settings);
   } catch (error) {
     console.error("Error in GET /api/admin/settings:", error);
-    return NextResponse.json(
-      { error: "Failed to read settings" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to read settings', 500);
   }
 }
 
@@ -34,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Check authentication (supports both JWT and API tokens)
     const authResult = await verifyAuth(request);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body = await request.json();
@@ -43,30 +41,24 @@ export async function POST(request: NextRequest) {
     const requiredSections = ["header", "body", "footer"];
     for (const section of requiredSections) {
       if (!body[section] || typeof body[section] !== "object") {
-        return NextResponse.json(
-          { error: `Invalid ${section} section` },
-          { status: 400 }
-        );
+        return jsonResponseNoCache(
+          { error: `Invalid ${section} section` }, 400);
       }
 
       const requiredFields = ["html", "css", "javascript"];
       for (const field of requiredFields) {
         if (!Array.isArray(body[section][field])) {
-          return NextResponse.json(
-            { error: `Invalid ${section}.${field} field - must be an array` },
-            { status: 400 }
-          );
+          return jsonResponseNoCache(
+            { error: `Invalid ${section}.${field} field - must be an array` }, 400);
         }
 
         // Validate each item in the array is a string
         for (const item of body[section][field]) {
           if (typeof item !== "string") {
-            return NextResponse.json(
-              {
+            return jsonResponseNoCache({
                 error: `Invalid item in ${section}.${field} - must be a string`,
               },
-              { status: 400 }
-            );
+              { status: 400 });
           }
         }
       }
@@ -76,29 +68,21 @@ export async function POST(request: NextRequest) {
     const textFields = ["adsTxt", "robotsTxt"];
     for (const field of textFields) {
       if (body[field] !== undefined && typeof body[field] !== "string") {
-        return NextResponse.json(
-          { error: `Invalid ${field} field - must be a string` },
-          { status: 400 }
-        );
+        return jsonResponseNoCache(
+          { error: `Invalid ${field} field - must be a string` }, 400);
       }
     }
 
     // Validate hero field
     if (body.hero && typeof body.hero === "object") {
       if (body.hero.page !== undefined && typeof body.hero.page !== "string") {
-        return NextResponse.json(
-          { error: "Invalid hero.page field - must be a string" },
-          { status: 400 }
-        );
+        return errorResponseNoCache('Invalid hero.page field - must be a string', 400);
       }
       if (
         body.hero.content !== undefined &&
         typeof body.hero.content !== "string"
       ) {
-        return NextResponse.json(
-          { error: "Invalid hero.content field - must be a string" },
-          { status: 400 }
-        );
+        return errorResponseNoCache('Invalid hero.content field - must be a string', 400);
       }
     }
 
@@ -118,10 +102,8 @@ export async function POST(request: NextRequest) {
           body.staticPages[field] !== undefined &&
           typeof body.staticPages[field] !== "string"
         ) {
-          return NextResponse.json(
-            { error: `Invalid staticPages.${field} field - must be a string` },
-            { status: 400 }
-          );
+          return jsonResponseNoCache(
+            { error: `Invalid staticPages.${field} field - must be a string` }, 400);
         }
       }
     }
@@ -137,27 +119,21 @@ export async function POST(request: NextRequest) {
     const success = await saveAdminSettings(updatedSettings);
 
     if (!success) {
-      return NextResponse.json(
-        { error: "Failed to save settings" },
-        { status: 500 }
-      );
+      return errorResponseNoCache('Failed to save settings', 500);
     }
 
     // Revalidate cached admin settings
     revalidateTag("admin-settings");
     await revalidateAdminPaths();
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       message: "Settings updated successfully",
       settings: updatedSettings,
     });
   } catch (error) {
     console.error("Error in POST /api/admin/settings:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
 
@@ -167,7 +143,7 @@ export async function PUT(request: NextRequest) {
     // Check authentication (supports both JWT and API tokens)
     const authResult = await verifyAuth(request);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body = await request.json();
@@ -176,30 +152,24 @@ export async function PUT(request: NextRequest) {
     const requiredSections = ["header", "body", "footer"];
     for (const section of requiredSections) {
       if (!body[section] || typeof body[section] !== "object") {
-        return NextResponse.json(
-          { error: `Invalid ${section} section` },
-          { status: 400 }
-        );
+        return jsonResponseNoCache(
+          { error: `Invalid ${section} section` }, 400);
       }
 
       const requiredFields = ["html", "css", "javascript"];
       for (const field of requiredFields) {
         if (!Array.isArray(body[section][field])) {
-          return NextResponse.json(
-            { error: `Invalid ${section}.${field} field - must be an array` },
-            { status: 400 }
-          );
+          return jsonResponseNoCache(
+            { error: `Invalid ${section}.${field} field - must be an array` }, 400);
         }
 
         // Validate each item in the array is a string
         for (const item of body[section][field]) {
           if (typeof item !== "string") {
-            return NextResponse.json(
-              {
+            return jsonResponseNoCache({
                 error: `Invalid item in ${section}.${field} - must be a string`,
               },
-              { status: 400 }
-            );
+              { status: 400 });
           }
         }
       }
@@ -209,27 +179,21 @@ export async function PUT(request: NextRequest) {
     const success = await saveAdminSettings(body as AdminSettingsData);
 
     if (!success) {
-      return NextResponse.json(
-        { error: "Failed to save settings" },
-        { status: 500 }
-      );
+      return errorResponseNoCache('Failed to save settings', 500);
     }
 
     // Revalidate cached admin settings
     revalidateTag("admin-settings");
     await revalidateAdminPaths();
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       message: "Settings replaced successfully",
       settings: body,
     });
   } catch (error) {
     console.error("Error in PUT /api/admin/settings:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
 
@@ -239,7 +203,7 @@ export async function PATCH(request: NextRequest) {
     // Check authentication (supports both JWT and API tokens)
     const authResult = await verifyAuth(request);
     if (!authResult) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body = await request.json();
@@ -262,26 +226,20 @@ export async function PATCH(request: NextRequest) {
     const success = await saveAdminSettings(updatedSettings as AdminSettingsData, updatedBy);
 
     if (!success) {
-      return NextResponse.json(
-        { error: "Failed to save settings" },
-        { status: 500 }
-      );
+      return errorResponseNoCache('Failed to save settings', 500);
     }
 
     // Revalidate cached admin settings
     revalidateTag("admin-settings");
     await revalidateAdminPaths();
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       message: "Settings updated successfully",
       settings: updatedSettings,
     });
   } catch (error) {
     console.error("Error in PATCH /api/admin/settings:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }

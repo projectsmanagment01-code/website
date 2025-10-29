@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
 import { getPageContent, updatePageContent } from "@/lib/page-content-service";
 import { revalidatePath } from "next/cache";
@@ -16,18 +17,15 @@ export async function GET(
     // Verify admin token
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     // Fetch from database
     const content = await getPageContent(params.page);
-    return NextResponse.json(content);
+    return jsonResponseNoCache(content);
   } catch (error) {
     console.error(`Error loading ${params.page} content:`, error);
-    return NextResponse.json(
-      { error: "Failed to load content" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to load content', 500);
   }
 }
 
@@ -39,7 +37,7 @@ export async function POST(
     // Verify admin token
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body = await request.json();
@@ -65,12 +63,9 @@ export async function POST(
       console.log(`✅ ${params.page} content saved to database and page revalidated`);
     }
 
-    return NextResponse.json({ success: true });
+    return jsonResponseNoCache({ success: true });
   } catch (error) {
     console.error(`Error saving ${params.page} content:`, error);
-    return NextResponse.json(
-      { error: "Failed to save content" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to save content', 500);
   }
 }

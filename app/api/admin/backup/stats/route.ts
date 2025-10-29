@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { BackupService } from '@/lib/backup/backup-service';
 import { BackupError } from '@/lib/backup/types';
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const stats = await backupService.getBackupStats();
     
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       data: stats
     });
@@ -24,12 +25,10 @@ export async function GET(request: NextRequest) {
     console.error('Error getting backup stats:', error);
     
     const statusCode = error instanceof BackupError ? 400 : 500;
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get backup statistics'
       },
-      { status: statusCode }
-    );
+      { status: statusCode });
   }
 }

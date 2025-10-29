@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { BackupService } from '@/lib/backup/backup-service';
 import { BackupError } from '@/lib/backup/types';
 import { checkAuthOrRespond } from '@/lib/auth-standard';
@@ -50,7 +51,7 @@ export async function POST(
       message: job.message
     });
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       data: job
     });
@@ -69,16 +70,14 @@ export async function POST(
     const statusCode = error instanceof BackupError ? 
       (error.code === 'BACKUP_NOT_FOUND' ? 404 : 400) : 500;
     
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: errorMessage,
         code: error instanceof BackupError ? error.code : 'RESTORE_FAILED',
         details: error instanceof BackupError && error.originalError ? 
           error.originalError.message : undefined
       },
-      { status: statusCode }
-    );
+      { status: statusCode });
   }
 }
 
@@ -99,7 +98,7 @@ export async function DELETE(
     
     console.log('✅ Backup deleted successfully:', params.id);
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       message: 'Backup deleted successfully'
     });
@@ -111,13 +110,11 @@ export async function DELETE(
       (error.code === 'BACKUP_NOT_FOUND' ? 404 : 
        error.code === 'FILE_NOT_FOUND' ? 404 : 400) : 500;
     
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to delete backup',
         code: error instanceof BackupError ? error.code : 'UNKNOWN_ERROR'
       },
-      { status: statusCode }
-    );
+      { status: statusCode });
   }
 }

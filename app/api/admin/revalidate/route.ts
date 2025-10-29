@@ -1,5 +1,6 @@
 const dynamic = "force-static";
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { revalidatePath, revalidateTag } from "next/cache";
 import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 
@@ -30,10 +31,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (!isAuthorized) {
-      return NextResponse.json(
-        { message: "Unauthorized - Invalid credentials" },
-        { status: 401 }
-      );
+      return jsonResponseNoCache({ message: "Unauthorized - Invalid credentials" },
+        { status: 401 });
     }
 
     let result = false;
@@ -167,13 +166,11 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        return NextResponse.json(
-          {
+        return jsonResponseNoCache({
             message:
               "Invalid action. Use 'new-recipe', 'update-recipe', 'delete-recipe', 'custom', or 'all'",
           },
-          { status: 400 }
-        );
+          { status: 400 });
     }
 
     console.log(`✅ Admin revalidation completed:`, {
@@ -182,7 +179,7 @@ export async function POST(request: NextRequest) {
       revalidatedTags,
     });
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: result,
       message: result
         ? "Revalidation triggered successfully"
@@ -194,13 +191,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("❌ Admin revalidation error:", error);
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         message: "Revalidation failed",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
-    );
+      { status: 500 });
   }
 }
 
@@ -209,7 +204,7 @@ export async function POST(request: NextRequest) {
  * Returns admin revalidation documentation
  */
 export async function GET() {
-  return NextResponse.json({
+  return jsonResponseNoCache({
     message: "Admin Revalidation Endpoint",
     usage: {
       method: "POST",

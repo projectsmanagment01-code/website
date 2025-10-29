@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { BackupService } from '@/lib/backup/backup-service';
 import { BackupError } from '@/lib/backup/types';
 import jwt from 'jsonwebtoken';
@@ -17,13 +18,11 @@ export async function POST(
     const backup = backups.find(b => b.id === params.id);
     
     if (!backup) {
-      return NextResponse.json(
-        {
+      return jsonResponseNoCache({
           success: false,
           error: 'Backup not found'
         },
-        { status: 404 }
-      );
+        { status: 404 });
     }
 
     // Generate a JWT token for secure access
@@ -41,7 +40,7 @@ export async function POST(
 
     console.log('✅ Generated backup link:', shareableLink);
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       link: shareableLink,
       expiresIn: '24 hours'
@@ -51,12 +50,10 @@ export async function POST(
     console.error('❌ Error generating backup link:', error);
     
     const statusCode = error instanceof BackupError ? 400 : 500;
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to generate backup link'
       },
-      { status: statusCode }
-    );
+      { status: statusCode });
   }
 }

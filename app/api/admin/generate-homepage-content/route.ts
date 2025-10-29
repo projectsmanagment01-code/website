@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
 import { loadAISettings, getOpenAIKey, getGeminiKey } from "@/lib/ai-settings-helper";
 import { 
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     // Verify admin token
     const adminCheck = await verifyAdminToken(request);
     if (!adminCheck.success) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body: GenerateRequest = await request.json();
@@ -28,10 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Validate context
     if (!context.websiteName || !context.businessType) {
-      return NextResponse.json(
-        { error: "Missing required context fields (websiteName, businessType)" },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Missing required context fields (websiteName, businessType)', 400);
     }
 
     // Load AI settings directly from file
@@ -39,10 +37,7 @@ export async function POST(request: NextRequest) {
     
     // Check if AI is enabled
     if (!aiSettings?.enabled) {
-      return NextResponse.json(
-        { error: "AI generation is disabled. Please enable it in AI Settings." },
-        { status: 403 }
-      );
+      return errorResponseNoCache('AI generation is disabled. Please enable it in AI Settings.', 403);
     }
 
     // Get API key based on provider using helper functions
@@ -51,10 +46,8 @@ export async function POST(request: NextRequest) {
       : await getGeminiKey();
 
     if (!apiKey) {
-      return NextResponse.json(
-        { error: `${provider === 'openai' ? 'OpenAI' : 'Gemini'} API key not configured. Please add it in AI Settings.` },
-        { status: 400 }
-      );
+      return jsonResponseNoCache(
+        { error: `${provider === 'openai' ? 'OpenAI' : 'Gemini'} API key not configured. Please add it in AI Settings.` }, 400);
     }
 
     // Generate content based on field
@@ -73,20 +66,16 @@ export async function POST(request: NextRequest) {
         result = await generateMetaDescription(context, apiKey, provider);
         break;
       default:
-        return NextResponse.json(
-          { error: `Unknown field: ${field}` },
-          { status: 400 }
-        );
+        return jsonResponseNoCache(
+          { error: `Unknown field: ${field}` }, 400);
     }
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || "Generation failed" },
-        { status: 500 }
-      );
+      return jsonResponseNoCache(
+        { error: result.error || "Generation failed" }, 500);
     }
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       content: result.content,
       field,
@@ -95,12 +84,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("AI generation error:", error);
-    return NextResponse.json(
-      { 
-        error: "Failed to generate content",
-        details: error instanceof Error ? error.message : String(error)
-      },
-      { status: 500 }
-    );
+    return errorResponseNoCache("Failed to generate content", 500);
   }
 }

@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // Handle search query
     if (search) {
       const categories = await searchCategories(search);
-      return NextResponse.json({
+      return jsonResponseNoCache({
         categories,
         total: categories.length,
         currentPage: 1,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     // Handle pagination
     const result = await getCategoriesPaginated(page, limit, includeInactive);
     
-    return NextResponse.json({
+    return jsonResponseNoCache({
       categories: result.categories,
       total: result.total,
       currentPage: result.page,
@@ -62,10 +62,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Error in GET /api/admin/categories:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
 
@@ -82,17 +79,11 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!name) {
-      return NextResponse.json(
-        { error: 'Name is required' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Name is required', 400);
     }
 
     if (!image) {
-      return NextResponse.json(
-        { error: 'Image is required' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Image is required', 400);
     }
 
     // Create category

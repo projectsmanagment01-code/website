@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { PrivacyPolicyAIService } from '@/lib/privacy-policy-ai';
 import { verifyAdminToken } from '@/lib/auth';
 import { promises as fs } from 'fs';
@@ -42,32 +43,24 @@ export async function POST(request: NextRequest) {
     // Verify admin authentication
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     // Load AI settings
     const aiSettings = await loadAISettings();
     if (!aiSettings) {
-      return NextResponse.json(
-        { error: 'AI settings not configured. Please configure AI settings first.' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('AI settings not configured. Please configure AI settings first.', 400);
     }
 
     if (!aiSettings.enabled) {
-      return NextResponse.json(
-        { error: 'AI features are disabled. Please enable AI in settings.' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('AI features are disabled. Please enable AI in settings.', 400);
     }
 
     // Get API key for the current provider
     const apiKey = aiSettings.apiKeys[aiSettings.provider];
     if (!apiKey) {
-      return NextResponse.json(
-        { error: `${aiSettings.provider} API key not configured` },
-        { status: 400 }
-      );
+      return jsonResponseNoCache(
+        { error: `${aiSettings.provider} API key not configured` }, 400);
     }
 
     // Generate privacy policy using AI
@@ -79,7 +72,7 @@ export async function POST(request: NextRequest) {
     console.log('Formatted policy length:', formattedPolicy.length);
     console.log('=== PRIVACY POLICY GENERATION COMPLETE ===');
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       privacyPolicy: formattedPolicy,
       generatedAt: new Date().toISOString(),
@@ -99,13 +92,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      { 
+    return jsonResponseNoCache({ 
         error: errorMessage,
         details: error instanceof Error ? error.message : 'Unknown error'
       }, 
-      { status: 500 }
-    );
+      { status: 500 });
   }
 }
 
@@ -114,14 +105,14 @@ export async function GET(request: NextRequest) {
   try {
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     // Load AI settings directly instead of making a fetch call
     const aiSettings = await loadAISettings();
     
     if (!aiSettings) {
-      return NextResponse.json({
+      return jsonResponseNoCache({
         available: false,
         providers: { openai: false, gemini: false },
         reason: 'AI settings not configured'
@@ -133,7 +124,7 @@ export async function GET(request: NextRequest) {
     const hasGemini = !!(aiSettings.apiKeys.gemini && aiSettings.apiKeys.gemini.trim());
     const isAvailable = aiSettings.enabled && (hasOpenAI || hasGemini);
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       available: isAvailable,
       providers: {
         openai: hasOpenAI,
@@ -144,7 +135,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('AI availability check error:', error);
-    return NextResponse.json({
+    return jsonResponseNoCache({
       available: false,
       providers: { openai: false, gemini: false },
       reason: 'Error checking AI availability'

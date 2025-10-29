@@ -1,4 +1,5 @@
 ﻿import { NextResponse, NextRequest } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import fs from 'fs-extra';
 import path from 'path';
 
@@ -17,10 +18,8 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('❌ Import error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to process import request' },
-      { status: 500 }
-    );
+    return jsonResponseNoCache({ success: false, error: 'Failed to process import request' },
+      { status: 500 });
   }
 }
 
@@ -31,20 +30,16 @@ async function handleFileUpload(request: NextRequest) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: 'No file provided' },
-        { status: 400 }
-      );
+      return jsonResponseNoCache({ success: false, error: 'No file provided' },
+        { status: 400 });
     }
 
     console.log('📥 Importing backup from uploaded file:', file.name);
 
     // Validate file type
     if (!file.name.endsWith('.zip') && !file.name.endsWith('.gz')) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid file type. Only .zip and .gz files are supported.' },
-        { status: 400 }
-      );
+      return jsonResponseNoCache({ success: false, error: 'Invalid file type. Only .zip and .gz files are supported.' },
+        { status: 400 });
     }
 
     // Log file size for monitoring (no limit)
@@ -91,7 +86,7 @@ async function handleFileUpload(request: NextRequest) {
 
     console.log('✅ Backup uploaded successfully:', filename);
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       success: true,
       message: 'Backup uploaded and imported successfully',
       filename: filename,
@@ -100,10 +95,8 @@ async function handleFileUpload(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ File upload error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to upload backup file' },
-      { status: 500 }
-    );
+    return jsonResponseNoCache({ success: false, error: 'Failed to upload backup file' },
+      { status: 500 });
   }
 }
 
@@ -114,10 +107,8 @@ async function handleUrlImport(request: NextRequest) {
     const { url } = body;
 
     if (!url) {
-      return NextResponse.json(
-        { success: false, error: 'URL is required' },
-        { status: 400 }
-      );
+      return jsonResponseNoCache({ success: false, error: 'URL is required' },
+        { status: 400 });
     }
 
     console.log('📥 Importing backup from URL:', url);
@@ -140,10 +131,8 @@ async function handleUrlImport(request: NextRequest) {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      return NextResponse.json(
-        { success: false, error: `Failed to download: ${response.status} ${response.statusText}` },
-        { status: 400 }
-      );
+      return jsonResponseNoCache({ success: false, error: `Failed to download: ${response.status} ${response.statusText}` },
+        { status: 400 });
     }
 
     // Check file size before downloading (log only, no limit)
@@ -175,10 +164,8 @@ async function handleUrlImport(request: NextRequest) {
     const reader = response.body?.getReader();
 
     if (!reader) {
-      return NextResponse.json(
-        { success: false, error: 'Failed to read file stream' },
-        { status: 500 }
-      );
+      return jsonResponseNoCache({ success: false, error: 'Failed to read file stream' },
+        { status: 500 });
     }
 
     try {
@@ -212,7 +199,7 @@ async function handleUrlImport(request: NextRequest) {
       
       console.log('✅ Backup imported successfully:', filename);
 
-      return NextResponse.json({
+      return jsonResponseNoCache({
         success: true,
         message: 'Backup imported successfully',
         filename: filename,
@@ -228,15 +215,11 @@ async function handleUrlImport(request: NextRequest) {
     console.error('❌ Import error:', error);
     
     if (error instanceof Error && error.name === 'AbortError') {
-      return NextResponse.json(
-        { success: false, error: 'Import timeout - file too large or connection too slow' },
-        { status: 408 }
-      );
+      return jsonResponseNoCache({ success: false, error: 'Import timeout - file too large or connection too slow' },
+        { status: 408 });
     }
     
-    return NextResponse.json(
-      { success: false, error: 'Failed to import backup' },
-      { status: 500 }
-    );
+    return jsonResponseNoCache({ success: false, error: 'Failed to import backup' },
+      { status: 500 });
   }
 }

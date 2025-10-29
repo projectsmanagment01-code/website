@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { PrismaClient } from "@prisma/client";
 import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 import crypto from "crypto";
@@ -57,13 +58,10 @@ export async function GET(request: NextRequest) {
       token: `****-****-****-${token.token.slice(-8)}`
     }));
 
-    return NextResponse.json({ tokens: maskedTokens });
+    return jsonResponseNoCache({ tokens: maskedTokens });
   } catch (error) {
     console.error("Error fetching API tokens:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch API tokens" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to fetch API tokens', 500);
   }
 }
 
@@ -78,10 +76,7 @@ export async function POST(request: NextRequest) {
     const { name, duration, description } = await request.json();
 
     if (!name || !duration) {
-      return NextResponse.json(
-        { error: "Name and duration are required" },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Name and duration are required', 400);
     }
 
     const token = generateApiToken();
@@ -97,7 +92,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       message: "API token created successfully",
       token: {
         id: newToken.id,
@@ -109,10 +104,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error creating API token:", error);
-    return NextResponse.json(
-      { error: "Failed to create API token" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to create API token', 500);
   }
 }
 
@@ -128,25 +120,19 @@ export async function DELETE(request: NextRequest) {
     const tokenId = searchParams.get('id');
 
     if (!tokenId) {
-      return NextResponse.json(
-        { error: "Token ID is required" },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Token ID is required', 400);
     }
 
     await prisma.apiToken.delete({
       where: { id: tokenId }
     });
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       message: "API token revoked successfully"
     });
   } catch (error) {
     console.error("Error revoking API token:", error);
-    return NextResponse.json(
-      { error: "Failed to revoke API token" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to revoke API token', 500);
   }
 }
 
@@ -161,10 +147,7 @@ export async function PATCH(request: NextRequest) {
     const { id, isActive } = await request.json();
 
     if (!id || typeof isActive !== 'boolean') {
-      return NextResponse.json(
-        { error: "Token ID and status are required" },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Token ID and status are required', 400);
     }
 
     const updatedToken = await prisma.apiToken.update({
@@ -172,7 +155,7 @@ export async function PATCH(request: NextRequest) {
       data: { isActive },
     });
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       message: `API token ${isActive ? 'activated' : 'deactivated'} successfully`,
       token: {
         id: updatedToken.id,
@@ -181,9 +164,6 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error updating API token:", error);
-    return NextResponse.json(
-      { error: "Failed to update API token" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to update API token', 500);
   }
 }

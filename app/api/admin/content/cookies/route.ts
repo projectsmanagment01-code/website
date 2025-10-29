@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import jwt from "jsonwebtoken";
 import { getPageContent, updatePageContent } from "@/lib/page-content-service";
 
@@ -25,14 +26,14 @@ function verifyAuth(request: NextRequest): boolean {
 
 export async function GET(request: NextRequest) {
   if (!verifyAuth(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return errorResponseNoCache('Unauthorized', 401);
   }
 
   try {
     const content = await getPageContent('cookies');
     
     // Map to old format for compatibility
-    return NextResponse.json({
+    return jsonResponseNoCache({
       heroTitle: content.heroTitle || '',
       heroDescription: content.heroDescription || '',
       mainContent: content.content || '',
@@ -42,13 +43,13 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error loading cookies content from database:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
 
 export async function POST(request: NextRequest) {
   if (!verifyAuth(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return errorResponseNoCache('Unauthorized', 401);
   }
 
   try {
@@ -56,10 +57,7 @@ export async function POST(request: NextRequest) {
     
     // Validate required fields
     if (!body.heroTitle || !body.heroDescription || !body.mainContent) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Missing required fields', 400);
     }
 
     // Map from old format to new format
@@ -74,13 +72,13 @@ export async function POST(request: NextRequest) {
     await updatePageContent('cookies', pageData, 'admin');
     console.log("✅ Cookies content saved to database");
     
-    return NextResponse.json({ 
+    return jsonResponseNoCache({ 
       success: true, 
       message: "Cookies content updated successfully",
       content: { ...pageData, lastUpdated: new Date().toISOString() }
     });
   } catch (error) {
     console.error("Error saving cookies content to database:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return errorResponseNoCache('Internal server error', 500);
   }
 }

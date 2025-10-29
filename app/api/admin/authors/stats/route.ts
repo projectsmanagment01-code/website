@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { getAuthorStats } from '@/lib/author-service';
 
@@ -17,13 +18,10 @@ export async function GET(request: NextRequest) {
     }
 
     const stats = await getAuthorStats();
-    return NextResponse.json(stats);
+    return jsonResponseNoCache(stats);
 
   } catch (error) {
     console.error('❌ Error in GET /api/admin/authors/stats:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }

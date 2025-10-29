@@ -9,10 +9,12 @@ import BackToTop from "@/components/BackToTop";
 // Function to get home content for metadata
 async function getHomeContent() {
   try {
-    // Use API route for consistency - NO CACHE to get fresh admin updates
+    // Use ISR: Cache for 1 hour, with on-demand revalidation when admin updates
     const response = await fetch(`${process.env.VERCEL_URL || 'http://localhost:3000'}/api/content/home`, {
-      cache: 'no-store',
-      next: { revalidate: 0 }
+      next: { 
+        revalidate: 3600, // Cache for 1 hour
+        tags: ['home-content'] // Tag for on-demand revalidation
+      }
     });
     
     if (response.ok) {

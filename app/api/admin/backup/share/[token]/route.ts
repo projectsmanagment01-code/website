@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { BackupService } from '@/lib/backup/backup-service';
 import { BackupError } from '@/lib/backup/types';
 import jwt from 'jsonwebtoken';
@@ -19,13 +20,11 @@ export async function GET(
     try {
       decoded = jwt.verify(params.token, process.env.JWT_SECRET || 'fallback-secret');
     } catch (jwtError) {
-      return NextResponse.json(
-        {
+      return jsonResponseNoCache({
           success: false,
           error: 'Invalid or expired backup link'
         },
-        { status: 401 }
-      );
+        { status: 401 });
     }
 
     const backupId = decoded.backupId;
@@ -36,13 +35,11 @@ export async function GET(
     const backup = backups.find(b => b.id === backupId);
     
     if (!backup) {
-      return NextResponse.json(
-        {
+      return jsonResponseNoCache({
           success: false,
           error: 'Backup not found'
         },
-        { status: 404 }
-      );
+        { status: 404 });
     }
 
     // Get backup file path
@@ -59,13 +56,11 @@ export async function GET(
 
     // Check if file exists
     if (!await fs.pathExists(backupPath)) {
-      return NextResponse.json(
-        {
+      return jsonResponseNoCache({
           success: false,
           error: 'Backup file not found'
         },
-        { status: 404 }
-      );
+        { status: 404 });
     }
 
     // Read file and return as download
@@ -97,12 +92,10 @@ export async function GET(
     console.error('❌ Error accessing shared backup:', error);
     
     const statusCode = error instanceof BackupError ? 400 : 500;
-    return NextResponse.json(
-      {
+    return jsonResponseNoCache({
         success: false,
         error: error instanceof Error ? error.message : 'Failed to access shared backup'
       },
-      { status: statusCode }
-    );
+      { status: statusCode });
   }
 }

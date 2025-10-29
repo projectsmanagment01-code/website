@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -8,10 +9,7 @@ export async function GET(request: NextRequest) {
     // Verify authentication
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     // Get reCAPTCHA settings from database
@@ -44,13 +42,10 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(recaptchaSettings);
+    return jsonResponseNoCache(recaptchaSettings);
   } catch (error) {
     console.error("Get reCAPTCHA settings error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
 
@@ -60,10 +55,7 @@ export async function POST(request: NextRequest) {
     // Verify authentication
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const { enabled, siteKey, secretKey } = await request.json();
@@ -102,7 +94,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       message: "reCAPTCHA settings updated successfully",
       settings: {
         enabled,
@@ -112,9 +104,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Update reCAPTCHA settings error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }

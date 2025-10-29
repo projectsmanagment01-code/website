@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -7,14 +8,14 @@ export async function POST(request: NextRequest) {
     // Verify admin token
     const authResult = await verifyAdminToken(request);
     if (!authResult.success) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponseNoCache('Unauthorized', 401);
     }
 
     const body = await request.json();
     const { page } = body;
 
     if (!page) {
-      return NextResponse.json({ error: "Page parameter required" }, { status: 400 });
+      return errorResponseNoCache('Page parameter required', 400);
     }
 
     // Map page names to their public routes
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const routes = pageRoutes[page];
     if (!routes) {
-      return NextResponse.json({ error: "Invalid page" }, { status: 400 });
+      return errorResponseNoCache('Invalid page', 400);
     }
 
     // Revalidate the page(s)
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
       revalidatePath(routes);
     }
 
-    return NextResponse.json({ 
+    return jsonResponseNoCache({ 
       success: true, 
       message: `Page ${page} revalidated successfully`,
       routes: Array.isArray(routes) ? routes : [routes]
@@ -55,9 +56,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Error revalidating page:", error);
-    return NextResponse.json(
-      { error: "Failed to revalidate page" },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Failed to revalidate page', 500);
   }
 }
