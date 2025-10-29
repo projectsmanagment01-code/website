@@ -13,6 +13,7 @@ import AuthorList from './AuthorList';
 import AuthorForm from './AuthorForm';
 import { AuthorEntity } from '@/outils/types';
 import { refreshAfterChange } from '@/lib/revalidation-utils';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface AuthorStats {
   totalAuthors: number;
@@ -56,7 +57,7 @@ const AuthorManagement: React.FC = () => {
         url.searchParams.set('search', search);
       }
 
-      const response = await fetch(url, {
+      const response = await adminFetch(url.toString(), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -85,7 +86,7 @@ const AuthorManagement: React.FC = () => {
       
       if (!token) return;
 
-      const response = await fetch('/api/admin/authors/stats', {
+      const response = await adminFetch('/api/admin/authors/stats', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -105,7 +106,7 @@ const AuthorManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token');
       
-      const response = await fetch('/api/admin/authors', {
+      const response = await adminFetch('/api/admin/authors', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -135,7 +136,7 @@ const AuthorManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token');
       
-      const response = await fetch(`/api/admin/authors/${id}`, {
+      const response = await adminFetch(`/api/admin/authors/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -169,7 +170,7 @@ const AuthorManagement: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token');
       
-      const response = await fetch(`/api/admin/authors/${id}`, {
+      const response = await adminFetch(`/api/admin/authors/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

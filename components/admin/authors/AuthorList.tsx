@@ -15,6 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { AuthorEntity } from '@/outils/types';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface AuthorWithCount extends AuthorEntity {
   recipeCount: number;
@@ -61,7 +62,7 @@ export default function AuthorList({
         params.append('search', search);
       }
 
-      const response = await fetch(`/api/admin/authors?${params}`, {
+      const response = await adminFetch(`/api/admin/authors?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -99,7 +100,7 @@ export default function AuthorList({
         throw new Error('No admin token found');
       }
 
-      const response = await fetch(`/api/admin/authors/${authorId}`, {
+      const response = await adminFetch(`/api/admin/authors/${authorId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

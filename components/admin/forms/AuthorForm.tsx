@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Author } from "@/outils/types";
 import { ChevronDown, User, UserPlus, X } from "lucide-react";
+import { adminFetch } from "@/lib/admin-fetch";
 
 interface AuthorEntity {
   id: string;
@@ -58,7 +59,7 @@ export const AuthorForm: React.FC<AuthorFormProps> = ({
     try {
       setLoading(true);
       const token = localStorage.getItem('admin_token');
-      const response = await fetch('/api/admin/authors?limit=1000', {
+      const response = await adminFetch('/api/admin/authors?limit=1000', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
