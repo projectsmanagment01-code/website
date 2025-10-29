@@ -252,9 +252,23 @@ export async function updateAuthor(id: string, data: UpdateAuthorData): Promise<
       }
     }
 
+    console.log('🔧 Updating author with data:', { 
+      id, 
+      tags: updateData.tags,
+      allUpdateData: JSON.stringify(updateData)
+    });
+
     const author = await prisma.author.update({
       where: { id },
       data: updateData
+    });
+
+    console.log('✅ Author updated in DB:', {
+      id: author.id,
+      name: author.name,
+      tags: author.tags,
+      tagsType: typeof author.tags,
+      tagsIsArray: Array.isArray(author.tags)
     });
 
     return {

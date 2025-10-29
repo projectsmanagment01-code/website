@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { getAuthorByCategory } from '@/lib/author-category-helper';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
+
+// Disable caching completely
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 /**
  * GET /api/admin/authors/by-category?categoryId=xxx
@@ -19,25 +24,19 @@ export async function GET(request: NextRequest) {
     const categoryId = searchParams.get('categoryId');
 
     if (!categoryId) {
-      return NextResponse.json(
-        { error: 'Category ID is required. Use ?categoryId=xxx' },
-        { status: 400 }
-      );
+      return errorResponseNoCache('Category ID is required. Use ?categoryId=xxx', 400);
     }
 
     const result = await getAuthorByCategory(categoryId);
 
     if (!result.author) {
-      return NextResponse.json(
-        { 
-          error: result.message || 'No authors available',
-          matchMethod: result.matchMethod
-        },
-        { status: 404 }
-      );
+      return jsonResponseNoCache({ 
+        error: result.message || 'No authors available',
+        matchMethod: result.matchMethod
+      }, 404);
     }
 
-    return NextResponse.json({
+    return jsonResponseNoCache({
       authorId: result.author.id,
       author: {
         id: result.author.id,
@@ -56,9 +55,6 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in by-category API:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return errorResponseNoCache('Internal server error', 500);
   }
 }
