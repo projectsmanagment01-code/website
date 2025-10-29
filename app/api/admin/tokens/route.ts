@@ -1,35 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { verify } from "jsonwebtoken";
+import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 import crypto from "crypto";
 
 const prisma = new PrismaClient();
-
-interface JwtPayload {
-  username: string;
-  role: string;
-}
-
-// Utility function to verify admin authorization
-async function verifyAdminAuth(request: NextRequest) {
-  try {
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return null;
-    }
-
-    const token = authHeader.substring(7);
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new Error("JWT_SECRET is not configured");
-    }
-
-    const payload = verify(token, secret) as JwtPayload;
-    return payload;
-  } catch (error) {
-    return null;
-  }
-}
 
 // Generate secure API token
 function generateApiToken(): string {
@@ -57,9 +31,9 @@ function calculateExpirationDate(duration: string): Date {
 // GET - Fetch all API tokens
 export async function GET(request: NextRequest) {
   try {
-    const auth = await verifyAdminAuth(request);
-    if (!auth) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const tokens = await prisma.apiToken.findMany({
@@ -96,15 +70,9 @@ export async function GET(request: NextRequest) {
 // POST - Create new API token
 export async function POST(request: NextRequest) {
   try {
-    // Skip authentication in development or if SKIP_AUTH is true
-    const skipAuth = process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH === 'true';
-    let auth = null;
-    
-    if (!skipAuth) {
-      auth = await verifyAdminAuth(request);
-      if (!auth) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const { name, duration, description } = await request.json();
@@ -124,7 +92,7 @@ export async function POST(request: NextRequest) {
         name,
         token,
         expiresAt,
-        createdBy: auth?.username || 'admin',
+        createdBy: authCheck.payload?.email || authCheck.payload?.name || 'admin',
         description: description || null,
       },
     });
@@ -151,9 +119,9 @@ export async function POST(request: NextRequest) {
 // DELETE - Revoke API token
 export async function DELETE(request: NextRequest) {
   try {
-    const auth = await verifyAdminAuth(request);
-    if (!auth) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const { searchParams } = new URL(request.url);
@@ -185,9 +153,9 @@ export async function DELETE(request: NextRequest) {
 // PATCH - Update token status (activate/deactivate)
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await verifyAdminAuth(request);
-    if (!auth) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const { id, isActive } = await request.json();

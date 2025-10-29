@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 import { getSiteInfo, updateSiteInfo } from "@/lib/site-config-service";
 
 /**
  * GET /api/admin/content/site
  * Returns site configuration from database
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
+    }
+
     const siteInfo = await getSiteInfo();
     return NextResponse.json(siteInfo);
   } catch (error) {
@@ -26,15 +32,15 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const token = await auth.getToken(request);
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
     }
 
     const data = await request.json();
     
     // Save to database
-    await updateSiteInfo(data, token.sub?.toString() || 'admin');
+    await updateSiteInfo(data, authCheck.payload?.email || authCheck.payload?.sub?.toString() || 'admin');
     
     console.log("✅ Site settings saved successfully to database");
     

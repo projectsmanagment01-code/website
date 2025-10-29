@@ -5,10 +5,17 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { getAuthorStats } from '@/lib/author-service';
 
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
+    }
+
     const stats = await getAuthorStats();
     return NextResponse.json(stats);
 

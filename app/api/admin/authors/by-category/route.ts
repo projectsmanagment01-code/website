@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { getAuthorByCategory } from '@/lib/author-category-helper';
 
 /**
@@ -8,6 +9,12 @@ import { getAuthorByCategory } from '@/lib/author-category-helper';
  */
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const categoryId = searchParams.get('categoryId');
 

@@ -1,6 +1,7 @@
 const dynamic = "force-static";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 
 /**
  * POST /api/admin/revalidate
@@ -12,12 +13,25 @@ export async function POST(request: NextRequest) {
     const { admin_secret, action, recipe_slug, recipe_category, paths, tags } =
       body;
 
-    // Verify admin secret
-    const expectedSecret =
-      process.env.ADMIN_SECRET || process.env.REVALIDATE_SECRET;
-    if (admin_secret !== expectedSecret) {
+    // Support both modern auth (JWT/API tokens) and legacy admin_secret
+    let isAuthorized = false;
+    
+    // Try modern auth first
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (authCheck.authorized) {
+      isAuthorized = true;
+    } else {
+      // Fall back to admin_secret for backward compatibility
+      const expectedSecret =
+        process.env.ADMIN_SECRET || process.env.REVALIDATE_SECRET;
+      if (admin_secret === expectedSecret) {
+        isAuthorized = true;
+      }
+    }
+
+    if (!isAuthorized) {
       return NextResponse.json(
-        { message: "Invalid admin secret" },
+        { message: "Unauthorized - Invalid credentials" },
         { status: 401 }
       );
     }

@@ -1,9 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import fs from 'fs-extra';
 import path from 'path';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Check authentication - this is a sensitive debug endpoint
+    const authCheck = await checkHybridAuthOrRespond(request);
+    if (!authCheck.authorized) {
+      return authCheck.response;
+    }
+
     const backupDir = path.join(process.cwd(), 'backups');
     
     // Ensure backup directory exists
