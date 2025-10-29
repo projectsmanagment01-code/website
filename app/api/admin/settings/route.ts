@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { revalidateTag } from "next/cache";
-import { auth } from "@/lib/auth";
+import { verifyAuth } from "@/lib/api-auth";
 import {
   getAdminSettings,
   saveAdminSettings,
@@ -25,9 +25,9 @@ export async function GET() {
 // POST - Update settings
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const token = await auth.getToken(request);
-    if (!token) {
+    // Check authentication (supports both JWT and API tokens)
+    const authResult = await verifyAuth(request);
+    if (!authResult) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -157,9 +157,9 @@ export async function POST(request: NextRequest) {
 // PUT - Replace entire settings (alternative to POST)
 export async function PUT(request: NextRequest) {
   try {
-    // Check authentication
-    const token = await auth.getToken(request);
-    if (!token) {
+    // Check authentication (supports both JWT and API tokens)
+    const authResult = await verifyAuth(request);
+    if (!authResult) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -228,9 +228,9 @@ export async function PUT(request: NextRequest) {
 // PATCH - Partial update settings (for specific fields like aboutPageContent)
 export async function PATCH(request: NextRequest) {
   try {
-    // Check authentication
-    const token = await auth.getToken(request);
-    if (!token) {
+    // Check authentication (supports both JWT and API tokens)
+    const authResult = await verifyAuth(request);
+    if (!authResult) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -245,8 +245,13 @@ export async function PATCH(request: NextRequest) {
       ...body,
     };
 
+    // Extract email from auth payload
+    const updatedBy = authResult.type === 'jwt' 
+      ? (authResult.payload as any).email 
+      : (authResult.payload as any).createdBy;
+
     // Save updated settings
-    const success = await saveAdminSettings(updatedSettings as AdminSettingsData, token.email);
+    const success = await saveAdminSettings(updatedSettings as AdminSettingsData, updatedBy);
 
     if (!success) {
       return NextResponse.json(

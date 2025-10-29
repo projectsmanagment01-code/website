@@ -241,3 +241,37 @@ model Media {
   
   @@map("media")
 }
+
+// Ad Management System
+model Ad {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  placement   String    // header, sidebar, footer, inline
+  active      Boolean   @default(true)
+  adCode      String    @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expiresAt   DateTime?
+
+  @@map("ads")
+}
+
+// Internal Link Suggestions for SEO
+model InternalLinkSuggestion {
+  id            String    @id @default(cuid())
+  sourceRecipeId String
+  targetRecipeId String?
+  sourceTitle   String?
+  targetTitle   String?
+  suggestedText String?
+  linkType      String?   // "related", "similar", "ingredient", "author"
+  status        String    @default("pending") // pending, approved, rejected, applied
+  confidence    Float?    // 0-1 confidence score
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("internal_link_suggestions")
+  @@index([sourceRecipeId])
+  @@index([status])
+}
