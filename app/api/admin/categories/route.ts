@@ -3,14 +3,24 @@
  * 
  * GET  /api/admin/categories - List all categories with pagination
  * POST /api/admin/categories - Create new category
+ * 
+ * Cache Strategy:
+ * - Full Route Cache: DISABLED (dynamic = 'force-dynamic')
+ * - Data Cache: DISABLED (revalidate = 0, fetchCache = 'force-no-store')
+ * - Router Cache: CLEARED via revalidatePath after mutations
+ * - HTTP Cache: DISABLED via aggressive no-cache headers
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createCategory, getCategoriesPaginated, searchCategories } from '@/lib/category-service-new';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
+import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
+import { revalidateAdminPaths } from '@/lib/cache-busting';
 
+// Aggressive cache-busting configuration (per Next.js docs)
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(request: NextRequest) {
   // Check authentication (supports both JWT and API tokens)
@@ -98,24 +108,22 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Category created: ${name} (ID: ${category.id})`);
 
-    return NextResponse.json({
+    // CRITICAL: Revalidate cache after mutation
+    await revalidateAdminPaths();
+
+    return jsonResponseNoCache({
       message: 'Category created successfully',
       category
-    }, { status: 201 });
+    }, 201);
 
   } catch (error) {
     console.error('❌ Error in POST /api/admin/categories:', error);
     
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return errorResponseNoCache(error.message, 400);
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    return errorResponseNoCache('Internal server error', 500
     );
   }
 }

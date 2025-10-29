@@ -25,6 +25,19 @@ export async function getAuthorIdByCategory(categoryId: string): Promise<string 
 
     // PRIORITY 1: Find authors who have this category in their tags
     // Check for: category ID, category name, or category slug
+    console.log('🔍 Searching for author with tags matching:', {
+      categoryId,
+      categoryName: category.name,
+      categorySlug: category.slug,
+      searchTerms: [
+        categoryId,
+        category.name,
+        category.slug,
+        category.name.toLowerCase(),
+        category.slug.toLowerCase()
+      ]
+    });
+
     const authorByTag = await prisma.author.findFirst({
       where: {
         OR: [
@@ -41,14 +54,22 @@ export async function getAuthorIdByCategory(categoryId: string): Promise<string 
         }
       },
       select: {
-        id: true
+        id: true,
+        name: true,
+        tags: true
       }
     });
 
     if (authorByTag) {
-      console.log(`Found author by tag for category ${category.name}:`, authorByTag.id);
+      console.log(`✅ Found author by tag for category ${category.name}:`, {
+        authorId: authorByTag.id,
+        authorName: authorByTag.name,
+        authorTags: authorByTag.tags
+      });
       return authorByTag.id;
     }
+    
+    console.log(`❌ No author found by tag for category ${category.name}`);
 
     // PRIORITY 2: Find the author with the most recipes in this category
     const authorWithRecipes = await prisma.recipe.groupBy({
@@ -123,6 +144,23 @@ export async function getAuthorByCategory(categoryId: string) {
       select: { id: true, name: true, tags: true }
     });
     console.log('📋 All authors with tags:', JSON.stringify(allAuthors, null, 2));
+
+    // DEBUG: Test each condition individually
+    const testQueries = [
+      { condition: 'by ID', query: { tags: { has: categoryId } } },
+      { condition: 'by name', query: { tags: { has: category.name } } },
+      { condition: 'by slug', query: { tags: { has: category.slug } } },
+      { condition: 'by name (lowercase)', query: { tags: { has: category.name.toLowerCase() } } },
+      { condition: 'by slug (lowercase)', query: { tags: { has: category.slug.toLowerCase() } } },
+    ];
+
+    for (const test of testQueries) {
+      const result = await prisma.author.findFirst({
+        where: test.query,
+        select: { id: true, name: true, tags: true }
+      });
+      console.log(`  Testing ${test.condition}:`, result ? `MATCH (${result.name})` : 'NO MATCH');
+    }
 
     // Check tag-based match (ID, name, or slug)
     const authorByTag = await prisma.author.findFirst({

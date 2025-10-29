@@ -1,38 +1,40 @@
 /**
  * API Response Helpers
  * 
- * Utilities for creating consistent API responses with proper cache headers
+ * AGGRESSIVE cache-busting utilities based on Next.js official documentation
+ * Prevents caching at ALL layers: Full Route Cache, Data Cache, Router Cache, HTTP Cache
+ * 
+ * Based on: https://nextjs.org/docs/app/guides/caching
  */
 
 import { NextResponse } from 'next/server';
+import { createNoCacheHeaders } from './cache-busting';
 
 /**
- * No-cache headers for admin APIs
- * Prevents aggressive browser caching of dynamic data
- */
-export const NO_CACHE_HEADERS = {
-  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-  'Pragma': 'no-cache',
-  'Expires': '0'
-};
-
-/**
- * Create a JSON response with no-cache headers
- * Use this for all admin API responses to prevent stale data
+ * Create a JSON response with AGGRESSIVE no-cache headers
+ * Use for ALL admin API responses to prevent stale data
+ * 
+ * @param data - Data to return in response
+ * @param status - HTTP status code (default: 200)
+ * @returns NextResponse with aggressive no-cache headers
  */
 export function jsonResponseNoCache(data: any, status: number = 200): NextResponse {
-  return NextResponse.json(data, {
+  const headers = new Headers(createNoCacheHeaders());
+  headers.set('Content-Type', 'application/json; charset=utf-8');
+  
+  return new NextResponse(JSON.stringify(data), {
     status,
-    headers: NO_CACHE_HEADERS
+    headers
   });
 }
 
 /**
  * Create an error response with no-cache headers
+ * 
+ * @param error - Error message
+ * @param status - HTTP status code (default: 500)
+ * @returns NextResponse with error and no-cache headers
  */
 export function errorResponseNoCache(error: string, status: number = 500): NextResponse {
-  return NextResponse.json({ error }, {
-    status,
-    headers: NO_CACHE_HEADERS
-  });
+  return jsonResponseNoCache({ error }, status);
 }
