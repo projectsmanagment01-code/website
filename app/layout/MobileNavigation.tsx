@@ -59,8 +59,8 @@ export default function MobileNavigation({ mobileNavigationItems }: MobileNaviga
                   title={item.title}
                   className={`flex items-center gap-x-3 px-4 py-3 rounded-md transition-colors text-base ${
                     isActive(item.href)
-                      ? "bg-gray-100 text-black font-medium"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-orange-700"
+                      ? "bg-gray-100 text-black font-bold"
+                      : "text-gray-700 font-bold hover:bg-gray-50 hover:text-orange-700"
                   }`}
                   onClick={handleMobileMenuClose}
                 >

@@ -36,7 +36,7 @@ export default async function Header({ className }: HeaderProps) {
                 <Link
                   href={item.href}
                   title={item.title}
-                  className="relative text-gray-700 font-medium text-sm uppercase tracking-wide transition-all duration-300 hover:text-orange-700 hover:scale-105"
+                  className="relative text-gray-700 font-bold text-sm uppercase tracking-wide transition-all duration-300 hover:text-orange-700 hover:scale-105"
                 >
                   {item.label}
                 </Link>
