@@ -441,7 +441,11 @@ export default function AutomationDashboard() {
               </div>
             ) : (
               recentJobs.map((job) => (
-                <div key={job.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                <Link
+                  key={job.id}
+                  href={`/admin/automation/jobs/${job.id}`}
+                  className="block px-4 py-3 hover:bg-gray-50 transition-colors"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1.5">
@@ -511,7 +515,7 @@ export default function AutomationDashboard() {
                       <ChevronRight className="w-4 h-4 text-gray-400" />
                     </div>
                   </div>
-                </div>
+                </Link>
               ))
             )}
           </div>

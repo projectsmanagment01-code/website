@@ -5,6 +5,7 @@
 
 import { WorkflowContext } from '../types/workflow.types';
 import { logger } from '../utils/logger';
+import { executeStep } from '../utils/step-logger';
 
 // Import workflow steps
 import { fetchRecipeStep } from './steps/01-fetch-recipe';
@@ -65,8 +66,105 @@ export async function executeWorkflow(
         automationId: context.automationId,
       });
 
-      // Execute step
-      await step.execute(context);
+      // Execute step with logging
+      await executeStep(
+        context.automationId,
+        context.currentStep,
+        step.name,
+        {
+          sheetId: context.config.sheetId,
+          model: context.config.geminiFlashModel,
+          enablePinterest: context.config.enablePinterest,
+          enableIndexing: context.config.enableIndexing,
+        },
+        {
+          recipeRowNumber: context.recipeRowNumber,
+          recipeTitle: context.recipe?.title,
+          currentStep: context.currentStep,
+        },
+        async () => {
+          await step.execute(context);
+        },
+        // Extract relevant output data based on step
+        () => {
+          switch (context.currentStep) {
+            case 1: // Fetch Recipe
+              return {
+                recipeTitle: context.recipe?.title,
+                category: context.recipe?.category,
+                author: context.recipe?.authorName,
+                ingredientsCount: context.recipe?.ingredients?.length,
+                instructionsCount: context.recipe?.instructions?.length,
+              };
+            case 2: // Generate SEO
+              return {
+                seoTitle: context.seoData?.seoTitle,
+                seoDescription: context.seoData?.seoDescription,
+                seoKeyword: context.seoData?.seoKeyword,
+              };
+            case 3: // Generate Prompts
+              return {
+                promptsGenerated: context.imagePrompts ? Object.keys(context.imagePrompts).length : 0,
+                hasFeaturePrompt: !!context.imagePrompts?.image_1_feature,
+                hasIngredientsPrompt: !!context.imagePrompts?.image_2_ingredients,
+              };
+            case 4: // Download Reference
+              return {
+                referenceImagePath: context.referenceImage,
+                imageUrl: context.recipe?.imageUrl,
+              };
+            case 5: // Generate Images
+              return {
+                imagesGenerated: context.generatedImages ? Object.keys(context.generatedImages).length : 0,
+                hasFeatureImage: !!context.generatedImages?.featureImage,
+                hasIngredientsImage: !!context.generatedImages?.ingredientsImage,
+                hasCookingImage: !!context.generatedImages?.cookingImage,
+                hasFinalDishImage: !!context.generatedImages?.finalDishImage,
+              };
+            case 6: // Upload Images
+              return {
+                featureImageUrl: context.uploadedImages?.featureImage,
+                ingredientsImageUrl: context.uploadedImages?.ingredientsImage,
+                cookingImageUrl: context.uploadedImages?.cookingImage,
+                finalDishImageUrl: context.uploadedImages?.finalDishImage,
+              };
+            case 7: // Update Sheet Images
+              return {
+                sheetUpdated: true,
+                imagesUpdated: context.uploadedImages ? Object.keys(context.uploadedImages).length : 0,
+              };
+            case 8: // Generate Article
+              return {
+                articleLength: context.article?.content?.length || 0,
+                hasArticle: !!context.article,
+              };
+            case 9: // Publish Recipe
+              return {
+                recipeId: context.publishedRecipe?.recipeId,
+                slug: context.publishedRecipe?.slug,
+                fullUrl: context.publishedRecipe?.fullUrl,
+                published: !!context.publishedRecipe,
+              };
+            case 10: // Update Sheet Post
+              return {
+                postLinkUpdated: true,
+                recipeId: context.publishedRecipe?.recipeId,
+              };
+            case 11: // Pinterest
+              return {
+                sentToPinterest: true,
+                recipeUrl: context.publishedRecipe?.fullUrl,
+              };
+            case 12: // Indexing
+              return {
+                indexingRequested: true,
+                recipeUrl: context.publishedRecipe?.fullUrl,
+              };
+            default:
+              return { stepCompleted: true };
+          }
+        }
+      );
 
       // Call progress callback if provided
       if (onProgress) {

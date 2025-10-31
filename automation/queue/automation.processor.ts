@@ -47,6 +47,7 @@ export async function processAutomationJob(
       data: {
         status: 'PROCESSING',
         currentStep: 1,
+        error: '📝 Step 1/12: Fetching Google Sheet data...'
       },
     });
 

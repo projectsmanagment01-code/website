@@ -360,3 +360,38 @@ model AutomationSchedule {
 
   @@map("automation_schedule")
 }
+
+// Automation Step Logs - Track each step execution
+model AutomationStepLog {
+  id              String    @id @default(cuid())
+  automationId    String    // References RecipeAutomation.id
+  stepNumber      Int       // 1-12
+  stepName        String    // "Fetch Google Sheet", "Generate SEO Title", etc.
+  status          String    // PENDING, RUNNING, SUCCESS, FAILED
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  durationMs      Int?      // Duration in milliseconds
+  
+  // Data passed in/out of step
+  inputData       Json?     // What went into this step
+  outputData      Json?     // What came out of this step
+  
+  // Configuration used for this step
+  config          Json?     // Prompt, model, image settings, etc.
+  
+  // Error details
+  error           String?   @db.Text
+  stackTrace      String?   @db.Text
+  
+  // Cost tracking (for AI steps)
+  tokensUsed      Int?
+  costUsd         Decimal?  @db.Decimal(10, 6)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([automationId])
+  @@index([stepNumber])
+  @@index([status])
+  @@map("automation_step_logs")
+}
