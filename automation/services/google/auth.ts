@@ -12,7 +12,7 @@ export async function getGoogleAuth() {
   }
 
   const { google } = await import('googleapis');
-  const credentials = getGoogleCredentials();
+  const credentials = await getGoogleCredentials();
 
   const auth = new google.auth.GoogleAuth({
     credentials,

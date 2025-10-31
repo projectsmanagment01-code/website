@@ -285,14 +285,12 @@ export default function AutomationSettingsPage() {
                     value={settings.googleCredentialsJson || ''}
                     onChange={(e) => setSettings({ ...settings, googleCredentialsJson: e.target.value })}
                     placeholder='{"type":"service_account","project_id":"...","private_key":"..."}'
-                    rows={showGoogleCreds ? 8 : 3}
-                    className={`w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 font-mono ${!showGoogleCreds ? 'blur-sm select-none' : ''}`}
-                    readOnly={!showGoogleCreds}
-                    style={!showGoogleCreds ? { userSelect: 'none' } : undefined}
+                    rows={8}
+                    className={`w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 font-mono ${!showGoogleCreds ? 'blur-sm' : ''}`}
                   />
                   {!showGoogleCreds && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="text-xs text-gray-400 font-semibold">Click eye icon to reveal</span>
+                      <span className="text-xs text-gray-400 font-semibold">Click eye icon to reveal • Field is editable</span>
                     </div>
                   )}
                 </div>

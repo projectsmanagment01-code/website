@@ -85,11 +85,60 @@ export function validateAutomationEnv() {
 }
 
 /**
- * Get Google Service Account credentials
- * Decodes from base64 if needed
+ * Get automation settings from database
+ * Caches the result for performance
  */
-export function getGoogleCredentials() {
-  const encoded = process.env.GOOGLE_SERVICE_ACCOUNT!;
+let cachedSettings: any = null;
+let cacheTime = 0;
+const CACHE_TTL = 60000; // 1 minute
+
+async function getSettingsFromDB() {
+  const now = Date.now();
+  
+  // Return cached settings if still valid
+  if (cachedSettings && (now - cacheTime) < CACHE_TTL) {
+    return cachedSettings;
+  }
+  
+  try {
+    const { getAutomationSettings } = await import('@/lib/automation-settings');
+    const settings = await getAutomationSettings();
+    
+    if (settings) {
+      cachedSettings = settings;
+      cacheTime = now;
+      return settings;
+    }
+  } catch (error) {
+    console.warn('Failed to load settings from database', error);
+  }
+  
+  return null;
+}
+
+/**
+ * Get Google Service Account credentials
+ * Loads from database settings or falls back to environment variables
+ */
+export async function getGoogleCredentials() {
+  // Try to load from database first
+  const settings = await getSettingsFromDB();
+  
+  if (settings?.googleCredentialsJson) {
+    try {
+      // Parse the JSON string
+      return JSON.parse(settings.googleCredentialsJson);
+    } catch (error) {
+      console.error('Failed to parse Google credentials JSON from database', error);
+    }
+  }
+  
+  // Fall back to environment variables
+  const encoded = process.env.GOOGLE_SERVICE_ACCOUNT;
+  
+  if (!encoded) {
+    throw new Error('Google Service Account credentials not found in database or environment variables');
+  }
   
   try {
     // Try to parse as JSON first (in case it's not base64)
@@ -99,4 +148,26 @@ export function getGoogleCredentials() {
     const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
     return JSON.parse(decoded);
   }
+}
+
+/**
+ * Get Google Sheet ID
+ * Loads from database settings or falls back to environment variables
+ */
+export async function getGoogleSheetId(): Promise<string> {
+  // Try to load from database first
+  const settings = await getSettingsFromDB();
+  
+  if (settings?.googleSheetId) {
+    return settings.googleSheetId;
+  }
+  
+  // Fall back to environment variable
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  
+  if (!sheetId) {
+    throw new Error('Google Sheet ID not found in database or environment variables');
+  }
+  
+  return sheetId;
 }

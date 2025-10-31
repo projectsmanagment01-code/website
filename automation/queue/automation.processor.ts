@@ -51,6 +51,10 @@ export async function processAutomationJob(
       },
     });
 
+    // Load settings from database
+    const { getAutomationSettings } = await import('@/lib/automation-settings');
+    const settings = await getAutomationSettings();
+
     // Initialize workflow context
     const context: WorkflowContext = {
       automationId,
@@ -65,7 +69,7 @@ export async function processAutomationJob(
       article: null,
       publishedRecipe: undefined,
       config: {
-        sheetId: process.env.GOOGLE_SHEET_ID || '',
+        sheetId: settings?.googleSheetId || process.env.GOOGLE_SHEET_ID || '',
         promptSheetRange: 'Sheet1!A:Z',
         statusColumn: 'A',
         imageColumns: {
@@ -78,10 +82,10 @@ export async function processAutomationJob(
         recipeIdColumn: 'G',
         pinterestDataColumn: 'H',
         indexingStatusColumn: 'I',
-        enablePinterest: false,
-        enableIndexing: true,
-        geminiFlashModel: 'gemini-2.0-flash-exp',
-        geminiProModel: 'gemini-2.0-flash-thinking-exp-01-21',
+        enablePinterest: settings?.enablePinterest || false,
+        enableIndexing: settings?.enableIndexing || true,
+        geminiFlashModel: settings?.geminiFlashModel || 'gemini-2.0-flash-exp',
+        geminiProModel: settings?.geminiProModel || 'gemini-2.0-flash-thinking-exp-01-21',
       },
     };
 
