@@ -4,7 +4,7 @@
  */
 
 import { Job } from 'bullmq';
-import { PrismaClient, AutomationStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
 import { AutomationJobData, AutomationJobResult } from './automation.queue';
 import { executeWorkflow } from '../workflows/main-workflow';
@@ -35,10 +35,6 @@ export async function processAutomationJob(
     // Fetch automation record from database
     const automation = await prisma.recipeAutomation.findUnique({
       where: { id: automationId },
-      include: {
-        config: true,
-        images: true,
-      },
     });
 
     if (!automation) {
@@ -49,8 +45,8 @@ export async function processAutomationJob(
     await prisma.recipeAutomation.update({
       where: { id: automationId },
       data: {
-        status: AutomationStatus.PROCESSING,
-        startedAt: new Date(),
+        status: 'PROCESSING',
+        currentStep: 1,
       },
     });
 
@@ -59,39 +55,43 @@ export async function processAutomationJob(
       automationId,
       recipeRowNumber,
       currentStep: 1,
-      totalSteps: 11,
+      totalSteps: 12,
       recipe: null,
       prompts: null,
       referenceImagePath: null,
       images: null,
-      uploadedImages: null,
+      uploadedImages: undefined,
       article: null,
-      publishedRecipe: null,
+      publishedRecipe: undefined,
       config: {
-        sheetId: automation.config.sheetId,
-        promptSheetRange: automation.config.promptSheetRange || 'Sheet1!A:Z',
-        statusColumn: automation.config.statusColumn || 'A',
+        sheetId: process.env.GOOGLE_SHEET_ID || '',
+        promptSheetRange: 'Sheet1!A:Z',
+        statusColumn: 'A',
         imageColumns: {
-          featureImage: automation.config.featureImageColumn || 'B',
-          ingredientsImage: automation.config.ingredientsImageColumn || 'C',
-          cookingImage: automation.config.cookingImageColumn || 'D',
-          finalDishImage: automation.config.finalDishImageColumn || 'E',
+          featureImage: 'B',
+          ingredientsImage: 'C',
+          cookingImage: 'D',
+          finalDishImage: 'E',
         },
-        postLinkColumn: automation.config.postLinkColumn || 'F',
-        recipeIdColumn: automation.config.recipeIdColumn || 'G',
-        pinterestDataColumn: automation.config.pinterestDataColumn || 'H',
-        indexingStatusColumn: automation.config.indexingStatusColumn || 'I',
-        enablePinterest: automation.config.enablePinterest,
-        enableIndexing: automation.config.enableIndexing,
-        geminiFlashModel: automation.config.geminiFlashModel || 'gemini-2.0-flash-exp',
-        geminiProModel: automation.config.geminiProModel || 'gemini-1.5-pro',
+        postLinkColumn: 'F',
+        recipeIdColumn: 'G',
+        pinterestDataColumn: 'H',
+        indexingStatusColumn: 'I',
+        enablePinterest: false,
+        enableIndexing: true,
+        geminiFlashModel: 'gemini-2.0-flash-exp',
+        geminiProModel: 'gemini-2.0-flash-thinking-exp-01-21',
       },
     };
 
     // Execute workflow with progress updates
-    const result = await executeWorkflow(context, async (step, total) => {
+    const result = await executeWorkflow(context, async (step: number, total: number) => {
       const progress = Math.round((step / total) * 100);
       await job.updateProgress(progress);
+      await prisma.recipeAutomation.update({
+        where: { id: automationId },
+        data: { currentStep: step },
+      });
       logger.debug(`Job ${job.id} progress: ${progress}%`, { step, total });
     });
 
@@ -99,10 +99,11 @@ export async function processAutomationJob(
     await prisma.recipeAutomation.update({
       where: { id: automationId },
       data: {
-        status: AutomationStatus.COMPLETED,
+        status: 'SUCCESS',
         recipeId: result.recipeId || null,
-        recipeUrl: result.recipeUrl || null,
+        postLink: result.recipeUrl || null,
         completedAt: new Date(),
+        currentStep: 12,
       },
     });
 
@@ -124,9 +125,9 @@ export async function processAutomationJob(
     await prisma.recipeAutomation.update({
       where: { id: automationId },
       data: {
-        status: AutomationStatus.FAILED,
+        status: 'FAILED',
         error: error instanceof Error ? error.message : 'Unknown error',
-        failedAt: new Date(),
+        completedAt: new Date(),
       },
     });
 
@@ -147,19 +148,6 @@ export async function onJobCompleted(
     recipeId: result.recipeId,
     recipeUrl: result.recipeUrl,
   });
-
-  // Log to database
-  await prisma.automationLog.create({
-    data: {
-      automationId: result.automationId,
-      level: 'INFO',
-      message: 'Automation completed successfully',
-      metadata: {
-        recipeId: result.recipeId,
-        recipeUrl: result.recipeUrl,
-      },
-    },
-  });
 }
 
 /**
@@ -175,21 +163,6 @@ export async function onJobFailed(
     attemptsMade: job.attemptsMade,
     maxAttempts: job.opts.attempts,
   });
-
-  // Log to database
-  await prisma.automationLog.create({
-    data: {
-      automationId: job.data.automationId,
-      level: 'ERROR',
-      message: `Automation failed: ${error.message}`,
-      metadata: {
-        error: error.message,
-        stack: error.stack,
-        attemptsMade: job.attemptsMade,
-        maxAttempts: job.opts.attempts,
-      },
-    },
-  });
 }
 
 /**
@@ -201,18 +174,7 @@ export async function onJobStalled(
 ): Promise<void> {
   logger.warn(`Job ${jobId} stalled`, {
     automationId: data.automationId,
-  });
-
-  // Log to database
-  await prisma.automationLog.create({
-    data: {
-      automationId: data.automationId,
-      level: 'WARN',
-      message: `Job ${jobId} stalled - may be stuck or taking too long`,
-      metadata: {
-        jobId,
-      },
-    },
+    jobId,
   });
 }
 

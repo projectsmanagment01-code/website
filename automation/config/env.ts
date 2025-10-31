@@ -11,7 +11,8 @@ export const automationEnv = {
 
   // Redis (for BullMQ)
   redis: {
-    host: process.env.REDIS_HOST || 'localhost',
+    // Auto-detect: Use 'redis' in Docker, 'localhost' locally
+    host: process.env.REDIS_HOST || (process.env.NODE_ENV === 'production' ? 'redis' : 'localhost'),
     port: parseInt(process.env.REDIS_PORT || '6379'),
     password: process.env.REDIS_PASSWORD,
     db: parseInt(process.env.REDIS_DB || '0'),
