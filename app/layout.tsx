@@ -9,6 +9,9 @@ import { getAdminSettings } from "@/lib/admin-settings";
 import { Fragment } from "react";
 import { headers } from "next/headers";
 
+// Auto-start automation worker on server boot
+import '@/lib/worker-init';
+
 // ISR: Revalidate every hour, but allow on-demand revalidation via cache tags
 export const revalidate = 3600; // 1 hour
 
