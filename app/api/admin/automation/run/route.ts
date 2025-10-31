@@ -14,24 +14,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse request body
-    const body = await request.json();
-    const { rowNumber, title } = body;
-
-    if (!rowNumber || typeof rowNumber !== "number") {
-      return NextResponse.json(
-        { error: "Validation Error", message: "Row number is required and must be a number" },
-        { status: 400 }
-      );
-    }
-
-    // Start automation
-    const jobId = await startAutomation(rowNumber, title);
+    // Start automation (will automatically find eligible row)
+    const jobId = await startAutomation();
 
     return NextResponse.json({
       success: true,
       jobId,
-      message: `Automation started for row ${rowNumber}`,
+      message: "Automation started - finding eligible recipe automatically",
     });
   } catch (error) {
     console.error("Failed to start automation:", error);

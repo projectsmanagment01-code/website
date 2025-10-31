@@ -316,3 +316,47 @@ model AutomationSettings {
 
   @@map("automation_settings")
 }
+
+// Recipe Automation Job Tracking
+model RecipeAutomation {
+  id                String    @id @default(cuid())
+  recipeRowNumber   Int       // Row number in Google Sheet
+  status            String    // PENDING, PROCESSING, SUCCESS, FAILED
+  currentStep       Int       @default(0)
+  totalSteps        Int       @default(12)
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  error             String?   @db.Text
+  jobId             String?   // BullMQ job ID
+  
+  // Recipe details (from sheet)
+  spyTitle          String?
+  seoKeyword        String?
+  recipeId          String?   // Final published recipe ID
+  postLink          String?   // Final published URL
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([status])
+  @@index([startedAt])
+  @@map("recipe_automation")
+}
+
+// Automation Scheduler Configuration
+model AutomationSchedule {
+  id                String    @id @default(cuid())
+  enabled           Boolean   @default(false)
+  scheduleType      String    @default("manual") // manual, hourly, daily, weekly, custom
+  cronExpression    String?   // For custom schedules
+  timeOfDay         String?   // HH:MM format for daily schedules
+  dayOfWeek         Int?      // 0-6 for weekly schedules (0=Sunday)
+  lastRun           DateTime?
+  nextRun           DateTime?
+  runCount          Int       @default(0)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("automation_schedule")
+}

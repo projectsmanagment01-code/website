@@ -1,5 +1,13 @@
 /**
  * Google Sheets Service
+ * 
+ * Column Structure:
+ * A: SPY Title, B: SPY Description, C: SPY Image URL, D: Spy Article URL, E: SPY PIN Image
+ * F: Row (Go/Not), G: SEO Keyword, H: SEO Title, I: SEO Description, J: Categorie
+ * K: Image Job ID, L: Image 01, M: Image 02, N: Image 03, O: Image 04
+ * P: Recipe ID, Q: Post link, R: is Published (Go/True), S: Is Indexed
+ * T: PIN Description, U: PIN Title, V: Pin Image, W: Published, X: Post link (duplicate)
+ * Y: PIN Categorie, Z: Error Count, AA: Skip (true/false)
  */
 
 import { automationEnv } from '../../config/env';
@@ -17,28 +25,31 @@ export class GoogleSheetsService {
   }
 
   /**
-   * Fetch first pending recipe from Google Sheet
+   * Find first eligible recipe (is Published = "Go" AND Skip = false)
+   * Returns only SPY data - SEO data will be generated
    */
   async fetchPendingRecipe(): Promise<{
-    title: string;
-    description?: string;
-    keyword?: string;
-    category: string;
+    // SPY Input Data
+    spyTitle: string;
+    spyDescription: string;
     spyImageUrl?: string;
+    spyArticleUrl?: string;
+    spyPinImage?: string;
+    category: string;
     rowNumber: number;
   } | null> {
-    logger.info('Fetching pending recipe from Google Sheets');
+    logger.info('Fetching eligible recipe from Google Sheets');
 
     try {
       const { google } = await import('googleapis');
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
 
-      // Read all data
+      // Read all data (columns A to AA)
       const response = await retryWithBackoff(() =>
         sheets.spreadsheets.values.get({
           spreadsheetId: this.sheetId,
-          range: 'Sheet1!A2:F1000', // Adjust range as needed
+          range: 'Sheet1!A2:AA1000',
         })
       );
 
@@ -49,30 +60,36 @@ export class GoogleSheetsService {
       }
 
       // Find first row where:
-      // - Column F (Skip) is not "true"
-      // - Column G (is Published) is "Go"
+      // - Column R (index 17): is Published = "Go"
+      // - Column AA (index 26): Skip = "false" (must be explicitly false)
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-        const skip = row[5]?.toLowerCase() === 'true';
-        const isPublished = row[6]?.toLowerCase() === 'go';
-
-        if (!skip && isPublished) {
-          logger.info(`Found pending recipe at row ${i + 2}`, {
-            title: row[0],
-          });
-
-          return {
-            title: row[0],
-            keyword: row[1] || undefined,
-            description: row[2] || undefined,
-            category: row[3],
-            spyImageUrl: row[4] || undefined,
+        
+        const isPublished = row[17]?.trim().toLowerCase(); // Column R
+        const skip = row[26]?.trim().toLowerCase(); // Column AA
+        
+        // Check eligibility
+        if (isPublished === 'go' && skip === 'false') {
+          const recipe = {
+            spyTitle: row[0] || '', // Column A
+            spyDescription: row[1] || '', // Column B
+            spyImageUrl: row[2] || undefined, // Column C
+            spyArticleUrl: row[3] || undefined, // Column D
+            spyPinImage: row[4] || undefined, // Column E
+            category: row[9] || 'Recipes', // Column J
             rowNumber: i + 2, // +2 because: array is 0-indexed, row 1 is header
           };
+
+          logger.info(`Found eligible recipe at row ${recipe.rowNumber}`, {
+            title: recipe.spyTitle,
+            category: recipe.category,
+          });
+
+          return recipe;
         }
       }
 
-      logger.info('No pending recipes found');
+      logger.info('No eligible recipes found (need is Published="Go" and Skip="false")');
       return null;
     } catch (error) {
       logger.error('Failed to fetch recipe from sheet', error);
@@ -125,69 +142,119 @@ export class GoogleSheetsService {
   }
 
   /**
-   * Update publication status
+   * Update publication status and all generated data
    */
   async updatePublicationStatus(
     rowNumber: number,
     data: {
-      postLink: string;
+      // SEO Generated Data
+      seoKeyword: string;
+      seoTitle: string;
+      seoDescription: string;
+      // Image URLs
+      image01: string;
+      image02: string;
+      image03: string;
+      image04: string;
+      // Recipe Data
       recipeId: string;
-      pinterestImage: string;
-      pinterestTitle: string;
-      pinterestDescription: string;
-      pinterestCategory: string;
+      postLink: string;
+      // Pinterest Data (optional)
+      pinterestDescription?: string;
+      pinterestTitle?: string;
+      pinterestImage?: string;
+      pinterestCategory?: string;
+      // Indexing Status
+      isIndexed?: string;
     }
   ): Promise<void> {
-    logger.info(`Updating publication status in row ${rowNumber}`);
+    logger.info(`Updating publication status for row ${rowNumber}`);
 
     try {
       const { google } = await import('googleapis');
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
 
-      // Update multiple columns:
-      // G (is Published) = true
-      // L (Post Link)
-      // M (Recipe ID)
-      // N (Is Indexed) = sent
-      // O (PIN Image)
-      // P (PIN Title)
-      // Q (PIN Description)
-      // R (PIN Category)
-      // S (Published) = Go
+      const updates: any[] = [
+        // G: SEO Keyword
+        {
+          range: `Sheet1!G${rowNumber}`,
+          values: [[data.seoKeyword]],
+        },
+        // H: SEO Title
+        {
+          range: `Sheet1!H${rowNumber}`,
+          values: [[data.seoTitle]],
+        },
+        // I: SEO Description
+        {
+          range: `Sheet1!I${rowNumber}`,
+          values: [[data.seoDescription]],
+        },
+        // L-O: Image URLs (Image 01-04)
+        {
+          range: `Sheet1!L${rowNumber}:O${rowNumber}`,
+          values: [[data.image01, data.image02, data.image03, data.image04]],
+        },
+        // P: Recipe ID
+        {
+          range: `Sheet1!P${rowNumber}`,
+          values: [[data.recipeId]],
+        },
+        // Q: Post link
+        {
+          range: `Sheet1!Q${rowNumber}`,
+          values: [[data.postLink]],
+        },
+        // R: is Published = "True" (mark as completed)
+        {
+          range: `Sheet1!R${rowNumber}`,
+          values: [['True']],
+        },
+        // S: Is Indexed
+        {
+          range: `Sheet1!S${rowNumber}`,
+          values: [[data.isIndexed || 'sent']],
+        },
+        // W: Published timestamp
+        {
+          range: `Sheet1!W${rowNumber}`,
+          values: [[new Date().toISOString()]],
+        },
+      ];
+
+      // Add Pinterest data if provided
+      if (data.pinterestDescription) {
+        updates.push(
+          // T: PIN Description
+          {
+            range: `Sheet1!T${rowNumber}`,
+            values: [[data.pinterestDescription]],
+          },
+          // U: PIN Title
+          {
+            range: `Sheet1!U${rowNumber}`,
+            values: [[data.pinterestTitle || '']],
+          },
+          // V: Pin Image
+          {
+            range: `Sheet1!V${rowNumber}`,
+            values: [[data.pinterestImage || '']],
+          },
+          // Y: PIN Categorie
+          {
+            range: `Sheet1!Y${rowNumber}`,
+            values: [[data.pinterestCategory || '']],
+          }
+        );
+      }
 
       await retryWithBackoff(() =>
         sheets.spreadsheets.values.batchUpdate({
           spreadsheetId: this.sheetId,
           requestBody: {
             valueInputOption: 'RAW',
-            data: [
-              {
-                range: `Sheet1!G${rowNumber}`,
-                values: [['true']],
-              },
-              {
-                range: `Sheet1!L${rowNumber}:M${rowNumber}`,
-                values: [[data.postLink, data.recipeId]],
-              },
-              {
-                range: `Sheet1!N${rowNumber}`,
-                values: [['sent']],
-              },
-              {
-                range: `Sheet1!O${rowNumber}:R${rowNumber}`,
-                values: [[
-                  data.pinterestImage,
-                  data.pinterestTitle,
-                  data.pinterestDescription,
-                  data.pinterestCategory,
-                ]],
-              },
-              {
-                range: `Sheet1!S${rowNumber}`,
-                values: [['Go']],
-              },
-            ],
+            data: updates,
           },
         })
       );
@@ -199,6 +266,60 @@ export class GoogleSheetsService {
         'Failed to update publication status in sheet',
         AUTOMATION_CONSTANTS.STEPS.UPDATE_SHEET_PUBLISH
       );
+    }
+  }
+
+  /**
+   * Handle automation error - increment error count and set Skip if needed
+   */
+  async handleError(rowNumber: number, errorMessage: string): Promise<void> {
+    logger.info(`Handling error for row ${rowNumber}`);
+
+    try {
+      const { google } = await import('googleapis');
+      const auth = await getGoogleAuth();
+      const sheets = google.sheets({ version: 'v4', auth });
+
+      // First, read current error count (column Z)
+      const readResponse = await retryWithBackoff(() =>
+        sheets.spreadsheets.values.get({
+          spreadsheetId: this.sheetId,
+          range: `Sheet1!Z${rowNumber}`,
+        })
+      );
+
+      const currentCount = parseInt(readResponse.data.values?.[0]?.[0] || '0', 10);
+      const newCount = currentCount + 1;
+      const shouldSkip = newCount >= 3;
+
+      logger.info(`Error count: ${currentCount} -> ${newCount}. Skip: ${shouldSkip}`);
+
+      // Update error count and skip status
+      await retryWithBackoff(() =>
+        sheets.spreadsheets.values.batchUpdate({
+          spreadsheetId: this.sheetId,
+          requestBody: {
+            valueInputOption: 'RAW',
+            data: [
+              // Z: Error Count
+              {
+                range: `Sheet1!Z${rowNumber}`,
+                values: [[newCount.toString()]],
+              },
+              // AA: Skip (set to "true" if error count >= 3)
+              {
+                range: `Sheet1!AA${rowNumber}`,
+                values: [[shouldSkip ? 'true' : 'false']],
+              },
+            ],
+          },
+        })
+      );
+
+      logger.info('Error handling completed', { newCount, shouldSkip });
+    } catch (error) {
+      logger.error('Failed to handle error in sheet', error);
+      // Don't throw - this is a best-effort operation
     }
   }
 }

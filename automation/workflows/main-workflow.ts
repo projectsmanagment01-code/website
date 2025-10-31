@@ -8,16 +8,17 @@ import { logger } from '../utils/logger';
 
 // Import workflow steps
 import { fetchRecipeStep } from './steps/01-fetch-recipe';
-import { generatePromptsStep } from './steps/02-generate-prompts';
-import { downloadReferenceImageStep } from './steps/03-download-reference';
-import { generateImagesStep } from './steps/04-generate-images';
-import { uploadImagesStep } from './steps/05-upload-images';
-import { updateSheetImagesStep } from './steps/06-update-sheet-images';
-import { generateArticleStep } from './steps/07-generate-article';
-import { publishRecipeStep } from './steps/08-publish-recipe';
-import { updateSheetPostDataStep } from './steps/09-update-sheet-post';
-import { sendToPinterestStep } from './steps/10-send-pinterest';
-import { requestIndexingStep } from './steps/11-request-indexing';
+import { generateSeoDataStep } from './steps/02-generate-seo';
+import { generatePromptsStep } from './steps/03-generate-prompts';
+import { downloadReferenceImageStep } from './steps/04-download-reference';
+import { generateImagesStep } from './steps/05-generate-images';
+import { uploadImagesStep } from './steps/06-upload-images';
+import { updateSheetImagesStep } from './steps/07-update-sheet-images';
+import { generateArticleStep } from './steps/08-generate-article';
+import { publishRecipeStep } from './steps/09-publish-recipe';
+import { updateSheetPostDataStep } from './steps/10-update-sheet-post';
+import { sendToPinterestStep } from './steps/11-send-pinterest';
+import { requestIndexingStep } from './steps/12-request-indexing';
 
 export interface WorkflowResult {
   success: boolean;
@@ -41,7 +42,8 @@ export async function executeWorkflow(
   });
 
   const steps = [
-    { name: 'Fetch Recipe', execute: fetchRecipeStep },
+    { name: 'Fetch Recipe SPY Data', execute: fetchRecipeStep },
+    { name: 'Generate SEO Data', execute: generateSeoDataStep },
     { name: 'Generate Image Prompts', execute: generatePromptsStep },
     { name: 'Download Reference Image', execute: downloadReferenceImageStep },
     { name: 'Generate AI Images', execute: generateImagesStep },

@@ -82,10 +82,8 @@ export {
   PinterestService,
 } from './services/external';
 
-export {
-  // Utils
-  logger,
-} from './utils/logger';
+// Note: logger is not exported to prevent client-side bundle issues
+// Import directly from './utils/logger' in server-side code only
 
 export {
   retryWithBackoff,
@@ -121,48 +119,43 @@ export { automationEnv } from './config/env';
  */
 export async function initializeAutomation(): Promise<void> {
   const { setupQueueEventListeners } = await import('./queue/automation.queue');
+  const { logger } = await import('./utils/logger');
   setupQueueEventListeners();
   logger.info('Automation system initialized');
 }
 
 /**
  * Start a new recipe automation
+ * Automatically finds the first eligible row from Google Sheets
  * 
- * @param recipeRowNumber - Row number in Google Sheets (1-indexed)
- * @param title - Optional recipe title for logging
  * @returns Job ID for tracking
  */
-export async function startAutomation(
-  recipeRowNumber: number,
-  title?: string
-): Promise<string> {
+export async function startAutomation(): Promise<string> {
   const { PrismaClient } = await import('@prisma/client');
   const { addAutomationJob } = await import('./queue/automation.queue');
+  const { logger } = await import('./utils/logger');
   
   const prisma = new PrismaClient();
   
   try {
-    // Create automation record in database
+    // Create automation record in database (row number will be found by workflow)
     const automation = await prisma.recipeAutomation.create({
       data: {
         status: 'PENDING',
-        recipeRowNumber,
-        configId: 'default', // Use default config
+        recipeRowNumber: 0, // Will be updated when workflow finds eligible row
       },
     });
 
-    // Add job to queue
+    // Add job to queue (workflow will find eligible row automatically)
     const jobId = await addAutomationJob(
       automation.id,
-      recipeRowNumber,
-      title
+      0, // No row number - auto-find
+      'Auto-finding eligible recipe'
     );
 
-    logger.info('Automation started', {
+    logger.info('Automation started - auto-finding eligible recipe', {
       automationId: automation.id,
       jobId,
-      recipeRowNumber,
-      title,
     });
 
     return jobId;

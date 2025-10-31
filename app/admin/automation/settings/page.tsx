@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   Save, 
   TestTube, 
@@ -10,7 +11,8 @@ import {
   Eye,
   EyeOff,
   Info,
-  ExternalLink
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react';
 
 interface Settings {
@@ -152,40 +154,54 @@ export default function AutomationSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading settings...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-sm text-gray-600">Loading settings...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Automation Settings</h1>
-          <p className="text-gray-600 mt-2">
-            Configure your automation credentials and settings. All sensitive data is encrypted in the database.
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="border-b border-gray-200 bg-white shadow-md">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link
+                href="/admin/automation"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+              >
+                <ChevronRight className="w-4 h-4 rotate-180" />
+                Back to Dashboard
+              </Link>
+              <div className="h-5 w-px bg-gray-300" />
+              <h1 className="text-lg font-semibold text-gray-900">
+                Automation Settings
+              </h1>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto p-4 space-y-4">
 
         {/* Status Badge */}
         {settings.isConfigured !== undefined && (
-          <div className={`mb-6 p-4 rounded-lg border ${
+          <div className={`p-4 rounded-lg border shadow-md ${
             settings.isConfigured 
               ? 'bg-green-50 border-green-200' 
               : 'bg-yellow-50 border-yellow-200'
           }`}>
             <div className="flex items-center gap-2">
               {settings.isConfigured ? (
-                <CheckCircle className="w-5 h-5 text-green-600" />
+                <CheckCircle className="w-4 h-4 text-green-600" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-yellow-600" />
+                <AlertCircle className="w-4 h-4 text-yellow-600" />
               )}
-              <span className={`font-medium ${
+              <span className={`text-sm font-semibold ${
                 settings.isConfigured ? 'text-green-900' : 'text-yellow-900'
               }`}>
                 {settings.isConfigured 
@@ -194,7 +210,7 @@ export default function AutomationSettingsPage() {
               </span>
             </div>
             {settings.lastTestedAt && (
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-xs text-gray-600 mt-2">
                 Last tested: {new Date(settings.lastTestedAt).toLocaleString()}
                 {settings.testMessage && ` - ${settings.testMessage}`}
               </p>
@@ -204,7 +220,7 @@ export default function AutomationSettingsPage() {
 
         {/* Message */}
         {message && (
-          <div className={`mb-6 p-4 rounded-lg border ${
+          <div className={`p-4 rounded-lg border shadow-md text-sm ${
             messageType === 'success' 
               ? 'bg-green-50 border-green-200 text-green-900'
               : messageType === 'error'
@@ -215,17 +231,16 @@ export default function AutomationSettingsPage() {
           </div>
         )}
 
-        <div className="space-y-6">
           {/* Google Sheets Section */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Info className="w-5 h-5 text-blue-600" />
-              Google Sheets Configuration
-            </h2>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-md p-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-gray-200 mb-4">
+              <Info className="w-4 h-4 text-gray-900" />
+              <h2 className="text-sm font-bold text-gray-900">Google Sheets Configuration</h2>
+            </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Google Sheet ID <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -233,7 +248,7 @@ export default function AutomationSettingsPage() {
                   value={settings.googleSheetId || ''}
                   onChange={(e) => setSettings({ ...settings, googleSheetId: e.target.value })}
                   placeholder="1abc123xyz..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Found in your sheet URL: https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit
@@ -241,7 +256,7 @@ export default function AutomationSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Google Sheet URL (optional, for reference)
                 </label>
                 <input
@@ -249,36 +264,45 @@ export default function AutomationSettingsPage() {
                   value={settings.googleSheetUrl || ''}
                   onChange={(e) => setSettings({ ...settings, googleSheetUrl: e.target.value })}
                   placeholder="https://docs.google.com/spreadsheets/d/..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-2">
                   Service Account JSON <span className="text-red-500">*</span>
                   <button
                     type="button"
                     onClick={() => setShowGoogleCreds(!showGoogleCreds)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-900 transition-colors"
+                    title={showGoogleCreds ? "Hide credentials" : "Show credentials"}
                   >
                     {showGoogleCreds ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </label>
-                <textarea
-                  value={settings.googleCredentialsJson || ''}
-                  onChange={(e) => setSettings({ ...settings, googleCredentialsJson: e.target.value })}
-                  placeholder='{"type":"service_account","project_id":"...","private_key":"..."}'
-                  rows={showGoogleCreds ? 8 : 3}
-                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm ${!showGoogleCreds ? 'password-dots' : ''}`}
-                  style={!showGoogleCreds ? { WebkitTextSecurity: 'disc' } as any : undefined}
-                />
+                <div className="relative">
+                  <textarea
+                    value={settings.googleCredentialsJson || ''}
+                    onChange={(e) => setSettings({ ...settings, googleCredentialsJson: e.target.value })}
+                    placeholder='{"type":"service_account","project_id":"...","private_key":"..."}'
+                    rows={showGoogleCreds ? 8 : 3}
+                    className={`w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 font-mono ${!showGoogleCreds ? 'blur-sm select-none' : ''}`}
+                    readOnly={!showGoogleCreds}
+                    style={!showGoogleCreds ? { userSelect: 'none' } : undefined}
+                  />
+                  {!showGoogleCreds && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <span className="text-xs text-gray-400 font-semibold">Click eye icon to reveal</span>
+                    </div>
+                  )}
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
                   Paste your entire Google Service Account JSON file content here
                   <a 
                     href="https://console.cloud.google.com/iam-admin/serviceaccounts" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline ml-1 inline-flex items-center gap-1"
+                    className="text-gray-900 hover:underline ml-1 inline-flex items-center gap-1"
                   >
                     Get credentials <ExternalLink className="w-3 h-3" />
                   </a>
@@ -288,20 +312,21 @@ export default function AutomationSettingsPage() {
           </div>
 
           {/* AI Configuration Section */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Info className="w-5 h-5 text-purple-600" />
-              Gemini AI Configuration
-            </h2>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-md p-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-gray-200 mb-4">
+              <Info className="w-4 h-4 text-gray-900" />
+              <h2 className="text-sm font-bold text-gray-900">Gemini AI Configuration</h2>
+            </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-2">
                   Gemini API Key <span className="text-red-500">*</span>
                   <button
                     type="button"
                     onClick={() => setShowGeminiKey(!showGeminiKey)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-900 transition-colors"
+                    title={showGeminiKey ? "Hide API key" : "Show API key"}
                   >
                     {showGeminiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -311,7 +336,7 @@ export default function AutomationSettingsPage() {
                   value={settings.geminiApiKey || ''}
                   onChange={(e) => setSettings({ ...settings, geminiApiKey: e.target.value })}
                   placeholder="AIza..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
+                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 font-mono"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Get your API key from Google AI Studio
@@ -319,35 +344,35 @@ export default function AutomationSettingsPage() {
                     href="https://makersuite.google.com/app/apikey" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline ml-1 inline-flex items-center gap-1"
+                    className="text-gray-900 hover:underline ml-1 inline-flex items-center gap-1"
                   >
                     Get API key <ExternalLink className="w-3 h-3" />
                   </a>
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Flash Model (for prompts)
                   </label>
                   <input
                     type="text"
                     value={settings.geminiFlashModel || ''}
                     onChange={(e) => setSettings({ ...settings, geminiFlashModel: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Pro Model (for articles)
                   </label>
                   <input
                     type="text"
                     value={settings.geminiProModel || ''}
                     onChange={(e) => setSettings({ ...settings, geminiProModel: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                   />
                 </div>
               </div>
@@ -355,15 +380,15 @@ export default function AutomationSettingsPage() {
           </div>
 
           {/* Website API Section */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Info className="w-5 h-5 text-green-600" />
-              Website API Configuration
-            </h2>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-md p-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-gray-200 mb-4">
+              <Info className="w-4 h-4 text-gray-900" />
+              <h2 className="text-sm font-bold text-gray-900">Website API Configuration</h2>
+            </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Website URL <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -371,17 +396,18 @@ export default function AutomationSettingsPage() {
                   value={settings.websiteApiUrl || ''}
                   onChange={(e) => setSettings({ ...settings, websiteApiUrl: e.target.value })}
                   placeholder="https://yourwebsite.com"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-2">
                   API Token <span className="text-red-500">*</span>
                   <button
                     type="button"
                     onClick={() => setShowApiToken(!showApiToken)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-900 transition-colors"
+                    title={showApiToken ? "Hide API token" : "Show API token"}
                   >
                     {showApiToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -391,7 +417,7 @@ export default function AutomationSettingsPage() {
                   value={settings.websiteApiToken || ''}
                   onChange={(e) => setSettings({ ...settings, websiteApiToken: e.target.value })}
                   placeholder="Your API token"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono"
+                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 font-mono"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Generate a token in the API Tokens section of your admin panel
@@ -401,28 +427,30 @@ export default function AutomationSettingsPage() {
           </div>
 
           {/* Optional Features Section */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Optional Features</h2>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-md p-4">
+            <div className="pb-3 border-b border-gray-200 mb-4">
+              <h2 className="text-sm font-bold text-gray-900">Optional Features</h2>
+            </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Pinterest */}
-              <div className="border border-gray-200 rounded-lg p-4">
+              <div className="border border-gray-200 rounded-lg p-3">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={settings.enablePinterest || false}
                     onChange={(e) => setSettings({ ...settings, enablePinterest: e.target.checked })}
-                    className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-4 h-4 text-gray-900 rounded focus:ring-1 focus:ring-gray-900"
                   />
                   <div className="flex-1">
-                    <span className="font-medium text-gray-900">Enable Pinterest Integration</span>
-                    <p className="text-sm text-gray-500">Send recipes to Pinterest via Make.com webhook</p>
+                    <span className="text-sm font-semibold text-gray-900">Enable Pinterest Integration</span>
+                    <p className="text-xs text-gray-500">Send recipes to Pinterest via Make.com webhook</p>
                   </div>
                 </label>
 
                 {settings.enablePinterest && (
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <div className="mt-3">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
                       Make.com Webhook URL
                     </label>
                     <input
@@ -430,24 +458,24 @@ export default function AutomationSettingsPage() {
                       value={settings.makeWebhookUrl || ''}
                       onChange={(e) => setSettings({ ...settings, makeWebhookUrl: e.target.value })}
                       placeholder="https://hook.eu1.make.com/..."
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                     />
                   </div>
                 )}
               </div>
 
               {/* Google Indexing */}
-              <div className="border border-gray-200 rounded-lg p-4">
+              <div className="border border-gray-200 rounded-lg p-3">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={settings.enableIndexing || false}
                     onChange={(e) => setSettings({ ...settings, enableIndexing: e.target.checked })}
-                    className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-4 h-4 text-gray-900 rounded focus:ring-1 focus:ring-gray-900"
                   />
                   <div className="flex-1">
-                    <span className="font-medium text-gray-900">Enable Google Indexing</span>
-                    <p className="text-sm text-gray-500">Automatically request indexing for published recipes</p>
+                    <span className="text-sm font-semibold text-gray-900">Enable Google Indexing</span>
+                    <p className="text-xs text-gray-500">Automatically request indexing for published recipes</p>
                   </div>
                 </label>
               </div>
@@ -455,12 +483,14 @@ export default function AutomationSettingsPage() {
           </div>
 
           {/* Behavior Settings */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Automation Behavior</h2>
+          <div className="bg-white rounded-lg border border-gray-200 shadow-md p-4">
+            <div className="pb-3 border-b border-gray-200 mb-4">
+              <h2 className="text-sm font-bold text-gray-900">Automation Behavior</h2>
+            </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Max Retries
                 </label>
                 <input
@@ -469,13 +499,13 @@ export default function AutomationSettingsPage() {
                   onChange={(e) => setSettings({ ...settings, maxRetries: parseInt(e.target.value) })}
                   min="1"
                   max="10"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                 />
                 <p className="text-xs text-gray-500 mt-1">Number of retry attempts on failure</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Retry Delay (ms)
                 </label>
                 <input
@@ -485,7 +515,7 @@ export default function AutomationSettingsPage() {
                   min="1000"
                   max="60000"
                   step="1000"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                 />
                 <p className="text-xs text-gray-500 mt-1">Delay between retry attempts</p>
               </div>
@@ -493,21 +523,21 @@ export default function AutomationSettingsPage() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-shadow"
             >
               {saving ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Saving...
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Saving...</span>
                 </>
               ) : (
                 <>
-                  <Save className="w-5 h-5" />
-                  Save Settings
+                  <Save className="w-4 h-4" />
+                  <span>Save Settings</span>
                 </>
               )}
             </button>
@@ -515,22 +545,21 @@ export default function AutomationSettingsPage() {
             <button
               onClick={handleTest}
               disabled={testing || !settings.isConfigured}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-shadow"
             >
               {testing ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Testing...
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Testing...</span>
                 </>
               ) : (
                 <>
-                  <TestTube className="w-5 h-5" />
-                  Test Configuration
+                  <TestTube className="w-4 h-4" />
+                  <span>Test Configuration</span>
                 </>
               )}
             </button>
           </div>
-        </div>
       </div>
     </div>
   );

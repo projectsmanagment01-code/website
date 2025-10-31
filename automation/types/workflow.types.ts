@@ -17,22 +17,27 @@ export interface WorkflowContext {
   config: AutomationConfig;
   
   // Step data (added progressively during workflow)
-  recipe?: any; // From step 1
-  imagePrompts?: any; // From step 2
-  referenceImage?: string; // From step 3
-  generatedImages?: any; // From step 4
+  recipe?: any; // From step 1 - SPY data
+  seoData?: {
+    seoKeyword: string;
+    seoTitle: string;
+    seoDescription: string;
+  }; // From step 2 - Generated SEO data
+  imagePrompts?: any; // From step 3
+  referenceImage?: string; // From step 4
+  generatedImages?: any; // From step 5
   uploadedImages?: {
     featureImage: string;
     ingredientsImage: string;
     cookingImage: string;
     finalDishImage: string;
-  }; // From step 5
-  article?: any; // From step 7
+  }; // From step 6
+  article?: any; // From step 8
   publishedRecipe?: {
     recipeId: string;
     slug: string;
     fullUrl: string;
-  }; // From step 8
+  }; // From step 9
   
   // Legacy compatibility
   recipeData?: RecipeData;
