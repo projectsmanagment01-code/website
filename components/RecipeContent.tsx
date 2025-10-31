@@ -12,18 +12,6 @@ interface RecipeContentProps {
   recipe: Recipe;
 }
 
-// Optimized image URL generator for Cloudflare CDN
-const getOptimizedImageUrl = (
-  src: string,
-  width: number,
-  quality = 65,
-  format = "webp"
-) => {
-  // Remove existing query parameters
-  const cleanSrc = src?.split("?")[0] || "";
-  return `${cleanSrc}?w=${width}&q=${quality}&f=${format}`;
-};
-
 export async function RecipeContent({ recipe }: RecipeContentProps) {
   recipe = Array.isArray(recipe) ? recipe[0] : recipe;
 
@@ -68,7 +56,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               alt={`${recipe.title} - feature image`}
               width={1200}
               height={800}
-              quality={75}
+              quality={90}
               style={{
                 width: "100%",
                 height: "auto",
@@ -140,7 +128,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                 height: "auto",
               }}
               loading="lazy"
-              quality={75}
+              quality={90}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
             />
           </div>
@@ -172,7 +160,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                 height: "auto",
               }}
               loading="lazy"
-              quality={75}
+              quality={90}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
             />
           </div>
@@ -244,7 +232,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                       height: "auto",
                     }}
                     loading="lazy"
-                    quality={75}
+                    quality={90}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 700px"
                   />
                 </div>
@@ -314,7 +302,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                 height: "auto",
               }}
               loading="lazy"
-              quality={75}
+              quality={90}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
             />
           </div>
