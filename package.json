@@ -8,9 +8,11 @@
     "dev:next": "next dev --turbo",
     "media-server:dev": "nodemon --watch server --ext ts --exec tsx server/index.ts",
     "media-server:prod": "tsx server/index.ts",
-    "start": "concurrently \"yarn media-server:prod\" \"next start\"",
+    "start": "concurrently \"yarn media-server:prod\" \"yarn automation-worker\" \"next start\"",
     "start:next": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "automation-worker": "tsx automation/queue/automation.worker.ts",
+    "automation-worker:dev": "nodemon --watch automation --ext ts --exec tsx automation/queue/automation.worker.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -73,7 +75,12 @@
     "uuid": "^13.0.0",
     "vaul": "^0.9.9",
     "yauzl": "^2.10.0",
-    "zod": "3.25.67"
+    "zod": "3.25.67",
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.3.2",
+    "googleapis": "^130.0.0",
+    "formdata-node": "^6.0.3",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@types/archiver": "^5.3.2",

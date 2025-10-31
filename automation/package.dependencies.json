@@ -1,0 +1,43 @@
+{
+  "name": "automation-dependencies",
+  "description": "Required dependencies for Recipe Automation System",
+  "dependencies": {
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.3.2",
+    "googleapis": "^130.0.0",
+    "formdata-node": "^6.0.3",
+    "zod": "^3.22.4",
+    "@google-cloud/local-auth": "^3.0.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  },
+  "instructions": {
+    "install": "Run: npm install bullmq ioredis googleapis formdata-node zod winston",
+    "note": "Most dependencies should already be installed. Only BullMQ, ioredis, and googleapis are new.",
+    "optional": "winston is optional if you want file logging in addition to console and database"
+  },
+  "environment": {
+    "required": [
+      "REDIS_HOST",
+      "REDIS_PORT",
+      "GOOGLE_CREDENTIALS_BASE64",
+      "GEMINI_API_KEY",
+      "WEBSITE_API_URL",
+      "WEBSITE_API_TOKEN"
+    ],
+    "optional": [
+      "REDIS_PASSWORD",
+      "REDIS_DB",
+      "MAKE_WEBHOOK_URL",
+      "AUTOMATION_MAX_RETRIES",
+      "AUTOMATION_RETRY_DELAY"
+    ]
+  },
+  "scripts": {
+    "worker": "node -r ts-node/register automation/queue/automation.worker.ts",
+    "worker:dev": "nodemon -r ts-node/register automation/queue/automation.worker.ts",
+    "worker:pm2": "pm2 start automation/queue/automation.worker.ts --name recipe-automation-worker --interpreter ts-node"
+  }
+}

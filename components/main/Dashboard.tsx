@@ -109,6 +109,19 @@ function AdminDashboardContent() {
         return <CookiesPolicyCMS onBack={() => setActiveSection("content")} />;
       case "backup":
         return <BackupManager />;
+      case "automation":
+        // Redirect to automation page
+        if (typeof window !== 'undefined') {
+          window.location.href = '/admin/automation';
+        }
+        return (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Redirecting to Automation Dashboard...</p>
+            </div>
+          </div>
+        );
       case "seo-reports":
         return (
           <div className="space-y-6">

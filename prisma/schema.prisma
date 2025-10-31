@@ -275,3 +275,44 @@ model InternalLinkSuggestion {
   @@index([sourceRecipeId])
   @@index([status])
 }
+
+// Automation Settings (stored encrypted in database)
+model AutomationSettings {
+  id                        String    @id @default(cuid())
+  
+  // Google Sheets Configuration
+  googleSheetId             String?   // The ID of the Google Sheet
+  googleSheetUrl            String?   // Full URL for reference
+  googleCredentialsJson     String?   @db.Text // Encrypted service account JSON
+  
+  // AI Configuration
+  geminiApiKey              String?   // Encrypted Gemini API key
+  geminiFlashModel          String    @default("gemini-2.0-flash-exp")
+  geminiProModel            String    @default("gemini-1.5-pro")
+  
+  // Website API Configuration
+  websiteApiUrl             String?   // Base URL of your website
+  websiteApiToken           String?   // API token for authentication
+  
+  // Pinterest Integration (Optional)
+  enablePinterest           Boolean   @default(false)
+  makeWebhookUrl            String?   // Make.com webhook URL
+  
+  // Google Indexing (Optional)
+  enableIndexing            Boolean   @default(false)
+  
+  // Automation Behavior
+  maxRetries                Int       @default(3)
+  retryDelayMs              Int       @default(5000)
+  
+  // Status
+  isConfigured              Boolean   @default(false) // True when all required fields are set
+  lastTestedAt              DateTime?
+  testStatus                String?   // "success", "failed", "not_tested"
+  testMessage               String?   @db.Text
+  
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  @@map("automation_settings")
+}
