@@ -298,6 +298,24 @@ export async function POST(request: NextRequest) {
       hasEmbeddedAuthor: !!recipeData.author
     });
 
+    // Check if recipe with this slug already exists
+    const existingRecipe = await prisma.recipe.findUnique({
+      where: { slug: recipeData.slug }
+    });
+
+    if (existingRecipe) {
+      console.log("⚠️ Recipe with slug already exists, updating instead");
+      const createdRecipe = await prisma.recipe.update({
+        where: { slug: recipeData.slug },
+        data: recipeData,
+      });
+      
+      return NextResponse.json({
+        message: "Recipe updated successfully (slug already existed)",
+        recipe: createdRecipe,
+      });
+    }
+
     // Create the recipe using processed data
     const createdRecipe = await prisma.recipe.create({
       data: recipeData,

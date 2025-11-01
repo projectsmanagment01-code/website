@@ -6,7 +6,7 @@ import CompleteCookingProcess from "./CompleteProcess";
 import { Card } from "./Card";
 import { renderSafeHtml, hasHtmlTags } from "@/lib/utils";
 import { PinterestPinButton } from "./PinterestPinButton";
-import { siteConfig } from "@/config/site";
+import { getWebsiteName } from "@/lib/site-name-helper";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -27,26 +27,37 @@ const getOptimizedImageUrl = (
 export async function RecipeContent({ recipe }: RecipeContentProps) {
   recipe = Array.isArray(recipe) ? recipe[0] : recipe;
 
+  // Get website name from database (cached for performance)
+  const websiteName = await getWebsiteName();
+
+  // Helper function to validate if image exists and is valid
+  const isValidImage = (img: any): boolean => {
+    return img && typeof img === 'string' && img.trim().length > 0 && !img.includes('undefined') && !img.includes('null');
+  };
+
   // Check if recipe uses new named image fields
   const hasNamedImages = !!(recipe.featureImage || recipe.preparationImage || recipe.cookingImage || recipe.finalPresentationImage);
 
-  // Get images from named fields or fallback to array indices
-  const featureImage = recipe.featureImage || recipe.images?.[0] || recipe.heroImage;
+  // Get images from named fields or fallback to array indices (with validation)
+  const featureImage = isValidImage(recipe.featureImage) ? recipe.featureImage 
+    : isValidImage(recipe.images?.[0]) ? recipe.images[0]
+    : isValidImage(recipe.heroImage) ? recipe.heroImage
+    : null;
   
   // Only show subsequent images if:
   // 1. Recipe has named fields (new system), OR
   // 2. The image is different from featureImage (old system - prevent duplicates)
   const ingredientImage = hasNamedImages 
-    ? (recipe.preparationImage || recipe.images?.[1])
-    : (recipe.images?.[1] && recipe.images[1] !== featureImage ? recipe.images[1] : null);
+    ? (isValidImage(recipe.preparationImage) ? recipe.preparationImage : isValidImage(recipe.images?.[1]) ? recipe.images[1] : null)
+    : (isValidImage(recipe.images?.[1]) && recipe.images[1] !== featureImage ? recipe.images[1] : null);
     
   const mixingImage = hasNamedImages 
-    ? (recipe.cookingImage || recipe.images?.[2])
-    : (recipe.images?.[2] && recipe.images[2] !== featureImage && recipe.images[2] !== ingredientImage ? recipe.images[2] : null);
+    ? (isValidImage(recipe.cookingImage) ? recipe.cookingImage : isValidImage(recipe.images?.[2]) ? recipe.images[2] : null)
+    : (isValidImage(recipe.images?.[2]) && recipe.images[2] !== featureImage && recipe.images[2] !== ingredientImage ? recipe.images[2] : null);
     
   const finalImage = hasNamedImages 
-    ? (recipe.finalPresentationImage || recipe.images?.[3])
-    : (recipe.images?.[3] && recipe.images[3] !== featureImage && recipe.images[3] !== ingredientImage && recipe.images[3] !== mixingImage ? recipe.images[3] : null);
+    ? (isValidImage(recipe.finalPresentationImage) ? recipe.finalPresentationImage : isValidImage(recipe.images?.[3]) ? recipe.images[3] : null)
+    : (isValidImage(recipe.images?.[3]) && recipe.images[3] !== featureImage && recipe.images[3] !== ingredientImage && recipe.images[3] !== mixingImage ? recipe.images[3] : null);
 
   return (
     <div className="space-y-8 mt-2 text-md max-w-none">
@@ -56,7 +67,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           <div className="relative w-full rounded-lg overflow-hidden shadow-xl">
             <PinterestPinButton 
               imageUrl={featureImage}
-              description={`${recipe.title} - Delicious recipe from ${siteConfig.name}`}
+              description={`${recipe.title} - Delicious recipe from ${websiteName}`}
               altText={`${recipe.title} - feature image`}
             />
             <Image
@@ -75,7 +86,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            {recipe.title} | {siteConfig.name}
+            {recipe.title} | {websiteName}
           </div>
         </div>
       )}
@@ -141,7 +152,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            Preparing {recipe.title} | {siteConfig.name}
+            Preparing {recipe.title} | {websiteName}
           </div>
         </div>
       )}
@@ -173,7 +184,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            Cooking {recipe.title} | {siteConfig.name}
+            Cooking {recipe.title} | {websiteName}
           </div>
         </div>
       )}
@@ -245,7 +256,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                   />
                 </div>
                 <div className="text-center mt-3 text-gray-600 text-sm">
-                  {recipe.title} | {getHostname()}
+                  {recipe.title} | {websiteName}
                 </div>
               </div>
             )}
@@ -315,7 +326,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            {recipe.title} - Final Presentation | {siteConfig.name}
+            {recipe.title} - Final Presentation | {websiteName}
           </div>
         </div>
       )}
