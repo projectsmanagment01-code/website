@@ -12,7 +12,8 @@ import {
   EyeOff,
   Info,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  RefreshCw
 } from 'lucide-react';
 
 interface Settings {
@@ -48,6 +49,7 @@ export default function AutomationSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info');
 
@@ -143,6 +145,30 @@ export default function AutomationSettingsPage() {
       showMessage('Failed to test settings', 'error');
     } finally {
       setTesting(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const response = await fetch('/api/admin/automation/settings/refresh', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showMessage('Settings refreshed! Loading latest changes...', 'success');
+        // Reload settings from database
+        await loadSettings();
+      } else {
+        showMessage(data.error || 'Failed to refresh settings', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to refresh settings:', error);
+      showMessage('Failed to refresh settings', 'error');
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -536,6 +562,25 @@ export default function AutomationSettingsPage() {
                 <>
                   <Save className="w-4 h-4" />
                   <span>Save Settings</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-shadow"
+              title="Clear cache and reload settings from database"
+            >
+              {refreshing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Refreshing...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Refresh</span>
                 </>
               )}
             </button>

@@ -95,8 +95,10 @@ const CACHE_TTL = 60000; // 1 minute
 async function getSettingsFromDB() {
   const now = Date.now();
   
-  // Return cached settings if still valid
-  if (cachedSettings && (now - cacheTime) < CACHE_TTL) {
+  // Check if cache should be bypassed or is expired
+  const shouldRefresh = process.env.FORCE_REFRESH_SETTINGS === 'true' || !cachedSettings || (now - cacheTime) >= CACHE_TTL;
+  
+  if (!shouldRefresh) {
     return cachedSettings;
   }
   
@@ -107,6 +109,7 @@ async function getSettingsFromDB() {
     if (settings) {
       cachedSettings = settings;
       cacheTime = now;
+      console.log('🔄 Settings refreshed from database');
       return settings;
     }
   } catch (error) {
@@ -114,6 +117,15 @@ async function getSettingsFromDB() {
   }
   
   return null;
+}
+
+/**
+ * Force refresh settings cache
+ */
+export function clearSettingsCache() {
+  cachedSettings = null;
+  cacheTime = 0;
+  console.log('🗑️ Settings cache cleared');
 }
 
 /**
