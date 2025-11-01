@@ -18,10 +18,12 @@ import { SheetError } from '../../utils/errors';
 import { getGoogleAuth } from './auth';
 
 export class GoogleSheetsService {
-  private sheetId: string;
-
-  constructor() {
-    this.sheetId = automationEnv.google.sheetId;
+  /**
+   * Get sheet ID from database settings or environment
+   */
+  private async getSheetId(): Promise<string> {
+    const { getGoogleSheetId } = await import('../../config/env');
+    return await getGoogleSheetId();
   }
 
   /**
@@ -44,11 +46,12 @@ export class GoogleSheetsService {
       const { google } = await import('googleapis');
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
+      const sheetId = await this.getSheetId();
 
       // Read all data (columns A to AA)
       const response = await retryWithBackoff(() =>
         sheets.spreadsheets.values.get({
-          spreadsheetId: this.sheetId,
+          spreadsheetId: sheetId,
           range: 'Sheet1!A2:AA1000',
         })
       );
@@ -118,11 +121,12 @@ export class GoogleSheetsService {
       const { google } = await import('googleapis');
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
+      const sheetId = await this.getSheetId();
 
       // Update columns H, I, J, K (images 1-4)
       await retryWithBackoff(() =>
         sheets.spreadsheets.values.update({
-          spreadsheetId: this.sheetId,
+          spreadsheetId: sheetId,
           range: `Sheet1!H${rowNumber}:K${rowNumber}`,
           valueInputOption: 'RAW',
           requestBody: {
@@ -174,6 +178,7 @@ export class GoogleSheetsService {
       const { google } = await import('googleapis');
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
+      const sheetId = await this.getSheetId();
 
       const updates: any[] = [
         // G: SEO Keyword
@@ -251,7 +256,7 @@ export class GoogleSheetsService {
 
       await retryWithBackoff(() =>
         sheets.spreadsheets.values.batchUpdate({
-          spreadsheetId: this.sheetId,
+          spreadsheetId: sheetId,
           requestBody: {
             valueInputOption: 'RAW',
             data: updates,
@@ -279,11 +284,12 @@ export class GoogleSheetsService {
       const { google } = await import('googleapis');
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
+      const sheetId = await this.getSheetId();
 
       // First, read current error count (column Z)
       const readResponse = await retryWithBackoff(() =>
         sheets.spreadsheets.values.get({
-          spreadsheetId: this.sheetId,
+          spreadsheetId: sheetId,
           range: `Sheet1!Z${rowNumber}`,
         })
       );
@@ -297,7 +303,7 @@ export class GoogleSheetsService {
       // Update error count and skip status
       await retryWithBackoff(() =>
         sheets.spreadsheets.values.batchUpdate({
-          spreadsheetId: this.sheetId,
+          spreadsheetId: sheetId,
           requestBody: {
             valueInputOption: 'RAW',
             data: [

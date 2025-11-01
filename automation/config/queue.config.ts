@@ -14,10 +14,13 @@ export const redisConnection: ConnectionOptions = {
   db: automationEnv.redis.db,
   maxRetriesPerRequest: null, // Required for BullMQ
   enableReadyCheck: false,
-  retryStrategy: (times: number) => {
+  // Don't retry during build
+  retryStrategy: process.env.SKIP_REDIS_CONNECTION ? () => null : (times: number) => {
     const delay = Math.min(times * 50, 2000);
     return delay;
   },
+  connectTimeout: process.env.SKIP_REDIS_CONNECTION ? 100 : 10000,
+  lazyConnect: true, // Don't connect immediately
 };
 
 // Queue default job options
