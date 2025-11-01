@@ -56,7 +56,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           <div className="relative w-full rounded-lg overflow-hidden shadow-xl">
             <PinterestPinButton 
               imageUrl={featureImage}
-              description={`${recipe.title} - Delicious recipe from ${siteName}`}
+              description={`${recipe.title} - Delicious recipe from ${siteConfig.name}`}
               altText={`${recipe.title} - feature image`}
             />
             <Image
@@ -75,7 +75,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            {recipe.title} | {siteName}
+            {recipe.title} | {siteConfig.name}
           </div>
         </div>
       )}
@@ -141,7 +141,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            Preparing {recipe.title} | {siteName}
+            Preparing {recipe.title} | {siteConfig.name}
           </div>
         </div>
       )}
@@ -315,7 +315,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            {recipe.title} - Final Presentation | {siteName}
+            {recipe.title} - Final Presentation | {siteConfig.name}
           </div>
         </div>
       )}
