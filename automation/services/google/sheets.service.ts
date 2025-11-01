@@ -18,12 +18,43 @@ import { SheetError } from '../../utils/errors';
 import { getGoogleAuth } from './auth';
 
 export class GoogleSheetsService {
+  private cachedSheetName: string | null = null;
+
   /**
    * Get sheet ID from database settings or environment
    */
   private async getSheetId(): Promise<string> {
     const { getGoogleSheetId } = await import('../../config/env');
     return await getGoogleSheetId();
+  }
+
+  /**
+   * Get the actual sheet name from the spreadsheet
+   * Uses first sheet by default, caches result
+   */
+  private async getSheetName(): Promise<string> {
+    if (this.cachedSheetName) {
+      return this.cachedSheetName;
+    }
+
+    try {
+      const { google } = await import('googleapis');
+      const auth = await getGoogleAuth();
+      const sheets = google.sheets({ version: 'v4', auth });
+      const sheetId = await this.getSheetId();
+
+      const metadata = await sheets.spreadsheets.get({
+        spreadsheetId: sheetId,
+      });
+
+      const firstSheet = metadata.data.sheets?.[0];
+      this.cachedSheetName = firstSheet?.properties?.title || 'Sheet1';
+      
+      return this.cachedSheetName;
+    } catch (error) {
+      console.warn('Failed to get sheet name, using default "Sheet1"', error);
+      return 'Sheet1';
+    }
   }
 
   /**
@@ -58,12 +89,16 @@ export class GoogleSheetsService {
 
       logger.info(`Using Sheet ID: ${sheetId}`);
 
-      console.log('5️⃣ Reading sheet data (Sheet1!A2:AA1000)...');
+      console.log('5️⃣ Getting sheet name...');
+      const sheetName = await this.getSheetName();
+      console.log(`   Sheet name: "${sheetName}"`);
+
+      console.log(`6️⃣ Reading sheet data (${sheetName}!A2:AA1000)...`);
       // Read all data (columns A to AA)
       const response = await retryWithBackoff(() =>
         sheets.spreadsheets.values.get({
           spreadsheetId: sheetId,
-          range: 'Sheet1!A2:AA1000',
+          range: `${sheetName}!A2:AA1000`,
         })
       );
 
@@ -76,7 +111,7 @@ export class GoogleSheetsService {
         return null;
       }
 
-      console.log(`6️⃣ Searching for eligible recipe (is Published="Go" AND Skip="false")...`);
+      console.log(`7️⃣ Searching for eligible recipe (is Published="Go" AND Skip="false")...`);
       
       // Find first row where:
       // - Column R (index 17): is Published = "Go"
@@ -161,12 +196,13 @@ export class GoogleSheetsService {
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
       const sheetId = await this.getSheetId();
+      const sheetName = await this.getSheetName();
 
       // Update columns H, I, J, K (images 1-4)
       await retryWithBackoff(() =>
         sheets.spreadsheets.values.update({
           spreadsheetId: sheetId,
-          range: `Sheet1!H${rowNumber}:K${rowNumber}`,
+          range: `${sheetName}!H${rowNumber}:K${rowNumber}`,
           valueInputOption: 'RAW',
           requestBody: {
             values: [[images.image1, images.image2, images.image3, images.image4]],
