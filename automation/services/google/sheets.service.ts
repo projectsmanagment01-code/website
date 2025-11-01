@@ -254,51 +254,52 @@ export class GoogleSheetsService {
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
       const sheetId = await this.getSheetId();
+      const sheetName = await this.getSheetName();
 
       const updates: any[] = [
         // G: SEO Keyword
         {
-          range: `Sheet1!G${rowNumber}`,
+          range: `${sheetName}!G${rowNumber}`,
           values: [[data.seoKeyword]],
         },
         // H: SEO Title
         {
-          range: `Sheet1!H${rowNumber}`,
+          range: `${sheetName}!H${rowNumber}`,
           values: [[data.seoTitle]],
         },
         // I: SEO Description
         {
-          range: `Sheet1!I${rowNumber}`,
+          range: `${sheetName}!I${rowNumber}`,
           values: [[data.seoDescription]],
         },
         // L-O: Image URLs (Image 01-04)
         {
-          range: `Sheet1!L${rowNumber}:O${rowNumber}`,
+          range: `${sheetName}!L${rowNumber}:O${rowNumber}`,
           values: [[data.image01, data.image02, data.image03, data.image04]],
         },
         // P: Recipe ID
         {
-          range: `Sheet1!P${rowNumber}`,
+          range: `${sheetName}!P${rowNumber}`,
           values: [[data.recipeId]],
         },
         // Q: Post link
         {
-          range: `Sheet1!Q${rowNumber}`,
+          range: `${sheetName}!Q${rowNumber}`,
           values: [[data.postLink]],
         },
         // R: is Published = "True" (mark as completed)
         {
-          range: `Sheet1!R${rowNumber}`,
+          range: `${sheetName}!R${rowNumber}`,
           values: [['True']],
         },
         // S: Is Indexed
         {
-          range: `Sheet1!S${rowNumber}`,
+          range: `${sheetName}!S${rowNumber}`,
           values: [[data.isIndexed || 'sent']],
         },
         // W: Published timestamp
         {
-          range: `Sheet1!W${rowNumber}`,
+          range: `${sheetName}!W${rowNumber}`,
           values: [[new Date().toISOString()]],
         },
       ];
@@ -308,22 +309,22 @@ export class GoogleSheetsService {
         updates.push(
           // T: PIN Description
           {
-            range: `Sheet1!T${rowNumber}`,
+            range: `${sheetName}!T${rowNumber}`,
             values: [[data.pinterestDescription]],
           },
           // U: PIN Title
           {
-            range: `Sheet1!U${rowNumber}`,
+            range: `${sheetName}!U${rowNumber}`,
             values: [[data.pinterestTitle || '']],
           },
           // V: Pin Image
           {
-            range: `Sheet1!V${rowNumber}`,
+            range: `${sheetName}!V${rowNumber}`,
             values: [[data.pinterestImage || '']],
           },
           // Y: PIN Categorie
           {
-            range: `Sheet1!Y${rowNumber}`,
+            range: `${sheetName}!Y${rowNumber}`,
             values: [[data.pinterestCategory || '']],
           }
         );
@@ -360,12 +361,13 @@ export class GoogleSheetsService {
       const auth = await getGoogleAuth();
       const sheets = google.sheets({ version: 'v4', auth });
       const sheetId = await this.getSheetId();
+      const sheetName = await this.getSheetName();
 
       // First, read current error count (column Z)
       const readResponse = await retryWithBackoff(() =>
         sheets.spreadsheets.values.get({
           spreadsheetId: sheetId,
-          range: `Sheet1!Z${rowNumber}`,
+          range: `${sheetName}!Z${rowNumber}`,
         })
       );
 
@@ -384,12 +386,12 @@ export class GoogleSheetsService {
             data: [
               // Z: Error Count
               {
-                range: `Sheet1!Z${rowNumber}`,
+                range: `${sheetName}!Z${rowNumber}`,
                 values: [[newCount.toString()]],
               },
               // AA: Skip (set to "true" if error count >= 3)
               {
-                range: `Sheet1!AA${rowNumber}`,
+                range: `${sheetName}!AA${rowNumber}`,
                 values: [[shouldSkip ? 'true' : 'false']],
               },
             ],
