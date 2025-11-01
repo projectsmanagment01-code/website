@@ -4,9 +4,9 @@ import { TipCard } from "./TipCard";
 import EssentialIngredients from "./EssentialIngerdients";
 import CompleteCookingProcess from "./CompleteProcess";
 import { Card } from "./Card";
-import { getHostname, renderSafeHtml, hasHtmlTags } from "@/lib/utils";
+import { renderSafeHtml, hasHtmlTags } from "@/lib/utils";
 import { PinterestPinButton } from "./PinterestPinButton";
-import { getSiteSettings } from "@/lib/server-utils";
+import { siteConfig } from "@/config/site";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -26,10 +26,6 @@ const getOptimizedImageUrl = (
 
 export async function RecipeContent({ recipe }: RecipeContentProps) {
   recipe = Array.isArray(recipe) ? recipe[0] : recipe;
-
-  // Get site settings for logo text
-  const siteSettings = await getSiteSettings();
-  const siteName = siteSettings.logoSettings?.logoText || siteSettings.siteTitle || getHostname();
 
   // Check if recipe uses new named image fields
   const hasNamedImages = !!(recipe.featureImage || recipe.preparationImage || recipe.cookingImage || recipe.finalPresentationImage);
@@ -177,7 +173,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             />
           </div>
           <div className="text-center mt-3 text-gray-600 text-sm">
-            Cooking {recipe.title} | {siteName}
+            Cooking {recipe.title} | {siteConfig.name}
           </div>
         </div>
       )}

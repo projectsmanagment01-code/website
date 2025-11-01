@@ -36,7 +36,7 @@ export interface SiteSettings {
 
 // Default fallback content (brand-consistent)
 const DEFAULT_HERO_CONTENT: HeroContent = {
-  title: "Welcome to Calama Team Recipes",
+  title: "Welcome to Recipes website",
   subtitle: "Discover delicious, family-friendly recipes that bring people together around the table",
   buttonText: "Explore Recipes",
   buttonLink: "/recipes",
@@ -45,13 +45,13 @@ const DEFAULT_HERO_CONTENT: HeroContent = {
 
 const DEFAULT_LOGO_SETTINGS: LogoSettings = {
   logoType: "text",
-  logoText: "Calama Team Recipes",
+  logoText: "Recipes website",
   logoImage: ""
 };
 
 const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  siteTitle: "Calama Team Recipes - Delicious Family-Friendly Recipes",
-  siteDescription: "Discover amazing recipes from the Calama team. Easy-to-follow instructions for delicious meals that bring families together.",
+  siteTitle: "Recipes website - Delicious Family-Friendly Recipes",
+  siteDescription: "Discover amazing recipes from the Recipes website team. Easy-to-follow instructions for delicious meals that bring families together.",
   siteUrl: "https://yoursite.com",
   favicon: "/favicon.ico",
   logoSettings: DEFAULT_LOGO_SETTINGS

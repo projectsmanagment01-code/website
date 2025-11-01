@@ -22,11 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
     
     if (response.ok) {
       const siteSettings = await response.json();
-      const baseUrl = siteSettings.siteUrl || 'https://yoursite.com';
+      const baseUrl = siteSettings.siteUrl || 'https://Recipeswebsite.com';
       
       return {
-        title: siteSettings.siteTitle || "Calama Team Recipes - Delicious Family-Friendly Recipes",
-        description: siteSettings.siteDescription || "Discover amazing recipes from the Calama team.",
+        title: siteSettings.siteTitle || "Recipes website - Delicious Family-Friendly Recipes",
+        description: siteSettings.siteDescription || "Discover amazing recipes from the Recipes website.",
         metadataBase: new URL(baseUrl),
         icons: {
           icon: siteSettings.favicon || '/favicon.ico',
@@ -42,16 +42,16 @@ export async function generateMetadata(): Promise<Metadata> {
           },
         },
         openGraph: {
-          title: siteSettings.siteTitle || "Calama Team Recipes",
-          description: siteSettings.siteDescription || "Discover amazing recipes from the Calama team.",
+          title: siteSettings.siteTitle || " Recipes website",
+          description: siteSettings.siteDescription || "Discover amazing recipes from the Recipes website.",
           url: baseUrl,
-          siteName: siteSettings.siteTitle || "Calama Team Recipes",
+          siteName: siteSettings.siteTitle || "Recipes website",
           type: "website",
         },
         twitter: {
           card: "summary_large_image",
-          title: siteSettings.siteTitle || "Calama Team Recipes",
-          description: siteSettings.siteDescription || "Discover amazing recipes from the Calama team.",
+          title: siteSettings.siteTitle || "Recipes website",
+          description: siteSettings.siteDescription || "Discover amazing recipes from the Recipes website.",
         },
       };
     }
@@ -61,9 +61,9 @@ export async function generateMetadata(): Promise<Metadata> {
   
   // Fallback metadata
   return {
-    title: "Calama Team Recipes - Delicious Family-Friendly Recipes",
-    description: "Discover amazing recipes from the Calama team. Easy-to-follow instructions for delicious meals that bring families together.",
-    metadataBase: new URL('https://yoursite.com'),
+    title: "Recipes website - Delicious Family-Friendly Recipes",
+    description: "Discover amazing recipes from the Recipes website. Easy-to-follow instructions for delicious meals that bring families together.",
+    metadataBase: new URL('https://Recipeswebsite.com'),
     icons: {
       icon: '/favicon.ico',
     },
@@ -164,7 +164,7 @@ export default async function RootLayout({
       <head>
         <meta
           name="title"
-          content="Guelma Team Recipes - Delicious Family-Friendly Recipes"
+          content="Recipes website - Delicious Family-Friendly Recipes"
         />
         
         {/* Header Code Injection - Server-side rendered, visible in view-source */}

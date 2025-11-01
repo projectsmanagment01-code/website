@@ -1,4 +1,6 @@
+// Force static generation for maximum performance
 export const dynamic = "force-static";
+export const revalidate = 3600; // Revalidate every hour
 
 import { RecipeContent } from "@/components/RecipeContent";
 import { notFound } from "next/navigation";

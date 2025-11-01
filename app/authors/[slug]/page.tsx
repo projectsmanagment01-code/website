@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
   }
 
   return {
-    title: `${author.name} - Recipe Author | Recipes by Calama`,
+    title: `${author.name} - Recipe Author | Recipes website`,
     description: author.bio || `Discover delicious recipes by ${author.name}`,
     openGraph: {
       title: `${author.name} - Recipe Author`,
@@ -94,21 +94,21 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
     "@type": "Person",
     "name": author.name,
     "description": author.bio,
-    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://recipesbycalama.com'}/authors/${author.slug}`,
+    "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://Recipeswebsite.com'}/authors/${author.slug}`,
     ...(authorImageUrl ? {
       "image": authorImageUrl.startsWith('http') 
         ? authorImageUrl 
-        : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://recipesbycalama.com'}${authorImageUrl}`
+        : `${process.env.NEXT_PUBLIC_SITE_URL || 'https://Recipeswebsite.com'}${authorImageUrl}`
     } : {}),
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://recipesbycalama.com'}/authors/${author.slug}`
+      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://Recipeswebsite.com'}/authors/${author.slug}`
     },
     ...(authorRecipes.length > 0 ? {
       "knowsAbout": authorRecipes.map(recipe => ({
         "@type": "Recipe",
         "name": recipe.title,
-        "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://recipesbycalama.com'}/recipes/${recipe.slug}`
+        "url": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://Recipeswebsite.com'}/recipes/${recipe.slug}`
       }))
     } : {})
   };

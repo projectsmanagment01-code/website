@@ -3,10 +3,10 @@ import { FileText, Calendar, User, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Articles - Recipes by Calama',
+  title: 'Articles - Recipes website',
   description: 'Explore our collection of cooking articles, tips, and culinary guides. Learn new techniques and discover food stories.',
   openGraph: {
-    title: 'Articles - Recipes by Calama',
+    title: 'Articles - Recipes website',
     description: 'Explore our collection of cooking articles, tips, and culinary guides.',
     type: 'website',
   },

@@ -11,10 +11,10 @@ import Image from 'next/image';
 import { getAuthorImageUrl } from '@/lib/author-image';
 
 export const metadata: Metadata = {
-  title: 'Our Recipe Authors - Recipes by Calama',
+  title: 'Our Recipe Authors - Recipes website',
   description: 'Meet the talented chefs and home cooks behind our delicious recipes. Discover their culinary expertise and passion for cooking.',
   openGraph: {
-    title: 'Our Recipe Authors - Recipes by Calama',
+    title: 'Our Recipe Authors - Recipes website',
     description: 'Meet the talented chefs and home cooks behind our delicious recipes.',
     type: 'website',
   },

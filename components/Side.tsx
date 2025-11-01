@@ -72,11 +72,11 @@ async function AuthorCard({ recipe }: { recipe: any }) {
           <Image
             src={authorData.avatar}
             alt={authorData.name}
-            width={384}
-            height={384}
+            width={310}
+            height={310}
             quality={100}
             className="rounded-full object-cover"
-            style={{ width: '384px', height: '384px' }}
+            style={{ width: '310px', height: '310px' }}
           />
         </div>
       </div>

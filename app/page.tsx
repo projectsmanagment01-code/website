@@ -20,7 +20,7 @@ async function getHomeContent() {
     if (response.ok) {
       const heroContent = await response.json();
       return {
-        metaTitle: `${heroContent.heroTitle || 'Welcome'} | Recipes by Calama`,
+        metaTitle: `${heroContent.heroTitle || 'Welcome'} | Recipes website`,
         metaDescription: (heroContent.heroDescription && heroContent.heroDescription.length > 160)
           ? heroContent.heroDescription.substring(0, 157) + "..."
           : (heroContent.heroDescription || "Discover simple, delicious plant-based recipes that fit your busy lifestyle."),
@@ -31,7 +31,7 @@ async function getHomeContent() {
   }
   
   return {
-    metaTitle: "Recipes by Calama - Plant-Based Recipes Made Simple",
+    metaTitle: "Recipes website - Plant-Based Recipes Made Simple",
     metaDescription: "Discover simple, delicious plant-based recipes that fit your busy lifestyle. Easy healthy cooking made simple.",
   };
 }
@@ -41,16 +41,16 @@ export async function generateMetadata(): Promise<Metadata> {
   const homeContent = await getHomeContent();
   
   return {
-    title: homeContent.metaTitle || "Recipes by Calama - Plant-Based Recipes Made Simple",
+    title: homeContent.metaTitle || "Recipes website - Plant-Based Recipes Made Simple",
     description: homeContent.metaDescription || "Discover simple, delicious plant-based recipes that fit your busy lifestyle. Easy healthy cooking made simple.",
     openGraph: {
-      title: homeContent.metaTitle || "Recipes by Calama - Plant-Based Recipes Made Simple",
+      title: homeContent.metaTitle || "Recipes website - Plant-Based Recipes Made Simple",
       description: homeContent.metaDescription || "Discover simple, delicious plant-based recipes that fit your busy lifestyle. Easy healthy cooking made simple.",
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: homeContent.metaTitle || "Recipes by Calama - Plant-Based Recipes Made Simple",
+      title: homeContent.metaTitle || "Recipes website   - Plant-Based Recipes Made Simple",
       description: homeContent.metaDescription || "Discover simple, delicious plant-based recipes that fit your busy lifestyle. Easy healthy cooking made simple.",
     },
   };
