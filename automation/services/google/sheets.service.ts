@@ -40,16 +40,25 @@ export class GoogleSheetsService {
     category: string;
     rowNumber: number;
   } | null> {
-    logger.info('Fetching eligible recipe from Google Sheets');
+    logger.info('📋 Fetching eligible recipe from Google Sheets');
 
     try {
+      console.log('1️⃣ Importing googleapis...');
       const { google } = await import('googleapis');
+      
+      console.log('2️⃣ Getting Google auth...');
       const auth = await getGoogleAuth();
+      
+      console.log('3️⃣ Creating sheets client...');
       const sheets = google.sheets({ version: 'v4', auth });
+      
+      console.log('4️⃣ Getting Sheet ID from database/env...');
       const sheetId = await this.getSheetId();
+      console.log(`   Sheet ID: ${sheetId}`);
 
       logger.info(`Using Sheet ID: ${sheetId}`);
 
+      console.log('5️⃣ Reading sheet data (Sheet1!A2:AA1000)...');
       // Read all data (columns A to AA)
       const response = await retryWithBackoff(() =>
         sheets.spreadsheets.values.get({
@@ -58,20 +67,33 @@ export class GoogleSheetsService {
         })
       );
 
+      console.log(`✅ Sheet read successful. Found ${response.data.values?.length || 0} rows`);
+
       const rows = response.data.values;
       if (!rows || rows.length === 0) {
         logger.info('No recipes found in sheet');
+        console.log('ℹ️ Sheet is empty or has no data rows');
         return null;
       }
 
+      console.log(`6️⃣ Searching for eligible recipe (is Published="Go" AND Skip="false")...`);
+      
       // Find first row where:
       // - Column R (index 17): is Published = "Go"
       // - Column AA (index 26): Skip = "false" (must be explicitly false)
+      let checkedCount = 0;
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         
         const isPublished = row[17]?.trim().toLowerCase(); // Column R
         const skip = row[26]?.trim().toLowerCase(); // Column AA
+        
+        checkedCount++;
+        
+        // Log first few rows for debugging
+        if (i < 3) {
+          console.log(`   Row ${i + 2}: is Published="${row[17]}", Skip="${row[26]}"`);
+        }
         
         // Check eligibility
         if (isPublished === 'go' && skip === 'false') {
@@ -90,13 +112,28 @@ export class GoogleSheetsService {
             category: recipe.category,
           });
 
+          console.log(`✅ Found eligible recipe at row ${recipe.rowNumber}`);
+          console.log(`   Title: ${recipe.spyTitle}`);
+          console.log(`   Category: ${recipe.category}`);
+
           return recipe;
         }
       }
 
+      console.log(`ℹ️ Checked ${checkedCount} rows - no eligible recipes found`);
       logger.info('No eligible recipes found (need is Published="Go" and Skip="false")');
       return null;
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Failed to fetch recipe from sheet:');
+      console.error(`   Error type: ${error?.constructor?.name || 'Unknown'}`);
+      console.error(`   Error message: ${error?.message || 'No message'}`);
+      console.error(`   Error code: ${error?.code || 'No code'}`);
+      
+      if (error?.response) {
+        console.error(`   API Response Status: ${error.response.status}`);
+        console.error(`   API Response Data:`, error.response.data);
+      }
+      
       logger.error('Failed to fetch recipe from sheet', error);
       throw new SheetError(
         'Failed to read from Google Sheets',

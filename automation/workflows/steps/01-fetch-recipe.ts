@@ -8,28 +8,25 @@ import { logger } from '../../utils/logger';
 import { ValidationError, SheetError } from '../../utils/errors';
 
 export async function fetchRecipeStep(context: WorkflowContext): Promise<void> {
-  logger.info('Step 1: Fetching recipe from Google Sheets', {
-    sheetId: context.config.sheetId,
-    rowNumber: context.recipeRowNumber,
-  });
+  logger.info('Step 1: Fetching recipe from Google Sheets');
 
   try {
-    const recipe = await googleSheets.fetchPendingRecipe(
-      context.config.sheetId,
-      context.config.promptSheetRange,
-      context.recipeRowNumber
-    );
+    // fetchPendingRecipe() takes no parameters - it loads sheet ID from database/env
+    const recipe = await googleSheets.fetchPendingRecipe();
 
     if (!recipe) {
-      throw new SheetError(`No recipe found at row ${context.recipeRowNumber}`);
+      logger.info('No eligible recipes found in sheet (need is Published="Go" and Skip="false")');
+      throw new SheetError('No eligible recipe found in Google Sheets');
     }
 
+    // Store the recipe and row number in context
     context.recipe = recipe;
+    context.recipeRowNumber = recipe.rowNumber;
 
     logger.info('Recipe fetched successfully', {
-      title: recipe.title,
+      rowNumber: recipe.rowNumber,
+      spyTitle: recipe.spyTitle,
       category: recipe.category,
-      author: recipe.authorName,
     });
   } catch (error) {
     logger.error('Failed to fetch recipe from Google Sheets', error);

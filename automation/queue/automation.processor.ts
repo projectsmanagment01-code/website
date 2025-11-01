@@ -61,15 +61,22 @@ export async function processAutomationJob(
       recipeRowNumber,
       currentStep: 1,
       totalSteps: 12,
-      recipe: null,
-      prompts: null,
-      referenceImagePath: null,
-      images: null,
+      startTime: Date.now(),
+      recipe: undefined,
+      seoData: undefined,
+      imagePrompts: undefined,
+      referenceImage: undefined,
+      generatedImages: undefined,
       uploadedImages: undefined,
-      article: null,
+      article: undefined,
       publishedRecipe: undefined,
       config: {
-        sheetId: settings?.googleSheetId || process.env.GOOGLE_SHEET_ID || '',
+        googleSheetId: settings?.googleSheetId || process.env.GOOGLE_SHEET_ID || '',
+        websiteApiToken: settings?.websiteApiToken || process.env.WEBSITE_API_TOKEN || '',
+        aiGenerator: settings?.geminiFlashModel || 'gemini-2.0-flash-exp',
+        nakedDomain: process.env.NAKED_DOMAIN || '',
+        geminiApiKey: settings?.geminiApiKey || process.env.GEMINI_API_KEY || '',
+        makeWebhookUrl: settings?.makeWebhookUrl || process.env.MAKE_WEBHOOK_URL,
         promptSheetRange: 'Sheet1!A:Z',
         statusColumn: 'A',
         imageColumns: {
@@ -99,6 +106,21 @@ export async function processAutomationJob(
       });
       logger.debug(`Job ${job.id} progress: ${progress}%`, { step, total });
     });
+
+    // Check if workflow succeeded
+    if (!result.success) {
+      // Workflow failed - update status and throw error
+      await prisma.recipeAutomation.update({
+        where: { id: automationId },
+        data: {
+          status: 'FAILED',
+          error: result.error || 'Workflow failed without error message',
+          completedAt: new Date(),
+        },
+      });
+
+      throw new Error(result.error || 'Workflow failed without error message');
+    }
 
     // Update automation record with final status
     await prisma.recipeAutomation.update({
