@@ -126,27 +126,49 @@ export async function getGoogleCredentials() {
   
   if (settings?.googleCredentialsJson) {
     try {
+      console.log('Loading Google credentials from database...');
       // Parse the JSON string
-      return JSON.parse(settings.googleCredentialsJson);
+      const credentials = JSON.parse(settings.googleCredentialsJson);
+      
+      // Validate required fields
+      if (!credentials.type || !credentials.project_id || !credentials.private_key || !credentials.client_email) {
+        throw new Error('Invalid credentials format: missing required fields (type, project_id, private_key, client_email)');
+      }
+      
+      console.log('✅ Google credentials loaded from database');
+      console.log(`   Project: ${credentials.project_id}`);
+      console.log(`   Email: ${credentials.client_email}`);
+      return credentials;
     } catch (error) {
-      console.error('Failed to parse Google credentials JSON from database', error);
+      console.error('❌ Failed to parse Google credentials JSON from database', error);
+      console.error('Credentials preview:', settings.googleCredentialsJson?.substring(0, 100));
     }
+  } else {
+    console.log('No Google credentials found in database settings');
   }
   
   // Fall back to environment variables
   const encoded = process.env.GOOGLE_SERVICE_ACCOUNT;
   
   if (!encoded) {
-    throw new Error('Google Service Account credentials not found in database or environment variables');
+    const errorMsg = 'Google Service Account credentials not found in database or environment variables. Please configure them in /admin/automation/settings';
+    console.error('❌', errorMsg);
+    throw new Error(errorMsg);
   }
+  
+  console.log('Loading Google credentials from environment variables...');
   
   try {
     // Try to parse as JSON first (in case it's not base64)
-    return JSON.parse(encoded);
+    const credentials = JSON.parse(encoded);
+    console.log('✅ Google credentials loaded from env (JSON)');
+    return credentials;
   } catch {
     // If parsing fails, assume it's base64 encoded
     const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
-    return JSON.parse(decoded);
+    const credentials = JSON.parse(decoded);
+    console.log('✅ Google credentials loaded from env (base64)');
+    return credentials;
   }
 }
 

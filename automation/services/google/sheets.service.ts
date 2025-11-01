@@ -48,6 +48,8 @@ export class GoogleSheetsService {
       const sheets = google.sheets({ version: 'v4', auth });
       const sheetId = await this.getSheetId();
 
+      logger.info(`Using Sheet ID: ${sheetId}`);
+
       // Read all data (columns A to AA)
       const response = await retryWithBackoff(() =>
         sheets.spreadsheets.values.get({
