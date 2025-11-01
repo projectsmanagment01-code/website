@@ -190,7 +190,7 @@ export const Card: React.FC<{
           className="bg-white rounded-lg p-6 space-y-6 shadow-sm border-2"
           style={{ borderColor: '#7FAD8A' }}
         >
-          {recipe.instructions?.map((instruction: any, index) => (
+          {Array.isArray(recipe.instructions) && recipe.instructions.map((instruction: any, index) => (
             <Instruction key={index} index={index} instruction={instruction.instruction} />
           ))}
         </div>
@@ -207,7 +207,7 @@ export const Card: React.FC<{
           background: 'linear-gradient(135deg, #F5F9F6 0%, #E8F5EA 100%)'
         }}>
           <ul className="space-y-6">
-            {recipe.notes.map((note: string, index: number) => (
+            {Array.isArray(recipe.notes) && recipe.notes.map((note: string, index: number) => (
               <li
                 key={index}
                 className="flex items-start space-x-4"
@@ -241,7 +241,7 @@ export const Card: React.FC<{
         </h3>
         <div className="bg-white rounded-lg p-6 shadow-sm border-2" style={{ borderColor: '#7FAD8A' }}>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recipe?.mustKnowTips?.map((tool: string, index: number) => (
+            {Array.isArray(recipe?.mustKnowTips) && recipe.mustKnowTips.map((tool: string, index: number) => (
               <li
                 key={index}
                 className="flex items-center space-x-4 rounded-lg p-4 shadow-sm"

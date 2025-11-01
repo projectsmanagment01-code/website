@@ -183,7 +183,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
       )}
 
       {/* Sections with optimized images */}
-      {recipe.sections?.map((item: any, index: number) => {
+      {Array.isArray(recipe.sections) && recipe.sections.map((item: any, index: number) => {
         
 
         return (
@@ -277,7 +277,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           {recipe.questions?.title}
         </h2>
         <div className="space-y-6 text-[1.2rem]">
-          {recipe.questions?.items?.map((item: any, index: any) => (
+          {Array.isArray(recipe.questions?.items) && recipe.questions.items.map((item: any, index: any) => (
             <div key={index} className="border-b border-gray-200 pb-4">
               <h3 className="flex font-bold items-center space-x-2 font-bold text-gray-650 mb-2">
                 <span>{"→" + item.question}</span>

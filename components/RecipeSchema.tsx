@@ -59,9 +59,9 @@ export default async function RecipeSchema({ recipe }: RecipeSchemaProps) {
     "@type": "Recipe",
     name: recipe.title,
     description: recipe.description || recipe.shortDescription,
-    image: recipe.images?.map(img => 
+    image: Array.isArray(recipe.images) ? recipe.images.map(img => 
       img.startsWith('http') ? img : `${baseUrl}${img}`
-    ) || [],
+    ) : [],
     
     // Author information
     author: {
@@ -87,17 +87,17 @@ export default async function RecipeSchema({ recipe }: RecipeSchemaProps) {
     recipeYield: recipe.recipeInfo?.servings || recipe.serving,
 
     // Ingredients
-    recipeIngredient: recipe.ingredients?.flatMap(group => 
+    recipeIngredient: Array.isArray(recipe.ingredients) ? recipe.ingredients.flatMap(group => 
       group.items || []
-    ) || [],
+    ) : [],
 
     // Instructions
-    recipeInstructions: recipe.instructions?.map((instruction, index) => ({
+    recipeInstructions: Array.isArray(recipe.instructions) ? recipe.instructions.map((instruction, index) => ({
       "@type": "HowToStep",
       name: `Step ${index + 1}`,
       text: instruction.instruction,
       position: index + 1
-    })) || [],
+    })) : [],
 
     // Keywords (tags, dietary info, etc.)
     keywords: [

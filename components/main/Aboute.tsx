@@ -280,7 +280,7 @@ export default async function About() {
             position={aboutPageContent.recipesCardPosition || "left"}
           >
             <StyledList>
-              {aboutPageContent.recipesCardItems?.map((item: string, index: number) => (
+              {Array.isArray(aboutPageContent.recipesCardItems) && aboutPageContent.recipesCardItems.map((item: string, index: number) => (
                 <li key={index} className="break-words leading-relaxed">{item}</li>
               ))}
             </StyledList>
@@ -293,7 +293,7 @@ export default async function About() {
             position={aboutPageContent.meetAuthorCardPosition || "right"}
           >
             <StyledList>
-              {aboutPageContent.meetAuthorCardItems?.map((item: string, index: number) => (
+              {Array.isArray(aboutPageContent.meetAuthorCardItems) && aboutPageContent.meetAuthorCardItems.map((item: string, index: number) => (
                 <li key={index} className="break-words leading-relaxed">{item}</li>
               ))}
             </StyledList>
@@ -306,14 +306,14 @@ export default async function About() {
             position={aboutPageContent.missionCardPosition || "left"}
           >
             <StyledList>
-              {aboutPageContent.missionCardItems?.map((item: string, index: number) => (
+              {Array.isArray(aboutPageContent.missionCardItems) && aboutPageContent.missionCardItems.map((item: string, index: number) => (
                 <li key={index} className="break-words leading-relaxed">{item}</li>
               ))}
             </StyledList>
           </AboutCard>
 
           {/* Custom Sections */}
-          {aboutPageContent.customSections?.map((section: any) => (
+          {Array.isArray(aboutPageContent.customSections) && aboutPageContent.customSections.map((section: any) => (
             <AboutCard
               key={section.id}
               icon={getIconComponent(section.icon || "flame")}
@@ -321,7 +321,7 @@ export default async function About() {
               position={section.position || "left"}
             >
               <StyledList>
-                {section.items?.map((item: string, index: number) => (
+                {Array.isArray(section.items) && section.items.map((item: string, index: number) => (
                   <li key={index} className="break-words leading-relaxed">{item}</li>
                 ))}
               </StyledList>

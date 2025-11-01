@@ -20,7 +20,7 @@ export const TipCard: React.FC<any> = ({ title, items, after }) => {
           </div>
           <div className="px-2">
             <ul className="w-full space-y-3">
-              {items?.map((item: any, index: any) => (
+              {Array.isArray(items) && items.map((item: any, index: any) => (
                 <li
                   key={index}
                   className="flex items-start space-x-3"
