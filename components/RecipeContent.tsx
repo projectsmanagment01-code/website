@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Recipe from "@/outils/types";
 import { TipCard } from "./TipCard";
 import EssentialIngredients from "./EssentialIngerdients";
@@ -7,6 +6,7 @@ import { Card } from "./Card";
 import { renderSafeHtml, hasHtmlTags } from "@/lib/utils";
 import { PinterestPinButton } from "./PinterestPinButton";
 import { getWebsiteName } from "@/lib/site-name-helper";
+import { SafeImage } from "./SafeImage";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -32,7 +32,13 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
   // Helper function to validate if image exists and is valid
   const isValidImage = (img: any): boolean => {
-    return img && typeof img === 'string' && img.trim().length > 0 && !img.includes('undefined') && !img.includes('null');
+    if (!img || typeof img !== 'string') return false;
+    const trimmed = img.trim();
+    if (trimmed.length === 0) return false;
+    if (trimmed.includes('undefined') || trimmed.includes('null')) return false;
+    // Must start with http:// or https:// or / (relative path)
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://') && !trimmed.startsWith('/')) return false;
+    return true;
   };
 
   // Check if recipe uses new named image fields
@@ -70,7 +76,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               description={`${recipe.title} - Delicious recipe from ${websiteName}`}
               altText={`${recipe.title} - feature image`}
             />
-            <Image
+            <SafeImage
               src={featureImage}
               alt={`${recipe.title} - feature image`}
               width={1200}
@@ -137,7 +143,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               description={`${recipe.title} - Ingredients preparation`}
               altText={`${recipe.title} - ingredients preparation`}
             />
-            <Image
+            <SafeImage
               src={ingredientImage}
               alt={`${recipe.title} - ingredients preparation`}
               width={1200}
@@ -169,7 +175,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               description={`${recipe.title} - Cooking process`}
               altText={`${recipe.title} - cooking process`}
             />
-            <Image
+            <SafeImage
               src={mixingImage}
               alt={`${recipe.title} - cooking process`}
               width={1200}
@@ -241,7 +247,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                     description={`${recipe.title} - ${item.title}`}
                     altText={`${recipe.title} - ${item.title}`}
                   />
-                  <Image
+                  <SafeImage
                     src={recipe.images[item.img] || recipe.images[1]}
                     alt={`${recipe.title} - ${item.title}`}
                     width={700}
@@ -311,7 +317,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               description={`${recipe.title} - Final presentation`}
               altText={`${recipe.title} - final presentation`}
             />
-            <Image
+            <SafeImage
               src={finalImage}
               alt={`${recipe.title} - final presentation`}
               width={1200}
