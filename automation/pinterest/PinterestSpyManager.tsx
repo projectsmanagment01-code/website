@@ -27,13 +27,7 @@ const DEFAULT_PROMPT_SETTINGS: PromptSettings = {
   "title": "SEO-optimized recipe title (60 chars max)",
   "description": "Compelling meta description (150-160 chars)",
   "keywords": "comma-separated relevant keywords",
-  "category": "main recipe category",
-  "tags": "comma-separated recipe tags",
-  "author": "recipe author name",
-  "cookingTime": "cooking time in minutes",
-  "prepTime": "prep time in minutes", 
-  "servings": "number of servings",
-  "difficulty": "Easy|Medium|Hard"
+  "category": "main recipe category"
 }
 
 Focus on making the title and description compelling for search engines while maintaining accuracy.`
@@ -70,16 +64,23 @@ export default function PinterestSpyManager() {
     extractionProgress,
     extractFeaturedImage,
     extractImagesForSelected,
-    setExtractionProgress
+    setExtractionProgress,
+    isPaused,
+    setIsPaused
   } = useImageExtraction(getAuthHeaders);
 
-  // SEO processing hook
+  // SEO processing hook (pass spyData to load existing results)
   const {
     seoResults,
     seoProgress,
     processSEO,
-    setSeoProgress
-  } = useSEOProcessing(getAuthHeaders);
+    setSeoProgress,
+    isPaused: isSEOPaused,
+    isStopped: isSEOStopped,
+    togglePause: toggleSEOPause,
+    stopProcessing: stopSEOProcessing,
+    resetStopFlag: resetSEOStopFlag
+  } = useSEOProcessing(getAuthHeaders, spyData);
 
   // Handle bulk import success
   const handleBulkImportSuccess = () => {
@@ -100,15 +101,8 @@ export default function PinterestSpyManager() {
 
     await extractImagesForSelected(selectedData);
     
-    // Update database for successful extractions
-    for (const entry of selectedData) {
-      const result = extractionResults[entry.id];
-      if (result?.imageUrl) {
-        await updateSpyData(entry.id, { spyImageUrl: result.imageUrl });
-      }
-    }
-    
-    loadSpyData();
+    // Reload data to show updated images in the table
+    await loadSpyData();
   };
 
   // Handle image extraction for all entries
@@ -157,12 +151,31 @@ export default function PinterestSpyManager() {
     }
   };
 
-  // Handle SEO processing
+  // Handle SEO processing with pause/resume/stop
   const handleProcessSEO = async (entries: PinterestSpyData[], prompt: string) => {
+    resetSEOStopFlag(); // Reset stop flag at start
     setSeoProgress({ current: 0, total: entries.length });
 
     for (let i = 0; i < entries.length; i++) {
+      // Check if stopped
+      if (isSEOStopped) {
+        console.log('⏹️ SEO processing stopped by user');
+        break;
+      }
+
+      // Check if paused - wait until resumed
+      while (isSEOPaused && !isSEOStopped) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      // Check again after pause
+      if (isSEOStopped) {
+        console.log('⏹️ SEO processing stopped by user');
+        break;
+      }
+
       const entry = entries[i];
+      console.log(`🔄 Processing SEO ${i + 1}/${entries.length}: ${entry.spyTitle}`);
       setSeoProgress({ current: i + 1, total: entries.length });
       
       const result = await processSEO(entry, prompt);
@@ -174,22 +187,32 @@ export default function PinterestSpyManager() {
           spyDescription: result.description,
           spyKeywords: result.keywords,
           spyCategory: result.category,
-          spyTags: result.tags,
-          spyAuthor: result.author,
-          spyCookingTime: result.cookingTime,
-          spyPrepTime: result.prepTime,
-          spyServings: result.servings,
-          spyDifficulty: result.difficulty,
           spyStatus: 'SEO_COMPLETED'
         });
       }
       
-      // Add delay between requests
-      if (i < entries.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      // 30-second delay between requests to avoid rate limiting
+      if (i < entries.length - 1 && !isSEOStopped) {
+        console.log('⏳ Waiting 30 seconds before next request...');
+        
+        // Break delay into 1-second chunks so we can check pause/stop
+        for (let delay = 0; delay < 30; delay++) {
+          if (isSEOStopped) break;
+          
+          // Pause countdown if paused
+          while (isSEOPaused && !isSEOStopped) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          
+          if (isSEOStopped) break;
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
     }
 
+    if (!isSEOStopped) {
+      console.log('✅ SEO processing completed');
+    }
     setSeoProgress({ current: 0, total: 0 });
     loadSpyData();
   };
@@ -204,9 +227,9 @@ export default function PinterestSpyManager() {
     }
 
     const csvContent = [
-      'ID,Title,Description,Keywords,Category,Tags,Author,Cooking Time,Prep Time,Servings,Difficulty',
+      'ID,Title,Description,Keywords,Category',
       ...results.map(r => 
-        `"${r.id}","${r.title}","${r.description}","${r.keywords}","${r.category}","${r.tags}","${r.author}","${r.cookingTime}","${r.prepTime}","${r.servings}","${r.difficulty}"`
+        `"${r.id}","${r.title}","${r.description}","${r.keywords}","${r.category}"`
       )
     ].join('\n');
 
@@ -252,23 +275,6 @@ export default function PinterestSpyManager() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Pinterest Spy Data Manager</h1>
-          <p className="text-gray-600 mt-1">
-            Import Pinterest spy data and generate recipes with AI-powered SEO extraction
-          </p>
-        </div>
-        
-        <button
-          onClick={() => setShowBulkImport(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-        >
-          📤 Bulk Import
-        </button>
-      </div>
-
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
@@ -302,6 +308,7 @@ export default function PinterestSpyManager() {
             onBulkImport={() => setShowBulkImport(true)}
             onUpdateEntry={updateSpyData}
             onDeleteEntries={deleteSpyData}
+            onSendToImageExtraction={() => setActiveTab('extract')}
           />
         )}
 
@@ -309,12 +316,20 @@ export default function PinterestSpyManager() {
           <ImageExtractionTab
             spyData={spyData}
             selectedEntries={selectedEntries}
+            onSelectionChange={setSelectedEntries}
             extractionStatus={extractionStatus}
             extractionResults={extractionResults}
             extractionProgress={extractionProgress}
             onExtractForSelected={handleExtractForSelected}
             onExtractForAll={handleExtractForAll}
             onExtractSingle={handleExtractSingle}
+            onCancelExtraction={() => setExtractionProgress({ current: 0, total: 0 })}
+            onUpdateImage={async (entryId: string, imageUrl: string) => {
+              await updateSpyData(entryId, { spyImageUrl: imageUrl });
+              await loadSpyData();
+            }}
+            isPaused={isPaused}
+            onTogglePause={() => setIsPaused(!isPaused)}
           />
         )}
 
@@ -322,10 +337,16 @@ export default function PinterestSpyManager() {
           <SEOResultsTab
             spyData={spyData}
             selectedEntries={selectedEntries}
+            onSelectionChange={setSelectedEntries}
             seoResults={seoResults}
+            seoProgress={seoProgress}
             onProcessSEO={handleProcessSEO}
             onExportResults={handleExportResults}
+            onDeleteEntries={deleteSpyData}
             getAuthHeaders={getAuthHeaders}
+            isPaused={isSEOPaused}
+            onTogglePause={toggleSEOPause}
+            onStop={stopSEOProcessing}
           />
         )}
 

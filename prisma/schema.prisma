@@ -360,6 +360,15 @@ model PinterestSpyData {
   seoKeyword            String?   @db.Text
   seoTitle              String?   @db.Text
   seoDescription        String?   @db.Text
+  seoCategory           String?   @db.Text  // AI-selected category slug from website categories
+  
+  // AI-Generated Images (4 images per recipe)
+  generatedImagePrompts Json?                // Stores all 4 prompts as JSON
+  generatedImage1Url    String?   @db.Text  // Feature image URL
+  generatedImage2Url    String?   @db.Text  // Ingredients image URL
+  generatedImage3Url    String?   @db.Text  // Cooking process image URL
+  generatedImage4Url    String?   @db.Text  // Final presentation image URL
+  imageGeneratedAt      DateTime?           // When images were generated
   
   // Processing Status Indicators
   status                String    @default("PENDING") // PENDING, SEO_PROCESSING, SEO_COMPLETED, READY_FOR_GENERATION, GENERATING, COMPLETED, FAILED

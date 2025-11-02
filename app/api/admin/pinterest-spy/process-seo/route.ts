@@ -154,7 +154,8 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Helper function to process a batch of entries
+ * Helper function to process a batch of entries using TRUE BATCH processing
+ * Sends all entries in ONE API call instead of individual requests
  */
 async function processSEOBatch(entryIds: string[]): Promise<{
   processed: number;
@@ -165,92 +166,147 @@ async function processSEOBatch(entryIds: string[]): Promise<{
   let processed = 0;
   let failed = 0;
 
+  console.log(`🚀 TRUE BATCH: Processing ${entryIds.length} entries in ONE API call`);
+
+  // Fetch all entries at once
+  const allSpyData = await prisma.pinterestSpyData.findMany({
+    where: { id: { in: entryIds } }
+  });
+
+  // Create a map for quick lookup
+  const spyDataMap = new Map(allSpyData.map(data => [data.id, data]));
+
+  // Separate already processed from pending
+  const pendingEntries: Array<{ id: string; data: any }> = [];
+  
   for (const entryId of entryIds) {
-    try {
-      // Get the spy data entry
-      const spyData = await prisma.pinterestSpyData.findUnique({
-        where: { id: entryId }
-      });
+    const spyData = spyDataMap.get(entryId);
 
-      if (!spyData) {
-        results.push({ id: entryId, success: false, error: 'Entry not found' });
-        failed++;
-        continue;
-      }
+    if (!spyData) {
+      results.push({ id: entryId, success: false, error: 'Entry not found' });
+      failed++;
+      continue;
+    }
 
-      // Skip if already processed and successful
-      if (spyData.status === 'SEO_COMPLETED' && spyData.seoKeyword) {
-        console.log(`⏭️ Skipping already processed entry: ${spyData.spyTitle}`);
-        results.push({ id: entryId, success: true, seoData: {
-          seoKeyword: spyData.seoKeyword,
-          seoTitle: spyData.seoTitle,
-          seoDescription: spyData.seoDescription
-        }});
-        processed++;
-        continue;
-      }
-
-      console.log(`🔄 Processing SEO for: ${spyData.spyTitle}`);
-
-      // Update status to processing
-      await prisma.pinterestSpyData.update({
-        where: { id: entryId },
-        data: { 
-          status: 'SEO_PROCESSING',
-          seoProcessingAttempts: { increment: 1 }
-        }
-      });
-
-      // Extract SEO metadata using AI
-      const seoMetadata = await SEOExtractionService.extractSEOMetadata({
-        spyTitle: spyData.spyTitle,
-        spyDescription: spyData.spyDescription,
-        spyImageUrl: spyData.spyImageUrl,
-        spyArticleUrl: spyData.spyArticleUrl,
-        spyPinImage: spyData.spyPinImage || undefined,
-        annotation: spyData.annotation || undefined
-      });
-
-      // Update with SEO data
-      await prisma.pinterestSpyData.update({
-        where: { id: entryId },
-        data: {
-          seoKeyword: seoMetadata.seoKeyword,
-          seoTitle: seoMetadata.seoTitle,
-          seoDescription: seoMetadata.seoDescription,
-          status: 'SEO_COMPLETED',
-          seoProcessedAt: new Date(),
-          seoProcessingError: null
-        }
-      });
-
+    // Skip if already processed
+    if (spyData.status === 'SEO_COMPLETED' && spyData.seoKeyword) {
+      console.log(`⏭️ Skipping already processed: ${spyData.spyTitle}`);
       results.push({ 
         id: entryId, 
         success: true, 
         seoData: {
-          seoKeyword: seoMetadata.seoKeyword,
-          seoTitle: seoMetadata.seoTitle,
-          seoDescription: seoMetadata.seoDescription,
-          confidence: seoMetadata.confidence,
-          reasoning: seoMetadata.reasoning
+          seoKeyword: spyData.seoKeyword,
+          seoTitle: spyData.seoTitle,
+          seoDescription: spyData.seoDescription,
+          seoCategory: spyData.seoCategory
         }
       });
       processed++;
-      
-      console.log(`✅ SEO processed: ${seoMetadata.seoKeyword} | ${seoMetadata.seoTitle}`);
-      
-      // Add delay between API calls to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) {
-      console.error(`❌ SEO processing failed for entry ${entryId}:`, error);
-      
-      // Update with error
-      try {
+      continue;
+    }
+
+    pendingEntries.push({ id: entryId, data: spyData });
+  }
+
+  // If no pending entries, return early
+  if (pendingEntries.length === 0) {
+    console.log('✅ All entries already processed');
+    return { processed, failed, results };
+  }
+
+  console.log(`📦 Sending ${pendingEntries.length} entries to AI in ONE batch...`);
+
+  try {
+    // Update all to processing status
+    await prisma.pinterestSpyData.updateMany({
+      where: { id: { in: pendingEntries.map(e => e.id) } },
+      data: { 
+        status: 'SEO_PROCESSING',
+        seoProcessingAttempts: { increment: 1 }
+      }
+    });
+
+    // Call the TRUE BATCH extraction service
+    const batchResults = await SEOExtractionService.batchExtractSEO(
+      pendingEntries.map(e => ({
+        spyTitle: e.data.spyTitle,
+        spyDescription: e.data.spyDescription,
+        spyImageUrl: e.data.spyImageUrl,
+        spyArticleUrl: e.data.spyArticleUrl,
+        spyPinImage: e.data.spyPinImage || undefined,
+        annotation: e.data.annotation || undefined
+      })),
+      pendingEntries.length // Batch size = all pending entries
+    );
+
+    // Process results and update database
+    for (let i = 0; i < batchResults.length; i++) {
+      const result = batchResults[i];
+      const entryId = pendingEntries[i].id;
+
+      if (result.success && result.data) {
+        // Update with SEO data
         await prisma.pinterestSpyData.update({
           where: { id: entryId },
           data: {
-            status: 'FAILED',
-            seoProcessingError: error instanceof Error ? error.message : 'Unknown error'
+            seoKeyword: result.data.seoKeyword,
+            seoTitle: result.data.seoTitle,
+            seoDescription: result.data.seoDescription,
+            seoCategory: result.data.seoCategory || null,
+            status: 'SEO_COMPLETED',
+            seoProcessedAt: new Date(),
+            seoProcessingError: null
+          }
+        });
+
+        results.push({ 
+          id: entryId, 
+          success: true, 
+          seoData: {
+            seoKeyword: result.data.seoKeyword,
+            seoTitle: result.data.seoTitle,
+            seoDescription: result.data.seoDescription,
+            seoCategory: result.data.seoCategory,
+            confidence: result.data.confidence,
+            reasoning: result.data.reasoning
+          }
+        });
+        processed++;
+        
+        console.log(`✅ [${i + 1}/${batchResults.length}] ${result.data.seoCategory || 'no-cat'} | ${result.data.seoKeyword}`);
+      } else {
+        // Update with error
+        await prisma.pinterestSpyData.update({
+          where: { id: entryId },
+          data: {
+            status: 'SEO_FAILED',
+            seoProcessingError: result.error || 'Unknown error'
+          }
+        });
+
+        results.push({ 
+          id: entryId, 
+          success: false, 
+          error: result.error 
+        });
+        failed++;
+        
+        console.error(`❌ [${i + 1}/${batchResults.length}] Failed: ${result.error}`);
+      }
+    }
+
+    console.log(`✅ TRUE BATCH complete: ${processed} processed, ${failed} failed`);
+  } catch (batchError) {
+    console.error('❌ Batch processing error:', batchError);
+    
+    // Mark all pending entries as failed
+    for (const entry of pendingEntries) {
+      try {
+        await prisma.pinterestSpyData.update({
+          where: { id: entry.id },
+          data: {
+            status: 'SEO_FAILED',
+            seoProcessingError: batchError instanceof Error ? batchError.message : 'Batch processing error'
           }
         });
       } catch (updateError) {
@@ -258,9 +314,9 @@ async function processSEOBatch(entryIds: string[]): Promise<{
       }
 
       results.push({ 
-        id: entryId, 
+        id: entry.id, 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: batchError instanceof Error ? batchError.message : 'Batch processing error'
       });
       failed++;
     }

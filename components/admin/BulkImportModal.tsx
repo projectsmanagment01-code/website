@@ -69,7 +69,27 @@ export default function BulkImportModal({
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">📤 Bulk Import Pinterest Spy Data</h3>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">📤 Bulk Import Pinterest Spy Data</h3>
+              <button
+                onClick={() => {
+                  const csvExample = `SPY Title,SPY Description,SPY Image URL,SPY Article URL,SPY PIN Image,Annotation
+"Chocolate Chip Cookies","Delicious homemade cookies","https://example.com/image1.jpg","https://example.com/recipe1","https://pinterest.com/pin1.jpg","Chef John - Desserts"
+"Pasta Carbonara","Classic Italian pasta dish","https://example.com/image2.jpg","https://example.com/recipe2","https://pinterest.com/pin2.jpg","Chef Maria - Italian"
+"Green Smoothie","Healthy breakfast smoothie","https://example.com/image3.jpg","https://example.com/recipe3","https://pinterest.com/pin3.jpg","Chef Amy - Healthy"`;
+                  const blob = new Blob([csvExample], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'pinterest-spy-import-example.csv';
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 mt-1"
+              >
+                📥 Download Example CSV
+              </button>
+            </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
@@ -148,17 +168,6 @@ Recipe 2,Another recipe,https://...,https://...,Chef Name"
             </div>
           )}
 
-          {/* Instructions */}
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h4 className="font-medium text-blue-800 mb-2">📋 CSV Format Requirements</h4>
-            <ul className="text-sm text-blue-700 space-y-1">
-              <li>• First row must contain column headers</li>
-              <li>• Supported columns: Title, Description, Image URL, Article URL, Author, Category, Tags</li>
-              <li>• Use commas to separate values</li>
-              <li>• Wrap text containing commas in quotes</li>
-              <li>• UTF-8 encoding recommended</li>
-            </ul>
-          </div>
         </div>
 
         <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">

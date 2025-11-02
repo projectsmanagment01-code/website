@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuth } from '../../../../../lib/auth';
+import { verifyAdminToken } from '../../../../../lib/auth';
 
 interface ExtractionRequest {
   url: string;
@@ -65,8 +65,7 @@ async function extractImageFromUrl(url: string): Promise<ExtractionResult> {
         'DNT': '1',
         'Connection': 'keep-alive',
         'Upgrade-Insecure-Requests': '1'
-      },
-      timeout: 10000 // 10 second timeout
+      }
     });
 
     if (!response.ok) {
@@ -83,7 +82,7 @@ async function extractImageFromUrl(url: string): Promise<ExtractionResult> {
     // Method 1: Try specific selectors
     for (const selector of IMAGE_SELECTORS) {
       const result = extractImageWithSelector(html, selector, url);
-      if (result.imageUrl) {
+      if (result.imageUrl && !result.imageUrl.startsWith('data:')) {
         imageUrl = result.imageUrl;
         alt = result.alt || '';
         usedSelector = selector;
@@ -119,8 +118,20 @@ async function extractImageFromUrl(url: string): Promise<ExtractionResult> {
       };
     }
 
+    // Make absolute URL
+    const absoluteUrl = makeAbsoluteUrl(imageUrl, url);
+
+    // Validate image URL - reject placeholders and invalid URLs
+    if (!isValidImageUrl(absoluteUrl)) {
+      return {
+        imageUrl: '',
+        success: false,
+        error: 'Invalid or placeholder image detected'
+      };
+    }
+
     return {
-      imageUrl: makeAbsoluteUrl(imageUrl, url),
+      imageUrl: absoluteUrl,
       alt,
       selector: usedSelector,
       success: true
@@ -172,7 +183,7 @@ function extractImageWithSelector(html: string, selector: string, baseUrl: strin
 
 function extractImageFromJsonLd(html: string, baseUrl: string): { imageUrl: string; alt?: string } {
   try {
-    const jsonLdRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>(.*?)<\/script>/gis;
+    const jsonLdRegex = /<script[^>]*type=["']application\/ld\+json["'][^>]*>(.*?)<\/script>/gi;
     let match;
     
     while ((match = jsonLdRegex.exec(html)) !== null) {
@@ -266,6 +277,57 @@ function extractFirstLargeImage(html: string, baseUrl: string): { imageUrl: stri
   }
 }
 
+function isValidImageUrl(url: string): boolean {
+  try {
+    // Reject data URLs (base64, SVG, etc.)
+    if (url.startsWith('data:')) {
+      return false;
+    }
+
+    // Reject SVG files (usually placeholders)
+    if (url.toLowerCase().endsWith('.svg') || url.includes('.svg?')) {
+      return false;
+    }
+
+    // Reject placeholder patterns
+    const placeholderPatterns = [
+      'placeholder',
+      'default',
+      'no-image',
+      'noimage',
+      'missing',
+      'dummy',
+      '1x1',
+      'pixel',
+      'blank'
+    ];
+
+    const lowerUrl = url.toLowerCase();
+    if (placeholderPatterns.some(pattern => lowerUrl.includes(pattern))) {
+      return false;
+    }
+
+    // Must be a valid image extension
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+    const hasValidExtension = validExtensions.some(ext => 
+      lowerUrl.includes(ext) || lowerUrl.match(new RegExp(`\\${ext}[?#]`, 'i'))
+    );
+
+    if (!hasValidExtension) {
+      return false;
+    }
+
+    // Must be HTTP/HTTPS
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function makeAbsoluteUrl(url: string, baseUrl: string): string {
   try {
     if (url.startsWith('http')) {
@@ -291,8 +353,8 @@ function makeAbsoluteUrl(url: string, baseUrl: string): string {
 export async function POST(request: NextRequest) {
   try {
     // Verify authentication
-    const authResult = await verifyAuth(request);
-    if (!authResult.isValid) {
+    const authResult = await verifyAdminToken(request);
+    if (!authResult.success) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -321,6 +383,16 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    // Update database with extracted image URL
+    if (entryId && result.imageUrl) {
+      const prisma = (await import('@/lib/prisma')).default;
+      
+      await prisma.pinterestSpyData.update({
+        where: { id: entryId },
+        data: { spyImageUrl: result.imageUrl }
+      });
     }
 
     return NextResponse.json({

@@ -28,6 +28,7 @@ import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import PinterestSpyManager from "@/automation/pinterest/PinterestSpyManager";
+import ImageGenerationManager from "@/automation/image-generation/ImageGenerationManager";
 import AutomationDashboard from "@/components/admin/AutomationDashboard";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
@@ -139,6 +140,8 @@ function AdminDashboardContent() {
             <PinterestSpyManager />
           </div>
         );
+      case "image-generation":
+        return <ImageGenerationManager />;
       case "seo-reports":
         return (
           <div className="space-y-6">

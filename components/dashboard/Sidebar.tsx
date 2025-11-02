@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
   Activity,
+  ImageIcon,
   Target,
 } from "lucide-react";
 
@@ -78,6 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const automationItems = [
     { id: "automation", label: "Recipe Automation", icon: Activity },
     { id: "pinterest-spy", label: "Pinterest Spy Data", icon: Target },
+    { id: "image-generation", label: "Image Generation", icon: ImageIcon },
   ];
 
   return (

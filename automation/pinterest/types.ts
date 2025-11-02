@@ -5,6 +5,8 @@ export interface PinterestSpyData {
   spyAuthor?: string;
   spyImageUrl?: string;
   spyArticleUrl?: string;
+  spyPinImage?: string;
+  annotation?: string;
   spyCategory?: string;
   spyTags?: string;
   spyCookingTime?: string;
@@ -29,6 +31,19 @@ export interface PinterestSpyData {
   spyAuthorImage?: string;
   spyAuthorBio?: string;
   markForGeneration?: boolean;
+  // AI-Generated SEO Fields (from database)
+  seoKeyword?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoCategory?: string;
+  seoProcessedAt?: Date;
+  // AI-Generated Images (4 images per recipe)
+  generatedImagePrompts?: any; // JSON containing all 4 prompts
+  generatedImage1Url?: string;
+  generatedImage2Url?: string;
+  generatedImage3Url?: string;
+  generatedImage4Url?: string;
+  imageGeneratedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -62,12 +77,6 @@ export interface SEOResult {
   description: string;
   keywords: string;
   category: string;
-  tags: string;
-  author: string;
-  cookingTime: string;
-  prepTime: string;
-  servings: string;
-  difficulty: string;
   status: 'processing' | 'completed' | 'error';
 }
 
