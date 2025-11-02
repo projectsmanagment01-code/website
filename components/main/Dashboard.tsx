@@ -27,7 +27,7 @@ import BackupManager from "@/components/admin/BackupManager";
 import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
-import PinterestSpyDataManager from "@/components/admin/PinterestSpyDataManager";
+import PinterestSpyManager from "@/automation/pinterest/PinterestSpyManager";
 import AutomationDashboard from "@/components/admin/AutomationDashboard";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
@@ -136,7 +136,7 @@ function AdminDashboardContent() {
                 Import Pinterest spy data and generate recipes with AI-powered SEO extraction
               </p>
             </div>
-            <PinterestSpyDataManager />
+            <PinterestSpyManager />
           </div>
         );
       case "seo-reports":
