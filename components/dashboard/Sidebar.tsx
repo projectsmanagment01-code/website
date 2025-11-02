@@ -15,6 +15,10 @@ import {
   Archive,
   Sparkles,
   Zap,
+  ChevronDown,
+  ChevronRight,
+  Activity,
+  Target,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -33,11 +37,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onMobileToggle,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [automationExpanded, setAutomationExpanded] = useState(false);
   
   // Handle mobile state
   useEffect(() => {
     setIsOpen(isMobileOpen);
   }, [isMobileOpen]);
+  
+  // Auto expand automation if one of its sub-items is active
+  useEffect(() => {
+    if (activeSection === 'automation' || activeSection === 'pinterest-spy') {
+      setAutomationExpanded(true);
+    }
+  }, [activeSection]);
   
   const handleSectionChange = (section: string) => {
     onSectionChange(section);
@@ -55,13 +67,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "media", label: "Media Library", icon: Image },
     { id: "content", label: "Content Management", icon: Edit },
     { id: "backup", label: "Backup & Restore", icon: Archive },
-    { id: "automation", label: "Automation", icon: Zap },
     { id: "seo-reports", label: "AI SEO Reports", icon: Sparkles },
     { id: "google-search", label: "Google Search", icon: Bot },
     { id: "plugins", label: "Plugins", icon: Bot },
     { id: "api-tokens", label: "API Tokens", icon: Key },
     { id: "profile", label: "Login Settings", icon: User },
     { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  const automationItems = [
+    { id: "automation", label: "Recipe Automation", icon: Activity },
+    { id: "pinterest-spy", label: "Pinterest Spy Data", icon: Target },
   ];
 
   return (
@@ -135,6 +151,52 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </li>
               );
             })}
+            
+            {/* Automation Section with Submenu */}
+            <li>
+              <button
+                onClick={() => setAutomationExpanded(!automationExpanded)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  (activeSection === 'automation' || activeSection === 'pinterest-spy')
+                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                <Zap className="w-4 h-4" />
+                <span className="flex-1 text-left">Automation</span>
+                {automationExpanded ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </button>
+              
+              {/* Submenu */}
+              {automationExpanded && (
+                <ul className="ml-6 mt-2 space-y-1">
+                  {automationItems.map((subItem) => {
+                    const SubIcon = subItem.icon;
+                    const isSubActive = activeSection === subItem.id;
+
+                    return (
+                      <li key={subItem.id}>
+                        <button
+                          onClick={() => handleSectionChange(subItem.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                            isSubActive
+                              ? "bg-blue-100 text-blue-800 border border-blue-300"
+                              : "text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          <SubIcon className="w-4 h-4" />
+                          {subItem.label}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
           </ul>
         </nav>
       </div>

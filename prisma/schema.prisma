@@ -62,6 +62,7 @@ model Recipe {
   // Relations
   authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])
   categoryRef         Category? @relation("CategoryRecipes", fields: [categoryId], references: [id], onDelete: SetNull)
+  spyDataSource       PinterestSpyData[] @relation("SpyDataRecipe") // Reverse relation for spy data
   
   @@index([categoryId])
   @@index([status])
@@ -341,6 +342,69 @@ model RecipeAutomation {
   @@index([status])
   @@index([startedAt])
   @@map("recipe_automation")
+}
+
+// Pinterest Spy Data Management
+model PinterestSpyData {
+  id                    String    @id @default(cuid())
+  
+  // Raw Pinterest Spy Data (User Input)
+  spyTitle              String    @db.Text
+  spyDescription        String    @db.Text
+  spyImageUrl           String    @db.Text
+  spyArticleUrl         String    @db.Text
+  spyPinImage           String?   @db.Text
+  annotation            String?   @db.Text
+  
+  // AI-Extracted SEO Metadata
+  seoKeyword            String?   @db.Text
+  seoTitle              String?   @db.Text
+  seoDescription        String?   @db.Text
+  
+  // Processing Status Indicators
+  status                String    @default("PENDING") // PENDING, SEO_PROCESSING, SEO_COMPLETED, READY_FOR_GENERATION, GENERATING, COMPLETED, FAILED
+  isMarkedForGeneration Boolean   @default(false)
+  isProcessed           Boolean   @default(false)
+  
+  // AI Processing Metadata
+  seoProcessedAt        DateTime?
+  seoProcessingError    String?   @db.Text
+  seoProcessingAttempts Int       @default(0)
+  
+  // Recipe Generation Tracking
+  recipeGeneratedAt     DateTime?
+  generatedRecipeId     String?   // Link to created Recipe
+  generationError       String?   @db.Text
+  generationAttempts    Int       @default(0)
+  
+  // Batch/Import Tracking
+  batchId               String?   // For bulk imports
+  importedAt            DateTime?
+  importedBy            String?   // User ID who imported
+  
+  // Additional Metadata
+  priority              Int       @default(0) // Higher number = higher priority
+  tags                  String[]  @default([]) // Custom tags for organization
+  notes                 String?   @db.Text     // Internal notes
+  
+  // Audit Fields
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  createdBy             String?   // User ID who created
+  lastProcessedBy       String?   // User ID who last processed
+  
+  // Relations
+  generatedRecipe       Recipe?   @relation("SpyDataRecipe", fields: [generatedRecipeId], references: [id], onDelete: SetNull)
+  
+  // Indexes for performance
+  @@index([status])
+  @@index([isMarkedForGeneration])
+  @@index([createdAt])
+  @@index([priority])
+  @@index([batchId])
+  @@index([importedAt])
+  
+  @@map("pinterest_spy_data")
 }
 
 // Automation Scheduler Configuration

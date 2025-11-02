@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "provider": "gemini",
+  "apiKeys": {
+    "openai": "",
+    "gemini": "AIzaSyDEuqGVMVFEiZh9L3XJD8Q9Sp2VTY_H0uc"
+  },
+  "model": "gemini-2.5-flash",
+  "temperature": 0.7,
+  "maxTokens": 1000,
+  "features": {
+    "contentGeneration": true,
+    "recipeAssistance": true,
+    "seoOptimization": true,
+    "imageAnalysis": true,
+    "imageDescriptions": true,
+    "objectDetection": true
+  },
+  "lastTested": "2025-11-02T13:56:43.119Z",
+  "connectionStatus": "connected",
+  "lastUpdated": "2025-11-02T13:56:47.332Z",
+  "updatedBy": "admin@yourrecipesite.com"
+}

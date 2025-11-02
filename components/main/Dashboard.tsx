@@ -27,6 +27,8 @@ import BackupManager from "@/components/admin/BackupManager";
 import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
+import PinterestSpyDataManager from "@/components/admin/PinterestSpyDataManager";
+import AutomationDashboard from "@/components/admin/AutomationDashboard";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -110,16 +112,31 @@ function AdminDashboardContent() {
       case "backup":
         return <BackupManager />;
       case "automation":
-        // Redirect to automation page
-        if (typeof window !== 'undefined') {
-          window.location.href = '/admin/automation';
-        }
         return (
-          <div className="flex items-center justify-center h-screen">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Redirecting to Automation Dashboard...</p>
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Recipe Automation Dashboard
+              </h1>
+              <p className="text-gray-600">
+                Monitor and control automated recipe generation from Google Sheets
+              </p>
             </div>
+            <AutomationDashboard />
+          </div>
+        );
+      case "pinterest-spy":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Pinterest Spy Data Manager
+              </h1>
+              <p className="text-gray-600">
+                Import Pinterest spy data and generate recipes with AI-powered SEO extraction
+              </p>
+            </div>
+            <PinterestSpyDataManager />
           </div>
         );
       case "seo-reports":
