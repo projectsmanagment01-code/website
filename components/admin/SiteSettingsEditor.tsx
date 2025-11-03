@@ -433,10 +433,10 @@ export default function SiteSettingsEditor({ onBack }: SiteSettingsEditorProps) 
       </div>
 
       {/* Manual Settings Section */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-6">
-        <div className="border-b border-gray-200 pb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Additional Settings</h2>
-          <p className="text-sm text-gray-600 mt-1">Configure site contact and footer information</p>
+      <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6 space-y-6">
+        <div className="border-b border-gray-200 dark:border-slate-700 pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">Additional Settings</h2>
+          <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">Configure site contact and footer information</p>
         </div>
 
         {/* Site URL */}

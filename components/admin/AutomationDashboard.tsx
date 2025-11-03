@@ -13,6 +13,7 @@ import {
   AlertCircle,
   ChevronRight
 } from 'lucide-react';
+import { AdminCard, AdminButton, AdminBadge } from '@/components/admin/AdminUI';
 
 interface QueueStats {
   active: number;
@@ -210,15 +211,15 @@ export default function AutomationDashboard() {
     switch (status.toUpperCase()) {
       case 'SUCCESS':
       case 'COMPLETED':
-        return 'text-green-700 bg-green-50 border border-green-200';
+        return 'text-emerald-700 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800';
       case 'FAILED':
-        return 'text-red-700 bg-red-50 border border-red-200';
+        return 'text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-900/30 border border-red-200 dark:border-red-800';
       case 'PROCESSING':
-        return 'text-blue-700 bg-blue-50 border border-blue-200';
+        return 'text-slate-700 bg-slate-100 dark:text-slate-300 dark:bg-slate-700 border border-slate-200 dark:border-slate-600';
       case 'PENDING':
-        return 'text-gray-700 bg-gray-50 border border-gray-200';
+        return 'text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800';
       default:
-        return 'text-gray-600 bg-gray-50 border border-gray-200';
+        return 'text-slate-600 bg-slate-100 dark:text-slate-400 dark:bg-slate-700 border border-slate-200 dark:border-slate-600';
     }
   };
 
@@ -240,57 +241,57 @@ export default function AutomationDashboard() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded border border-gray-200 p-4 shadow-md">
+        <div className="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Active Jobs</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1.5">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Active Jobs</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1.5">
                 {queueStats?.active || 0}
               </p>
             </div>
-            <div className="w-11 h-11 bg-gray-900 rounded flex items-center justify-center shadow-sm">
+            <div className="w-11 h-11 bg-slate-900 dark:bg-slate-700 rounded flex items-center justify-center shadow-sm">
               <Activity className="w-5 h-5 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded border border-gray-200 p-4 shadow-md">
+        <div className="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Completed</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1.5">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Completed</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1.5">
                 {queueStats?.completed || 0}
               </p>
             </div>
-            <div className="w-11 h-11 bg-green-600 rounded flex items-center justify-center shadow-sm">
+            <div className="w-11 h-11 bg-emerald-600 dark:bg-emerald-700 rounded flex items-center justify-center shadow-sm">
               <CheckCircle2 className="w-5 h-5 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded border border-gray-200 p-4 shadow-md">
+        <div className="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">In Queue</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1.5">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">In Queue</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1.5">
                 {queueStats?.waiting || 0}
               </p>
             </div>
-            <div className="w-11 h-11 bg-blue-600 rounded flex items-center justify-center shadow-sm">
+            <div className="w-11 h-11 bg-slate-600 dark:bg-slate-500 rounded flex items-center justify-center shadow-sm">
               <Clock className="w-5 h-5 text-white" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded border border-gray-200 p-4 shadow-md">
+        <div className="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Failed</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1.5">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Failed</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1.5">
                 {queueStats?.failed || 0}
               </p>
             </div>
-            <div className="w-11 h-11 bg-red-600 rounded flex items-center justify-center shadow-sm">
+            <div className="w-11 h-11 bg-red-600 dark:bg-red-700 rounded flex items-center justify-center shadow-sm">
               <XCircle className="w-5 h-5 text-white" />
             </div>
           </div>
@@ -300,20 +301,20 @@ export default function AutomationDashboard() {
       {/* Control Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Manual Start Card */}
-        <div className="bg-gray-900 rounded border border-gray-700 p-4 text-white shadow-lg">
+        <div className="bg-slate-800 dark:bg-slate-900 rounded border border-slate-700 dark:border-slate-600 p-4 text-white shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <div>
               <h3 className="text-base font-bold mb-1.5">Manual Start</h3>
-              <p className="text-gray-300 text-xs leading-relaxed">
+              <p className="text-slate-300 dark:text-slate-400 text-xs leading-relaxed">
                 Start automation immediately for the next eligible recipe
               </p>
             </div>
-            <PlayCircle className="w-5 h-5 text-gray-400" />
+            <PlayCircle className="w-5 h-5 text-slate-400" />
           </div>
           <button
             onClick={handleStartAutomation}
             disabled={isStarting || (queueStats?.active || 0) > 0}
-            className="w-full bg-white text-gray-900 font-semibold py-2 px-4 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm shadow-md"
+            className="w-full bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold py-2 px-4 rounded hover:bg-slate-100 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
           >
             {isStarting ? (
               <>
@@ -330,17 +331,17 @@ export default function AutomationDashboard() {
         </div>
 
         {/* Scheduler Card */}
-        <div className="bg-white rounded border border-gray-200 p-4 shadow-md">
+        <div className="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h3 className="text-base font-bold text-gray-900 mb-1.5">Automation Schedule</h3>
-              <p className="text-gray-600 text-xs leading-relaxed">
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-1.5">Automation Schedule</h3>
+              <p className="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
                 {schedule?.enabled 
                   ? `Running ${schedule.scheduleType} • Next: ${schedule.nextRun ? new Date(schedule.nextRun).toLocaleString() : 'N/A'}`
                   : 'Schedule automatic runs'}
               </p>
             </div>
-            <Calendar className="w-5 h-5 text-gray-500" />
+            <Calendar className="w-5 h-5 text-slate-500 dark:text-slate-400" />
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -359,76 +360,76 @@ export default function AutomationDashboard() {
 
       {/* Performance Stats */}
       {automationStats && (
-        <div className="bg-white rounded border border-gray-200 p-4 shadow-md">
-          <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2 pb-2 border-b border-gray-200">
-            <TrendingUp className="w-4 h-4 text-gray-700" />
+        <div className="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+            <TrendingUp className="w-4 h-4 text-slate-700 dark:text-slate-300" />
             Performance Metrics
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-50 rounded p-3 border border-gray-200 shadow-sm">
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Runs</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{automationStats.totalRuns}</p>
+            <div className="bg-slate-50 dark:bg-slate-700 rounded p-3 border border-slate-200 dark:border-slate-600 shadow-sm">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Total Runs</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{automationStats.totalRuns}</p>
             </div>
-            <div className="bg-gray-50 rounded p-3 border border-gray-200 shadow-sm">
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Success Rate</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{automationStats.successRate}%</p>
+            <div className="bg-slate-50 dark:bg-slate-700 rounded p-3 border border-slate-200 dark:border-slate-600 shadow-sm">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Success Rate</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{automationStats.successRate}%</p>
             </div>
-            <div className="bg-gray-50 rounded p-3 border border-gray-200 shadow-sm">
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Avg. Time</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{automationStats.averageTime}m</p>
+            <div className="bg-slate-50 dark:bg-slate-700 rounded p-3 border border-slate-200 dark:border-slate-600 shadow-sm">
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Avg. Time</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">{automationStats.averageTime}m</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Recent Activity */}
-      <div className="bg-white rounded border border-gray-200 shadow-md">
-        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
-          <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-gray-700" />
+      <div className="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Activity className="w-4 h-4 text-slate-700 dark:text-slate-300" />
             Recent Activity
           </h3>
         </div>
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-slate-200 dark:divide-slate-700">
           {recentJobs.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
-              <Activity className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <div className="p-6 text-center text-slate-500 dark:text-slate-400">
+              <Activity className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
               <p className="font-semibold text-sm">No recent activity</p>
-              <p className="text-xs mt-1 text-gray-400">Start your first automation to see activity here</p>
+              <p className="text-xs mt-1 text-slate-400 dark:text-slate-500">Start your first automation to see activity here</p>
             </div>
           ) : (
             recentJobs.map((job) => (
-              <div key={job.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+              <div key={job.id} className="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1.5">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getStatusColor(job.status)}`}>
                         {job.status}
                       </span>
-                      <span className="text-xs font-medium text-gray-500">
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         Row {job.recipeRowNumber}
                       </span>
                     </div>
-                    <p className="font-semibold text-sm text-gray-900 mb-1">
+                    <p className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1">
                       {job.spyTitle || 'Untitled Recipe'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Started {new Date(job.startedAt).toLocaleString()}
                     </p>
                     {job.error && (
-                      <p className="text-xs text-red-700 mt-2 bg-red-50 p-2 rounded border border-red-200 shadow-sm">
+                      <p className="text-xs text-red-700 dark:text-red-400 mt-2 bg-red-50 dark:bg-red-900/30 p-2 rounded border border-red-200 dark:border-red-800 shadow-sm">
                         {job.error}
                       </p>
                     )}
                   </div>
                   <div className="ml-3 flex items-center gap-3">
                     <div className="text-right">
-                      <p className="text-xs font-bold text-gray-900">
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
                         Step {job.currentStep} / {job.totalSteps}
                       </p>
-                      <div className="w-20 h-2 bg-gray-200 rounded-full mt-1.5 overflow-hidden border border-gray-300">
+                      <div className="w-20 h-2 bg-slate-200 dark:bg-slate-700 rounded-full mt-1.5 overflow-hidden border border-slate-300 dark:border-slate-600">
                         <div
-                          className="h-full bg-gray-900 transition-all duration-300"
+                          className="h-full bg-slate-900 dark:bg-slate-400 transition-all duration-300"
                           style={{ width: `${getProgressPercentage(job.currentStep, job.totalSteps)}%` }}
                         />
                       </div>
@@ -439,7 +440,7 @@ export default function AutomationDashboard() {
                       {job.status === 'PROCESSING' && (
                         <button
                           onClick={() => handleStopJob(job.id)}
-                          className="px-2.5 py-1 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded transition-colors shadow-md hover:shadow-lg"
+                          className="px-2.5 py-1 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded transition-colors shadow-sm"
                           title="Stop this job"
                         >
                           Stop
@@ -448,7 +449,7 @@ export default function AutomationDashboard() {
                       {job.status === 'PENDING' && (
                         <button
                           onClick={() => handleCancelJob(job.id)}
-                          className="px-2.5 py-1 text-xs font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded transition-colors shadow-md hover:shadow-lg border border-gray-300"
+                          className="px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 rounded transition-colors shadow-sm border border-slate-300 dark:border-slate-500"
                           title="Cancel this job"
                         >
                           Cancel
@@ -457,7 +458,7 @@ export default function AutomationDashboard() {
                       {job.status === 'FAILED' && (
                         <button
                           onClick={() => handleRetryJob(job.id)}
-                          className="px-2.5 py-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors shadow-md hover:shadow-lg"
+                          className="px-2.5 py-1 text-xs font-semibold text-white bg-slate-600 hover:bg-slate-700 rounded transition-colors shadow-sm"
                           title="Retry this job"
                         >
                           Retry
@@ -475,28 +476,28 @@ export default function AutomationDashboard() {
       </div>
 
       {/* System Info */}
-      <div className="bg-white rounded border border-gray-200 p-4 shadow-md">
-        <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2 pb-2 border-b border-gray-200">
-          <Settings className="w-4 h-4 text-gray-700" />
+      <div className="bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 p-4 shadow-sm">
+        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-700">
+          <Settings className="w-4 h-4 text-slate-700 dark:text-slate-300" />
           System Information
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-gray-50 rounded p-2.5 border border-gray-200 shadow-sm">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Queue System</p>
-            <p className="font-bold text-sm text-gray-900 mt-1">BullMQ + Redis</p>
+          <div className="bg-slate-50 dark:bg-slate-700 rounded p-2.5 border border-slate-200 dark:border-slate-600 shadow-sm">
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Queue System</p>
+            <p className="font-bold text-sm text-slate-900 dark:text-slate-100 mt-1">BullMQ + Redis</p>
           </div>
-          <div className="bg-gray-50 rounded p-2.5 border border-gray-200">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Steps</p>
-            <p className="font-bold text-sm text-gray-900 mt-1">12 Steps</p>
+          <div className="bg-slate-50 dark:bg-slate-700 rounded p-2.5 border border-slate-200 dark:border-slate-600">
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Total Steps</p>
+            <p className="font-bold text-sm text-slate-900 dark:text-slate-100 mt-1">12 Steps</p>
           </div>
-          <div className="bg-gray-50 rounded p-2.5 border border-gray-200">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">AI Models</p>
-            <p className="font-bold text-sm text-gray-900 mt-1">Gemini</p>
+          <div className="bg-slate-50 dark:bg-slate-700 rounded p-2.5 border border-slate-200 dark:border-slate-600">
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">AI Models</p>
+            <p className="font-bold text-sm text-slate-900 dark:text-slate-100 mt-1">Gemini</p>
           </div>
-          <div className="bg-gray-50 rounded p-2.5 border border-gray-200">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</p>
-            <div className="font-bold text-sm text-gray-900 mt-1 flex items-center gap-1.5">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <div className="bg-slate-50 dark:bg-slate-700 rounded p-2.5 border border-slate-200 dark:border-slate-600">
+            <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Status</p>
+            <div className="font-bold text-sm text-slate-900 dark:text-slate-100 mt-1 flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               Online
             </div>
           </div>

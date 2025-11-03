@@ -116,10 +116,10 @@ function AdminDashboardContent() {
         return (
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                 Recipe Automation Dashboard
               </h1>
-              <p className="text-gray-600">
+              <p className="text-slate-600 dark:text-slate-400">
                 Monitor and control automated recipe generation from Google Sheets
               </p>
             </div>
@@ -130,10 +130,10 @@ function AdminDashboardContent() {
         return (
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                 Pinterest Spy Data Manager
               </h1>
-              <p className="text-gray-600">
+              <p className="text-slate-600 dark:text-slate-400">
                 Import Pinterest spy data and generate recipes with AI-powered SEO extraction
               </p>
             </div>
@@ -146,10 +146,10 @@ function AdminDashboardContent() {
         return (
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                 AI SEO Reports
               </h1>
-              <p className="text-gray-600">
+              <p className="text-slate-600 dark:text-slate-400">
                 View and manage AI-generated SEO enhancements for your recipes
               </p>
             </div>
@@ -174,7 +174,7 @@ function AdminDashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex relative">
       <Sidebar
         activeSection={activeSection}
         onSectionChange={setActiveSection}
@@ -185,17 +185,19 @@ function AdminDashboardContent() {
 
       <main className="flex-1 overflow-auto">
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
+        <div className="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Admin Dashboard</h1>
           <button
             onClick={toggleMobileSidebar}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+            className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
           >
             <Menu className="w-5 h-5" />
           </button>
         </div>
         
-        <div className="p-1 md:p-2">{renderContent()}</div>
+        <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
+          {renderContent()}
+        </div>
       </main>
 
       <RecipeModal

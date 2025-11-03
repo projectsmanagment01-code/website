@@ -374,10 +374,10 @@ export default function Settings({ className }: SettingsProps) {
     return (
       <>
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-medium text-gray-900">File Content</h4>
+          <h4 className="text-sm font-medium text-gray-900 dark:text-slate-100">File Content</h4>
           <button
             onClick={startEditingFile}
-            className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-2 py-1 border border-gray-300 dark:border-slate-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
           >
             <Edit3 className="w-3 h-3 mr-1" />
               Edit
@@ -406,7 +406,7 @@ export default function Settings({ className }: SettingsProps) {
                 </button>
                 <button
                   onClick={cancelFileEdit}
-                  className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
                 >
                   Cancel
                 </button>
@@ -554,12 +554,12 @@ export default function Settings({ className }: SettingsProps) {
                 <>
                   <button
                     onClick={downloadFile}
-                    className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </button>
-                  <label className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer">
+                  <label className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 cursor-pointer">
                     <Upload className="w-4 h-4 mr-2" />
                     Upload
                     <input
@@ -573,7 +573,7 @@ export default function Settings({ className }: SettingsProps) {
               )}
               <button
                 onClick={loadSettings}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Refresh
@@ -594,16 +594,16 @@ export default function Settings({ className }: SettingsProps) {
           </div>
 
           {/* File Content */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
             {renderFileContent()}
           </div>
 
           {/* Help Text for Files */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-blue-800 mb-2">
+          <div className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-2">
               {getSectionLabel(activeTab)} Guidelines
             </h4>
-            <ul className="text-sm text-blue-700 space-y-1">
+            <ul className="text-sm text-slate-700 dark:text-slate-300 space-y-1">
               {renderFileHelpText()}
             </ul>
           </div>
@@ -650,7 +650,7 @@ export default function Settings({ className }: SettingsProps) {
                 </button>
                 <button
                   onClick={loadSettings}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
@@ -687,23 +687,23 @@ export default function Settings({ className }: SettingsProps) {
                 codeBlocks.map((codeBlock: string, index: number) => (
                   <div
                     key={index}
-                    className="bg-white border border-gray-200 rounded-lg p-4"
+                    className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-sm font-medium text-gray-900">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-slate-100">
                         Code Block #{index + 1}
                       </h4>
                       <div className="flex gap-2">
                         <button
                           onClick={() => startEditing(index)}
-                          className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                          className="inline-flex items-center px-2 py-1 border border-gray-300 dark:border-slate-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
                         >
                           <Edit3 className="w-3 h-3 mr-1" />
                           Edit
                         </button>
                         <button
                           onClick={() => removeCodeBlock(index)}
-                          className="inline-flex items-center px-2 py-1 border border-red-300 shadow-sm text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50"
+                          className="inline-flex items-center px-2 py-1 border border-red-300 dark:border-red-600 shadow-sm text-xs font-medium rounded text-red-700 dark:text-red-400 bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/20"
                         >
                           <Trash2 className="w-3 h-3 mr-1" />
                           Remove
@@ -733,8 +733,8 @@ export default function Settings({ className }: SettingsProps) {
                             Save
                           </button>
                           <button
-                            onClick={cancelEdit}
-                            className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                            onclick={cancelEdit}
+                            className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
                           >
                             Cancel
                           </button>

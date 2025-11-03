@@ -285,7 +285,7 @@ export default function ContentManagement({ className }: ContentManagementProps)
           <div className="flex gap-2">
             <button
               onClick={loadSettings}
-              className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
@@ -306,11 +306,11 @@ export default function ContentManagement({ className }: ContentManagementProps)
         </div>
 
         {/* Content Editor */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4">
           {/* Hero Section Page Selector */}
           {activeTab === "hero" && (
-            <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Hero Page</h4>
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-slate-100 mb-2">Hero Page</h4>
               <select
                 value={settings.hero.page}
                 onChange={(e) =>
@@ -337,7 +337,7 @@ export default function ContentManagement({ className }: ContentManagementProps)
             </h4>
             <button
               onClick={startEditingFile}
-              className="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+              className="inline-flex items-center px-2 py-1 border border-gray-300 dark:border-slate-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
             >
               <Edit3 className="w-3 h-3 mr-1" />
               Edit
@@ -367,7 +367,7 @@ export default function ContentManagement({ className }: ContentManagementProps)
                 </button>
                 <button
                   onClick={cancelFileEdit}
-                  className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
                 >
                   Cancel
                 </button>

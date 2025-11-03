@@ -245,7 +245,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
         </nav>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
         {activeTab === "password" && (
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div>
