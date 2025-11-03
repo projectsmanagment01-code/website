@@ -1,7 +1,109 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { PinterestSpyData, Stats } from './types';
+
+// Optimized thumbnail component for fast table display
+const FastThumbnail = memo(({ 
+  src, 
+  alt, 
+  onClick, 
+  className,
+  title 
+}: {
+  src: string;
+  alt: string;
+  onClick: () => void;
+  className?: string;
+  title?: string;
+}) => {
+  const [imgSrc, setImgSrc] = useState<string>('');
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    // Generate optimized image URL
+    let optimizedSrc = src;
+    
+    try {
+      const url = new URL(src);
+      // Add optimization parameters for common image services
+      if (url.hostname.includes('pinterest') || url.hostname.includes('pinimg')) {
+        optimizedSrc = src.replace(/\/\d+x\//, '/75x75/'); // Smaller Pinterest thumbnails
+      } else if (url.hostname.includes('unsplash')) {
+        optimizedSrc = `${src}?w=48&h=48&q=30&fm=webp&fit=crop&auto=compress`;
+      } else if (url.hostname.includes('cloudinary')) {
+        optimizedSrc = src.replace(/\/upload\//, '/upload/w_48,h_48,c_fill,q_auto:low,f_webp,dpr_auto/');
+      } else if (url.hostname.includes('imgur')) {
+        optimizedSrc = src.replace(/\.(jpg|jpeg|png|gif)$/i, 's.$1'); // Imgur small size
+      } else {
+        // Generic optimization attempt with aggressive compression
+        optimizedSrc = `${src}${src.includes('?') ? '&' : '?'}w=48&h=48&q=30&fm=webp`;
+      }
+    } catch {
+      optimizedSrc = src; // Fallback to original if URL parsing fails
+    }
+
+    setImgSrc(optimizedSrc);
+    
+    // Preload the image for instant display
+    imagePreloader.preload(optimizedSrc).catch(() => {
+      // Silently handle preload failures
+    });
+  }, [src]);
+
+  const handleError = () => {
+    if (!hasError) {
+      setHasError(true);
+      // Try original URL as fallback
+      if (imgSrc !== src) {
+        setImgSrc(src);
+      } else {
+        // Final fallback to placeholder
+        setImgSrc('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48"%3E%3Crect fill="%23e5e7eb" width="48" height="48"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23888" font-size="10"%3ENo img%3C/text%3E%3C/svg%3E');
+      }
+    }
+  };
+
+  if (!imgSrc) {
+    return (
+      <div className="w-12 h-12 bg-gray-100 rounded animate-pulse flex items-center justify-center">
+        <span className="text-xs text-gray-400">...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-12 h-12">
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-gray-100 rounded animate-pulse flex items-center justify-center">
+          <span className="text-xs text-gray-400">⏳</span>
+        </div>
+      )}
+      <img
+        src={imgSrc}
+        alt={alt}
+        title={title}
+        loading="lazy"
+        decoding="async"
+        onClick={onClick}
+        className={`w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className || ''}`}
+        style={{ 
+          imageRendering: 'crisp-edges' as any,
+          transform: 'translateZ(0)', // Hardware acceleration
+          backfaceVisibility: 'hidden',
+          perspective: 1000,
+          minHeight: '48px', // Prevent layout shift
+          minWidth: '48px',
+          maxHeight: '48px',
+          maxWidth: '48px'
+        }}
+        onLoad={() => setIsLoaded(true)}
+        onError={handleError}
+      />
+    </div>
+  );
+});
 
 interface DataManagementTabProps {
   spyData: PinterestSpyData[];
@@ -13,8 +115,68 @@ interface DataManagementTabProps {
   onBulkImport: () => void;
   onUpdateEntry: (id: string, updates: Partial<PinterestSpyData>) => Promise<boolean>;
   onDeleteEntries: (ids: string[]) => Promise<boolean>;
-  onSendToImageExtraction: () => void;
+  onAutoImageExtraction: (entry: PinterestSpyData) => Promise<boolean>;
+  backgroundExtractionActive: boolean;
+  onBackgroundExtractionStart: () => void;
+  onBackgroundExtractionEnd: () => void;
 }
+
+FastThumbnail.displayName = 'FastThumbnail';
+
+// Image preloader service for better performance
+class ImagePreloader {
+  private cache = new Map<string, Promise<string>>();
+  private maxCacheSize = 200;
+
+  preload(src: string): Promise<string> {
+    if (this.cache.has(src)) {
+      return this.cache.get(src)!;
+    }
+
+    const promise = new Promise<string>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(src);
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = src;
+      // Set small size for preloading
+      img.width = 48;
+      img.height = 48;
+    });
+
+    // Manage cache size
+    if (this.cache.size >= this.maxCacheSize) {
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey) {
+        this.cache.delete(firstKey);
+      }
+    }
+
+    this.cache.set(src, promise);
+    return promise;
+  }
+}
+
+const imagePreloader = new ImagePreloader();
+
+// Helper function to check if URL is invalid
+const isInvalidUrl = (url: string): boolean => {
+  if (!url || !url.trim()) return false;
+  try {
+    new URL(url);
+    return false;
+  } catch {
+    return true;
+  }
+};
+
+// Helper function to check if entry has invalid URLs (from annotation flags or direct URL validation)
+const hasInvalidUrls = (entry: PinterestSpyData): { hasInvalidArticle: boolean; hasInvalidImage: boolean } => {
+  const annotation = entry.annotation || '';
+  return {
+    hasInvalidArticle: annotation.includes('INVALID_ARTICLE_URL') || isInvalidUrl(entry.spyArticleUrl || ''),
+    hasInvalidImage: annotation.includes('INVALID_IMAGE_URL') || isInvalidUrl(entry.spyImageUrl || '')
+  };
+};
 
 export const DataManagementTab: React.FC<DataManagementTabProps> = ({
   spyData,
@@ -26,55 +188,160 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
   onBulkImport,
   onUpdateEntry,
   onDeleteEntries,
-  onSendToImageExtraction
+  onAutoImageExtraction,
+  backgroundExtractionActive,
+  onBackgroundExtractionStart,
+  onBackgroundExtractionEnd
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [imageFilter, setImageFilter] = useState<string>('all');
   const [hasArticleUrl, setHasArticleUrl] = useState<string>('all');
   const [hasAnnotation, setHasAnnotation] = useState<string>('all');
+  const [invalidUrlFilter, setInvalidUrlFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedImage, setSelectedImage] = useState<{url: string, title: string, author?: string, entryId?: string} | null>(null);
   const [editingImageUrl, setEditingImageUrl] = useState<{entryId: string, currentUrl: string} | null>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [autoRefreshActive, setAutoRefreshActive] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{
+    key: keyof PinterestSpyData | null;
+    direction: 'asc' | 'desc';
+  }>({ key: 'id', direction: 'asc' }); // Default sort by ID to ensure consistent order
 
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 50; // Increased for better performance with optimized images
 
-  // Filter and paginate data
-  const filteredData = spyData.filter(entry => {
-    const matchesSearch = (entry.spyTitle?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-                         (entry.spyDescription?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-                         (entry.spyKeywords?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+  // Sorting function
+  const handleSort = (key: keyof PinterestSpyData) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+    setCurrentPage(1); // Reset to first page when sorting
+  };
+
+  // Sort indicator component
+  const SortIndicator = ({ column }: { column: keyof PinterestSpyData }) => {
+    if (sortConfig.key !== column) {
+      return <span className="text-gray-400 ml-1">↕️</span>;
+    }
+    return (
+      <span className="text-blue-600 ml-1">
+        {sortConfig.direction === 'asc' ? '↑' : '↓'}
+      </span>
+    );
+  };
+
+  // Filter, sort, and paginate data
+  const filteredAndSortedData = spyData
+    .filter(entry => {
+      const matchesSearch = (entry.spyTitle?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+                           (entry.spyDescription?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+                           (entry.spyKeywords?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+      
+      const matchesStatus = statusFilter === 'all' || entry.spyStatus === statusFilter;
     
-    const matchesStatus = statusFilter === 'all' || entry.spyStatus === statusFilter;
-    
-    const matchesImage = imageFilter === 'all' || 
+      const matchesImage = imageFilter === 'all' || 
                         (imageFilter === 'with-image' && entry.spyImageUrl) ||
                         (imageFilter === 'no-image' && !entry.spyImageUrl);
-    
-    const matchesArticleUrl = hasArticleUrl === 'all' ||
-                             (hasArticleUrl === 'with-url' && entry.spyArticleUrl) ||
-                             (hasArticleUrl === 'no-url' && !entry.spyArticleUrl);
-    
-    const matchesAnnotation = hasAnnotation === 'all' ||
-                             (hasAnnotation === 'with-annotation' && entry.annotation) ||
-                             (hasAnnotation === 'no-annotation' && !entry.annotation);
-    
-    return matchesSearch && matchesStatus && matchesImage && matchesArticleUrl && matchesAnnotation;
-  });
+      
+      const matchesArticleUrl = hasArticleUrl === 'all' ||
+                               (hasArticleUrl === 'with-url' && entry.spyArticleUrl) ||
+                               (hasArticleUrl === 'no-url' && !entry.spyArticleUrl);
+      
+      const matchesAnnotation = hasAnnotation === 'all' ||
+                               (hasAnnotation === 'with-annotation' && entry.annotation) ||
+                               (hasAnnotation === 'no-annotation' && !entry.annotation);
 
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+      const invalidUrls = hasInvalidUrls(entry);
+      const matchesInvalidUrl = invalidUrlFilter === 'all' ||
+                               (invalidUrlFilter === 'invalid-urls' && (invalidUrls.hasInvalidArticle || invalidUrls.hasInvalidImage)) ||
+                               (invalidUrlFilter === 'valid-urls' && !invalidUrls.hasInvalidArticle && !invalidUrls.hasInvalidImage);
+      
+      return matchesSearch && matchesStatus && matchesImage && matchesArticleUrl && matchesAnnotation && matchesInvalidUrl;
+    })
+    .sort((a, b) => {
+      if (!sortConfig.key) return 0;
+      
+      const aVal = a[sortConfig.key];
+      const bVal = b[sortConfig.key];
+      
+      // Handle null/undefined values
+      if (aVal === null || aVal === undefined) return sortConfig.direction === 'asc' ? 1 : -1;
+      if (bVal === null || bVal === undefined) return sortConfig.direction === 'asc' ? -1 : 1;
+      
+      // String comparison
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        const comparison = aVal.toLowerCase().localeCompare(bVal.toLowerCase());
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      }
+      
+      // Date comparison
+      if (aVal instanceof Date && bVal instanceof Date) {
+        const comparison = aVal.getTime() - bVal.getTime();
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      }
+      
+      // Number comparison
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        const comparison = aVal - bVal;
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      }
+      
+      // Default string comparison
+      const comparison = String(aVal).toLowerCase().localeCompare(String(bVal).toLowerCase());
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+
+  const totalPages = Math.ceil(filteredAndSortedData.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-
-  // Reset to page 1 when filters change
+  const paginatedData = filteredAndSortedData.slice(startIndex, endIndex);  // Reset to page 1 when filters or sorting change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, imageFilter, hasArticleUrl, hasAnnotation]);
+  }, [searchTerm, statusFilter, imageFilter, hasArticleUrl, hasAnnotation, invalidUrlFilter, sortConfig]);
+
+  // Auto-refresh stats during background image extraction
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    let lastImageCount = spyData.filter(entry => entry.spyImageUrl && entry.spyImageUrl.trim()).length;
+    let stableCount = 0;
+    
+    if (backgroundExtractionActive) {
+      console.log('🔄 Background extraction active - starting auto-refresh');
+      setAutoRefreshActive(true);
+      intervalId = setInterval(async () => {
+        console.log('📊 Auto-refreshing stats during background extraction...');
+        await onRefresh();
+        
+        // Check if image count has stabilized (no new images for 2 intervals = 10 seconds)
+        const currentImageCount = spyData.filter(entry => entry.spyImageUrl && entry.spyImageUrl.trim()).length;
+        if (currentImageCount === lastImageCount) {
+          stableCount++;
+          if (stableCount >= 2) {
+            console.log('✅ No new images extracted for 10+ seconds - assuming background extraction completed');
+            onBackgroundExtractionEnd();
+          }
+        } else {
+          stableCount = 0;
+          lastImageCount = currentImageCount;
+        }
+      }, 5000); // Refresh every 5 seconds during background extraction
+    } else {
+      setAutoRefreshActive(false);
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [backgroundExtractionActive, spyData, onRefresh, onBackgroundExtractionEnd]);
 
   const handleSelectAll = () => {
-    const allFilteredIds = filteredData.map(entry => entry.id);
+    const allFilteredIds = filteredAndSortedData.map(entry => entry.id);
     const allSelected = allFilteredIds.every(id => selectedEntries.includes(id));
     
     if (allSelected) {
@@ -109,7 +376,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
   const handleExportData = () => {
     const dataToExport = selectedEntries.length > 0 
       ? spyData.filter(entry => selectedEntries.includes(entry.id))
-      : filteredData;
+      : filteredAndSortedData;
 
     if (dataToExport.length === 0) {
       alert('No data to export.');
@@ -118,7 +385,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
 
     const csvContent = [
       'Title,Description,Image URL,Article URL,Author,Status,Category,Keywords',
-      ...dataToExport.map(entry => 
+      ...dataToExport.map((entry: PinterestSpyData) => 
         `"${(entry.spyTitle || '').replace(/"/g, '""')}","${(entry.spyDescription || '').replace(/"/g, '""')}","${entry.spyImageUrl || ''}","${entry.spyArticleUrl || ''}","${entry.spyAuthor || ''}","${entry.spyStatus || ''}","${entry.spyCategory || ''}","${(entry.spyKeywords || '').replace(/"/g, '""')}"`
       )
     ].join('\n');
@@ -156,6 +423,21 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Performance CSS */}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .fast-table img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            will-change: opacity;
+          }
+          .fast-table tbody tr {
+            contain: layout style paint;
+            will-change: transform;
+          }
+        `
+      }} />
+      
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div className="bg-white p-3 rounded shadow-sm border border-gray-200">
@@ -168,11 +450,18 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           </div>
           <div className="text-xs text-gray-600">SEO Processed</div>
         </div>
-        <div className="bg-white p-3 rounded shadow-sm border border-gray-200">
-          <div className="text-xl font-bold text-slate-700">
-            {stats.markedForGeneration}
+        <div className={`bg-white p-3 rounded shadow-sm border border-gray-200 ${autoRefreshActive ? 'ring-2 ring-emerald-300 ring-opacity-50' : ''}`}>
+          <div className="text-xl font-bold text-emerald-600">
+            {spyData.filter(entry => entry.spyImageUrl && entry.spyImageUrl.trim()).length}
+            {autoRefreshActive && <span className="text-sm ml-1 animate-pulse">🔄</span>}
           </div>
-          <div className="text-xs text-gray-600">Ready to Generate</div>
+          <div className="text-xs text-gray-600">
+            Images Extracted
+            {autoRefreshActive && <span className="text-emerald-600 ml-1">(live)</span>}
+          </div>
+          <div className="text-xs text-emerald-600 mt-1">
+            {spyData.filter(entry => entry.spyArticleUrl && !entry.spyImageUrl).length} pending
+          </div>
         </div>
         <div className="bg-white p-3 rounded shadow-sm border border-gray-200">
           <div className="text-xl font-bold text-slate-700">
@@ -237,16 +526,50 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
             <option value="no-annotation">No Annotation</option>
           </select>
 
+          <select
+            value={invalidUrlFilter}
+            onChange={(e) => setInvalidUrlFilter(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-slate-500 focus:border-slate-500"
+          >
+            <option value="all">All URLs</option>
+            <option value="invalid-urls">🚨 Invalid URLs</option>
+            <option value="valid-urls">✅ Valid URLs</option>
+          </select>
+
           <div className="px-3 py-1.5 text-xs text-gray-600 bg-gray-50 rounded border border-gray-200">
-            Showing {filteredData.length} of {stats.total} entries
+            Showing {filteredAndSortedData.length} of {stats.total} entries
+            {sortConfig.key && (
+              <span className="ml-2 text-blue-600">
+                • Sorted by {sortConfig.key} {sortConfig.direction === 'asc' ? '↑' : '↓'}
+              </span>
+            )}
           </div>
 
           {/* Action Buttons */}
           <button
-            onClick={onRefresh}
-            className="px-3 py-1.5 text-sm bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors"
+            onClick={async () => {
+              setRefreshing(true);
+              try {
+                // Clear all filters
+                setSearchTerm('');
+                setStatusFilter('all');
+                setImageFilter('all');
+                setHasArticleUrl('all');
+                setHasAnnotation('all');
+                setInvalidUrlFilter('all');
+                setCurrentPage(1);
+                setSortConfig({ key: 'id', direction: 'asc' }); // Reset to consistent default
+                
+                // Refresh data
+                await onRefresh();
+              } finally {
+                setRefreshing(false);
+              }
+            }}
+            disabled={refreshing}
+            className="px-3 py-1.5 text-sm bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            🔄 Refresh
+            {refreshing ? '🔄 Refreshing...' : '🔄 Refresh & Clear Filters'}
           </button>
 
           <button
@@ -258,17 +581,17 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
 
           <button
             onClick={handleExportData}
-            disabled={filteredData.length === 0}
+            disabled={filteredAndSortedData.length === 0}
             className="px-3 py-1.5 text-sm bg-gray-700 text-white rounded hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
-            📥 Export {selectedEntries.length > 0 ? `(${selectedEntries.length})` : `(${filteredData.length})`}
+            📥 Export {selectedEntries.length > 0 ? `(${selectedEntries.length})` : `(${filteredAndSortedData.length})`}
           </button>
 
           <button
             onClick={handleSelectAll}
             className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            {filteredData.length > 0 && filteredData.every(entry => selectedEntries.includes(entry.id))
+            {filteredAndSortedData.length > 0 && filteredAndSortedData.every(entry => selectedEntries.includes(entry.id))
               ? `Deselect All (${stats.total})`
               : `Select All (${stats.total})`}
           </button>
@@ -276,25 +599,65 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           {selectedEntries.length > 0 && (
             <>
               <button
-                onClick={() => {
-                  onSendToImageExtraction();
-                  alert(`Sent ${selectedEntries.length} entries to Image Extraction tab. Switch to the Image Extract tab to process them.`);
+                onClick={handleDeleteSelected}
+                className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
+                🗑️ Delete ({selectedEntries.length})
+              </button>
+              <button
+                onClick={async () => {
+                  // Get selected data in the same order as displayed in the table
+                  const selectedData = filteredAndSortedData.filter(entry => 
+                    selectedEntries.includes(entry.id) && entry.spyArticleUrl && !entry.spyImageUrl
+                  );
+                  
+                  if (selectedData.length === 0) {
+                    alert('No selected entries need image extraction (they must have article URLs and no existing image).');
+                    return;
+                  }
+
+                  if (!confirm(`Auto-extract images for ${selectedData.length} selected entries in table order?`)) {
+                    return;
+                  }
+
+                  // Log the extraction order for tracking
+                  console.log(`🔍 Manual extraction order (current table display order):`, 
+                    selectedData.map((e, i) => `${i + 1}. ${e.spyTitle} (ID: ${e.id})`).join(', '));
+
+                  // Notify parent that extraction is starting
+                  onBackgroundExtractionStart();
+                  
+                  let successCount = 0;
+                  let currentIndex = 0;
+                  
+                  try {
+                    for (const entry of selectedData) {
+                      currentIndex++;
+                      console.log(`🖼️ [MANUAL] Extracting image ${currentIndex}/${selectedData.length}: ${entry.spyTitle}`);
+                      
+                      const success = await onAutoImageExtraction(entry);
+                      if (success) successCount++;
+                      
+                      // Small delay between extractions
+                      await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                    
+                    alert(`Successfully extracted images for ${successCount} out of ${selectedData.length} entries.`);
+                  } finally {
+                    // Notify parent that extraction has ended
+                    onBackgroundExtractionEnd();
+                    await onRefresh();
+                  }
                 }}
                 className="px-3 py-1.5 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
               >
-                🖼️ Send to Image Extract ({selectedEntries.length})
+                🖼️ Auto Extract Images ({selectedEntries.length})
               </button>
               <button
                 onClick={() => onSelectionChange([])}
                 className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
               >
                 Clear Selection
-              </button>
-              <button
-                onClick={handleDeleteSelected}
-                className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-              >
-                🗑️ Delete ({selectedEntries.length})
               </button>
             </>
           )}
@@ -303,8 +666,17 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
 
       {/* Data Table */}
       <div className="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="overflow-x-auto" 
+             style={{ 
+               willChange: 'scroll-position',
+               contain: 'layout style paint',
+               transform: 'translateZ(0)' // Hardware acceleration
+             }}>
+          <table className="min-w-full divide-y divide-gray-200 fast-table"
+                 style={{ 
+                   tableLayout: 'fixed',
+                   backfaceVisibility: 'hidden'
+                 }}>
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">
@@ -315,13 +687,38 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
                     className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
                   />
                 </th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">SPY Title</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">SPY Description</th>
+                <th 
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('spyTitle')}
+                >
+                  SPY Title <SortIndicator column="spyTitle" />
+                </th>
+                <th 
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('spyDescription')}
+                >
+                  SPY Description <SortIndicator column="spyDescription" />
+                </th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">SPY Image URL</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">SPY Article URL</th>
+                <th 
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('spyArticleUrl')}
+                >
+                  SPY Article URL <SortIndicator column="spyArticleUrl" />
+                </th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">SPY PIN Image</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Annotation</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Status</th>
+                <th 
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('annotation')}
+                >
+                  Annotation <SortIndicator column="annotation" />
+                </th>
+                <th 
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSort('spyStatus')}
+                >
+                  Status <SortIndicator column="spyStatus" />
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
@@ -347,24 +744,33 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
                   </td>
                   <td className="px-3 py-2">
                     {entry.spyImageUrl ? (
-                      <img 
-                        src={entry.spyImageUrl} 
-                        alt=""
-                        onClick={() => setSelectedImage({url: entry.spyImageUrl!, title: entry.spyTitle || 'Image', entryId: entry.id})}
-                        className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48"%3E%3Crect fill="%23ddd" width="48" height="48"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="12"%3ENo img%3C/text%3E%3C/svg%3E';
-                        }}
-                      />
+                      hasInvalidUrls(entry).hasInvalidImage ? (
+                        <div className="w-12 h-12 bg-red-100 border-2 border-red-300 rounded flex items-center justify-center text-xs text-red-600 cursor-not-allowed" title={`Invalid image URL: ${entry.spyImageUrl}`}>
+                          ⚠️
+                        </div>
+                      ) : (
+                        <FastThumbnail
+                          src={entry.spyImageUrl}
+                          alt=""
+                          title={entry.spyTitle || 'Image'}
+                          onClick={() => setSelectedImage({url: entry.spyImageUrl!, title: entry.spyTitle || 'Image', entryId: entry.id})}
+                        />
+                      )
                     ) : (
                       <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">-</div>
                     )}
                   </td>
                   <td className="px-3 py-2 max-w-[150px]">
                     {entry.spyArticleUrl ? (
-                      <a href={entry.spyArticleUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:text-blue-800 truncate block">
-                        {entry.spyArticleUrl}
-                      </a>
+                      hasInvalidUrls(entry).hasInvalidArticle ? (
+                        <span className="text-xs text-red-600 truncate block cursor-not-allowed" title="Invalid URL - cannot open">
+                          {entry.spyArticleUrl} ⚠️
+                        </span>
+                      ) : (
+                        <a href={entry.spyArticleUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:text-blue-800 truncate block">
+                          {entry.spyArticleUrl}
+                        </a>
+                      )
                     ) : (
                       <span className="text-xs text-gray-400">-</span>
                     )}
@@ -393,10 +799,10 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
         </div>
 
         {/* Pagination */}
-        {filteredData.length > 0 && (
+        {filteredAndSortedData.length > 0 && (
           <div className="bg-gray-50 px-3 py-2 border-t border-gray-200 flex items-center justify-between">
             <div className="text-xs text-gray-600">
-              Showing {startIndex + 1}-{Math.min(endIndex, filteredData.length)} of {filteredData.length}
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSortedData.length)} of {filteredAndSortedData.length}
             </div>
             {totalPages > 1 && (
               <div className="flex items-center gap-1">

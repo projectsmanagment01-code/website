@@ -15,41 +15,66 @@ interface ExtractionResult {
   error?: string;
 }
 
-// Common selectors for recipe featured images
+// Enhanced selectors for recipe featured images - ordered by priority
 const IMAGE_SELECTORS = [
-  // Recipe-specific selectors
-  'article img[data-lazy-src]',
-  'article img[data-src]',
-  '.recipe-card img',
-  '.recipe-header img',
-  '.featured-image img',
-  '.post-thumbnail img',
-  '.wp-post-image',
-  
-  // General content selectors
-  'article img:first-of-type',
-  '.content img:first-of-type',
-  '.post-content img:first-of-type',
-  '.entry-content img:first-of-type',
-  
-  // Open Graph and meta images
+  // Meta tags (highest priority - most reliable)
   'meta[property="og:image"]',
+  'meta[name="twitter:image:src"]',
   'meta[name="twitter:image"]',
   
-  // Pinterest-specific
+  // Recipe-specific selectors (high priority)
+  '.recipe-hero img',
+  '.recipe-featured-image img',
+  '.recipe-image img',
+  '.recipe-card img',
+  '.recipe-header img',
+  '.featured-recipe-image img',
+  '.wp-post-image',
+  
+  // WordPress and popular themes
+  '.post-thumbnail img',
+  '.featured-image img',
+  '.entry-thumbnail img',
+  '.wp-block-image img',
+  '.featured img',
+  
+  // Article and content areas
+  'article img:first-of-type',
+  '.post-content img:first-of-type',
+  '.entry-content img:first-of-type',
+  '.content img:first-of-type',
+  '.main-content img:first-of-type',
+  
+  // Data attributes (lazy loading)
+  'img[data-lazy-src]:first-of-type',
+  'img[data-src]:first-of-type',
+  'img[data-original]:first-of-type',
+  
+  // Pinterest and social
   'img[data-pin-media]',
   'img.pin-image',
+  'img[data-pinterest-media]',
   
-  // WordPress and CMS
-  '.wp-block-image img',
-  '.gutenberg-image img',
-  '.elementor-image img',
+  // Size-based selectors
+  'img[width][height]',
   
-  // Generic fallbacks
+  // Content-based selectors
   'img[alt*="recipe"]',
   'img[alt*="food"]',
+  'img[alt*="dish"]',
+  'img[alt*="cooking"]',
   'img[src*="recipe"]',
+  'img[src*="food"]',
+  
+  // CMS and framework specific
+  '.elementor-image img',
+  '.gutenberg-image img',
+  '.divi-image img',
+  '.beaver-builder img',
+  
+  // Generic fallbacks (lowest priority)
   'main img:first-of-type',
+  '.container img:first-of-type',
   'body img:first-of-type'
 ];
 
@@ -149,28 +174,79 @@ async function extractImageFromUrl(url: string): Promise<ExtractionResult> {
 function extractImageWithSelector(html: string, selector: string, baseUrl: string): { imageUrl: string; alt?: string } {
   try {
     if (selector.startsWith('meta[')) {
-      // Handle meta tags
-      const metaRegex = selector.includes('og:image') 
-        ? /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i
-        : /<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i;
+      // Handle meta tags with improved patterns
+      let metaRegex;
+      if (selector.includes('og:image')) {
+        metaRegex = /<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i;
+      } else if (selector.includes('twitter:image:src')) {
+        metaRegex = /<meta[^>]*name=["']twitter:image:src["'][^>]*content=["']([^"']+)["']/i;
+      } else {
+        metaRegex = /<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["']/i;
+      }
       
       const match = html.match(metaRegex);
-      return { imageUrl: match ? match[1] : '', alt: '' };
+      const imageUrl = match ? match[1] : '';
+      return { 
+        imageUrl: makeAbsoluteUrl(imageUrl, baseUrl), 
+        alt: 'Featured image from meta tag' 
+      };
     }
 
-    // Handle img tags - simplified regex approach
-    const imgRegex = new RegExp(`<img[^>]*(?:class=["'][^"']*${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^"']*["']|${selector})[^>]*>`, 'i');
-    const imgMatch = html.match(imgRegex);
+    // Handle img tags with improved parsing
+    const selectorParts = selector.split(' ');
+    let searchPattern = '';
     
-    if (imgMatch) {
-      const imgTag = imgMatch[0];
+    if (selectorParts.length > 1) {
+      // Complex selector like ".recipe-card img"
+      const containerClass = selectorParts[0].replace('.', '');
+      searchPattern = `<[^>]*class=["'][^"']*${containerClass}[^"']*["'][^>]*>[\\s\\S]*?<img[^>]*>`;
+    } else if (selector.startsWith('.')) {
+      // Simple class selector like ".wp-post-image"
+      const className = selector.replace('.', '');
+      searchPattern = `<img[^>]*class=["'][^"']*${className}[^"']*["'][^>]*>`;
+    } else if (selector.includes('[')) {
+      // Attribute selector like "img[data-lazy-src]"
+      const attrMatch = selector.match(/img\[([^\]]+)\]/);
+      if (attrMatch) {
+        const attr = attrMatch[1];
+        if (attr.includes('=')) {
+          searchPattern = `<img[^>]*${attr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^>]*>`;
+        } else {
+          searchPattern = `<img[^>]*${attr}[^>]*>`;
+        }
+      }
+    } else {
+      // Simple tag selector
+      searchPattern = `<img[^>]*>`;
+    }
+
+    const regex = new RegExp(searchPattern, 'i');
+    const match = html.match(regex);
+    
+    if (match) {
+      const imgTag = match[0];
       
-      // Extract src, data-src, or data-lazy-src
-      const srcMatch = imgTag.match(/(?:data-lazy-)?(?:data-)?src=["']([^"']+)["']/i);
+      // Try multiple src attributes in order of preference
+      const srcPatterns = [
+        /data-lazy-src=["']([^"']+)["']/i,
+        /data-src=["']([^"']+)["']/i,
+        /data-original=["']([^"']+)["']/i,
+        /src=["']([^"']+)["']/i
+      ];
+      
+      let imageUrl = '';
+      for (const pattern of srcPatterns) {
+        const srcMatch = imgTag.match(pattern);
+        if (srcMatch && srcMatch[1] && !srcMatch[1].startsWith('data:')) {
+          imageUrl = srcMatch[1];
+          break;
+        }
+      }
+      
       const altMatch = imgTag.match(/alt=["']([^"']*)["']/i);
       
       return {
-        imageUrl: srcMatch ? srcMatch[1] : '',
+        imageUrl: makeAbsoluteUrl(imageUrl, baseUrl),
         alt: altMatch ? altMatch[1] : ''
       };
     }
@@ -179,6 +255,17 @@ function extractImageWithSelector(html: string, selector: string, baseUrl: strin
   } catch (error) {
     return { imageUrl: '', alt: '' };
   }
+}
+
+function makeAbsoluteUrl(url: string, baseUrl: string): string {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('//')) return 'https:' + url;
+  if (url.startsWith('/')) {
+    const base = new URL(baseUrl);
+    return base.origin + url;
+  }
+  return url;
 }
 
 function extractImageFromJsonLd(html: string, baseUrl: string): { imageUrl: string; alt?: string } {
@@ -325,28 +412,6 @@ function isValidImageUrl(url: string): boolean {
     return true;
   } catch {
     return false;
-  }
-}
-
-function makeAbsoluteUrl(url: string, baseUrl: string): string {
-  try {
-    if (url.startsWith('http')) {
-      return url;
-    }
-    
-    const base = new URL(baseUrl);
-    
-    if (url.startsWith('//')) {
-      return `${base.protocol}${url}`;
-    }
-    
-    if (url.startsWith('/')) {
-      return `${base.protocol}//${base.host}${url}`;
-    }
-    
-    return new URL(url, baseUrl).href;
-  } catch (error) {
-    return url;
   }
 }
 

@@ -4,14 +4,12 @@ import React, { useState } from 'react';
 import { TabType, TabConfig, PinterestSpyData, PromptSettings } from './types';
 import { usePinterestData, useImageExtraction, useSEOProcessing } from './hooks';
 import { DataManagementTab } from './DataManagementTab';
-import { ImageExtractionTab } from './ImageExtractionTab';
 import { SEOResultsTab } from './SEOResultsTab';
 import { SettingsTab } from './SettingsTab';
 import BulkImportModal from '@/components/admin/BulkImportModal';
 
 const TABS: TabConfig[] = [
   { id: 'data', name: 'Data Management', icon: '📊' },
-  { id: 'extract', name: 'Image Extract', icon: '🖼️' },
   { id: 'seo', name: 'SEO Results', icon: '🧠' },
   { id: 'settings', name: 'Settings', icon: '⚙️' }
 ];
@@ -43,6 +41,9 @@ export default function PinterestSpyManager() {
   // Bulk import modal
   const [showBulkImport, setShowBulkImport] = useState(false);
   
+  // Background extraction state
+  const [backgroundExtractionActive, setBackgroundExtractionActive] = useState(false);
+  
   // Settings
   const [promptSettings, setPromptSettings] = useState<PromptSettings>(DEFAULT_PROMPT_SETTINGS);
 
@@ -57,16 +58,9 @@ export default function PinterestSpyManager() {
     getAuthHeaders
   } = usePinterestData();
 
-  // Image extraction hook
+  // Image extraction hook (for automatic processing)
   const {
-    extractionStatus,
-    extractionResults,
-    extractionProgress,
-    extractFeaturedImage,
-    extractImagesForSelected,
-    setExtractionProgress,
-    isPaused,
-    setIsPaused
+    extractFeaturedImage
   } = useImageExtraction(getAuthHeaders);
 
   // SEO processing hook (pass spyData to load existing results)
@@ -88,67 +82,38 @@ export default function PinterestSpyManager() {
     loadSpyData();
   };
 
-  // Handle image extraction for selected entries
-  const handleExtractForSelected = async () => {
-    const selectedData = spyData.filter(entry => 
-      selectedEntries.includes(entry.id) && entry.spyArticleUrl && !entry.spyImageUrl
-    );
-    
-    if (selectedData.length === 0) {
-      alert('Please select entries with article URLs that need image extraction.');
-      return;
-    }
+  // Background extraction management
+  const handleBackgroundExtractionStart = () => {
+    console.log('🔄 Background extraction started - enabling auto-refresh');
+    setBackgroundExtractionActive(true);
+  };
 
-    await extractImagesForSelected(selectedData);
-    
-    // Reload data to show updated images in the table
+  const handleBackgroundExtractionEnd = () => {
+    console.log('✅ Background extraction ended - disabling auto-refresh');
+    setBackgroundExtractionActive(false);
+  };
+
+  // Force refresh function
+  const handleForceRefresh = async () => {
+    console.log('🔄 Force refreshing Pinterest spy data...');
     await loadSpyData();
   };
 
-  // Handle image extraction for all entries
-  const handleExtractForAll = async () => {
-    const entriesWithUrls = spyData.filter(entry => entry.spyArticleUrl && !entry.spyImageUrl);
-    
-    if (entriesWithUrls.length === 0) {
-      alert('No entries found that need image extraction.');
-      return;
-    }
-
-    if (!confirm(`Extract images for ${entriesWithUrls.length} entries? This may take several minutes.`)) {
-      return;
-    }
-
-    setExtractionProgress({ current: 0, total: entriesWithUrls.length });
-
-    for (let i = 0; i < entriesWithUrls.length; i++) {
-      const entry = entriesWithUrls[i];
-      setExtractionProgress({ current: i + 1, total: entriesWithUrls.length });
-      
-      const result = await extractFeaturedImage(entry);
-      
-      // Update database if extraction was successful
-      if (result?.imageUrl) {
-        await updateSpyData(entry.id, { spyImageUrl: result.imageUrl });
-      }
-      
-      // Add delay between requests
-      if (i < entriesWithUrls.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 3000));
+  // Automatic image extraction when new data is added
+  const handleAutoImageExtraction = async (entry: PinterestSpyData) => {
+    if (entry.spyArticleUrl && !entry.spyImageUrl) {
+      try {
+        const result = await extractFeaturedImage(entry);
+        
+        if (result?.imageUrl) {
+          await updateSpyData(entry.id, { spyImageUrl: result.imageUrl });
+          return true;
+        }
+      } catch (error) {
+        console.error('Auto image extraction failed:', error);
       }
     }
-
-    setExtractionProgress({ current: 0, total: 0 });
-    loadSpyData();
-  };
-
-  // Handle single entry image extraction
-  const handleExtractSingle = async (entry: PinterestSpyData) => {
-    const result = await extractFeaturedImage(entry);
-    
-    if (result?.imageUrl) {
-      await updateSpyData(entry.id, { spyImageUrl: result.imageUrl });
-      loadSpyData();
-    }
+    return false;
   };
 
   // Handle SEO processing with pause/resume/stop
@@ -304,34 +269,18 @@ export default function PinterestSpyManager() {
             loading={loading}
             selectedEntries={selectedEntries}
             onSelectionChange={setSelectedEntries}
-            onRefresh={loadSpyData}
+            onRefresh={handleForceRefresh}
             onBulkImport={() => setShowBulkImport(true)}
             onUpdateEntry={updateSpyData}
             onDeleteEntries={deleteSpyData}
-            onSendToImageExtraction={() => setActiveTab('extract')}
+            onAutoImageExtraction={handleAutoImageExtraction}
+            backgroundExtractionActive={backgroundExtractionActive}
+            onBackgroundExtractionStart={handleBackgroundExtractionStart}
+            onBackgroundExtractionEnd={handleBackgroundExtractionEnd}
           />
         )}
 
-        {activeTab === 'extract' && (
-          <ImageExtractionTab
-            spyData={spyData}
-            selectedEntries={selectedEntries}
-            onSelectionChange={setSelectedEntries}
-            extractionStatus={extractionStatus}
-            extractionResults={extractionResults}
-            extractionProgress={extractionProgress}
-            onExtractForSelected={handleExtractForSelected}
-            onExtractForAll={handleExtractForAll}
-            onExtractSingle={handleExtractSingle}
-            onCancelExtraction={() => setExtractionProgress({ current: 0, total: 0 })}
-            onUpdateImage={async (entryId: string, imageUrl: string) => {
-              await updateSpyData(entryId, { spyImageUrl: imageUrl });
-              await loadSpyData();
-            }}
-            isPaused={isPaused}
-            onTogglePause={() => setIsPaused(!isPaused)}
-          />
-        )}
+
 
         {activeTab === 'seo' && (
           <SEOResultsTab
@@ -366,6 +315,8 @@ export default function PinterestSpyManager() {
           onSuccess={handleBulkImportSuccess}
           apiEndpoint="/api/admin/pinterest-spy"
           getAuthHeaders={getAuthHeaders}
+          onBackgroundExtractionStart={handleBackgroundExtractionStart}
+          onBackgroundExtractionEnd={handleBackgroundExtractionEnd}
         />
       )}
     </div>

@@ -198,7 +198,7 @@ async function processSEOBatch(entryIds: string[]): Promise<{
           seoKeyword: spyData.seoKeyword,
           seoTitle: spyData.seoTitle,
           seoDescription: spyData.seoDescription,
-          seoCategory: spyData.seoCategory
+          seoCategory: spyData.seoCategory || null
         }
       });
       processed++;
@@ -252,7 +252,7 @@ async function processSEOBatch(entryIds: string[]): Promise<{
             seoKeyword: result.data.seoKeyword,
             seoTitle: result.data.seoTitle,
             seoDescription: result.data.seoDescription,
-            seoCategory: result.data.seoCategory || null,
+            seoCategory: result.data.category || null,
             status: 'SEO_COMPLETED',
             seoProcessedAt: new Date(),
             seoProcessingError: null

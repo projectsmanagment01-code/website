@@ -696,8 +696,9 @@ Analyze the provided spy data and return the SEO metadata in the exact JSON form
   /**
    * Validate spy data before processing
    */
-  static validateSpyData(spyData: SpyDataInput): { valid: boolean; errors: string[] } {
+  static validateSpyData(spyData: SpyDataInput): { valid: boolean; errors: string[]; warnings: string[] } {
     const errors: string[] = [];
+    const warnings: string[] = [];
 
     // Only require title OR description (at least one)
     if ((!spyData.spyTitle || spyData.spyTitle.trim().length === 0) && 
@@ -705,18 +706,19 @@ Analyze the provided spy data and return the SEO metadata in the exact JSON form
       errors.push('Either spy title or spy description is required');
     }
 
-    // URLs are optional, but if provided, they should be valid
+    // URLs validation - now just warnings, not blocking errors
     if (spyData.spyArticleUrl && spyData.spyArticleUrl.trim() && !this.isValidUrl(spyData.spyArticleUrl)) {
-      errors.push('Spy article URL must be valid if provided');
+      warnings.push('Spy article URL appears to be invalid');
     }
 
     if (spyData.spyImageUrl && spyData.spyImageUrl.trim() && !this.isValidUrl(spyData.spyImageUrl)) {
-      errors.push('Spy image URL must be valid if provided');
+      warnings.push('Spy image URL appears to be invalid');
     }
 
     return {
-      valid: errors.length === 0,
-      errors
+      valid: errors.length === 0, // Only hard errors block import
+      errors,
+      warnings
     };
   }
 

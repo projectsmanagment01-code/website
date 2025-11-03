@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { data, batchId, autoProcessSEO = false } = body;
+    const { data, batchId, autoProcessSEO = false, autoExtractImages = false } = body;
 
     // Handle both single entry and bulk import
     const spyDataList = Array.isArray(data) ? data : [data];
@@ -155,6 +155,21 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    // Collect warnings for entries with invalid URLs (but allow import)
+    const warningEntries = validationResults.filter(result => result.warnings && result.warnings.length > 0);
+    console.log(`⚠️ ${warningEntries.length} entries have warnings (invalid URLs) but will be imported`);
+
+    // Helper function to check if URL is invalid
+    const isInvalidUrl = (url: string): boolean => {
+      if (!url || !url.trim()) return false;
+      try {
+        new URL(url);
+        return false;
+      } catch {
+        return true;
+      }
+    };
+
     // Extract user info from auth
     const userId = authResult.type === 'jwt' 
       ? (authResult.payload as any).email 
@@ -163,14 +178,27 @@ export async function POST(request: NextRequest) {
     // Create spy data entries
     const createdEntries = await Promise.all(
       spyDataList.map(async (spyData: SpyDataInput, index: number) => {
+        // Check if URLs are invalid and mark them
+        const hasInvalidArticleUrl = isInvalidUrl(spyData.spyArticleUrl || '');
+        const hasInvalidImageUrl = isInvalidUrl(spyData.spyImageUrl || '');
+        
+        // Add a flag in annotation to mark invalid URLs for visual identification
+        let annotation = spyData.annotation || '';
+        if (hasInvalidArticleUrl || hasInvalidImageUrl) {
+          const invalidFlags = [];
+          if (hasInvalidArticleUrl) invalidFlags.push('INVALID_ARTICLE_URL');
+          if (hasInvalidImageUrl) invalidFlags.push('INVALID_IMAGE_URL');
+          annotation = annotation + (annotation ? ' | ' : '') + `[${invalidFlags.join(', ')}]`;
+        }
+
         return await prisma.pinterestSpyData.create({
           data: {
-            spyTitle: spyData.spyTitle,
-            spyDescription: spyData.spyDescription,
-            spyImageUrl: spyData.spyImageUrl,
-            spyArticleUrl: spyData.spyArticleUrl,
-            spyPinImage: spyData.spyPinImage,
-            annotation: spyData.annotation,
+            spyTitle: spyData.spyTitle || '',
+            spyDescription: spyData.spyDescription || '',
+            spyImageUrl: spyData.spyImageUrl || '',
+            spyArticleUrl: spyData.spyArticleUrl || '',
+            spyPinImage: spyData.spyPinImage || null,
+            annotation: annotation,
             batchId: batchId || `batch_${Date.now()}`,
             createdBy: userId,
             importedAt: new Date(),
@@ -182,6 +210,17 @@ export async function POST(request: NextRequest) {
     );
 
     console.log(`✅ Created ${createdEntries.length} spy data entries`);
+
+    // Auto-extract images if requested
+    let imageExtractionResults = null;
+    if (autoExtractImages) {
+      console.log('🖼️ Starting automatic image extraction...');
+      try {
+        imageExtractionResults = await extractImagesForEntries(createdEntries);
+      } catch (imageError) {
+        console.error('⚠️ Image extraction failed, but entries were created:', imageError);
+      }
+    }
 
     // Auto-process SEO if requested
     let seoResults = null;
@@ -198,6 +237,7 @@ export async function POST(request: NextRequest) {
       message: `Successfully created ${createdEntries.length} spy data entries`,
       created: createdEntries.length,
       data: createdEntries,
+      imageExtraction: imageExtractionResults,
       seoProcessing: seoResults
     });
   } catch (error) {
@@ -321,6 +361,91 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Helper function to extract images for multiple entries
+ */
+async function extractImagesForEntries(entries: any[]): Promise<{
+  processed: number;
+  failed: number;
+  results: Array<{ id: string; success: boolean; imageUrl?: string; error?: string }>;
+}> {
+  const results: Array<{ id: string; success: boolean; imageUrl?: string; error?: string }> = [];
+  let processed = 0;
+  let failed = 0;
+
+  for (const entry of entries) {
+    // Only process entries with article URLs and no existing image
+    if (!entry.spyArticleUrl || entry.spyImageUrl) {
+      results.push({ 
+        id: entry.id, 
+        success: false, 
+        error: entry.spyImageUrl ? 'Image already exists' : 'No article URL' 
+      });
+      continue;
+    }
+
+    try {
+      console.log(`🖼️ Extracting image for: ${entry.spyTitle}`);
+
+      // Call the image extraction API
+      const extractResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/pinterest-spy/extract-image`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: entry.spyArticleUrl,
+          title: entry.spyTitle,
+          entryId: entry.id,
+          autoSave: true  // Save directly to database
+        })
+      });
+
+      if (extractResponse.ok) {
+        const extractResult = await extractResponse.json();
+        
+        if (extractResult.imageUrl) {
+          results.push({ 
+            id: entry.id, 
+            success: true, 
+            imageUrl: extractResult.imageUrl 
+          });
+          processed++;
+          console.log(`✅ Successfully extracted image for: ${entry.spyTitle}`);
+        } else {
+          results.push({ 
+            id: entry.id, 
+            success: false, 
+            error: 'No image found' 
+          });
+          failed++;
+        }
+      } else {
+        results.push({ 
+          id: entry.id, 
+          success: false, 
+          error: `Extraction API failed: ${extractResponse.statusText}` 
+        });
+        failed++;
+      }
+
+      // Small delay between extractions to avoid overwhelming the servers
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+    } catch (error) {
+      console.error(`❌ Image extraction failed for ${entry.spyTitle}:`, error);
+      results.push({ 
+        id: entry.id, 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+      failed++;
+    }
+  }
+
+  return { processed, failed, results };
 }
 
 /**
