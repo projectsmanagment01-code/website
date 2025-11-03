@@ -3,105 +3,74 @@
 import React, { useState, useEffect, memo } from 'react';
 import { PinterestSpyData, Stats } from './types';
 
-// Optimized thumbnail component for fast table display
+// Fast thumbnail component - optimized for speed, no lazy loading
 const FastThumbnail = memo(({ 
   src, 
   alt, 
   onClick, 
-  className,
   title 
 }: {
   src: string;
   alt: string;
   onClick: () => void;
-  className?: string;
   title?: string;
 }) => {
   const [imgSrc, setImgSrc] = useState<string>('');
-  const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    // Generate optimized image URL
+    // Generate optimized image URL with aggressive compression
     let optimizedSrc = src;
     
     try {
       const url = new URL(src);
       // Add optimization parameters for common image services
       if (url.hostname.includes('pinterest') || url.hostname.includes('pinimg')) {
-        optimizedSrc = src.replace(/\/\d+x\//, '/75x75/'); // Smaller Pinterest thumbnails
+        optimizedSrc = src.replace(/\/\d+x\//, '/75x75/'); // Pinterest small thumbnails
       } else if (url.hostname.includes('unsplash')) {
-        optimizedSrc = `${src}?w=48&h=48&q=30&fm=webp&fit=crop&auto=compress`;
+        optimizedSrc = `${src}?w=48&h=48&q=20&fm=webp&fit=crop`;
       } else if (url.hostname.includes('cloudinary')) {
-        optimizedSrc = src.replace(/\/upload\//, '/upload/w_48,h_48,c_fill,q_auto:low,f_webp,dpr_auto/');
+        optimizedSrc = src.replace(/\/upload\//, '/upload/w_48,h_48,c_fill,q_20,f_webp/');
       } else if (url.hostname.includes('imgur')) {
-        optimizedSrc = src.replace(/\.(jpg|jpeg|png|gif)$/i, 's.$1'); // Imgur small size
+        optimizedSrc = src.replace(/\.(jpg|jpeg|png|gif)$/i, 's.$1'); // Imgur small
       } else {
-        // Generic optimization attempt with aggressive compression
-        optimizedSrc = `${src}${src.includes('?') ? '&' : '?'}w=48&h=48&q=30&fm=webp`;
+        // Generic optimization with very low quality for speed
+        optimizedSrc = `${src}${src.includes('?') ? '&' : '?'}w=48&h=48&q=20`;
       }
     } catch {
-      optimizedSrc = src; // Fallback to original if URL parsing fails
+      optimizedSrc = src;
     }
 
     setImgSrc(optimizedSrc);
-    
-    // Preload the image for instant display
-    imagePreloader.preload(optimizedSrc).catch(() => {
-      // Silently handle preload failures
-    });
   }, [src]);
 
   const handleError = () => {
     if (!hasError) {
       setHasError(true);
-      // Try original URL as fallback
       if (imgSrc !== src) {
-        setImgSrc(src);
+        setImgSrc(src); // Try original
       } else {
-        // Final fallback to placeholder
-        setImgSrc('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48"%3E%3Crect fill="%23e5e7eb" width="48" height="48"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23888" font-size="10"%3ENo img%3C/text%3E%3C/svg%3E');
+        // Final fallback
+        setImgSrc('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48"%3E%3Crect fill="%23f3f4f6" width="48" height="48"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999" font-size="10"%3E❌%3C/text%3E%3C/svg%3E');
       }
     }
   };
 
-  if (!imgSrc) {
-    return (
-      <div className="w-12 h-12 bg-gray-100 rounded animate-pulse flex items-center justify-center">
-        <span className="text-xs text-gray-400">...</span>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative w-12 h-12">
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-gray-100 rounded animate-pulse flex items-center justify-center">
-          <span className="text-xs text-gray-400">⏳</span>
-        </div>
-      )}
-      <img
-        src={imgSrc}
-        alt={alt}
-        title={title}
-        loading="lazy"
-        decoding="async"
-        onClick={onClick}
-        className={`w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className || ''}`}
-        style={{ 
-          imageRendering: 'crisp-edges' as any,
-          transform: 'translateZ(0)', // Hardware acceleration
-          backfaceVisibility: 'hidden',
-          perspective: 1000,
-          minHeight: '48px', // Prevent layout shift
-          minWidth: '48px',
-          maxHeight: '48px',
-          maxWidth: '48px'
-        }}
-        onLoad={() => setIsLoaded(true)}
-        onError={handleError}
-      />
-    </div>
+    <img
+      src={imgSrc}
+      alt={alt}
+      title={title}
+      onClick={onClick}
+      className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity bg-gray-100"
+      style={{ 
+        imageRendering: 'pixelated',
+        transform: 'translateZ(0)',
+        minHeight: '48px',
+        minWidth: '48px'
+      }}
+      onError={handleError}
+    />
   );
 });
 
