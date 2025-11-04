@@ -7,7 +7,6 @@ import { Job } from 'bullmq';
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
 import { AutomationJobData, AutomationJobResult } from './automation.queue';
-import { executeWorkflow } from '../workflows/main-workflow';
 import { WorkflowContext } from '../types/workflow.types';
 import { ValidationError } from '../utils/errors';
 

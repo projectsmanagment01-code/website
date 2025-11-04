@@ -82,7 +82,7 @@ export class ImageGenerationService {
   }
 
   /**
-   * Step 2: Generate a single image using Google Imagen 3
+   * Step 2: Generate a single image using Gemini 2.5 Flash Image (Nano Banana)
    */
   static async generateSingleImage(
     prompt: string,
@@ -95,45 +95,75 @@ export class ImageGenerationService {
       throw new Error('Gemini API key not configured');
     }
 
-    console.log(`🖼️ Generating image ${imageNumber}/4 using Imagen 3`);
+    console.log(`🖼️ Generating image ${imageNumber}/4 using Gemini 2.5 Flash Image (Nano Banana)`);
 
-    // Enhanced prompt with watermark instruction
-    const enhancedPrompt = `${prompt}. Include watermark text "www.${this.DOMAIN}" centered at bottom of image in subtle white text.`;
+    // Add image-specific composition enforcement to prevent duplicates
+    let compositionEnforcement = '';
+    switch (imageNumber) {
+      case 1:
+        compositionEnforcement = ' COMPOSITION REQUIREMENT: Close-up 45-degree angle of FINISHED COMPLETE dish. Show the FINAL RESULT ONLY, no raw ingredients, no cooking process. The dish must be fully prepared and plated.';
+        break;
+      case 2:
+        compositionEnforcement = ' COMPOSITION REQUIREMENT: Overhead flat lay from directly above showing ONLY RAW INGREDIENTS separated in bowls and containers. NO finished dish visible, NO cooking process. Ingredients must be uncooked and laid out individually.';
+        break;
+      case 3:
+        compositionEnforcement = ' COMPOSITION REQUIREMENT: Side angle or 3/4 view showing COOKING PROCESS in action. Must show mixing, baking, or preparation IN PROGRESS with steam or motion. NO finished dish, NO raw ingredient layout.';
+        break;
+      case 4:
+        compositionEnforcement = ' COMPOSITION REQUIREMENT: Front view or side profile showing FINISHED dish in STYLED PRESENTATION with decorative elements like flowers, cups, or props. Different angle from image 1, more elegant styling.';
+        break;
+    }
 
-    // Use Imagen 3 API
+    // Enhanced prompt with composition enforcement and watermark instruction
+    const enhancedPrompt = `${prompt}${compositionEnforcement}. CRITICAL: This is IMAGE ${imageNumber} of 4 - it MUST be visually distinct from the other 3 images with a completely different composition, subject, and angle. IMPORTANT: Add watermark text "www.${this.DOMAIN}" centered at the bottom of the image. The watermark must have a semi-transparent dark background overlay (rgba 0,0,0,0.5) behind the white text to ensure it is clearly visible on any background, especially white or light-colored foods. The watermark should be professional and subtle but always readable.`;
+
+    // Use Gemini 2.5 Flash Image API (aka Nano Banana)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instances: [{
-            prompt: enhancedPrompt,
-            image: {
-              bytesBase64Encoded: referenceImageBase64
-            },
-            parameters: {
-              sampleCount: 1,
-              aspectRatio: "9:16", // Tall aspect ratio
-              safetyFilterLevel: "block_few",
-              personGeneration: "dont_allow"
+          contents: [{
+            parts: [
+              { text: enhancedPrompt },
+              {
+                inline_data: {
+                  mime_type: "image/jpeg",
+                  data: referenceImageBase64
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            responseModalities: ["Image"],
+            imageConfig: {
+              aspectRatio: "9:16"
             }
-          }]
+          }
         }),
       }
     );
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Imagen API error: ${response.status} - ${errorText}`);
+      throw new Error(`Gemini Image API error: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
-    const imageData = result.predictions?.[0]?.bytesBase64Encoded;
+    
+    // Extract image data from response (uses camelCase: inlineData not inline_data)
+    const parts = result.candidates?.[0]?.content?.parts || [];
+    const imagePart = parts.find((part: any) => part.inlineData || part.inline_data);
+    const imageData = imagePart?.inlineData?.data || imagePart?.inline_data?.data;
 
     if (!imageData) {
-      throw new Error('No image data received from Imagen');
+      console.error('❌ Could not find image data in response structure');
+      console.error('Response structure:', JSON.stringify(result, null, 2).substring(0, 500));
+      throw new Error('No image data received from Gemini Image model');
     }
+    
+    console.log(`✅ Received image data (${imageData.length} chars)`)
 
     // Generate filename: seoKeyword + 2 words + timestamp
     const filename = this.generateFilename(seoKeyword, imageNumber);
@@ -158,30 +188,63 @@ export class ImageGenerationService {
    * Build the IGP.txt prompt instructions
    */
   private static buildPromptGenerationInstruction(): string {
-    return `You are an AI agent responsible for generating four separate, highly realistic, and visually cohesive image prompts for a single recipe. Each prompt must describe one stage of the same cooking scene and environment, ensuring lighting, camera angle, and setting consistency across all four photos.
+    return `You are an AI agent responsible for generating FOUR COMPLETELY DIFFERENT AND UNIQUE image prompts for a single recipe. Each prompt MUST describe a DISTINCT stage with DIFFERENT composition, angle, and subject matter. DUPLICATES ARE STRICTLY FORBIDDEN.
 
 CRITICAL REQUIREMENTS:
-- All four images share the same environment, decor, and visual tone
-- Feature image focuses on the food with close-up framing
-- Two images must use bright natural sunlight, two must use professional studio lighting
+- ALL images must be set in a KITCHEN ENVIRONMENT ONLY - kitchen counter, kitchen table, or cooking area
+- NO HUMANS, NO HANDS, NO BODY PARTS, NO PEOPLE - completely human-free food photography
+- All four images share the same kitchen environment, decor, and visual tone
 - Every image must be captured in a 16:9 tall aspect ratio
 - Background must remain detailed, rich, and realistic — never blurred
-- Focus remains on the food, but the full environment must be visible and crisp
+- Kitchen setting should be visible (counter, utensils, kitchen decor) but food is the focus
 
-Generate four separate, detailed, single-line descriptive prompts in valid JSON format:
-- image_1_feature: Close-up view of finished dish in focus, rich colors, 16:9 tall ratio, no blur
-- image_2_ingredients: All raw ingredients neatly arranged, with bowls, utensils, cutting boards
-- image_3_cooking: Action shot of cooking/assembling process with visible steam or textures
-- image_4_final_presentation: Completed dish presented creatively and stylishly
+MANDATORY UNIQUENESS REQUIREMENTS - EACH IMAGE MUST BE DIFFERENT:
 
-Each prompt should be one continuous line without special characters, underscores, or quotation marks inside.
+1. IMAGE 1 - FINISHED DISH HERO SHOT:
+   - MUST show the COMPLETE finished dish as the main subject
+   - Close-up angled view of the plated final result on kitchen surface
+   - Finished cake/dish fully decorated and complete
+   - Camera angle: 45-degree angle from above
+   - NO raw ingredients visible, NO cooking process, ONLY the final result
+   - Example: "Finished brown sugar chai cake on kitchen counter, decorated with frosting swirls and cinnamon sticks, 45-degree angle, warm kitchen lighting, no people"
+
+2. IMAGE 2 - RAW INGREDIENTS LAYOUT (MUST BE COMPLETELY DIFFERENT FROM IMAGE 1):
+   - MUST show ONLY raw, uncooked ingredients laid out separately
+   - NO finished dish visible, NO cooking in progress
+   - Ingredients in individual bowls, measuring cups, on cutting board
+   - Overhead flat lay view from directly above
+   - Camera angle: straight down from top
+   - Example: "Raw ingredients for chai cake on kitchen counter, flour in bowl, sugar, eggs, spices in separate containers, overhead flat lay, no people, no hands"
+
+3. IMAGE 3 - COOKING ACTION SHOT (MUST BE COMPLETELY DIFFERENT FROM IMAGES 1 AND 2):
+   - MUST show cooking/mixing/baking IN PROGRESS
+   - Batter being mixed, cake in oven visible through glass, or mixing bowl with whisk
+   - Steam, bubbles, or action visible
+   - Side angle or 3/4 view showing the process
+   - NO finished dish, NO raw ingredients layout
+   - Example: "Cake batter being mixed in stand mixer on kitchen counter, visible swirls in bowl, side angle view, kitchen in background, no hands visible"
+
+4. IMAGE 4 - STYLED PRESENTATION (MUST BE COMPLETELY DIFFERENT FROM ALL PREVIOUS):
+   - MUST show finished dish in an ELEGANT table setting
+   - Dish presented with complementary items like coffee cups, flowers, decorative plates
+   - Different angle than image 1 (front view or side profile)
+   - More styling and props than image 1
+   - Example: "Brown sugar chai cake on decorative cake stand with coffee cups and flowers on kitchen table, side profile view, elegant presentation, no people"
+
+STRICT ANTI-DUPLICATION RULES:
+- Each image MUST have different subject matter (finished vs ingredients vs cooking vs styled)
+- Each image MUST have different camera angle (45-degree vs overhead vs side vs front)
+- Each image MUST be visually distinct - someone should immediately see the difference
+- If two images look similar, you have FAILED the task
+
+IMPORTANT: Every prompt MUST explicitly mention "kitchen" or "kitchen counter" and MUST specify "no people, no hands visible, human-free".
 
 Output ONLY valid JSON in this exact format:
 {
-  "image_1_feature": "prompt text here",
-  "image_2_ingredients": "prompt text here",
-  "image_3_cooking": "prompt text here",
-  "image_4_final_presentation": "prompt text here"
+  "image_1_feature": "Finished dish prompt with specific angle and composition",
+  "image_2_ingredients": "Raw ingredients prompt with different angle and composition",
+  "image_3_cooking": "Cooking process prompt with different angle and composition",
+  "image_4_final_presentation": "Styled presentation prompt with different angle and composition"
 }`;
   }
 

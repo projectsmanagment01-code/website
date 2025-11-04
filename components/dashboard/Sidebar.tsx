@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   
   // Auto expand automation if one of its sub-items is active
   useEffect(() => {
-    if (activeSection === 'automation' || activeSection === 'pinterest-spy') {
+    if (activeSection === 'automation' || activeSection === 'pinterest-spy' || activeSection === 'image-generation' || activeSection === 'recipe-generation') {
       setAutomationExpanded(true);
     }
   }, [activeSection]);
@@ -79,8 +79,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const automationItems = [
     { id: "automation", label: "Recipe Automation", icon: Activity },
-    { id: "pinterest-spy", label: "Pinterest Spy Data", icon: Target },
+    { id: "pinterest-spy", label: "Data Manager", icon: Target },
     { id: "image-generation", label: "Image Generation", icon: ImageIcon },
+    { id: "recipe-generation", label: "Recipe Generation", icon: FileText },
   ];
 
   return (
@@ -169,7 +170,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 onClick={() => setAutomationExpanded(!automationExpanded)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  (activeSection === 'automation' || activeSection === 'pinterest-spy' || activeSection === 'image-generation')
+                  (activeSection === 'automation' || activeSection === 'pinterest-spy' || activeSection === 'image-generation' || activeSection === 'recipe-generation')
                     ? "bg-slate-700 dark:bg-slate-600 text-white"
                     : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}

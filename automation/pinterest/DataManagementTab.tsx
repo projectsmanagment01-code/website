@@ -409,39 +409,39 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
       
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="bg-white p-3 rounded shadow-sm border border-gray-200">
-          <div className="text-xl font-bold text-gray-900">{stats.total}</div>
-          <div className="text-xs text-gray-600">Total Entries</div>
+        <div className="bg-white dark:bg-gray-800 p-3 rounded shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.total}</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">Total Entries</div>
         </div>
-        <div className="bg-white p-3 rounded shadow-sm border border-gray-200">
-          <div className="text-xl font-bold text-green-600">
+        <div className="bg-white dark:bg-gray-800 p-3 rounded shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="text-xl font-bold text-green-600 dark:text-green-400">
             {stats.byStatus['SEO_COMPLETED'] || 0}
           </div>
-          <div className="text-xs text-gray-600">SEO Processed</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">SEO Processed</div>
         </div>
-        <div className={`bg-white p-3 rounded shadow-sm border border-gray-200 ${autoRefreshActive ? 'ring-2 ring-emerald-300 ring-opacity-50' : ''}`}>
-          <div className="text-xl font-bold text-emerald-600">
+        <div className={`bg-white dark:bg-gray-800 p-3 rounded shadow-sm border border-gray-200 dark:border-gray-700 ${autoRefreshActive ? 'ring-2 ring-emerald-300 dark:ring-emerald-700 ring-opacity-50' : ''}`}>
+          <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
             {spyData.filter(entry => entry.spyImageUrl && entry.spyImageUrl.trim()).length}
             {autoRefreshActive && <span className="text-sm ml-1 animate-pulse">🔄</span>}
           </div>
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-gray-600 dark:text-gray-400">
             Images Extracted
-            {autoRefreshActive && <span className="text-emerald-600 ml-1">(live)</span>}
+            {autoRefreshActive && <span className="text-emerald-600 dark:text-emerald-400 ml-1">(live)</span>}
           </div>
-          <div className="text-xs text-emerald-600 mt-1">
+          <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
             {spyData.filter(entry => entry.spyArticleUrl && !entry.spyImageUrl).length} pending
           </div>
         </div>
-        <div className="bg-white p-3 rounded shadow-sm border border-gray-200">
-          <div className="text-xl font-bold text-slate-700">
+        <div className="bg-white dark:bg-gray-800 p-3 rounded shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="text-xl font-bold text-slate-700 dark:text-slate-300">
             {stats.byStatus['COMPLETED'] || 0}
           </div>
-          <div className="text-xs text-gray-600">Recipes Generated</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">Recipes Generated</div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-3 rounded shadow-sm border border-gray-200">
+      <div className="bg-white dark:bg-gray-800 p-3 rounded shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex flex-wrap gap-2 items-center">
           {/* Search and Dropdowns */}
           <input
@@ -449,13 +449,13 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
             placeholder="Search title, description, keywords..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-[250px] px-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-slate-500 focus:border-slate-500"
+            className="w-[250px] px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-slate-500 dark:focus:border-slate-400"
           />
           
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-slate-500 focus:border-slate-500"
+            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-slate-500 dark:focus:border-slate-400"
           >
             <option value="all">All Statuses</option>
             <option value="PENDING">Pending</option>
@@ -468,7 +468,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           <select
             value={imageFilter}
             onChange={(e) => setImageFilter(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-slate-500 focus:border-slate-500"
+            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-slate-500 dark:focus:border-slate-400"
           >
             <option value="all">All Images</option>
             <option value="with-image">With Image</option>
@@ -478,7 +478,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           <select
             value={hasArticleUrl}
             onChange={(e) => setHasArticleUrl(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-slate-500 focus:border-slate-500"
+            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-slate-500 dark:focus:border-slate-400"
           >
             <option value="all">All Articles</option>
             <option value="with-url">Has Article URL</option>
@@ -488,7 +488,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           <select
             value={hasAnnotation}
             onChange={(e) => setHasAnnotation(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-slate-500 focus:border-slate-500"
+            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-slate-500 dark:focus:border-slate-400"
           >
             <option value="all">All Annotations</option>
             <option value="with-annotation">Has Annotation</option>
@@ -498,17 +498,17 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           <select
             value={invalidUrlFilter}
             onChange={(e) => setInvalidUrlFilter(e.target.value)}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-slate-500 focus:border-slate-500"
+            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-slate-500 dark:focus:border-slate-400"
           >
             <option value="all">All URLs</option>
             <option value="invalid-urls">🚨 Invalid URLs</option>
             <option value="valid-urls">✅ Valid URLs</option>
           </select>
 
-          <div className="px-3 py-1.5 text-xs text-gray-600 bg-gray-50 rounded border border-gray-200">
+          <div className="px-3 py-1.5 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 rounded border border-gray-200 dark:border-gray-700">
             Showing {filteredAndSortedData.length} of {stats.total} entries
             {sortConfig.key && (
-              <span className="ml-2 text-blue-600">
+              <span className="ml-2 text-blue-600 dark:text-blue-400">
                 • Sorted by {sortConfig.key} {sortConfig.direction === 'asc' ? '↑' : '↓'}
               </span>
             )}
@@ -536,14 +536,14 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
               }
             }}
             disabled={refreshing}
-            className="px-3 py-1.5 text-sm bg-slate-600 text-white rounded hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-sm bg-slate-600 dark:bg-slate-700 text-white rounded hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {refreshing ? '🔄 Refreshing...' : '🔄 Refresh & Clear Filters'}
           </button>
 
           <button
             onClick={onBulkImport}
-            className="px-3 py-1.5 text-sm bg-slate-700 text-white rounded hover:bg-slate-800 transition-colors"
+            className="px-3 py-1.5 text-sm bg-slate-700 dark:bg-slate-600 text-white rounded hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
           >
             📋 Bulk Import
           </button>
@@ -551,14 +551,14 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
           <button
             onClick={handleExportData}
             disabled={filteredAndSortedData.length === 0}
-            className="px-3 py-1.5 text-sm bg-gray-700 text-white rounded hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 text-sm bg-gray-700 dark:bg-gray-600 text-white rounded hover:bg-gray-800 dark:hover:bg-gray-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
           >
             📥 Export {selectedEntries.length > 0 ? `(${selectedEntries.length})` : `(${filteredAndSortedData.length})`}
           </button>
 
           <button
             onClick={handleSelectAll}
-            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="px-3 py-1.5 text-sm bg-blue-600 dark:bg-blue-700 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
           >
             {filteredAndSortedData.length > 0 && filteredAndSortedData.every(entry => selectedEntries.includes(entry.id))
               ? `Deselect All (${stats.total})`
@@ -569,7 +569,7 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
             <>
               <button
                 onClick={handleDeleteSelected}
-                className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                className="px-3 py-1.5 text-sm bg-red-600 dark:bg-red-700 text-white rounded hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
               >
                 🗑️ Delete ({selectedEntries.length})
               </button>
@@ -634,80 +634,80 @@ export const DataManagementTab: React.FC<DataManagementTabProps> = ({
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto" 
              style={{ 
                willChange: 'scroll-position',
                contain: 'layout style paint',
                transform: 'translateZ(0)' // Hardware acceleration
              }}>
-          <table className="min-w-full divide-y divide-gray-200 fast-table"
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 fast-table"
                  style={{ 
                    tableLayout: 'fixed',
                    backfaceVisibility: 'hidden'
                  }}>
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
                   <input
                     type="checkbox"
                     checked={paginatedData.length > 0 && paginatedData.every(entry => selectedEntries.includes(entry.id))}
                     onChange={handleSelectAll}
-                    className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
+                    className="rounded border-gray-300 dark:border-gray-600 text-slate-600 dark:text-slate-400 focus:ring-slate-500 dark:focus:ring-slate-400"
                   />
                 </th>
                 <th 
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => handleSort('spyTitle')}
                 >
                   SPY Title <SortIndicator column="spyTitle" />
                 </th>
                 <th 
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => handleSort('spyDescription')}
                 >
                   SPY Description <SortIndicator column="spyDescription" />
                 </th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">SPY Image URL</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">SPY Image URL</th>
                 <th 
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => handleSort('spyArticleUrl')}
                 >
                   SPY Article URL <SortIndicator column="spyArticleUrl" />
                 </th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">SPY PIN Image</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">SPY PIN Image</th>
                 <th 
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => handleSort('annotation')}
                 >
                   Annotation <SortIndicator column="annotation" />
                 </th>
                 <th 
-                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="px-3 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => handleSort('spyStatus')}
                 >
                   Status <SortIndicator column="spyStatus" />
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-100">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
               {paginatedData.map((entry) => (
-                <tr key={entry.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={entry.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <td className="px-3 py-2 whitespace-nowrap">
                     <input
                       type="checkbox"
                       checked={selectedEntries.includes(entry.id)}
                       onChange={() => handleSelectEntry(entry.id)}
-                      className="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
+                      className="rounded border-gray-300 dark:border-gray-600 text-slate-600 dark:text-slate-400 focus:ring-slate-500 dark:focus:ring-slate-400"
                     />
                   </td>
                   <td className="px-3 py-2 max-w-xs">
-                    <div className="text-xs font-medium text-gray-900 line-clamp-2">
+                    <div className="text-xs font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
                       {entry.spyTitle || 'No title'}
                     </div>
                   </td>
                   <td className="px-3 py-2 max-w-sm">
-                    <div className="text-xs text-gray-600 line-clamp-2">
+                    <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
                       {entry.spyDescription || 'No description'}
                     </div>
                   </td>

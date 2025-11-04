@@ -4,7 +4,7 @@ import { ImageGenerationTab } from '@/automation/image-generation';
 import { usePinterestData } from '@/automation/pinterest/hooks';
 
 export default function ImageGenerationManager() {
-  const { spyData, loading, getAuthHeaders } = usePinterestData();
+  const { spyData, loading, getAuthHeaders, loadSpyData } = usePinterestData();
 
   if (loading) {
     return (
@@ -17,17 +17,5 @@ export default function ImageGenerationManager() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          🎨 AI Image Generation
-        </h1>
-        <p className="text-gray-600">
-          Generate 4 professional food images for each recipe using Google Imagen 3
-        </p>
-      </div>
-      <ImageGenerationTab spyData={spyData} getAuthHeaders={getAuthHeaders} />
-    </div>
-  );
+  return <ImageGenerationTab spyData={spyData} getAuthHeaders={getAuthHeaders} onRefresh={loadSpyData} />;
 }

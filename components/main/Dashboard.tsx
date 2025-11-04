@@ -29,6 +29,7 @@ import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import PinterestSpyManager from "@/automation/pinterest/PinterestSpyManager";
 import ImageGenerationManager from "@/automation/image-generation/ImageGenerationManager";
+import RecipeGenerationManager from "@/automation/recipe-generation/RecipeGenerationManager";
 import AutomationDashboard from "@/components/admin/AutomationDashboard";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
@@ -142,6 +143,20 @@ function AdminDashboardContent() {
         );
       case "image-generation":
         return <ImageGenerationManager />;
+      case "recipe-generation":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                Recipe Generation
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                Generate complete recipes from entries with SEO data and AI-generated images
+              </p>
+            </div>
+            <RecipeGenerationManager />
+          </div>
+        );
       case "seo-reports":
         return (
           <div className="space-y-6">

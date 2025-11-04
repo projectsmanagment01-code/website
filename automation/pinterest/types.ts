@@ -44,6 +44,9 @@ export interface PinterestSpyData {
   generatedImage3Url?: string;
   generatedImage4Url?: string;
   imageGeneratedAt?: Date;
+  // Recipe Generation
+  recipeGeneratedAt?: Date;
+  generatedRecipeId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

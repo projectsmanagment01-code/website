@@ -1,0 +1,257 @@
+/**
+ * Scheduled Pipeline Jobs
+ * Integrates with existing BullMQ automation system to run recipe pipelines on schedule
+ */
+
+import { Queue, Worker } from 'bullmq';
+import { PrismaClient } from '@prisma/client';
+import { RecipePipelineOrchestrator } from '../pipeline/recipe-pipeline';
+import { queueConfig } from '../config/queue.config';
+import { logger } from '../utils/logger';
+
+const prisma = new PrismaClient();
+
+export interface PipelineJobData {
+  scheduleId: string;
+  batchSize: number;
+  authorId?: string;
+  filters?: Record<string, any>;
+}
+
+export interface PipelineJobResult {
+  success: boolean;
+  processed: number;
+  failed: number;
+  recipes: Array<{
+    spyDataId: string;
+    recipeId?: string;
+    recipeUrl?: string;
+    error?: string;
+  }>;
+}
+
+/**
+ * Pipeline queue for scheduled jobs
+ */
+export const pipelineQueue = new Queue<PipelineJobData, PipelineJobResult>(
+  'recipe-pipeline',
+  queueConfig
+);
+
+/**
+ * Pipeline worker - processes scheduled jobs
+ */
+export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
+  'recipe-pipeline',
+  async (job) => {
+    const { scheduleId, batchSize, authorId, filters } = job.data;
+
+    logger.info(`🚀 Starting scheduled pipeline job`, {
+      scheduleId,
+      batchSize,
+      jobId: job.id
+    });
+
+    const results: PipelineJobResult = {
+      success: true,
+      processed: 0,
+      failed: 0,
+      recipes: []
+    };
+
+    try {
+      // Update schedule last run
+      await prisma.automationSchedule.update({
+        where: { id: scheduleId },
+        data: {
+          lastRun: new Date(),
+          runCount: { increment: 1 }
+        }
+      });
+
+      // Get pending spy data entries based on filters
+      const spyDataEntries = await prisma.pinterestSpyData.findMany({
+        where: {
+          generatedRecipeId: null,
+          status: { in: ['PENDING', 'SEO_COMPLETED'] },
+          ...filters
+        },
+        take: batchSize,
+        orderBy: [
+          { priority: 'desc' },
+          { createdAt: 'asc' }
+        ],
+        select: { id: true, spyTitle: true }
+      });
+
+      if (spyDataEntries.length === 0) {
+        logger.info(`No pending entries found for scheduled job ${job.id}`);
+        return results;
+      }
+
+      logger.info(`Found ${spyDataEntries.length} entries to process`);
+
+      // Process each entry through the pipeline
+      for (let i = 0; i < spyDataEntries.length; i++) {
+        const entry = spyDataEntries[i];
+        
+        logger.info(`Processing entry ${i + 1}/${spyDataEntries.length}: ${entry.spyTitle}`);
+        
+        await job.updateProgress((i / spyDataEntries.length) * 100);
+
+        try {
+          const pipelineResult = await RecipePipelineOrchestrator.executePipeline({
+            spyDataId: entry.id,
+            authorId: authorId,
+            onProgress: async (step, total, message) => {
+              logger.debug(`Pipeline step ${step}/${total}: ${message}`);
+            }
+          });
+
+          if (pipelineResult.success) {
+            results.processed++;
+            results.recipes.push({
+              spyDataId: entry.id,
+              recipeId: pipelineResult.recipeId,
+              recipeUrl: pipelineResult.recipeUrl
+            });
+            
+            logger.info(`✅ Recipe created: ${pipelineResult.recipeUrl}`);
+          } else {
+            results.failed++;
+            results.recipes.push({
+              spyDataId: entry.id,
+              error: pipelineResult.error
+            });
+            
+            logger.error(`❌ Failed to create recipe: ${pipelineResult.error}`);
+          }
+
+        } catch (error) {
+          results.failed++;
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          results.recipes.push({
+            spyDataId: entry.id,
+            error: errorMessage
+          });
+          
+          logger.error(`❌ Pipeline error for ${entry.id}:`, error);
+        }
+
+        // Small delay between entries to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      // Update schedule statistics
+      await prisma.automationSchedule.update({
+        where: { id: scheduleId },
+        data: {
+          runCount: { increment: 1 }
+        }
+      });
+
+      await job.updateProgress(100);
+
+      logger.info(`✅ Scheduled job completed`, {
+        jobId: job.id,
+        processed: results.processed,
+        failed: results.failed
+      });
+
+      return results;
+
+    } catch (error) {
+      logger.error(`❌ Scheduled job failed`, { jobId: job.id, error });
+      results.success = false;
+      throw error;
+    }
+  },
+  {
+    ...queueConfig,
+    concurrency: 1, // Process one batch at a time
+    limiter: {
+      max: 10, // Max 10 jobs
+      duration: 60000 // per minute
+    }
+  }
+);
+
+/**
+ * Add or update a repeatable job based on schedule
+ */
+export async function scheduleRecipePipeline(
+  scheduleId: string,
+  cronExpression: string,
+  batchSize: number,
+  authorId?: string,
+  filters?: Record<string, any>
+): Promise<void> {
+  logger.info(`📅 Scheduling pipeline job`, { scheduleId, cronExpression, batchSize });
+
+  await pipelineQueue.add(
+    'scheduled-pipeline',
+    {
+      scheduleId,
+      batchSize,
+      authorId,
+      filters
+    },
+    {
+      repeat: {
+        pattern: cronExpression
+      },
+      jobId: `schedule-${scheduleId}`,
+      removeOnComplete: {
+        age: 7 * 24 * 3600, // Keep for 7 days
+        count: 100
+      },
+      removeOnFail: {
+        age: 30 * 24 * 3600 // Keep for 30 days
+      }
+    }
+  );
+
+  logger.info(`✅ Pipeline job scheduled successfully`);
+}
+
+/**
+ * Remove a scheduled job
+ */
+export async function removeScheduledPipeline(scheduleId: string): Promise<void> {
+  logger.info(`🗑️ Removing scheduled pipeline`, { scheduleId });
+
+  await pipelineQueue.removeRepeatable(
+    'scheduled-pipeline',
+    {
+      pattern: '', // Will be looked up by jobId
+    },
+    `schedule-${scheduleId}`
+  );
+
+  logger.info(`✅ Scheduled pipeline removed`);
+}
+
+/**
+ * Get all repeatable jobs
+ */
+export async function getScheduledJobs() {
+  return await pipelineQueue.getRepeatableJobs();
+}
+
+// Worker event listeners
+pipelineWorker.on('completed', (job, result) => {
+  logger.info(`✅ Pipeline job ${job.id} completed`, {
+    processed: result.processed,
+    failed: result.failed
+  });
+});
+
+pipelineWorker.on('failed', (job, error) => {
+  logger.error(`❌ Pipeline job ${job?.id} failed`, { error });
+});
+
+pipelineWorker.on('error', (error) => {
+  logger.error(`❌ Pipeline worker error`, { error });
+});
+
+logger.info(`🔧 Pipeline worker started and listening for jobs`);

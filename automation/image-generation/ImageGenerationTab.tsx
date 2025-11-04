@@ -11,26 +11,51 @@ import { useImageGeneration } from '../pinterest/hooks';
 interface ImageGenerationTabProps {
   spyData: PinterestSpyData[];
   getAuthHeaders: () => Record<string, string>;
+  onRefresh: () => Promise<void>;
 }
 
-const DEFAULT_MASTER_PROMPT = `You are an AI agent responsible for generating four separate, highly realistic, and visually cohesive image prompts for a single recipe. Each prompt must describe one stage of the same cooking scene and environment.
+const DEFAULT_MASTER_PROMPT = `You are an AI agent responsible for generating FOUR COMPLETELY DIFFERENT AND UNIQUE image prompts for a single recipe. Each prompt MUST describe a DISTINCT stage with DIFFERENT composition, angle, and subject matter. DUPLICATES ARE STRICTLY FORBIDDEN.
 
 CRITICAL REQUIREMENTS:
-- All four images share the same environment, decor, and visual tone
-- Feature image focuses on the food with close-up framing
-- Two images must use bright natural sunlight, two must use professional studio lighting
+- ALL images must be set in a KITCHEN ENVIRONMENT ONLY
+- NO HUMANS, NO HANDS, NO BODY PARTS - completely human-free
+- All four images share the same kitchen environment, decor, and visual tone
 - Every image must be captured in a 16:9 tall aspect ratio
-- Background must remain detailed, rich, and realistic — never blurred
 
-Generate four separate, detailed, single-line descriptive prompts in valid JSON format:
-- image_1_feature: Close-up view of finished dish
-- image_2_ingredients: All raw ingredients neatly arranged
-- image_3_cooking: Action shot of cooking/assembling process
-- image_4_final_presentation: Completed dish presented creatively
+MANDATORY UNIQUENESS REQUIREMENTS - EACH IMAGE MUST BE DIFFERENT:
+
+1. IMAGE 1 - FINISHED DISH HERO SHOT:
+   - MUST show the COMPLETE finished dish as main subject
+   - Close-up 45-degree angle of plated final result on kitchen surface
+   - NO raw ingredients visible, NO cooking process, ONLY final result
+
+2. IMAGE 2 - RAW INGREDIENTS LAYOUT (COMPLETELY DIFFERENT FROM IMAGE 1):
+   - MUST show ONLY raw, uncooked ingredients laid out separately
+   - NO finished dish visible, NO cooking in progress
+   - Ingredients in bowls, measuring cups, on cutting board
+   - Overhead flat lay view from directly above
+
+3. IMAGE 3 - COOKING ACTION SHOT (COMPLETELY DIFFERENT FROM IMAGES 1 AND 2):
+   - MUST show cooking/mixing/baking IN PROGRESS
+   - Steam, bubbles, or action visible
+   - Side angle or 3/4 view showing the process
+   - NO finished dish, NO raw ingredients layout
+
+4. IMAGE 4 - STYLED PRESENTATION (COMPLETELY DIFFERENT FROM ALL PREVIOUS):
+   - MUST show finished dish in ELEGANT table setting
+   - Different angle than image 1 (front view or side profile)
+   - More styling and props than image 1
+
+STRICT ANTI-DUPLICATION RULES:
+- Each image MUST have different subject matter (finished vs ingredients vs cooking vs styled)
+- Each image MUST have different camera angle (45-degree vs overhead vs side vs front)
+- Each image MUST be visually distinct
+
+IMPORTANT: Every prompt MUST mention "kitchen" and "no people, no hands visible, human-free".
 
 Output ONLY valid JSON.`;
 
-export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGenerationTabProps) {
+export default function ImageGenerationTab({ spyData, getAuthHeaders, onRefresh }: ImageGenerationTabProps) {
   const {
     imageResults,
     imageProgress,
@@ -52,9 +77,10 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
   const [processing, setProcessing] = useState(false);
   const [masterPrompt, setMasterPrompt] = useState(DEFAULT_MASTER_PROMPT);
   const [currentProcessing, setCurrentProcessing] = useState<Record<string, any>>({});
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
-  // Stage management: 'select' | 'prompts-generated' | 'generating-images'
-  const [stage, setStage] = useState<'select' | 'prompts-generated' | 'generating-images'>('select');
+  // Stage management: 'select' | 'prompts-generated' | 'generating-images' | 'results'
+  const [stage, setStage] = useState<'select' | 'prompts-generated' | 'generating-images' | 'results'>('select');
   const [generatedPrompts, setGeneratedPrompts] = useState<Record<string, any>>({});
   const [editedPrompts, setEditedPrompts] = useState<Record<string, any>>({});
 
@@ -77,7 +103,7 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
   const handleGeneratePrompts = async () => {
     const toProcess = entriesReady.filter(e => selectedIds.includes(e.id));
     if (toProcess.length === 0) {
-      alert('No entries selected');
+      console.log('⚠️ No entries selected');
       return;
     }
 
@@ -122,14 +148,14 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
     setEditedPrompts(JSON.parse(JSON.stringify(allPrompts))); // Deep copy for editing
     setProcessing(false);
     setStage('prompts-generated');
-    alert(`Generated prompts for ${Object.keys(allPrompts).length} entries! Review and edit them, then generate images.`);
+    console.log(`✅ Generated prompts for ${Object.keys(allPrompts).length} entries! Review and edit them, then generate images.`);
   };
 
   // STAGE 2: Generate images using the edited prompts
   const handleGenerateImages = async () => {
     const entriesToProcess = Object.values(editedPrompts);
     if (entriesToProcess.length === 0) {
-      alert('No prompts available');
+      console.log('⚠️ No prompts available');
       return;
     }
 
@@ -169,6 +195,7 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
 
           setCurrentProcessing(prev => ({ ...prev, [entry.id]: { ...prev[entry.id], currentImage: j + 1 } }));
           console.log(`🖼️ Generating image ${j + 1}/4 for: ${entry.seoTitle}`);
+          console.log(`📝 Prompt ${j + 1}:`, promptArray[j].substring(0, 150) + '...');
 
           const imageResult = await generateSingleImage(entry.id, promptArray[j], j + 1, entry.seoKeyword!, entry.spyImageUrl!);
           
@@ -199,7 +226,11 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
     }
 
     setProcessing(false);
-    alert(`Completed! Generated images for ${entriesToProcess.length} entries.`);
+    console.log(`✅ Completed! Generated images for ${entriesToProcess.length} entries.`);
+    
+    // Refresh data to update stats
+    await onRefresh();
+    
     // Reset to selection stage
     setStage('select');
     setSelectedIds([]);
@@ -225,34 +256,35 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
     <div className="p-6 space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold">🖼️ Image Generation</h2>
-        <p className="text-gray-600">Generate 4 professional images per recipe using Google Imagen 3</p>
+        <h2 className="text-2xl font-bold text-white mb-0">🖼️ Image Generation</h2>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="flex justify-center gap-6">
         {[
           { label: 'Ready', value: stats.needsImages },
-          { label: 'Generated', value: stats.alreadyGenerated },
-          { label: 'Selected', value: stats.selected },
-          { label: 'Will Process', value: stats.willProcess, highlight: true }
+          { label: 'Generated', value: stats.alreadyGenerated, clickable: true }
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-4 rounded border shadow-sm">
-            <div className="text-sm text-gray-600">{stat.label}</div>
-            <div className={`text-3xl font-bold ${stat.highlight ? 'text-blue-600' : ''}`}>{stat.value}</div>
+          <div 
+            key={i} 
+            onClick={() => stat.clickable && stats.alreadyGenerated > 0 ? setStage('results' as any) : null}
+            className={`bg-white dark:bg-gray-800 p-6 rounded border border-gray-200 dark:border-gray-700 shadow-sm w-48 ${stat.clickable && stats.alreadyGenerated > 0 ? 'cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors' : ''}`}
+          >
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">{stat.label}</div>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
           </div>
         ))}
       </div>
 
       {/* Master Prompt */}
-      <div className="bg-white p-6 rounded border">
-        <h3 className="font-semibold mb-2">✨ Master Prompt Template</h3>
-        <p className="text-sm text-gray-600 mb-3">Generates 4 image descriptions from recipe data</p>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded border border-gray-200 dark:border-gray-700">
+        <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">✨ Master Prompt Template</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Generates 4 image descriptions from recipe data</p>
         <textarea
           value={masterPrompt}
           onChange={(e) => setMasterPrompt(e.target.value)}
           rows={6}
-          className="w-full font-mono text-sm border rounded p-3 focus:ring-2 focus:ring-blue-500"
+          className="w-full font-mono text-sm border border-gray-300 dark:border-gray-600 rounded p-3 focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
         />
       </div>
 
@@ -260,10 +292,10 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
       <div className="flex gap-3">
         {stage === 'select' && (
           <>
-            <button onClick={() => setSelectedIds(entriesReady.map(e => e.id))} className="px-4 py-2 border rounded hover:bg-gray-50">
+            <button onClick={() => setSelectedIds(entriesReady.map(e => e.id))} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
               Select All ({stats.needsImages})
             </button>
-            <button onClick={() => setSelectedIds([])} className="px-4 py-2 border rounded hover:bg-gray-50">
+            <button onClick={() => setSelectedIds([])} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
               Clear
             </button>
             <div className="flex-1" />
@@ -271,7 +303,7 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
               <button
                 onClick={handleGeneratePrompts}
                 disabled={stats.willProcess === 0}
-                className="px-6 py-2 bg-blue-500 text-white rounded disabled:opacity-50 hover:bg-blue-600"
+                className="px-6 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded disabled:opacity-50 hover:bg-blue-600 dark:hover:bg-blue-700"
               >
                 📝 Step 1: Generate Prompts ({stats.willProcess})
               </button>
@@ -281,13 +313,13 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
         
         {stage === 'prompts-generated' && (
           <>
-            <button onClick={() => { setStage('select'); setGeneratedPrompts({}); setEditedPrompts({}); }} className="px-4 py-2 border rounded hover:bg-gray-50">
+            <button onClick={() => { setStage('select'); setGeneratedPrompts({}); setEditedPrompts({}); }} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
               ← Back to Selection
             </button>
             <div className="flex-1" />
             <button
               onClick={handleGenerateImages}
-              className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded hover:from-purple-600 hover:to-pink-600"
+              className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-600 text-white rounded hover:from-purple-600 hover:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700"
             >
               🎨 Step 2: Generate Images ({Object.keys(editedPrompts).length})
             </button>
@@ -299,11 +331,11 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
             <div className="flex-1" />
             <button
               onClick={togglePause}
-              className={`px-4 py-2 rounded ${isPaused ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}
+              className={`px-4 py-2 rounded ${isPaused ? 'bg-orange-500 dark:bg-orange-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
             >
               {isPaused ? '▶️ Resume' : '⏸️ Pause'}
             </button>
-            <button onClick={stopProcessing} className="px-4 py-2 bg-red-500 text-white rounded">
+            <button onClick={stopProcessing} className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded hover:bg-red-600 dark:hover:bg-red-700">
               ⏹️ Stop
             </button>
           </>
@@ -312,31 +344,31 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
 
       {/* Progress */}
       {processing && (
-        <div className="bg-white p-4 rounded border">
-          <div className="flex justify-between text-sm mb-2">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded border border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between text-sm mb-2 text-gray-700 dark:text-gray-300">
             <span>Processing: {imageProgress.current} / {imageProgress.total}</span>
             <span>{Math.round((imageProgress.current / imageProgress.total) * 100)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded h-2">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded h-2">
             <div
-              className={`h-2 rounded transition-all ${isPaused ? 'bg-orange-500' : 'bg-blue-500'}`}
+              className={`h-2 rounded transition-all ${isPaused ? 'bg-orange-500 dark:bg-orange-600' : 'bg-blue-500 dark:bg-blue-600'}`}
               style={{ width: `${(imageProgress.current / imageProgress.total) * 100}%` }}
             />
           </div>
-          {isPaused && <p className="text-sm text-orange-600 mt-2">⏸️ Paused</p>}
+          {isPaused && <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">⏸️ Paused</p>}
         </div>
       )}
 
       {/* Entries List - Stage 1: Selection */}
       {stage === 'select' && (
-        <div className="bg-white rounded border">
-          <div className="p-4 border-b">
-            <h3 className="font-semibold">Entries Ready for Image Generation</h3>
-            <p className="text-sm text-gray-600">{stats.needsImages} entries ready</p>
+        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="font-semibold text-gray-900 dark:text-white">Entries Ready for Image Generation</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{stats.needsImages} entries ready</p>
           </div>
           <div className="p-4 space-y-3 max-h-[600px] overflow-y-auto">
             {entriesReady.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <p>No entries ready</p>
                 <p className="text-sm mt-2">Entries need SEO data first</p>
               </div>
@@ -352,7 +384,9 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
                       prev.includes(entry.id) ? prev.filter(id => id !== entry.id) : [...prev, entry.id]
                     )}
                     className={`p-4 border rounded cursor-pointer transition ${
-                      isSelected ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'
+                      isSelected 
+                        ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20' 
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
                     }`}
                   >
                     <div className="flex gap-4">
@@ -361,19 +395,19 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
                         <img src={entry.spyImageUrl} alt="" className="w-20 h-20 object-cover rounded" />
                       )}
                       <div className="flex-1">
-                        <h4 className="font-semibold">{entry.seoTitle}</h4>
-                        <p className="text-sm text-gray-600 line-clamp-2">{entry.seoDescription}</p>
+                        <h4 className="font-semibold text-gray-900 dark:text-white">{entry.seoTitle}</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{entry.seoDescription}</p>
                         <div className="flex gap-2 mt-2">
-                          <span className="text-xs bg-gray-100 px-2 py-1 rounded">{entry.seoKeyword}</span>
+                          <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded">{entry.seoKeyword}</span>
                           {entry.seoCategory && (
-                            <span className="text-xs bg-blue-100 px-2 py-1 rounded">{entry.seoCategory}</span>
+                            <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-1 rounded">{entry.seoCategory}</span>
                           )}
                         </div>
                         {status && (
                           <div className="mt-2 text-sm">
-                            {status.status === 'generating-prompts' && <span className="text-blue-600">🎨 Generating prompts...</span>}
-                            {status.status === 'prompts-ready' && <span className="text-green-600">✅ Prompts ready!</span>}
-                            {status.status === 'error' && <span className="text-red-600">❌ {status.error}</span>}
+                            {status.status === 'generating-prompts' && <span className="text-blue-600 dark:text-blue-400">🎨 Generating prompts...</span>}
+                            {status.status === 'prompts-ready' && <span className="text-green-600 dark:text-green-400">✅ Prompts ready!</span>}
+                            {status.status === 'error' && <span className="text-red-600 dark:text-red-400">❌ {status.error}</span>}
                           </div>
                         )}
                       </div>
@@ -388,21 +422,21 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
 
       {/* Stage 2: Review and Edit Prompts */}
       {stage === 'prompts-generated' && (
-        <div className="bg-white rounded border">
-          <div className="p-4 border-b bg-green-50">
-            <h3 className="font-semibold text-green-800">✅ Prompts Generated - Review and Edit Before Image Generation</h3>
-            <p className="text-sm text-green-600">Edit any prompt below, then click "Step 2: Generate Images"</p>
+        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-green-50 dark:bg-green-900/30">
+            <h3 className="font-semibold text-green-800 dark:text-green-300">✅ Prompts Generated - Review and Edit Before Image Generation</h3>
+            <p className="text-sm text-green-600 dark:text-green-400">Edit any prompt below, then click "Step 2: Generate Images"</p>
           </div>
           <div className="p-4 space-y-6 max-h-[700px] overflow-y-auto">
             {Object.entries(editedPrompts).map(([entryId, promptData]: [string, any]) => (
-              <div key={entryId} className="border rounded p-4 bg-gray-50">
+              <div key={entryId} className="border border-gray-200 dark:border-gray-700 rounded p-4 bg-gray-50 dark:bg-gray-800/50">
                 <div className="flex gap-4 mb-4">
                   {promptData.entry.spyImageUrl && (
                     <img src={promptData.entry.spyImageUrl} alt="" className="w-20 h-20 object-cover rounded" />
                   )}
                   <div className="flex-1">
-                    <h4 className="font-semibold text-lg">{promptData.entryTitle}</h4>
-                    <p className="text-sm text-gray-600">{promptData.entry.seoKeyword}</p>
+                    <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{promptData.entryTitle}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{promptData.entry.seoKeyword}</p>
                   </div>
                 </div>
                 
@@ -415,12 +449,12 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
                     { key: 'image_4_final_presentation', label: '4️⃣ Final Presentation', color: 'purple' }
                   ].map(({ key, label, color }) => (
                     <div key={key}>
-                      <label className={`text-sm font-medium text-${color}-700 block mb-1`}>{label}</label>
+                      <label className={`text-sm font-medium text-${color}-700 dark:text-${color}-400 block mb-1`}>{label}</label>
                       <textarea
                         value={promptData.prompts[key]}
                         onChange={(e) => updatePrompt(entryId, key, e.target.value)}
                         rows={3}
-                        className="w-full text-sm border rounded p-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded p-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                       />
                     </div>
                   ))}
@@ -430,18 +464,95 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders }: ImageGen
                 {currentProcessing[entryId] && (
                   <div className="mt-3 text-sm">
                     {currentProcessing[entryId].status === 'generating-images' && (
-                      <span className="text-purple-600">🖼️ Generating image {currentProcessing[entryId].currentImage}/4...</span>
+                      <span className="text-purple-600 dark:text-purple-400">🖼️ Generating image {currentProcessing[entryId].currentImage}/4...</span>
                     )}
                     {currentProcessing[entryId].status === 'completed' && (
-                      <span className="text-green-600">✅ All 4 images generated!</span>
+                      <span className="text-green-600 dark:text-green-400">✅ All 4 images generated!</span>
                     )}
                     {currentProcessing[entryId].status === 'error' && (
-                      <span className="text-red-600">❌ {currentProcessing[entryId].error}</span>
+                      <span className="text-red-600 dark:text-red-400">❌ {currentProcessing[entryId].error}</span>
                     )}
                   </div>
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Results View */}
+      {stage === 'results' && (
+        <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">🖼️ Generated Images - {stats.alreadyGenerated} Entries</h3>
+            </div>
+            <button 
+              onClick={() => setStage('select')} 
+              className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+            >
+              ← Back
+            </button>
+          </div>
+          <div className="p-4 space-y-6 max-h-[700px] overflow-y-auto">
+            {spyData.filter(e => e.generatedImage1Url).map(entry => (
+              <div key={entry.id} className="border border-gray-200 dark:border-gray-700 rounded p-4 bg-gray-50 dark:bg-gray-800/50">
+                <div className="mb-3">
+                  <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{entry.seoTitle}</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{entry.seoKeyword} • {entry.seoCategory}</p>
+                </div>
+                
+                {/* 4 Generated Images Grid */}
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    entry.generatedImage1Url,
+                    entry.generatedImage2Url,
+                    entry.generatedImage3Url,
+                    entry.generatedImage4Url
+                  ].map((url, idx) => (
+                    <div key={idx}>
+                      {url ? (
+                        <div className="relative aspect-[9/16] bg-gray-200 dark:bg-gray-700 rounded overflow-hidden">
+                          <img 
+                            src={url} 
+                            alt=""
+                            className="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+                            onClick={() => setSelectedImage(url)}
+                          />
+                        </div>
+                      ) : (
+                        <div className="aspect-[9/16] bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                          <span className="text-xs text-gray-400 dark:text-gray-600">N/A</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal Popup */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <img 
+              src={selectedImage} 
+              alt="" 
+              className="max-w-full max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
