@@ -91,16 +91,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={onMobileToggle}
         />
-      )}
+ )}
       
       {/* Sidebar */}
       <div className={`
-        fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 h-screen flex flex-col transform transition-all duration-300 ease-in-out shadow-lg
+        fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 h-screen flex flex-col transform transition-all duration-300 ease-in-out shadow-lg overflow-hidden
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="p-4 md:p-6 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center justify-between">
+        <div className="p-4 md:p-6 border-b border-slate-200 dark:border-slate-700">          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 md:w-10 h-8 md:h-10 bg-slate-700 dark:bg-slate-600 rounded-lg flex items-center justify-center">
                 <FileText className="w-4 md:w-6 h-4 md:h-6 text-white" />
@@ -142,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto scrollbar-elegant">
           <ul className="space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -187,30 +186,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
               
               {/* Submenu */}
-              <div className={`overflow-hidden transition-all duration-300 ${automationExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <ul className="ml-6 mt-2 space-y-1 border-l border-slate-300 dark:border-slate-600 pl-4">
-                  {automationItems.map((subItem) => {
-                    const SubIcon = subItem.icon;
-                    const isSubActive = activeSection === subItem.id;
+              {automationExpanded && (
+                <div className="overflow-hidden">
+                  <ul className="ml-6 mt-2 pb-2 space-y-1 border-l border-slate-300 dark:border-slate-600 pl-4">
+                    {automationItems.map((subItem) => {
+                      const SubIcon = subItem.icon;
+                      const isSubActive = activeSection === subItem.id;
 
-                    return (
-                      <li key={subItem.id}>
-                        <button
-                          onClick={() => handleSectionChange(subItem.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                            isSubActive
-                              ? "bg-slate-600 dark:bg-slate-500 text-white"
-                              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200"
-                          }`}
-                        >
-                          <SubIcon className="w-4 h-4" />
-                          {subItem.label}
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
+                      return (
+                        <li key={subItem.id}>
+                          <button
+                            onClick={() => handleSectionChange(subItem.id)}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 truncate ${
+                              isSubActive
+                                ? "bg-slate-600 dark:bg-slate-500 text-white"
+                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200"
+                            }`}
+                          >
+                            <SubIcon className="w-4 h-4" />
+                            {subItem.label}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
             </li>
           </ul>
         </nav>
