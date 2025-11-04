@@ -3,34 +3,12 @@
  * 
  * This is the public API for the automation system.
  * Import and use these functions from admin dashboard and API routes.
+ * 
+ * NOTE: Old queue/workflow system removed. Use RecipePipelineOrchestrator instead.
  */
 
-export {
-  // Queue operations
-  addAutomationJob,
-  getJobStatus,
-  getQueueStats,
-  getRecentJobs,
-  retryJob,
-  cancelJob,
-  cleanQueue,
-  pauseQueue,
-  resumeQueue,
-  setupQueueEventListeners,
-  closeQueue,
-} from './queue/automation.queue';
-
-export {
-  // Worker
-  createAutomationWorker,
-} from './queue/automation.worker';
-
-export {
-  // Workflow (Legacy - use RecipePipelineOrchestrator for new code)
-  executeWorkflow,
-  type WorkflowResult,
-  type ProgressCallback,
-} from './workflows/main-workflow';
+// Old exports removed - queue and workflow systems deleted
+// Use RecipePipelineOrchestrator from './pipeline/recipe-pipeline' instead
 
 export {
   // Types
@@ -42,7 +20,6 @@ export {
 } from './types/workflow.types';
 
 export {
-  type ImagePrompts,
   type ImageGenerationRequest,
   type ImageGenerationResult,
   type ImageUploadRequest,
@@ -105,7 +82,6 @@ export {
   validateRecipeData,
   validateImagePrompts,
   validateRecipeArticle,
-  validateUrl,
   validateConfig,
 } from './utils/validators';
 
@@ -113,162 +89,41 @@ export {
 export { AUTOMATION_CONSTANTS } from './config/constants';
 export { automationEnv } from './config/env';
 
+// Export new pipeline system
+export { RecipePipelineOrchestrator } from './pipeline/recipe-pipeline';
+export { CategoryMatcher } from './recipe-generation/category-matcher';
+
 /**
- * Initialize the automation system
- * Call this once when your application starts
+ * @deprecated Old automation system removed. Use RecipePipelineOrchestrator instead.
  */
 export async function initializeAutomation(): Promise<void> {
-  const { setupQueueEventListeners } = await import('./queue/automation.queue');
-  const { logger } = await import('./utils/logger');
-  setupQueueEventListeners();
-  logger.info('Automation system initialized');
+  console.warn('⚠️ initializeAutomation() is deprecated. Old automation system removed.');
 }
 
 /**
- * Start a new recipe automation
- * Automatically finds the first eligible row from Google Sheets
- * 
- * @returns Job ID for tracking
+ * @deprecated Use RecipePipelineOrchestrator.executePipeline() instead
  */
 export async function startAutomation(): Promise<string> {
-  const { PrismaClient } = await import('@prisma/client');
-  const { addAutomationJob } = await import('./queue/automation.queue');
-  const { logger } = await import('./utils/logger');
-  
-  const prisma = new PrismaClient();
-  
-  try {
-    // Create automation record in database (row number will be found by workflow)
-    const automation = await prisma.recipeAutomation.create({
-      data: {
-        status: 'PENDING',
-        recipeRowNumber: 0, // Will be updated when workflow finds eligible row
-      },
-    });
-
-    // Add job to queue (workflow will find eligible row automatically)
-    const jobId = await addAutomationJob(
-      automation.id,
-      0, // No row number - auto-find
-      'Auto-finding eligible recipe'
-    );
-
-    logger.info('Automation started - auto-finding eligible recipe', {
-      automationId: automation.id,
-      jobId,
-    });
-
-    return jobId;
-  } finally {
-    await prisma.$disconnect();
-  }
+  throw new Error('startAutomation() is deprecated. Use RecipePipelineOrchestrator.executePipeline() or call /api/admin/automation/pipeline/run');
 }
 
 /**
- * Get automation status
- * 
- * @param automationId - Automation ID or Job ID
- * @returns Status information
+ * @deprecated Old automation system removed
  */
-export async function getAutomationStatus(automationId: string): Promise<{
-  automation: any;
-  job: any;
-}> {
-  const { PrismaClient } = await import('@prisma/client');
-  const { getJobStatus } = await import('./queue/automation.queue');
-  
-  const prisma = new PrismaClient();
-  
-  try {
-    const [automation, job] = await Promise.all([
-      prisma.recipeAutomation.findUnique({
-        where: { id: automationId },
-        include: {
-          config: true,
-          images: true,
-        },
-      }),
-      getJobStatus(automationId),
-    ]);
-
-    return { automation, job };
-  } finally {
-    await prisma.$disconnect();
-  }
+export async function getAutomationStatus(automationId: string): Promise<any> {
+  throw new Error('getAutomationStatus() is deprecated. Old automation system removed.');
 }
 
 /**
- * Get automation logs
- * 
- * @param automationId - Automation ID
- * @param level - Optional log level filter
- * @returns Array of log entries
+ * @deprecated Old automation system removed
  */
-export async function getAutomationLogs(
-  automationId: string,
-  level?: 'DEBUG' | 'INFO' | 'WARN' | 'ERROR'
-): Promise<any[]> {
-  const { PrismaClient } = await import('@prisma/client');
-  const prisma = new PrismaClient();
-  
-  try {
-    const logs = await prisma.automationLog.findMany({
-      where: {
-        automationId,
-        ...(level && { level }),
-      },
-      orderBy: {
-        timestamp: 'desc',
-      },
-      take: 100,
-    });
-
-    return logs;
-  } finally {
-    await prisma.$disconnect();
-  }
+export async function getAutomationLogs(automationId: string, level?: string): Promise<any[]> {
+  throw new Error('getAutomationLogs() is deprecated. Old automation system removed.');
 }
 
 /**
- * Get automation statistics
+ * @deprecated Old automation system removed
  */
-export async function getAutomationStats(): Promise<{
-  total: number;
-  pending: number;
-  processing: number;
-  completed: number;
-  failed: number;
-  successRate: number;
-}> {
-  const { PrismaClient } = await import('@prisma/client');
-  const prisma = new PrismaClient();
-  
-  try {
-    const [
-      total,
-      pending,
-      processing,
-      completed,
-      failed,
-    ] = await Promise.all([
-      prisma.recipeAutomation.count(),
-      prisma.recipeAutomation.count({ where: { status: 'PENDING' } }),
-      prisma.recipeAutomation.count({ where: { status: 'PROCESSING' } }),
-      prisma.recipeAutomation.count({ where: { status: 'COMPLETED' } }),
-      prisma.recipeAutomation.count({ where: { status: 'FAILED' } }),
-    ]);
-
-    const successRate = total > 0 ? (completed / total) * 100 : 0;
-
-    return {
-      total,
-      pending,
-      processing,
-      completed,
-      failed,
-      successRate: Math.round(successRate * 100) / 100,
-    };
-  } finally {
-    await prisma.$disconnect();
-  }
+export async function getAutomationStats(): Promise<any> {
+  throw new Error('getAutomationStats() is deprecated. Old automation system removed.');
 }

@@ -1,9 +1,10 @@
 /**
  * Auto-initialize worker on server startup
+ * NOTE: Old worker system removed. Pipeline jobs worker starts automatically.
  */
 
-import { createAutomationWorker } from '@/automation/queue/automation.worker';
 import { Worker } from 'bullmq';
+import { pipelineWorker } from '@/automation/jobs/pipeline-jobs';
 
 let workerInstance: Worker | null = null;
 
@@ -14,16 +15,17 @@ export function initializeWorker() {
   }
 
   if (workerInstance && !workerInstance.closing) {
-    console.log('Worker already running');
+    console.log('Pipeline worker already running');
     return workerInstance;
   }
 
   try {
-    workerInstance = createAutomationWorker();
-    console.log('✅ Automation worker initialized successfully');
+    // Use the new pipeline worker
+    workerInstance = pipelineWorker;
+    console.log('✅ Pipeline worker initialized successfully');
     return workerInstance;
   } catch (error) {
-    console.error('❌ Failed to initialize worker:', error);
+    console.error('❌ Failed to initialize pipeline worker:', error);
     return null;
   }
 }
