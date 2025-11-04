@@ -13,7 +13,6 @@ const prisma = new PrismaClient();
 
 export interface PipelineJobData {
   scheduleId: string;
-  batchSize: number;
   authorId?: string;
   filters?: Record<string, any>;
 }
@@ -44,11 +43,10 @@ export const pipelineQueue = new Queue<PipelineJobData, PipelineJobResult>(
 export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
   'recipe-pipeline',
   async (job) => {
-    const { scheduleId, batchSize, authorId, filters } = job.data;
+    const { scheduleId, authorId, filters } = job.data;
 
-    logger.info(`🚀 Starting scheduled pipeline job`, {
+    logger.info(`🚀 Starting scheduled pipeline job (1 recipe per run)`, {
       scheduleId,
-      batchSize,
       jobId: job.id
     });
 
@@ -69,14 +67,14 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
         }
       });
 
-      // Get pending spy data entries based on filters
+      // Get next single pending spy data entry (always process only 1)
       const spyDataEntries = await prisma.pinterestSpyData.findMany({
         where: {
           generatedRecipeId: null,
           status: { in: ['PENDING', 'SEO_COMPLETED'] },
           ...filters
         },
-        take: batchSize,
+        take: 1, // ALWAYS ONLY 1 RECIPE PER RUN
         orderBy: [
           { priority: 'desc' },
           { createdAt: 'asc' }
@@ -91,55 +89,51 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
 
       logger.info(`Found ${spyDataEntries.length} entries to process`);
 
-      // Process each entry through the pipeline
-      for (let i = 0; i < spyDataEntries.length; i++) {
-        const entry = spyDataEntries[i];
-        
-        logger.info(`Processing entry ${i + 1}/${spyDataEntries.length}: ${entry.spyTitle}`);
-        
-        await job.updateProgress((i / spyDataEntries.length) * 100);
+      // Process the single entry through the pipeline
+      const entry = spyDataEntries[0];
+      
+      logger.info(`Processing single entry: ${entry.spyTitle}`);
+      
+      await job.updateProgress(50);
 
-        try {
-          const pipelineResult = await RecipePipelineOrchestrator.executePipeline({
-            spyDataId: entry.id,
-            authorId: authorId,
-            onProgress: async (step, total, message) => {
-              logger.debug(`Pipeline step ${step}/${total}: ${message}`);
-            }
-          });
-
-          if (pipelineResult.success) {
-            results.processed++;
-            results.recipes.push({
-              spyDataId: entry.id,
-              recipeId: pipelineResult.recipeId,
-              recipeUrl: pipelineResult.recipeUrl
-            });
-            
-            logger.info(`✅ Recipe created: ${pipelineResult.recipeUrl}`);
-          } else {
-            results.failed++;
-            results.recipes.push({
-              spyDataId: entry.id,
-              error: pipelineResult.error
-            });
-            
-            logger.error(`❌ Failed to create recipe: ${pipelineResult.error}`);
+      try {
+        const pipelineResult = await RecipePipelineOrchestrator.executePipeline({
+          spyDataId: entry.id,
+          authorId: authorId,
+          onProgress: async (step, total, message) => {
+            logger.debug(`Pipeline step ${step}/${total}: ${message}`);
+            await job.updateProgress(50 + (step / total) * 50);
           }
+        });
 
-        } catch (error) {
-          results.failed++;
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        if (pipelineResult.success) {
+          results.processed++;
           results.recipes.push({
             spyDataId: entry.id,
-            error: errorMessage
+            recipeId: pipelineResult.recipeId,
+            recipeUrl: pipelineResult.recipeUrl
           });
           
-          logger.error(`❌ Pipeline error for ${entry.id}:`, error);
+          logger.info(`✅ Recipe created: ${pipelineResult.recipeUrl}`);
+        } else {
+          results.failed++;
+          results.recipes.push({
+            spyDataId: entry.id,
+            error: pipelineResult.error
+          });
+          
+          logger.error(`❌ Failed to create recipe: ${pipelineResult.error}`);
         }
 
-        // Small delay between entries to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        results.failed++;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        results.recipes.push({
+          spyDataId: entry.id,
+          error: errorMessage
+        });
+        
+        logger.error(`❌ Pipeline error for ${entry.id}:`, error);
       }
 
       // Update schedule statistics
@@ -178,21 +172,20 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
 
 /**
  * Add or update a repeatable job based on schedule
+ * Always processes 1 recipe per run
  */
 export async function scheduleRecipePipeline(
   scheduleId: string,
   cronExpression: string,
-  batchSize: number,
   authorId?: string,
   filters?: Record<string, any>
 ): Promise<void> {
-  logger.info(`📅 Scheduling pipeline job`, { scheduleId, cronExpression, batchSize });
+  logger.info(`📅 Scheduling pipeline job (1 recipe per run)`, { scheduleId, cronExpression });
 
   await pipelineQueue.add(
     'scheduled-pipeline',
     {
       scheduleId,
-      batchSize,
       authorId,
       filters
     },

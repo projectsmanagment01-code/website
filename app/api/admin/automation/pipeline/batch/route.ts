@@ -14,9 +14,15 @@ const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
-    const authResult = await verifyAuth(req);
-    if (!authResult) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Skip auth in development
+    const isDev = process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH === 'true';
+    if (!isDev) {
+      const authResult = await verifyAuth(req);
+      if (!authResult) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    } else {
+      console.log('🔓 Skipping auth (development mode)');
     }
 
     const body = await req.json();

@@ -20,6 +20,7 @@ import {
   Activity,
   ImageIcon,
   Target,
+  Clock,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/admin/ThemeToggle";
 
@@ -48,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   
   // Auto expand automation if one of its sub-items is active
   useEffect(() => {
-    if (activeSection === 'automation' || activeSection === 'pinterest-spy' || activeSection === 'image-generation' || activeSection === 'recipe-generation') {
+    if (activeSection === 'automation' || activeSection === 'pipeline-schedules' || activeSection === 'pinterest-spy' || activeSection === 'image-generation' || activeSection === 'recipe-generation') {
       setAutomationExpanded(true);
     }
   }, [activeSection]);
@@ -79,6 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const automationItems = [
     { id: "automation", label: "Recipe Automation", icon: Activity },
+    { id: "pipeline-schedules", label: "Pipeline Schedules", icon: Clock },
     { id: "pinterest-spy", label: "Data Manager", icon: Target },
     { id: "image-generation", label: "Image Generation", icon: ImageIcon },
     { id: "recipe-generation", label: "Recipe Generation", icon: FileText },

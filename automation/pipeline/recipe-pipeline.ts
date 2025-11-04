@@ -258,15 +258,18 @@ export class RecipePipelineOrchestrator {
    * Generate SEO metadata for spy data
    */
   private static async generateSEO(spyDataId: string): Promise<void> {
-    // Call your existing SEO generation endpoint
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/pinterest-spy/process`, {
+    // Get base URL - use localhost for server-side calls
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002';
+    
+    const response = await fetch(`${baseUrl}/api/admin/pinterest-spy/process`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ spyDataIds: [spyDataId] })
     });
 
     if (!response.ok) {
-      throw new Error(`SEO generation failed: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`SEO generation failed: ${response.statusText} - ${errorText}`);
     }
   }
 
@@ -274,15 +277,18 @@ export class RecipePipelineOrchestrator {
    * Generate images for spy data
    */
   private static async generateImages(spyDataId: string): Promise<void> {
-    // Call your existing image generation endpoint
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/pinterest-spy/generate-images`, {
+    // Get base URL - use localhost for server-side calls
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002';
+    
+    const response = await fetch(`${baseUrl}/api/admin/pinterest-spy/generate-image`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ spyDataIds: [spyDataId] })
     });
 
     if (!response.ok) {
-      throw new Error(`Image generation failed: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Image generation failed: ${response.statusText} - ${errorText}`);
     }
   }
 

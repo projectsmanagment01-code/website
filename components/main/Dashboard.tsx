@@ -30,6 +30,7 @@ import CategoryManager from "@/components/admin/CategoryManager";
 import PinterestSpyManager from "@/automation/pinterest/PinterestSpyManager";
 import ImageGenerationManager from "@/automation/image-generation/ImageGenerationManager";
 import RecipeGenerationManager from "@/automation/recipe-generation/RecipeGenerationManager";
+import ScheduleManager from "@/components/automation/ScheduleManager";
 import AutomationDashboard from "@/components/admin/AutomationDashboard";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
@@ -157,6 +158,8 @@ function AdminDashboardContent() {
             <RecipeGenerationManager />
           </div>
         );
+      case "pipeline-schedules":
+        return <ScheduleManager />;
       case "seo-reports":
         return (
           <div className="space-y-6">

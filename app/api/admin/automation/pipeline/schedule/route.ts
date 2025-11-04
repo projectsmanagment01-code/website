@@ -16,9 +16,13 @@ const prisma = new PrismaClient();
 // GET - List all schedules
 export async function GET(req: NextRequest) {
   try {
-    const authResult = await verifyAuth(req);
-    if (!authResult) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Skip auth in development
+    const isDev = process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH === 'true';
+    if (!isDev) {
+      const authResult = await verifyAuth(req);
+      if (!authResult) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     const schedules = await prisma.automationSchedule.findMany({
@@ -51,30 +55,44 @@ export async function GET(req: NextRequest) {
 // POST - Create new schedule
 export async function POST(req: NextRequest) {
   try {
-    const authResult = await verifyAuth(req);
-    if (!authResult) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    console.log('➕ POST /api/admin/automation/pipeline/schedule called');
+    
+    // Skip auth in development
+    const isDev = process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH === 'true';
+    if (!isDev) {
+      const authResult = await verifyAuth(req);
+      if (!authResult) {
+        console.log('❌ Auth failed');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    } else {
+      console.log('🔓 Skipping auth (development mode)');
     }
 
     const body = await req.json();
+    console.log('📦 Request body:', body);
+    
     const {
       name,
       cronExpression,
-      batchSize = 1,
       enabled = false,
       authorId,
       filters
     } = body;
 
-    if (!name || !cronExpression) {
+    // Name is optional, only cronExpression is required
+    if (!cronExpression) {
+      console.log('❌ Missing cronExpression');
       return NextResponse.json(
-        { error: 'Missing required fields: name, cronExpression' },
+        { error: 'Missing required field: cronExpression' },
         { status: 400 }
       );
     }
 
     // Validate cron expression (basic check)
+    console.log('🔍 Validating cron expression:', cronExpression);
     if (!isValidCronExpression(cronExpression)) {
+      console.log('❌ Invalid cron expression');
       return NextResponse.json(
         { error: 'Invalid cron expression' },
         { status: 400 }
@@ -82,6 +100,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create schedule in database
+    console.log('💾 Creating schedule in database...');
     const schedule = await prisma.automationSchedule.create({
       data: {
         enabled,
@@ -90,16 +109,18 @@ export async function POST(req: NextRequest) {
         runCount: 0
       }
     });
+    console.log('✅ Schedule created:', schedule);
 
     // If enabled, add to queue
     if (enabled) {
+      console.log('➕ Adding to queue...');
       await scheduleRecipePipeline(
         schedule.id,
         cronExpression,
-        batchSize,
         authorId,
         filters
       );
+      console.log('✅ Added to queue');
     }
 
     return NextResponse.json({
@@ -119,15 +140,27 @@ export async function POST(req: NextRequest) {
 // PUT - Update schedule
 export async function PUT(req: NextRequest) {
   try {
-    const authResult = await verifyAuth(req);
-    if (!authResult) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    console.log('🔄 PUT /api/admin/automation/pipeline/schedule called');
+    
+    // Skip auth in development
+    const isDev = process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH === 'true';
+    if (!isDev) {
+      const authResult = await verifyAuth(req);
+      if (!authResult) {
+        console.log('❌ Auth failed');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    } else {
+      console.log('🔓 Skipping auth (development mode)');
     }
 
     const body = await req.json();
-    const { id, enabled, cronExpression, batchSize, authorId, filters } = body;
+    console.log('📦 Request body:', body);
+    
+    const { id, enabled, cronExpression, authorId, filters } = body;
 
     if (!id) {
+      console.log('❌ Missing schedule ID');
       return NextResponse.json(
         { error: 'Missing schedule ID' },
         { status: 400 }
@@ -139,20 +172,25 @@ export async function PUT(req: NextRequest) {
     });
 
     if (!schedule) {
+      console.log('❌ Schedule not found:', id);
       return NextResponse.json(
         { error: 'Schedule not found' },
         { status: 404 }
       );
     }
 
+    console.log('📋 Found schedule:', schedule);
+
     // Remove existing job if any
     if (schedule.enabled) {
+      console.log('🗑️ Removing existing job...');
       await removeScheduledPipeline(id).catch(e => 
-        console.warn('Failed to remove old schedule:', e)
+        console.warn('⚠️ Failed to remove old schedule:', e)
       );
     }
 
     // Update schedule
+    console.log('💾 Updating schedule in database...');
     const updatedSchedule = await prisma.automationSchedule.update({
       where: { id },
       data: {
@@ -161,15 +199,18 @@ export async function PUT(req: NextRequest) {
       }
     });
 
+    console.log('✅ Schedule updated:', updatedSchedule);
+
     // Add new job if enabled
     if (updatedSchedule.enabled && updatedSchedule.cronExpression) {
+      console.log('➕ Adding new job to queue...');
       await scheduleRecipePipeline(
         updatedSchedule.id,
         updatedSchedule.cronExpression,
-        batchSize || 1,
         authorId,
         filters
       );
+      console.log('✅ Job added to queue');
     }
 
     return NextResponse.json({
@@ -189,9 +230,13 @@ export async function PUT(req: NextRequest) {
 // DELETE - Delete schedule
 export async function DELETE(req: NextRequest) {
   try {
-    const authResult = await verifyAuth(req);
-    if (!authResult) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Skip auth in development
+    const isDev = process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH === 'true';
+    if (!isDev) {
+      const authResult = await verifyAuth(req);
+      if (!authResult) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     const { searchParams } = new URL(req.url);

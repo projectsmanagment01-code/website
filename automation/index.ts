@@ -26,7 +26,7 @@ export {
 } from './queue/automation.worker';
 
 export {
-  // Workflow
+  // Workflow (Legacy - use RecipePipelineOrchestrator for new code)
   executeWorkflow,
   type WorkflowResult,
   type ProgressCallback,
