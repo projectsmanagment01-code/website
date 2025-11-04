@@ -275,3 +275,22 @@ model InternalLinkSuggestion {
   @@index([sourceRecipeId])
   @@index([status])
 }
+
+// Hero Slides for Homepage
+model HeroSlide {
+  id              String    @id @default(cuid())
+  title           String    @db.Text
+  description     String    @db.Text
+  buttonText      String
+  buttonLink      String
+  backgroundImage String    // URL or path to background image
+  order           Int       @default(0) // Display order (lower = shown first)
+  isActive        Boolean   @default(true) // Active/inactive toggle
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  updatedBy       String?   // Track who made changes
+
+  @@map("hero_slides")
+  @@index([order])
+  @@index([isActive])
+}
