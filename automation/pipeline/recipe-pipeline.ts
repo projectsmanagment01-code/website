@@ -258,38 +258,117 @@ export class RecipePipelineOrchestrator {
    * Generate SEO metadata for spy data
    */
   private static async generateSEO(spyDataId: string): Promise<void> {
-    // Get base URL - use localhost for server-side calls
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002';
+    // Import SEO extraction service directly instead of making API call
+    const { SEOExtractionService } = await import('@/lib/pinterest-spy/seo-extraction-service');
     
-    const response = await fetch(`${baseUrl}/api/admin/pinterest-spy/process`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ spyDataIds: [spyDataId] })
+    const spyData = await prisma.pinterestSpyData.findUnique({
+      where: { id: spyDataId }
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`SEO generation failed: ${response.statusText} - ${errorText}`);
+    
+    if (!spyData) {
+      throw new Error('Spy data not found');
     }
+    
+    const result = await SEOExtractionService.extractSEO({
+      title: spyData.spyTitle,
+      description: spyData.spyDescription || undefined,
+      imageUrl: spyData.spyImageUrl
+    });
+    
+    if (!result.success) {
+      throw new Error(result.error || 'SEO generation failed');
+    }
+    
+    await prisma.pinterestSpyData.update({
+      where: { id: spyDataId },
+      data: {
+        seoKeyword: result.keyword,
+        seoTitle: result.title,
+        seoDescription: result.description,
+        seoCategory: result.category,
+        seoExtractedAt: new Date(),
+        status: 'SEO_PROCESSED'
+      }
+    });
   }
 
   /**
    * Generate images for spy data
    */
   private static async generateImages(spyDataId: string): Promise<void> {
-    // Get base URL - use localhost for server-side calls
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002';
+    // Import image generation service directly
+    const { ImageGenerationService } = await import('@/automation/image-generation/service');
     
-    const response = await fetch(`${baseUrl}/api/admin/pinterest-spy/generate-image`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ spyDataIds: [spyDataId] })
+    const spyData = await prisma.pinterestSpyData.findUnique({
+      where: { id: spyDataId }
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Image generation failed: ${response.statusText} - ${errorText}`);
+    
+    if (!spyData) {
+      throw new Error('Spy data not found');
     }
+    
+    if (!spyData.seoKeyword || !spyData.seoTitle) {
+      throw new Error('SEO data must be generated before images');
+    }
+    
+    // Generate 4 images
+    const imageUrls: Record<string, string> = {};
+    const prompts: Record<string, string> = {};
+    
+    for (let i = 1; i <= 4; i++) {
+      const prompt = await this.generateImagePrompt(spyData, i);
+      prompts[`image_${i}`] = prompt;
+      
+      // Convert reference image to base64
+      const referenceBase64 = await ImageGenerationService.imageUrlToBase64(spyData.spyImageUrl!);
+      
+      // Generate image
+      const result = await ImageGenerationService.generateSingleImage(
+        prompt,
+        referenceBase64,
+        i,
+        spyData.seoKeyword
+      );
+      
+      // Save image file
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const uploadDir = path.join(process.cwd(), 'uploads', 'generated-recipes');
+      await fs.mkdir(uploadDir, { recursive: true });
+      
+      const filePath = path.join(uploadDir, result.filename);
+      await fs.writeFile(filePath, Buffer.from(result.imageData, 'base64'));
+      
+      imageUrls[`image${i}`] = `/uploads/generated-recipes/${result.filename}`;
+    }
+    
+    // Update spy data with image URLs
+    await prisma.pinterestSpyData.update({
+      where: { id: spyDataId },
+      data: {
+        generatedImage1Url: imageUrls.image1,
+        generatedImage2Url: imageUrls.image2,
+        generatedImage3Url: imageUrls.image3,
+        generatedImage4Url: imageUrls.image4,
+        generatedImagePrompts: prompts,
+        imageGeneratedAt: new Date(),
+        status: 'READY_FOR_GENERATION'
+      }
+    });
+  }
+  
+  /**
+   * Generate a prompt for a specific image number
+   */
+  private static async generateImagePrompt(spyData: any, imageNumber: number): Promise<string> {
+    const prompts = {
+      1: `FINISHED DISH HERO SHOT: Close-up 45-degree angle of ${spyData.seoTitle} plated on kitchen surface. Show complete finished dish as main subject. NO raw ingredients, NO cooking process, ONLY final result. Kitchen environment, 16:9 tall aspect ratio.`,
+      2: `RAW INGREDIENTS LAYOUT: ONLY raw, uncooked ingredients for ${spyData.seoTitle} laid out separately. NO finished dish, NO cooking in progress. Ingredients in bowls, measuring cups, on cutting board. Overhead flat lay view from directly above. Kitchen environment, 16:9 tall aspect ratio.`,
+      3: `COOKING ACTION SHOT: ${spyData.seoTitle} being cooked/mixed/baked IN PROGRESS. Steam, bubbles, or action visible. Side angle or 3/4 view showing the process. NO finished dish, NO raw ingredients layout. Kitchen environment, 16:9 tall aspect ratio.`,
+      4: `STYLED PRESENTATION: ${spyData.seoTitle} finished dish in ELEGANT table setting. Different angle than image 1 (front view or side profile). More styling and props. Kitchen environment, 16:9 tall aspect ratio.`
+    };
+    
+    return prompts[imageNumber as keyof typeof prompts] || prompts[1];
   }
 
   /**

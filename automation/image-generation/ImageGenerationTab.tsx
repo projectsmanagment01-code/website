@@ -70,11 +70,14 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders, onRefresh 
     generateImagePrompts,
     generateSingleImage,
     uploadImage,
-    saveImageUrls
+    saveImageUrls,
+    deleteGeneratedImages
   } = useImageGeneration(getAuthHeaders, spyData);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [processing, setProcessing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [selectedForDeletion, setSelectedForDeletion] = useState<string[]>([]);
   const [masterPrompt, setMasterPrompt] = useState(DEFAULT_MASTER_PROMPT);
   const [currentProcessing, setCurrentProcessing] = useState<Record<string, any>>({});
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -250,6 +253,33 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders, onRefresh 
         }
       }
     }));
+  };
+
+  // Delete generated images (bulk or individual)
+  const handleDeleteImages = async (entryIds: string[]) => {
+    if (!confirm(`Are you sure you want to delete generated images for ${entryIds.length} entry(ies)? This will also delete the files from disk.`)) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      console.log(`🗑️ Deleting images for ${entryIds.length} entries...`);
+      const result = await deleteGeneratedImages(entryIds);
+      console.log(`✅ Deleted ${result.deletedFiles} files`);
+      
+      // Refresh data
+      await onRefresh();
+      
+      // Clear selection
+      setSelectedForDeletion([]);
+      
+      alert(`Successfully deleted ${result.deletedFiles} image files from ${result.entriesProcessed} entries`);
+    } catch (error) {
+      console.error('❌ Error deleting images:', error);
+      alert('Failed to delete images. Check console for details.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -483,23 +513,72 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders, onRefresh 
       {/* Results View */}
       {stage === 'results' && (
         <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">🖼️ Generated Images - {stats.alreadyGenerated} Entries</h3>
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">🖼️ Generated Images - {stats.alreadyGenerated} Entries</h3>
+              </div>
+              <button 
+                onClick={() => setStage('select')} 
+                className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+              >
+                ← Back
+              </button>
             </div>
-            <button 
-              onClick={() => setStage('select')} 
-              className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-            >
-              ← Back
-            </button>
+            
+            {/* Bulk Actions */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  const allIds = spyData.filter(e => e.generatedImage1Url).map(e => e.id);
+                  setSelectedForDeletion(selectedForDeletion.length === allIds.length ? [] : allIds);
+                }}
+                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+              >
+                {selectedForDeletion.length === spyData.filter(e => e.generatedImage1Url).length ? 'Deselect All' : 'Select All'}
+              </button>
+              
+              {selectedForDeletion.length > 0 && (
+                <button
+                  onClick={() => handleDeleteImages(selectedForDeletion)}
+                  disabled={deleting}
+                  className="px-4 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {deleting ? '🗑️ Deleting...' : `🗑️ Delete ${selectedForDeletion.length} Selected`}
+                </button>
+              )}
+            </div>
           </div>
           <div className="p-4 space-y-6 max-h-[700px] overflow-y-auto">
             {spyData.filter(e => e.generatedImage1Url).map(entry => (
               <div key={entry.id} className="border border-gray-200 dark:border-gray-700 rounded p-4 bg-gray-50 dark:bg-gray-800/50">
-                <div className="mb-3">
-                  <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{entry.seoTitle}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{entry.seoKeyword} • {entry.seoCategory}</p>
+                <div className="mb-3 flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedForDeletion.includes(entry.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedForDeletion([...selectedForDeletion, entry.id]);
+                        } else {
+                          setSelectedForDeletion(selectedForDeletion.filter(id => id !== entry.id));
+                        }
+                      }}
+                      className="mt-1.5 w-4 h-4 rounded border-gray-300 dark:border-gray-600"
+                    />
+                    <div>
+                      <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{entry.seoTitle}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{entry.seoKeyword} • {entry.seoCategory}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteImages([entry.id])}
+                    disabled={deleting}
+                    className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    title="Delete this entry's images"
+                  >
+                    🗑️ Delete
+                  </button>
                 </div>
                 
                 {/* 4 Generated Images Grid */}

@@ -258,7 +258,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
                   id="currentPassword"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   required
                 />
                 <button
@@ -279,7 +279,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
                 id="newPassword"
                 value={passwordData.newPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 required
                 minLength={6}
               />
@@ -293,7 +293,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
                 id="confirmPassword"
                 value={passwordData.confirmPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 required
                 minLength={6}
               />
@@ -320,7 +320,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
                 id="currentUsername"
                 value={usernameData.currentUsername}
                 disabled
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-not-allowed"
               />
             </div>
             <div>
@@ -332,7 +332,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
                 id="newUsername"
                 value={usernameData.newUsername}
                 onChange={(e) => setUsernameData({ ...usernameData, newUsername: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 required
                 minLength={2}
                 maxLength={50}
@@ -376,7 +376,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
                 id="siteKey"
                 value={recaptchaSettings.siteKey}
                 onChange={(e) => setRecaptchaSettings({ ...recaptchaSettings, siteKey: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 placeholder="Enter your reCAPTCHA site key"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -392,7 +392,7 @@ export default function ProfileSettings({ onClose }: ProfileSettingsProps) {
                 id="secretKey"
                 value={recaptchaSettings.secretKey}
                 onChange={(e) => setRecaptchaSettings({ ...recaptchaSettings, secretKey: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 placeholder="Enter your reCAPTCHA secret key"
               />
               <p className="text-xs text-gray-500 mt-1">

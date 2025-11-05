@@ -423,6 +423,17 @@ export const useImageGeneration = (getAuthHeaders: () => Record<string, string>,
     return await response.json();
   };
 
+  const deleteGeneratedImages = async (entryIds: string[]) => {
+    const response = await fetch('/api/admin/pinterest-spy/delete-images', {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ entryIds })
+    });
+
+    if (!response.ok) throw new Error('Failed to delete images');
+    return await response.json();
+  };
+
   const togglePause = () => {
     setIsPaused(prev => !prev);
     pausedRef.current = !pausedRef.current;
@@ -456,6 +467,7 @@ export const useImageGeneration = (getAuthHeaders: () => Record<string, string>,
     generateImagePrompts,
     generateSingleImage,
     uploadImage,
-    saveImageUrls
+    saveImageUrls,
+    deleteGeneratedImages
   };
 };

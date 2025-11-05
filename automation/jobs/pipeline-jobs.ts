@@ -57,6 +57,8 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
       recipes: []
     };
 
+    let executionLog: any = null;
+
     try {
       // Update schedule last run
       await prisma.automationSchedule.update({
@@ -71,7 +73,7 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
       const spyDataEntries = await prisma.pinterestSpyData.findMany({
         where: {
           generatedRecipeId: null,
-          status: { in: ['PENDING', 'SEO_COMPLETED'] },
+          status: { in: ['PENDING', 'SEO_COMPLETED', 'SEO_PROCESSED', 'READY_FOR_GENERATION'] },
           ...filters
         },
         take: 1, // ALWAYS ONLY 1 RECIPE PER RUN
@@ -92,6 +94,21 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
       // Process the single entry through the pipeline
       const entry = spyDataEntries[0];
       
+      // Create execution log
+      executionLog = await prisma.pipelineExecutionLog.create({
+        data: {
+          scheduleId: scheduleId,
+          spyDataId: entry.id,
+          spyTitle: entry.spyTitle,
+          status: 'RUNNING',
+          stage: 'Starting',
+          progress: 0,
+          triggeredBy: 'schedule',
+          authorId: authorId,
+          logs: []
+        }
+      });
+      
       logger.info(`Processing single entry: ${entry.spyTitle}`);
       
       await job.updateProgress(50);
@@ -102,7 +119,25 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
           authorId: authorId,
           onProgress: async (step, total, message) => {
             logger.debug(`Pipeline step ${step}/${total}: ${message}`);
-            await job.updateProgress(50 + (step / total) * 50);
+            const progress = Math.floor(50 + (step / total) * 50);
+            await job.updateProgress(progress);
+            
+            // Update execution log
+            await prisma.pipelineExecutionLog.update({
+              where: { id: executionLog.id },
+              data: {
+                progress,
+                stage: message,
+                logs: {
+                  push: {
+                    timestamp: new Date().toISOString(),
+                    step,
+                    total,
+                    message
+                  }
+                }
+              }
+            });
           }
         });
 
@@ -114,12 +149,49 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
             recipeUrl: pipelineResult.recipeUrl
           });
           
+          // Update execution log as success
+          await prisma.pipelineExecutionLog.update({
+            where: { id: executionLog.id },
+            data: {
+              status: 'SUCCESS',
+              completedAt: new Date(),
+              durationMs: Date.now() - new Date(executionLog.startedAt).getTime(),
+              progress: 100,
+              recipeId: pipelineResult.recipeId,
+              recipeUrl: pipelineResult.recipeUrl,
+              logs: {
+                push: pipelineResult.logs.map(log => ({
+                  timestamp: new Date().toISOString(),
+                  message: log
+                }))
+              }
+            }
+          });
+          
           logger.info(`✅ Recipe created: ${pipelineResult.recipeUrl}`);
         } else {
           results.failed++;
           results.recipes.push({
             spyDataId: entry.id,
             error: pipelineResult.error
+          });
+          
+          // Update execution log as failed
+          await prisma.pipelineExecutionLog.update({
+            where: { id: executionLog.id },
+            data: {
+              status: 'FAILED',
+              completedAt: new Date(),
+              durationMs: Date.now() - new Date(executionLog.startedAt).getTime(),
+              error: pipelineResult.error,
+              errorStage: pipelineResult.stage,
+              logs: {
+                push: pipelineResult.logs.map(log => ({
+                  timestamp: new Date().toISOString(),
+                  message: log
+                }))
+              }
+            }
           });
           
           logger.error(`❌ Failed to create recipe: ${pipelineResult.error}`);
@@ -132,6 +204,25 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
           spyDataId: entry.id,
           error: errorMessage
         });
+        
+        // Update execution log as failed
+        if (executionLog) {
+          await prisma.pipelineExecutionLog.update({
+            where: { id: executionLog.id },
+            data: {
+              status: 'FAILED',
+              completedAt: new Date(),
+              durationMs: Date.now() - new Date(executionLog.startedAt).getTime(),
+              error: errorMessage,
+              logs: {
+                push: {
+                  timestamp: new Date().toISOString(),
+                  message: `Error: ${errorMessage}`
+                }
+              }
+            }
+          });
+        }
         
         logger.error(`❌ Pipeline error for ${entry.id}:`, error);
       }

@@ -388,7 +388,7 @@ export default function Settings({ className }: SettingsProps) {
               <textarea
                 value={fileEditValue}
                 onChange={(e) => setFileEditValue(e.target.value)}
-                className="w-full h-64 p-3 border border-gray-300 rounded-md font-mono text-sm focus:ring-blue-500 focus:border-blue-500 resize-none"
+                className="w-full h-64 p-3 border border-gray-300 dark:border-slate-600 rounded-md font-mono text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-blue-500 focus:border-blue-500 resize-none"
                 style={{
                   fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
                   fontSize: "14px",
@@ -716,7 +716,7 @@ export default function Settings({ className }: SettingsProps) {
                         <textarea
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          className="w-full h-48 p-3 border border-gray-300 rounded-md font-mono text-sm focus:ring-blue-500 focus:border-blue-500 resize-none"
+                          className="w-full h-48 p-3 border border-gray-300 dark:border-slate-600 rounded-md font-mono text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-blue-500 focus:border-blue-500 resize-none"
                           style={{
                             fontFamily:
                               'Monaco, Menlo, "Ubuntu Mono", monospace',

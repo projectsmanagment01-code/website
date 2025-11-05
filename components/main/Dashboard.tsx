@@ -31,7 +31,7 @@ import PinterestSpyManager from "@/automation/pinterest/PinterestSpyManager";
 import ImageGenerationManager from "@/automation/image-generation/ImageGenerationManager";
 import RecipeGenerationManager from "@/automation/recipe-generation/RecipeGenerationManager";
 import ScheduleManager from "@/components/automation/ScheduleManager";
-import AutomationDashboard from "@/components/admin/AutomationDashboard";
+import PipelineReportsPage from "@/app/admin/automation/reports/page";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -114,20 +114,6 @@ function AdminDashboardContent() {
         return <CookiesPolicyCMS onBack={() => setActiveSection("content")} />;
       case "backup":
         return <BackupManager />;
-      case "automation":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-                Recipe Automation Dashboard
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400">
-                Monitor and control automated recipe generation from Google Sheets
-              </p>
-            </div>
-            <AutomationDashboard />
-          </div>
-        );
       case "pinterest-spy":
         return (
           <div className="space-y-6">
@@ -160,6 +146,12 @@ function AdminDashboardContent() {
         );
       case "pipeline-schedules":
         return <ScheduleManager />;
+      case "reports":
+        return (
+          <div className="space-y-6">
+            <PipelineReportsPage />
+          </div>
+        );
       case "seo-reports":
         return (
           <div className="space-y-6">
@@ -201,7 +193,7 @@ function AdminDashboardContent() {
         onMobileToggle={toggleMobileSidebar}
       />
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto min-h-screen">
         {/* Mobile Header */}
         <div className="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Admin Dashboard</h1>

@@ -583,6 +583,16 @@ main {
   .dark .scrollbar-elegant::-webkit-scrollbar-thumb:hover {
     background-color: rgb(51 65 85);
   }
+
+  /* Hide scrollbar completely */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
 }
 
 /* Smooth theme transitions */

@@ -141,9 +141,13 @@ export default function ScheduleManager() {
     if (!confirm('Generate 1 recipe from next pending spy data?')) return;
 
     try {
+      const token = localStorage.getItem('admin_token');
       const response = await fetch('/api/admin/automation/pipeline/run', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ autoSelect: true })
       });
 

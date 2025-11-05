@@ -49,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   
   // Auto expand automation if one of its sub-items is active
   useEffect(() => {
-    if (activeSection === 'automation' || activeSection === 'pipeline-schedules' || activeSection === 'pinterest-spy' || activeSection === 'image-generation' || activeSection === 'recipe-generation') {
+    if (activeSection === 'pipeline-schedules' || activeSection === 'reports' || activeSection === 'pinterest-spy' || activeSection === 'image-generation' || activeSection === 'recipe-generation') {
       setAutomationExpanded(true);
     }
   }, [activeSection]);
@@ -79,11 +79,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const automationItems = [
-    { id: "automation", label: "Recipe Automation", icon: Activity },
     { id: "pipeline-schedules", label: "Pipeline Schedules", icon: Clock },
     { id: "pinterest-spy", label: "Data Manager", icon: Target },
     { id: "image-generation", label: "Image Generation", icon: ImageIcon },
     { id: "recipe-generation", label: "Recipe Generation", icon: FileText },
+    { id: "reports", label: "Execution Reports", icon: FileText },
   ];
 
   return (
@@ -98,8 +98,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       
       {/* Sidebar */}
       <div className={`
-        fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 h-screen flex flex-col transform transition-all duration-300 ease-in-out shadow-lg overflow-hidden
-        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        fixed md:sticky inset-y-0 left-0 top-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 md:h-screen flex flex-col transform transition-all duration-300 ease-in-out shadow-lg overflow-hidden
+        ${isOpen ? 'translate-x-0 h-screen' : '-translate-x-full md:translate-x-0 h-screen'}
       `}>
         {/* Logo */}
         <div className="p-4 md:p-6 border-b border-slate-200 dark:border-slate-700">          <div className="flex items-center justify-between">
@@ -144,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 overflow-y-auto scrollbar-elegant">
+        <nav className="flex-1 p-4 overflow-y-auto scrollbar-hide pb-30">
           <ul className="space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -172,7 +172,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 onClick={() => setAutomationExpanded(!automationExpanded)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  (activeSection === 'automation' || activeSection === 'pinterest-spy' || activeSection === 'image-generation' || activeSection === 'recipe-generation')
+                  (activeSection === 'pipeline-schedules' || activeSection === 'reports' || activeSection === 'pinterest-spy' || activeSection === 'image-generation' || activeSection === 'recipe-generation')
                     ? "bg-slate-700 dark:bg-slate-600 text-white"
                     : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
                 }`}
