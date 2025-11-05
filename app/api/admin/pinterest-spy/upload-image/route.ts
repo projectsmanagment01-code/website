@@ -32,12 +32,13 @@ export async function POST(request: NextRequest) {
 
     console.log(`📤 Uploading image: ${filename}`);
 
-    // Define upload directory
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'generated-recipes');
+    // Define upload directory - save to /uploads instead of /public/uploads
+    const uploadDir = path.join(process.cwd(), 'uploads', 'generated-recipes');
 
     // Create directory if it doesn't exist
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
+      console.log(`📁 Created directory: ${uploadDir}`);
     }
 
     // Convert base64 to buffer
@@ -47,10 +48,15 @@ export async function POST(request: NextRequest) {
     const filePath = path.join(uploadDir, filename);
     await writeFile(filePath, buffer);
 
-    // Generate public URL
-    const publicUrl = `/uploads/generated-recipes/${filename}`;
+    // Verify file was written
+    const fileExists = existsSync(filePath);
+    console.log(`✅ Image uploaded to: ${filePath}`);
+    console.log(`📁 File exists: ${fileExists}`);
+    console.log(`📏 Buffer size: ${buffer.length} bytes`);
 
-    console.log(`✅ Image uploaded: ${publicUrl}`);
+    // Generate public URL - use /uploads route which has optimization
+    const publicUrl = `/uploads/generated-recipes/${filename}`;
+    console.log(`🌐 Public URL: ${publicUrl}`);
 
     return NextResponse.json({
       success: true,
