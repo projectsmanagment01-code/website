@@ -23,6 +23,7 @@ import {
   Clock,
   ChefHat,
   BarChart3,
+  BookOpen,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/admin/ThemeToggle";
 
@@ -51,7 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   
   // Auto expand automation if one of its sub-items is active
   useEffect(() => {
-    if (activeSection === 'pipeline-schedules' || activeSection === 'reports' || activeSection === 'pinterest-spy' || activeSection === 'seo-results' || activeSection === 'image-generation' || activeSection === 'recipe-generation' || activeSection === 'automation-settings') {
+    if (activeSection === 'pipeline-schedules' || activeSection === 'reports' || activeSection === 'pinterest-spy' || activeSection === 'seo-results' || activeSection === 'image-generation' || activeSection === 'recipe-generation' || activeSection === 'automation-settings' || activeSection === 'automation-help') {
       setAutomationExpanded(true);
     }
   }, [activeSection]);
@@ -88,6 +89,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "recipe-generation", label: "Recipe Generation", icon: ChefHat },
     { id: "reports", label: "Execution Reports", icon: BarChart3 },
     { id: "automation-settings", label: "Automation Settings", icon: Settings },
+    { id: "automation-help", label: "Help & Documentation", icon: BookOpen },
   ];
 
   return (

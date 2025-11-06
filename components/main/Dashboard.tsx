@@ -34,6 +34,7 @@ import ScheduleManager from '@/components/automation/ScheduleManager';
 import PipelineReportsPage from '@/app/admin/automation/reports/page';
 import SEOResultsPage from '@/app/admin/automation/seo-results/page';
 import AutomationSettingsPage from '@/app/admin/automation/settings/page';
+import AutomationHelpPage from '@/app/admin/automation/help/page';
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -158,6 +159,12 @@ function AdminDashboardContent() {
         return (
           <div className="space-y-6">
             <AutomationSettingsPage />
+          </div>
+        );
+      case "automation-help":
+        return (
+          <div className="space-y-6">
+            <AutomationHelpPage />
           </div>
         );
       case "reports":

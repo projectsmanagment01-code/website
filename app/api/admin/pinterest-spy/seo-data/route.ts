@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
         seoCategory: true,
         status: true,
         createdAt: true,
-        seoExtractedAt: true
+        seoProcessedAt: true
       },
       orderBy: {
         createdAt: 'desc'

@@ -4,11 +4,12 @@ import { ImageGallery } from "./ImageGallery";
 import { EnhancedImageGallery } from "./EnhancedImageGallery";
 import { FileUpload } from "./FileUpload";
 import { ImageUsageViewer } from "./ImageUsageViewer";
-import { Upload, Image, FolderOpen, Link } from "lucide-react";
+import { Upload, Image, FolderOpen, Link, Sparkles } from "lucide-react";
 
 const categories = [
   { id: "all", name: "All Images", icon: FolderOpen },
   { id: "recipes", name: "Recipe Images", icon: Image },
+  { id: "generated-recipes", name: "Generated Recipes", icon: Sparkles },
   { id: "general", name: "General", icon: Upload },
   { id: "ingredients", name: "Ingredients", icon: Image },
   { id: "authors", name: "Authors", icon: Image },

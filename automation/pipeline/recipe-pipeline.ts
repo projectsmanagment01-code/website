@@ -269,24 +269,20 @@ export class RecipePipelineOrchestrator {
       throw new Error('Spy data not found');
     }
     
-    const result = await SEOExtractionService.extractSEO({
-      title: spyData.spyTitle,
-      description: spyData.spyDescription || undefined,
-      imageUrl: spyData.spyImageUrl
+    const result = await SEOExtractionService.extractSEOMetadata({
+      spyTitle: spyData.spyTitle,
+      spyDescription: spyData.spyDescription || undefined,
+      spyImageUrl: spyData.spyImageUrl
     });
-    
-    if (!result.success) {
-      throw new Error(result.error || 'SEO generation failed');
-    }
     
     await prisma.pinterestSpyData.update({
       where: { id: spyDataId },
       data: {
-        seoKeyword: result.keyword,
-        seoTitle: result.title,
-        seoDescription: result.description,
-        seoCategory: result.category,
-        seoExtractedAt: new Date(),
+        seoKeyword: result.seoKeyword,
+        seoTitle: result.seoTitle,
+        seoDescription: result.seoDescription,
+        seoCategory: result.seoCategory,
+        seoProcessedAt: new Date(),
         status: 'SEO_PROCESSED'
       }
     });

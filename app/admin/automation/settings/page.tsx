@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Save, RotateCcw, Settings } from 'lucide-react';
+import { Save, RotateCcw, Settings, Info, HelpCircle, BookOpen } from 'lucide-react';
 
 interface PromptSettings {
   // SEO Extraction Prompts
@@ -187,6 +187,18 @@ export default function AutomationSettingsPage() {
             </div>
             
             <div className="flex gap-3">
+              <a
+                href="/admin"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.hash = '#automation-help';
+                  window.location.reload();
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+              >
+                <BookOpen className="w-4 h-4" />
+                View Documentation
+              </a>
               <button
                 onClick={handleReset}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -244,6 +256,28 @@ export default function AutomationSettingsPage() {
           {/* SEO Extraction Tab */}
           {activeTab === 'seo' && (
             <div className="space-y-6">
+              {/* Help Section */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">About SEO Extraction</h3>
+                    <p className="text-sm text-blue-800 dark:text-blue-400 mb-2">
+                      These prompts control how AI analyzes Pinterest spy data to extract SEO-optimized metadata. The system prompt defines the AI's role and requirements, while the user prompt provides the actual data and output format.
+                    </p>
+                    <div className="text-xs text-blue-700 dark:text-blue-500 space-y-1">
+                      <p><strong>Available Variables:</strong></p>
+                      <ul className="list-disc list-inside ml-2 space-y-0.5">
+                        <li><code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">{'{spyTitle}'}</code> - Original Pinterest recipe title</li>
+                        <li><code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">{'{spyDescription}'}</code> - Original recipe description</li>
+                        <li><code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">{'{imageUrl}'}</code> - Reference image URL</li>
+                        <li><code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">{'{categories}'}</code> - Available website categories</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
                   System Prompt (SEO Extraction)
@@ -281,10 +315,35 @@ export default function AutomationSettingsPage() {
           {/* Image Generation Tab */}
           {activeTab === 'images' && (
             <div className="space-y-6">
+              {/* Help Section */}
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-green-900 dark:text-green-300 mb-2">About Image Generation Prompts</h3>
+                    <p className="text-sm text-green-800 dark:text-green-400 mb-2">
+                      These 4 prompts define the visual style and composition for each generated image. Each image serves a specific purpose in the recipe article.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-green-700 dark:text-green-500">
+                      <div><strong>Image 1:</strong> Finished dish hero shot (main photo)</div>
+                      <div><strong>Image 2:</strong> Raw ingredients layout (overhead view)</div>
+                      <div><strong>Image 3:</strong> Cooking process in action</div>
+                      <div><strong>Image 4:</strong> Styled table presentation</div>
+                    </div>
+                    <p className="text-xs text-green-700 dark:text-green-500 mt-2">
+                      <strong>Available Variable:</strong> <code className="bg-green-100 dark:bg-green-800 px-1 rounded">{'{recipeTitle}'}</code> - Recipe name
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div>
-                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                  Image 1: Finished Dish Hero Shot
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                    Image 1: Finished Dish Hero Shot
+                  </label>
+                  <HelpCircle className="w-4 h-4 text-gray-400" title="Close-up 45° angle of plated final result" />
+                </div>
                 <textarea
                   value={settings.imagePrompt1}
                   onChange={(e) => updateSetting('imagePrompt1', e.target.value)}
@@ -297,9 +356,12 @@ export default function AutomationSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                  Image 2: Raw Ingredients Layout
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                    Image 2: Raw Ingredients Layout
+                  </label>
+                  <HelpCircle className="w-4 h-4 text-gray-400" title="Overhead flat lay of uncooked ingredients" />
+                </div>
                 <textarea
                   value={settings.imagePrompt2}
                   onChange={(e) => updateSetting('imagePrompt2', e.target.value)}
@@ -312,9 +374,12 @@ export default function AutomationSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                  Image 3: Cooking Action Shot
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                    Image 3: Cooking Action Shot
+                  </label>
+                  <HelpCircle className="w-4 h-4 text-gray-400" title="Side angle showing cooking process in action" />
+                </div>
                 <textarea
                   value={settings.imagePrompt3}
                   onChange={(e) => updateSetting('imagePrompt3', e.target.value)}
@@ -327,9 +392,12 @@ export default function AutomationSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                  Image 4: Styled Presentation
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                    Image 4: Styled Presentation
+                  </label>
+                  <HelpCircle className="w-4 h-4 text-gray-400" title="Elegant table setting with different angle" />
+                </div>
                 <textarea
                   value={settings.imagePrompt4}
                   onChange={(e) => updateSetting('imagePrompt4', e.target.value)}
@@ -346,6 +414,27 @@ export default function AutomationSettingsPage() {
           {/* Recipe Generation Tab */}
           {activeTab === 'recipe' && (
             <div className="space-y-6">
+              {/* Help Section */}
+              <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-orange-900 dark:text-orange-300 mb-2">About Recipe Generation</h3>
+                    <p className="text-sm text-orange-800 dark:text-orange-400 mb-2">
+                      These prompts control how AI writes complete recipe articles. The system prompt defines writing style, tone, and structure rules. The default prompt provides data and output format.
+                    </p>
+                    <div className="text-xs text-orange-700 dark:text-orange-500 space-y-1">
+                      <p><strong>Available Variables:</strong></p>
+                      <ul className="list-disc list-inside ml-2 space-y-0.5">
+                        <li><code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{title}'}</code>, <code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{description}'}</code>, <code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{category}'}</code>, <code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{keyword}'}</code></li>
+                        <li><code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{featureImage}'}</code>, <code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{ingredientsImage}'}</code>, <code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{cookingImage}'}</code>, <code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{finalImage}'}</code></li>
+                        <li><code className="bg-orange-100 dark:bg-orange-800 px-1 rounded">{'{sitemap}'}</code> - For internal linking to related recipes</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
                   System Prompt (Recipe Generation)
@@ -381,6 +470,24 @@ export default function AutomationSettingsPage() {
           {/* Model Settings Tab */}
           {activeTab === 'models' && (
             <div className="space-y-8">
+              {/* Help Section */}
+              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-purple-900 dark:text-purple-300 mb-2">About Model Settings</h3>
+                    <p className="text-sm text-purple-800 dark:text-purple-400 mb-2">
+                      Fine-tune AI behavior for each automation stage. These parameters control output quality, creativity, and length.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-purple-700 dark:text-purple-500">
+                      <div><strong>Temperature:</strong> 0.0 = deterministic, 1.0 = balanced, 2.0 = very creative</div>
+                      <div><strong>Max Tokens:</strong> Maximum length of AI response</div>
+                      <div><strong>Guidance Scale:</strong> How strictly images follow prompts (7-15 recommended)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   SEO Extraction Model Settings
