@@ -139,14 +139,6 @@ export default function RecipeGenerationTab({ spyData, getAuthHeaders, onRefresh
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-0">🍳 Recipe Generation</h2>
-        <p className="text-sm text-gray-400 mt-2">
-          Generate complete recipes from entries with SEO data and generated images
-        </p>
-      </div>
-
       {/* Stats */}
       <div className="flex justify-center gap-6">
         {[

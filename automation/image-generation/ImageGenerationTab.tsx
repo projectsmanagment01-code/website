@@ -4,7 +4,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PinterestSpyData } from '../pinterest/types';
 import { useImageGeneration } from '../pinterest/hooks';
 
@@ -87,11 +87,19 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders, onRefresh 
   const [generatedPrompts, setGeneratedPrompts] = useState<Record<string, any>>({});
   const [editedPrompts, setEditedPrompts] = useState<Record<string, any>>({});
 
-  // Filter entries ready for image generation
+  // Auto-refresh data when component mounts to get latest SEO-processed entries
+  useEffect(() => {
+    console.log('🔄 Image Generation: Refreshing data to fetch latest SEO-processed entries...');
+    onRefresh();
+  }, []);
+
+  // Filter entries ready for image generation (have SEO data but no images yet)
   const entriesReady = useMemo(() => {
-    return spyData.filter(e =>
-      e.seoKeyword && e.seoTitle && e.seoDescription && e.spyImageUrl && !e.generatedImage1Url
+    const filtered = spyData.filter(e =>
+      e.seoKeyword && e.seoTitle && e.seoDescription && !e.generatedImage1Url
     );
+    console.log(`📊 Image Generation: ${filtered.length} entries ready (have SEO data, need images)`);
+    return filtered;
   }, [spyData]);
 
   // Stats

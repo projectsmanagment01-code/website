@@ -28,10 +28,10 @@ export default async function AuthorsPage() {
       <main>
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
             Meet Our Authors
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
             The passionate home cooks and culinary enthusiasts who share their 
             favorite recipes, kitchen tips, and cooking stories with you.
           </p>
@@ -46,7 +46,7 @@ export default async function AuthorsPage() {
             return (
               <article 
                 key={author.id}
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-300"
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-2xl transition-all duration-300"
               >
                 <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8 p-8`}>
                   {/* Author Image */}
@@ -66,10 +66,10 @@ export default async function AuthorsPage() {
                   <div className="flex-1 flex flex-col justify-center">
                     {/* Name & Stats */}
                     <div className="mb-6">
-                      <h2 className="text-4xl font-bold text-gray-900 mb-3">
+                      <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
                         {author.name}
                       </h2>
-                      <div className="flex items-center gap-4 text-base text-gray-600">
+                      <div className="flex items-center gap-4 text-base text-gray-600 dark:text-gray-300">
                         <span className="flex items-center gap-2">
                           <BookOpen className="w-5 h-5" />
                           <strong>{author.recipeCount}</strong> {author.recipeCount === 1 ? 'Recipe' : 'Recipes'}
@@ -80,7 +80,7 @@ export default async function AuthorsPage() {
                     {/* Bio - Full Text, No Truncation */}
                     {author.bio && (
                       <div className="mb-6">
-                        <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
+                        <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed whitespace-pre-wrap">
                           {author.bio}
                         </p>
                       </div>
@@ -92,7 +92,7 @@ export default async function AuthorsPage() {
                         {author.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-full font-medium"
+                            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-full font-medium"
                           >
                             {tag}
                           </span>
@@ -109,9 +109,9 @@ export default async function AuthorsPage() {
         {/* Empty State */}
         {authors.length === 0 && (
           <div className="text-center py-16">
-            <Users className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No Authors Yet</h3>
-            <p className="text-gray-600">
+            <Users className="w-24 h-24 text-gray-300 dark:text-gray-600 mx-auto mb-6" />
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Authors Yet</h3>
+            <p className="text-gray-600 dark:text-gray-400">
               Check back soon to meet our recipe authors!
             </p>
           </div>

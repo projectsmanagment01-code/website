@@ -140,10 +140,10 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Error Display */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
           <div className="flex items-center">
-            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-            <span className="text-red-700">{error}</span>
+            <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
+            <span className="text-red-700 dark:text-red-300">{error}</span>
           </div>
         </div>
       )}
@@ -152,7 +152,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Name */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Category Name *
           </label>
           <input
@@ -162,14 +162,14 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             value={formData.name}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g., Italian, Vegetarian, Breakfast"
           />
         </div>
 
         {/* Type */}
         <div>
-          <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Category Type *
           </label>
           <select
@@ -178,7 +178,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             value={formData.type}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="CUISINE">Cuisine (Italian, Mexican, etc.)</option>
             <option value="DIET">Diet (Vegetarian, Vegan, etc.)</option>
@@ -192,7 +192,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Description
         </label>
         <textarea
@@ -201,14 +201,14 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
           value={formData.description}
           onChange={handleInputChange}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Brief description of this category..."
         />
       </div>
 
       {/* Parent Category */}
       <div>
-        <label htmlFor="parentId" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="parentId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Parent Category (Optional)
         </label>
         <select
@@ -216,7 +216,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
           name="parentId"
           value={formData.parentId}
           onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           <option value="">No parent category</option>
           {parentCategories.map((parentCat) => (
@@ -225,19 +225,19 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             </option>
           ))}
         </select>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Create hierarchical relationships between categories
         </p>
       </div>
 
       {/* SEO Section */}
-      <div className="border-t pt-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">SEO Options</h3>
+      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">SEO Options</h3>
         
         <div className="grid grid-cols-1 gap-6">
           {/* SEO Title */}
           <div>
-            <label htmlFor="seoTitle" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="seoTitle" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               SEO Title
             </label>
             <input
@@ -246,14 +246,14 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
               name="seoTitle"
               value={formData.seoTitle}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Custom title for search engines..."
             />
           </div>
 
           {/* SEO Description */}
           <div>
-            <label htmlFor="seoDescription" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="seoDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               SEO Description
             </label>
             <textarea
@@ -262,7 +262,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
               value={formData.seoDescription}
               onChange={handleInputChange}
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Meta description for search engines..."
             />
           </div>
@@ -270,11 +270,11 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
       </div>
 
       {/* Form Actions */}
-      <div className="flex items-center justify-end space-x-4 pt-6 border-t">
+      <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
         <button
           type="button"
           onClick={onCancel}
-          className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:ring-2 focus:ring-blue-500"
+          className="flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:ring-2 focus:ring-blue-500"
         >
           <X className="h-4 w-4 mr-2" />
           Cancel

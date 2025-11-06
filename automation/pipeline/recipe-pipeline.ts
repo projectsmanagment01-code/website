@@ -316,8 +316,8 @@ export class RecipePipelineOrchestrator {
       const prompt = await this.generateImagePrompt(spyData, i);
       prompts[`image_${i}`] = prompt;
       
-      // Convert reference image to base64
-      const referenceBase64 = await ImageGenerationService.imageUrlToBase64(spyData.spyImageUrl!);
+      // Convert reference image to base64 (optional - will be null if not available)
+      const referenceBase64 = await ImageGenerationService.imageUrlToBase64(spyData.spyImageUrl);
       
       // Generate image
       const result = await ImageGenerationService.generateSingleImage(

@@ -10,7 +10,8 @@ import {
   Clock,
   Loader2,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  Brain
 } from 'lucide-react';
 
 interface SEOEntry {
@@ -29,6 +30,7 @@ interface SEOEntry {
 export default function SEOResultsPage() {
   const [entries, setEntries] = useState<SEOEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -44,7 +46,7 @@ export default function SEOResultsPage() {
   const fetchSEOResults = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('admin_token');
       
       const response = await fetch('/api/admin/pinterest-spy/seo-data', {
         headers: {
@@ -58,6 +60,7 @@ export default function SEOResultsPage() {
       setEntries(data.entries || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load SEO results');
+      console.error('Error fetching SEO results:', err);
     } finally {
       setLoading(false);
     }
@@ -91,7 +94,7 @@ export default function SEOResultsPage() {
     if (!confirm(`Delete ${ids.length} selected entries?`)) return;
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('admin_token');
       
       const response = await fetch('/api/admin/pinterest-spy', {
         method: 'DELETE',
@@ -102,12 +105,69 @@ export default function SEOResultsPage() {
         body: JSON.stringify({ ids })
       });
 
-      if (!response.ok) throw new Error('Failed to delete entries');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete entries');
+      }
 
+      console.log(`✅ Deleted ${ids.length} entries successfully`);
       await fetchSEOResults();
       setSelectedEntries([]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete entries');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete entries';
+      setError(errorMessage);
+      console.error('Delete error:', err);
+      alert(`Error: ${errorMessage}`);
+    }
+  };
+
+  const handleExtractSEO = async () => {
+    if (selectedEntries.length === 0) {
+      alert('Please select entries to process');
+      return;
+    }
+
+    if (!confirm(`Extract SEO data using AI for ${selectedEntries.length} selected entries?\n\nThis will use AI to analyze the Pinterest data and generate:\n• SEO Keyword\n• SEO Title\n• SEO Description\n• Category`)) return;
+
+    setProcessing(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('admin_token');
+      
+      console.log(`🧠 Starting SEO extraction for ${selectedEntries.length} entries...`);
+      
+      const response = await fetch('/api/admin/pinterest-spy/process-seo', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          entryIds: selectedEntries,
+          batchSize: 5 
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process SEO');
+      }
+
+      const result = await response.json();
+      console.log('✅ SEO Processing Result:', result);
+
+      await fetchSEOResults();
+      setSelectedEntries([]);
+      
+      alert(`🎉 SEO Extraction Complete!\n\n✅ Successfully Processed: ${result.processed}\n❌ Failed: ${result.failed}\n\nThe AI has generated SEO metadata for your selected entries.`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to process SEO';
+      setError(errorMessage);
+      console.error('SEO extraction error:', err);
+      alert(`❌ SEO Extraction Failed\n\n${errorMessage}\n\nCheck the console for more details.`);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -240,13 +300,33 @@ export default function SEOResultsPage() {
 
           <div className="flex gap-2">
             {selectedEntries.length > 0 && (
-              <button
-                onClick={() => handleDelete(selectedEntries)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete ({selectedEntries.length})
-              </button>
+              <>
+                <button
+                  onClick={handleExtractSEO}
+                  disabled={processing}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 dark:bg-purple-700 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="w-4 h-4" />
+                      Extract SEO ({selectedEntries.length})
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleDelete(selectedEntries)}
+                  disabled={processing}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-50 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete ({selectedEntries.length})
+                </button>
+              </>
             )}
             <button
               onClick={handleExport}

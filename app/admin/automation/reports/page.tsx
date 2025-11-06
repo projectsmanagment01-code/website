@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, CheckCircle2, XCircle, Loader2, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, XCircle, Loader2, ChevronDown, ChevronUp, Filter, Trash2 } from 'lucide-react';
 
 interface LogEntry {
   timestamp: string;
@@ -48,6 +48,8 @@ export default function PipelineReportsPage() {
   const [logs, setLogs] = useState<PipelineLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+  const [selectedLogs, setSelectedLogs] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
   const [pagination, setPagination] = useState<PaginationMeta>({
     page: 1,
     limit: 20,
@@ -107,6 +109,67 @@ export default function PipelineReportsPage() {
     });
   };
 
+  const toggleLogSelection = (logId: string) => {
+    setSelectedLogs(prev => {
+      const next = new Set(prev);
+      if (next.has(logId)) {
+        next.delete(logId);
+      } else {
+        next.add(logId);
+      }
+      return next;
+    });
+  };
+
+  const selectAllLogs = () => {
+    setSelectedLogs(new Set(logs.map(log => log.id)));
+  };
+
+  const deselectAllLogs = () => {
+    setSelectedLogs(new Set());
+  };
+
+  const deleteLogs = async (logIds: string[]) => {
+    if (!confirm(`Are you sure you want to delete ${logIds.length} execution log(s)? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/automation/pipeline/logs/delete', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ logIds })
+      });
+
+      if (!response.ok) throw new Error('Failed to delete logs');
+
+      const result = await response.json();
+      console.log(`✅ Deleted ${result.deletedCount} log(s)`);
+      
+      // Refresh the logs
+      await fetchLogs(pagination.page);
+      setSelectedLogs(new Set());
+    } catch (error) {
+      console.error('Error deleting logs:', error);
+      alert('Failed to delete logs. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const deleteSelectedLogs = () => {
+    deleteLogs(Array.from(selectedLogs));
+  };
+
+  const deleteSingleLog = (logId: string) => {
+    deleteLogs([logId]);
+  };
+
   const formatDuration = (ms: number | null) => {
     if (!ms) return 'N/A';
     const seconds = Math.floor(ms / 1000);
@@ -151,13 +214,25 @@ export default function PipelineReportsPage() {
           <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Pipeline Execution Reports</h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">View detailed logs and history of all pipeline executions</p>
         </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
-        >
-          <Filter className="w-4 h-4" />
-          {showFilters ? 'Hide' : 'Show'} Filters
-        </button>
+        <div className="flex gap-3">
+          {selectedLogs.size > 0 && (
+            <button
+              onClick={deleteSelectedLogs}
+              disabled={deleting}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Selected ({selectedLogs.size})
+            </button>
+          )}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
+          >
+            <Filter className="w-4 h-4" />
+            {showFilters ? 'Hide' : 'Show'} Filters
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -241,51 +316,98 @@ export default function PipelineReportsPage() {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Bulk selection controls */}
+          {logs.length > 0 && (
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 flex items-center gap-4">
+              <button
+                onClick={selectAllLogs}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Select All
+              </button>
+              <button
+                onClick={deselectAllLogs}
+                className="text-sm text-slate-600 dark:text-slate-400 hover:underline"
+              >
+                Deselect All
+              </button>
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                {selectedLogs.size} selected
+              </span>
+            </div>
+          )}
+
           {logs.map((log) => {
             const isExpanded = expandedLogs.has(log.id);
+            const isSelected = selectedLogs.has(log.id);
             
             return (
-              <div key={log.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+              <div key={log.id} className={`bg-white dark:bg-slate-800 border ${isSelected ? 'border-blue-500 dark:border-blue-400' : 'border-slate-200 dark:border-slate-700'} rounded-lg overflow-hidden`}>
                 {/* Log Header */}
-                <div
-                  className="p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50"
-                  onClick={() => toggleLogExpansion(log.id)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        {getStatusBadge(log.status)}
-                        <span className="text-sm text-slate-500 dark:text-slate-400 capitalize">
-                          {log.triggeredBy}
-                        </span>
+                <div className="p-4">
+                  <div className="flex items-start gap-4">
+                    {/* Selection checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleLogSelection(log.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    
+                    <div
+                      className="flex-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 -m-4 p-4"
+                      onClick={() => toggleLogExpansion(log.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            {getStatusBadge(log.status)}
+                            <span className="text-sm text-slate-500 dark:text-slate-400 capitalize">
+                              {log.triggeredBy}
+                            </span>
+                          </div>
+                          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
+                            {log.spyTitle || 'Untitled Recipe'}
+                          </h3>
+                          {log.schedule && (
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                              Schedule: {log.schedule.name}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right space-y-1 flex-shrink-0 ml-4">
+                          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                            <Calendar className="w-4 h-4" />
+                            {formatTimestamp(log.startedAt)}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                            <Clock className="w-4 h-4" />
+                            {formatDuration(log.durationMs)}
+                          </div>
+                          <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Progress: {log.progress}%
+                          </div>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronUp className="w-5 h-5 text-slate-400 dark:text-slate-500 ml-4" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-slate-400 dark:text-slate-500 ml-4" />
+                        )}
                       </div>
-                      <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-1">
-                        {log.spyTitle || 'Untitled Recipe'}
-                      </h3>
-                      {log.schedule && (
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                          Schedule: {log.schedule.name}
-                        </p>
-                      )}
                     </div>
-                    <div className="text-right space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <Calendar className="w-4 h-4" />
-                        {formatTimestamp(log.startedAt)}
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <Clock className="w-4 h-4" />
-                        {formatDuration(log.durationMs)}
-                      </div>
-                      <div className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                        Progress: {log.progress}%
-                      </div>
-                    </div>
-                    {isExpanded ? (
-                      <ChevronUp className="w-5 h-5 text-slate-400 dark:text-slate-500 ml-4" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-slate-400 dark:text-slate-500 ml-4" />
-                    )}
+                    
+                    {/* Delete button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteSingleLog(log.id);
+                      }}
+                      className="mt-2 flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </button>
                   </div>
 
                   {/* Progress Bar */}

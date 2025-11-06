@@ -21,16 +21,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { prompt, referenceImageUrl, imageNumber, seoKeyword, entryId } = body;
 
-    if (!prompt || !referenceImageUrl || !imageNumber || !seoKeyword || !entryId) {
+    if (!prompt || !imageNumber || !seoKeyword || !entryId) {
       return NextResponse.json(
-        { error: 'Missing required fields: prompt, referenceImageUrl, imageNumber, seoKeyword, entryId' },
+        { error: 'Missing required fields: prompt, imageNumber, seoKeyword, entryId' },
         { status: 400 }
       );
     }
 
     console.log(`🖼️ Generating image ${imageNumber}/4 for entry: ${entryId}`);
 
-    // Convert reference image URL to base64
+    // Convert reference image URL to base64 (optional - will be null if not available)
     const referenceImageBase64 = await ImageGenerationService.imageUrlToBase64(referenceImageUrl);
 
     // Generate the image

@@ -86,7 +86,7 @@ export class ImageGenerationService {
    */
   static async generateSingleImage(
     prompt: string,
-    referenceImageBase64: string,
+    referenceImageBase64: string | null,
     imageNumber: number,
     seoKeyword: string
   ): Promise<{ imageData: string; filename: string }> {
@@ -117,6 +117,21 @@ export class ImageGenerationService {
     // Enhanced prompt with composition enforcement and watermark instruction
     const enhancedPrompt = `${prompt}${compositionEnforcement}. CRITICAL: This is IMAGE ${imageNumber} of 4 - it MUST be visually distinct from the other 3 images with a completely different composition, subject, and angle. IMPORTANT: Add watermark text "www.${this.DOMAIN}" centered at the bottom of the image. The watermark must have a semi-transparent dark background overlay (rgba 0,0,0,0.5) behind the white text to ensure it is clearly visible on any background, especially white or light-colored foods. The watermark should be professional and subtle but always readable.`;
 
+    // Build request parts - include reference image only if available
+    const requestParts: any[] = [{ text: enhancedPrompt }];
+    
+    if (referenceImageBase64) {
+      requestParts.push({
+        inline_data: {
+          mime_type: "image/jpeg",
+          data: referenceImageBase64
+        }
+      });
+      console.log('ℹ️ Using reference image for generation');
+    } else {
+      console.log('ℹ️ No reference image available - generating without reference');
+    }
+
     // Use Gemini 2.5 Flash Image API (aka Nano Banana)
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
@@ -125,15 +140,7 @@ export class ImageGenerationService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{
-            parts: [
-              { text: enhancedPrompt },
-              {
-                inline_data: {
-                  mime_type: "image/jpeg",
-                  data: referenceImageBase64
-                }
-              }
-            ]
+            parts: requestParts
           }],
           generationConfig: {
             responseModalities: ["Image"],
@@ -280,19 +287,28 @@ Output ONLY valid JSON in this exact format:
 
   /**
    * Convert image URL to base64
+   * Returns null if image URL is missing or invalid - image is optional
    */
-  static async imageUrlToBase64(imageUrl: string): Promise<string> {
+  static async imageUrlToBase64(imageUrl: string | null | undefined): Promise<string | null> {
+    // Image is optional - return null if not provided
+    if (!imageUrl || imageUrl.trim() === '') {
+      console.log('ℹ️ No image URL provided - skipping base64 conversion (image is optional)');
+      return null;
+    }
+
     try {
       const response = await fetch(imageUrl);
       if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.statusText}`);
+        console.warn(`⚠️ Failed to fetch image from ${imageUrl}: ${response.statusText} - continuing without image`);
+        return null;
       }
 
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       return buffer.toString('base64');
     } catch (error) {
-      throw new Error(`Failed to convert image to base64: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.warn(`⚠️ Failed to convert image to base64: ${error instanceof Error ? error.message : 'Unknown error'} - continuing without image`);
+      return null;
     }
   }
 }

@@ -310,10 +310,10 @@ const CategoryManagement: React.FC = () => {
 
       {/* Create/Edit Form Modal */}
       {(showCreateForm || editingCategory) && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl bg-white rounded-lg shadow-lg">
+        <div className="fixed inset-0 bg-gray-600 dark:bg-gray-900 bg-opacity-50 dark:bg-opacity-75 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border border-gray-200 dark:border-gray-700 w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 {editingCategory ? 'Edit Category' : 'Create New Category'}
               </h3>
               <button
@@ -321,7 +321,7 @@ const CategoryManagement: React.FC = () => {
                   setShowCreateForm(false);
                   setEditingCategory(null);
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="h-6 w-6" />
               </button>

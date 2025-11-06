@@ -397,7 +397,7 @@ export const ImageExtractionTab: React.FC<ImageExtractionTabProps> = ({
                         {result?.imageUrl || entry.spyImageUrl ? (
                           <>
                             <img
-                              src={result?.imageUrl || entry.spyImageUrl || ''}
+                              src={result?.imageUrl || entry.spyImageUrl || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="48"%3E%3Crect fill="%23ddd"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%23999"%3E✕%3C/text%3E%3C/svg%3E'}
                               alt={result?.alt || 'Extracted image'}
                               className="w-12 h-12 object-cover rounded border hover:opacity-80 transition-opacity"
                               onError={(e) => {
