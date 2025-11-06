@@ -106,12 +106,28 @@ export class RecipePipelineOrchestrator {
           where: { id: context.spyDataId }
         });
         
-        if (!updatedSpyData || !updatedSpyData.generatedImage1Url) {
-          throw new Error('Failed to generate images');
+        if (!updatedSpyData) {
+          throw new Error('Failed to reload spy data after image generation');
+        }
+        
+        if (!updatedSpyData.generatedImage1Url || !updatedSpyData.generatedImage2Url ||
+            !updatedSpyData.generatedImage3Url || !updatedSpyData.generatedImage4Url) {
+          throw new Error(`Failed to generate all images. Missing: ${
+            [
+              !updatedSpyData.generatedImage1Url && 'image1',
+              !updatedSpyData.generatedImage2Url && 'image2',
+              !updatedSpyData.generatedImage3Url && 'image3',
+              !updatedSpyData.generatedImage4Url && 'image4'
+            ].filter(Boolean).join(', ')
+          }`);
         }
         
         Object.assign(spyData, updatedSpyData);
-        log(`✅ Images generated (4 images)`);
+        log(`✅ Images generated and verified:`);
+        log(`   Image 1: ${spyData.generatedImage1Url}`);
+        log(`   Image 2: ${spyData.generatedImage2Url}`);
+        log(`   Image 3: ${spyData.generatedImage3Url}`);
+        log(`   Image 4: ${spyData.generatedImage4Url}`);
       } else {
         log(`✅ Images already exist`);
       }
@@ -308,45 +324,157 @@ export class RecipePipelineOrchestrator {
       throw new Error('SEO data must be generated before images');
     }
     
+    console.log(`🖼️ Starting image generation for: ${spyData.seoTitle}`);
+    
     // Generate 4 images
     const imageUrls: Record<string, string> = {};
     const prompts: Record<string, string> = {};
     
     for (let i = 1; i <= 4; i++) {
-      const prompt = await this.generateImagePrompt(spyData, i);
-      prompts[`image_${i}`] = prompt;
+      let retryCount = 0;
+      const maxRetries = 3;
+      let lastError: Error | null = null;
       
-      // Convert reference image to base64 (optional - will be null if not available)
-      const referenceBase64 = await ImageGenerationService.imageUrlToBase64(spyData.spyImageUrl);
-      
-      // Generate image
-      const result = await ImageGenerationService.generateSingleImage(
-        prompt,
-        referenceBase64,
-        i,
-        spyData.seoKeyword
-      );
-      
-      // Save image file and convert to WebP
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'generated-recipes');
-      await fs.mkdir(uploadDir, { recursive: true });
-      
-      // Convert filename to .webp
-      const webpFilename = result.filename.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-      const webpPath = path.join(uploadDir, webpFilename);
-      
-      // Convert image to WebP format
-      const imageBuffer = Buffer.from(result.imageData, 'base64');
-      await sharp(imageBuffer)
-        .webp({ quality: 85 })
-        .toFile(webpPath);
-      
-      console.log(`✅ Saved image ${i} as WebP: ${webpFilename}`);
-      
-      imageUrls[`image${i}`] = `/uploads/generated-recipes/${webpFilename}`;
+      while (retryCount < maxRetries) {
+        try {
+          console.log(`📸 Generating image ${i}/4 (attempt ${retryCount + 1}/${maxRetries})...`);
+          
+          const prompt = await this.generateImagePrompt(spyData, i);
+          prompts[`image_${i}`] = prompt;
+          
+          // Convert reference image to base64 (optional - will be null if not available)
+          const referenceBase64 = await ImageGenerationService.imageUrlToBase64(spyData.spyImageUrl);
+          
+          // Generate image with timeout
+          console.log(`🎨 Calling Gemini API for image ${i}... (this may take up to 2 minutes)`);
+          const startTime = Date.now();
+          
+          const result = await ImageGenerationService.generateSingleImage(
+            prompt,
+            referenceBase64,
+            i,
+            spyData.seoKeyword
+          );
+          
+          const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+          console.log(`⏱️ Image ${i} generation took ${duration}s`);
+          
+          if (!result || !result.imageData) {
+            throw new Error(`Image generation returned no data for image ${i}`);
+          }
+          
+          console.log(`✅ Image ${i} generated, size: ${result.imageData.length} bytes`);
+          
+          // Save image file and convert to WebP
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'generated-recipes');
+          
+          console.log(`📁 Ensuring upload directory exists: ${uploadDir}`);
+          await fs.mkdir(uploadDir, { recursive: true });
+          
+          // Verify directory was created
+          try {
+            await fs.access(uploadDir);
+            console.log(`✅ Upload directory confirmed: ${uploadDir}`);
+          } catch (err) {
+            throw new Error(`Failed to create/access upload directory: ${uploadDir}`);
+          }
+          
+          // Convert filename to .webp
+          const webpFilename = result.filename.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+          const webpPath = path.join(uploadDir, webpFilename);
+          
+          console.log(`🔄 Converting image ${i} to WebP format...`);
+          console.log(`   Output path: ${webpPath}`);
+          
+          // Convert image to WebP format
+          const imageBuffer = Buffer.from(result.imageData, 'base64');
+          
+          try {
+            await sharp(imageBuffer)
+              .webp({ quality: 85 })
+              .toFile(webpPath);
+            
+            console.log(`💾 WebP file written: ${webpFilename}`);
+            
+            // CRITICAL: Verify file was actually written and is readable
+            const stats = await fs.stat(webpPath);
+            console.log(`✅ File verified - Size: ${stats.size} bytes, Written: ${stats.mtime}`);
+            
+            if (stats.size === 0) {
+              throw new Error(`WebP file was created but is empty (0 bytes)`);
+            }
+            
+            // Additional verification - try to read the file
+            await fs.access(webpPath, fs.constants.R_OK);
+            console.log(`✅ File is readable: ${webpFilename}`);
+            
+          } catch (conversionError) {
+            const errMsg = conversionError instanceof Error ? conversionError.message : String(conversionError);
+            throw new Error(`Failed to convert/save image ${i} to WebP: ${errMsg}`);
+          }
+          
+          const imageUrl = `/uploads/generated-recipes/${webpFilename}`;
+          imageUrls[`image${i}`] = imageUrl;
+          
+          console.log(`✅ Image ${i} complete and verified: ${imageUrl}`);
+          
+          // Small delay to ensure filesystem has fully committed the write
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Success - break retry loop
+          break;
+          
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+          retryCount++;
+          
+          console.error(`❌ Failed to generate image ${i} (attempt ${retryCount}/${maxRetries}):`, lastError.message);
+          
+          if (retryCount < maxRetries) {
+            const waitTime = Math.min(5000 * Math.pow(2, retryCount - 1), 30000); // Exponential backoff: 5s, 10s, 20s
+            console.log(`⏳ Waiting ${waitTime/1000}s before retry...`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          } else {
+            // Max retries reached
+            throw new Error(`Image ${i} generation failed after ${maxRetries} attempts: ${lastError.message}`);
+          }
+        }
+      }
     }
+    
+    // Verify all images were generated
+    if (!imageUrls.image1 || !imageUrls.image2 || !imageUrls.image3 || !imageUrls.image4) {
+      throw new Error(`Not all images were generated. Got: ${Object.keys(imageUrls).join(', ')}`);
+    }
+    
+    console.log(`✅ All 4 images generated successfully`);
+    
+    // CRITICAL: Final verification - ensure all files actually exist on disk before updating database
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    
+    console.log(`🔍 Performing final file existence verification...`);
+    for (const [key, url] of Object.entries(imageUrls)) {
+      const filePath = path.join(process.cwd(), 'public', url);
+      try {
+        const stats = await fs.stat(filePath);
+        console.log(`✅ ${key}: ${url} (${stats.size} bytes) - EXISTS`);
+        
+        if (stats.size === 0) {
+          throw new Error(`File ${url} exists but is empty (0 bytes)`);
+        }
+      } catch (err) {
+        throw new Error(`CRITICAL: Image file verification failed for ${key} (${url}). File does not exist or is not accessible. Error: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+    
+    console.log(`✅ All 4 image files verified on disk`);
+    console.log(`📝 Updating spy data with image URLs:`, imageUrls);
+    
+    // Additional safety delay to ensure all filesystem operations are complete
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Update spy data with image URLs
     await prisma.pinterestSpyData.update({
@@ -361,6 +489,8 @@ export class RecipePipelineOrchestrator {
         status: 'READY_FOR_GENERATION'
       }
     });
+    
+    console.log(`✅ Spy data updated with all image URLs`);
   }
   
   /**

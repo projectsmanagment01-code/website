@@ -133,49 +133,67 @@ export class ImageGenerationService {
     }
 
     // Use Gemini 2.5 Flash Image API (aka Nano Banana)
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: requestParts
-          }],
-          generationConfig: {
-            responseModalities: ["Image"],
-            imageConfig: {
-              aspectRatio: "9:16"
+    // Add timeout for long-running image generation
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout per image
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: requestParts
+            }],
+            generationConfig: {
+              responseModalities: ["Image"],
+              imageConfig: {
+                aspectRatio: "9:16"
+              }
             }
-          }
-        }),
+          }),
+          signal: controller.signal
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Gemini Image API error: ${response.status} - ${errorText}`);
       }
-    );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini Image API error: ${response.status} - ${errorText}`);
-    }
-
-    const result = await response.json();
+      const result = await response.json();
     
-    // Extract image data from response (uses camelCase: inlineData not inline_data)
-    const parts = result.candidates?.[0]?.content?.parts || [];
-    const imagePart = parts.find((part: any) => part.inlineData || part.inline_data);
-    const imageData = imagePart?.inlineData?.data || imagePart?.inline_data?.data;
+      // Extract image data from response (uses camelCase: inlineData not inline_data)
+      const parts = result.candidates?.[0]?.content?.parts || [];
+      const imagePart = parts.find((part: any) => part.inlineData || part.inline_data);
+      const imageData = imagePart?.inlineData?.data || imagePart?.inline_data?.data;
 
-    if (!imageData) {
-      console.error('❌ Could not find image data in response structure');
-      console.error('Response structure:', JSON.stringify(result, null, 2).substring(0, 500));
-      throw new Error('No image data received from Gemini Image model');
+      if (!imageData) {
+        console.error('❌ Could not find image data in response structure');
+        console.error('Response structure:', JSON.stringify(result, null, 2).substring(0, 500));
+        throw new Error('No image data received from Gemini Image model');
+      }
+      
+      console.log(`✅ Received image data (${imageData.length} chars)`);
+
+      // Generate filename: seoKeyword + 2 words + timestamp
+      const filename = this.generateFilename(seoKeyword, imageNumber);
+
+      return { imageData, filename };
+      
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error(`Image generation timed out after 2 minutes for image ${imageNumber}`);
+      }
+      
+      throw error;
     }
-    
-    console.log(`✅ Received image data (${imageData.length} chars)`)
-
-    // Generate filename: seoKeyword + 2 words + timestamp
-    const filename = this.generateFilename(seoKeyword, imageNumber);
-
-    return { imageData, filename };
   }
 
   /**
