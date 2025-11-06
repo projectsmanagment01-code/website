@@ -9,9 +9,7 @@ import { SettingsTab } from './SettingsTab';
 import BulkImportModal from '@/components/admin/BulkImportModal';
 
 const TABS: TabConfig[] = [
-  { id: 'data', name: 'Data Management', icon: '📊' },
-  { id: 'seo', name: 'SEO Results', icon: '🧠' },
-  { id: 'settings', name: 'Settings', icon: '⚙️' }
+  { id: 'data', name: 'Data Management', icon: '📊' }
 ];
 
 const DEFAULT_PROMPT_SETTINGS: PromptSettings = {
@@ -277,33 +275,6 @@ export default function PinterestSpyManager() {
             backgroundExtractionActive={backgroundExtractionActive}
             onBackgroundExtractionStart={handleBackgroundExtractionStart}
             onBackgroundExtractionEnd={handleBackgroundExtractionEnd}
-          />
-        )}
-
-
-
-        {activeTab === 'seo' && (
-          <SEOResultsTab
-            spyData={spyData}
-            selectedEntries={selectedEntries}
-            onSelectionChange={setSelectedEntries}
-            seoResults={seoResults}
-            seoProgress={seoProgress}
-            onProcessSEO={handleProcessSEO}
-            onExportResults={handleExportResults}
-            onDeleteEntries={deleteSpyData}
-            getAuthHeaders={getAuthHeaders}
-            isPaused={isSEOPaused}
-            onTogglePause={toggleSEOPause}
-            onStop={stopSEOProcessing}
-          />
-        )}
-
-        {activeTab === 'settings' && (
-          <SettingsTab
-            promptSettings={promptSettings}
-            onUpdateSettings={handleUpdateSettings}
-            onTestConnection={handleTestConnection}
           />
         )}
       </div>

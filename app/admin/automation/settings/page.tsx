@@ -1,0 +1,504 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Save, RotateCcw, Settings } from 'lucide-react';
+
+interface PromptSettings {
+  // SEO Extraction Prompts
+  seoExtractionSystem: string;
+  seoExtractionUser: string;
+  
+  // Image Generation Prompts (4 types)
+  imagePrompt1: string; // Finished dish hero shot
+  imagePrompt2: string; // Raw ingredients layout
+  imagePrompt3: string; // Cooking action shot
+  imagePrompt4: string; // Styled presentation
+  
+  // Recipe Generation Prompts
+  recipeSystemPrompt: string;
+  recipeDefaultPrompt: string;
+  
+  // Model Settings
+  seoTemperature: number;
+  seoMaxTokens: number;
+  recipeTemperature: number;
+  recipeMaxTokens: number;
+  imageGuidanceScale: number;
+}
+
+const DEFAULT_SETTINGS: PromptSettings = {
+  // SEO Extraction Prompts
+  seoExtractionSystem: `You are an expert SEO specialist for a recipe food blog. Your task is to analyze Pinterest spy data and extract optimized SEO metadata.
+
+REQUIREMENTS:
+- SEO Keyword: 2-4 words, highly searchable, specific to the recipe
+- SEO Title: 50-60 characters, includes keyword naturally, compelling and click-worthy
+- SEO Description: 150-160 characters, includes keyword, action-oriented with call-to-action
+- SEO Category: Must match one of the existing website categories
+
+GUIDELINES:
+- Maintain the essence of the original recipe
+- Optimize for Google search visibility
+- Use natural language that appeals to home cooks
+- Focus on what makes this recipe unique or appealing`,
+
+  seoExtractionUser: `Analyze the following Pinterest spy data and generate optimized SEO metadata:
+
+**Spy Title:** {spyTitle}
+**Spy Description:** {spyDescription}
+**Image URL:** {imageUrl}
+
+**Available Categories:** {categories}
+
+Generate SEO metadata in the following JSON format:
+{
+  "seoKeyword": "main keyword phrase",
+  "seoTitle": "Optimized Title Here",
+  "seoDescription": "Compelling meta description here.",
+  "seoCategory": "matching-category-slug",
+  "confidence": 0.95,
+  "reasoning": "Brief explanation of SEO choices"
+}`,
+
+  // Image Generation Prompts
+  imagePrompt1: `FINISHED DISH HERO SHOT: Close-up 45-degree angle of {recipeTitle} plated on kitchen surface. Show complete finished dish as main subject. NO raw ingredients, NO cooking process, ONLY final result. Kitchen environment, 16:9 tall aspect ratio.`,
+  
+  imagePrompt2: `RAW INGREDIENTS LAYOUT: ONLY raw, uncooked ingredients for {recipeTitle} laid out separately. NO finished dish, NO cooking in progress. Ingredients in bowls, measuring cups, on cutting board. Overhead flat lay view from directly above. Kitchen environment, 16:9 tall aspect ratio.`,
+  
+  imagePrompt3: `COOKING ACTION SHOT: {recipeTitle} being cooked/mixed/baked IN PROGRESS. Steam, bubbles, or action visible. Side angle or 3/4 view showing the process. NO finished dish, NO raw ingredients layout. Kitchen environment, 16:9 tall aspect ratio.`,
+  
+  imagePrompt4: `STYLED PRESENTATION: {recipeTitle} finished dish in ELEGANT table setting. Different angle than image 1 (front view or side profile). More styling and props. Kitchen environment, 16:9 tall aspect ratio.`,
+
+  // Recipe Generation Prompts
+  recipeSystemPrompt: `You are an advanced AI agent that generates complete recipe data strictly in valid JSON format.
+
+PRIMARY OBJECTIVE:
+Generate a fully structured recipe JSON object. Autofill all narrative and technical fields based on the input.
+
+AUTHOR PERSONA:
+Write in the voice of a 40-year-old woman — a calm, graceful home cook with a background in design.
+- Warm, nostalgic, sensory-driven tone
+- Short sentences, conversational rhythm
+- Use casual interjections: "honestly," "oops," "so," "yeah," "wow"
+- Focus on feelings, textures, smells, memories
+
+CORE RULES:
+1. Output ONLY valid JSON - no text, no markdown, no comments
+2. Never omit or rename fields
+3. Apply ingredient substitutions: pork→lamb, bacon→turkey ham, Italian sausage→beef sausage
+4. NO alcohol in any form
+5. Build slug from title using lowercase and hyphens
+6. Build href as /recipes/{slug}
+7. Build categoryLink as /categories/{CategoryName}
+
+Output must match exact schema with all required fields filled with natural, human-quality writing.`,
+
+  recipeDefaultPrompt: `Generate a complete recipe article with the following details:
+
+RECIPE INFORMATION:
+- Title: {title}
+- Description: {description}
+- Category: {category}
+- Category ID: {categoryId}
+- Author ID: {authorId}
+- SEO Keyword: {keyword}
+
+IMAGES (use these exact URLs):
+- Feature Image: {featureImage}
+- Ingredients Image: {ingredientsImage}
+- Cooking Image: {cookingImage}
+- Final Presentation: {finalImage}
+
+SITEMAP FOR INTERNAL LINKING:
+{sitemap}
+
+Generate a complete, valid JSON recipe article following the schema. Ensure all fields are filled with high-quality, human-like content.`,
+
+  // Model Settings
+  seoTemperature: 0.7,
+  seoMaxTokens: 1024,
+  recipeTemperature: 0.8,
+  recipeMaxTokens: 8192,
+  imageGuidanceScale: 7.5,
+};
+
+export default function AutomationSettingsPage() {
+  const [settings, setSettings] = useState<PromptSettings>(DEFAULT_SETTINGS);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  const [activeTab, setActiveTab] = useState<'seo' | 'images' | 'recipe' | 'models'>('seo');
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('automation-prompt-settings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
+    }
+  }, []);
+
+  const handleSave = () => {
+    setIsSaving(true);
+    try {
+      localStorage.setItem('automation-prompt-settings', JSON.stringify(settings));
+      setSaveMessage('✅ Settings saved successfully!');
+      setTimeout(() => setSaveMessage(''), 3000);
+    } catch (error) {
+      setSaveMessage('❌ Failed to save settings');
+      console.error('Save error:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleReset = () => {
+    if (confirm('Are you sure you want to reset all prompts to defaults? This cannot be undone.')) {
+      setSettings(DEFAULT_SETTINGS);
+      localStorage.removeItem('automation-prompt-settings');
+      setSaveMessage('✅ Settings reset to defaults');
+      setTimeout(() => setSaveMessage(''), 3000);
+    }
+  };
+
+  const updateSetting = (key: keyof PromptSettings, value: string | number) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Settings className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Automation Settings
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                  Configure all automation prompts and model parameters
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleReset}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset to Defaults
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                <Save className="w-4 h-4" />
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+          
+          {saveMessage && (
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-300">
+              {saveMessage}
+            </div>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+          <div className="border-b border-gray-200 dark:border-gray-700">
+            <nav className="flex gap-4 px-6" aria-label="Settings tabs">
+              {[
+                { id: 'seo', label: 'SEO Extraction', icon: '🧠' },
+                { id: 'images', label: 'Image Generation', icon: '🖼️' },
+                { id: 'recipe', label: 'Recipe Generation', icon: '📝' },
+                { id: 'models', label: 'Model Settings', icon: '⚙️' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          {/* SEO Extraction Tab */}
+          {activeTab === 'seo' && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  System Prompt (SEO Extraction)
+                </label>
+                <textarea
+                  value={settings.seoExtractionSystem}
+                  onChange={(e) => updateSetting('seoExtractionSystem', e.target.value)}
+                  rows={12}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent font-mono text-sm"
+                  placeholder="Enter the system prompt for SEO extraction..."
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  This prompt defines the AI's role and requirements for SEO extraction.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  User Prompt Template (SEO Extraction)
+                </label>
+                <textarea
+                  value={settings.seoExtractionUser}
+                  onChange={(e) => updateSetting('seoExtractionUser', e.target.value)}
+                  rows={14}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent font-mono text-sm"
+                  placeholder="Enter the user prompt template..."
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Available variables: {'{spyTitle}'}, {'{spyDescription}'}, {'{imageUrl}'}, {'{categories}'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Image Generation Tab */}
+          {activeTab === 'images' && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Image 1: Finished Dish Hero Shot
+                </label>
+                <textarea
+                  value={settings.imagePrompt1}
+                  onChange={(e) => updateSetting('imagePrompt1', e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent font-mono text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Variable: {'{recipeTitle}'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Image 2: Raw Ingredients Layout
+                </label>
+                <textarea
+                  value={settings.imagePrompt2}
+                  onChange={(e) => updateSetting('imagePrompt2', e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent font-mono text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Variable: {'{recipeTitle}'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Image 3: Cooking Action Shot
+                </label>
+                <textarea
+                  value={settings.imagePrompt3}
+                  onChange={(e) => updateSetting('imagePrompt3', e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent font-mono text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Variable: {'{recipeTitle}'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Image 4: Styled Presentation
+                </label>
+                <textarea
+                  value={settings.imagePrompt4}
+                  onChange={(e) => updateSetting('imagePrompt4', e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent font-mono text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Variable: {'{recipeTitle}'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Recipe Generation Tab */}
+          {activeTab === 'recipe' && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  System Prompt (Recipe Generation)
+                </label>
+                <textarea
+                  value={settings.recipeSystemPrompt}
+                  onChange={(e) => updateSetting('recipeSystemPrompt', e.target.value)}
+                  rows={16}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent font-mono text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Defines the AI's persona, tone, and core rules for recipe generation.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+                  Default User Prompt Template
+                </label>
+                <textarea
+                  value={settings.recipeDefaultPrompt}
+                  onChange={(e) => updateSetting('recipeDefaultPrompt', e.target.value)}
+                  rows={12}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent font-mono text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Available variables: {'{title}'}, {'{description}'}, {'{category}'}, {'{categoryId}'}, {'{authorId}'}, {'{keyword}'}, {'{featureImage}'}, {'{ingredientsImage}'}, {'{cookingImage}'}, {'{finalImage}'}, {'{sitemap}'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Model Settings Tab */}
+          {activeTab === 'models' && (
+            <div className="space-y-8">
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  SEO Extraction Model Settings
+                </h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Temperature
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="2"
+                      value={settings.seoTemperature}
+                      onChange={(e) => updateSetting('seoTemperature', parseFloat(e.target.value))}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Controls randomness. Lower = more focused, Higher = more creative
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Max Tokens
+                    </label>
+                    <input
+                      type="number"
+                      step="128"
+                      min="128"
+                      max="4096"
+                      value={settings.seoMaxTokens}
+                      onChange={(e) => updateSetting('seoMaxTokens', parseInt(e.target.value))}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Maximum response length
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Recipe Generation Model Settings
+                </h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Temperature
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="2"
+                      value={settings.recipeTemperature}
+                      onChange={(e) => updateSetting('recipeTemperature', parseFloat(e.target.value))}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Controls creativity in recipe writing
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Max Tokens
+                    </label>
+                    <input
+                      type="number"
+                      step="512"
+                      min="1024"
+                      max="16384"
+                      value={settings.recipeMaxTokens}
+                      onChange={(e) => updateSetting('recipeMaxTokens', parseInt(e.target.value))}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Maximum recipe article length
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Image Generation Settings
+                </h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Guidance Scale
+                  </label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    max="20"
+                    value={settings.imageGuidanceScale}
+                    onChange={(e) => updateSetting('imageGuidanceScale', parseFloat(e.target.value))}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    How closely the AI follows the prompt. Higher = more adherence, Lower = more creativity
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Info Footer */}
+        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <p className="text-sm text-blue-900 dark:text-blue-300">
+            <strong>💡 Tip:</strong> These prompts control how the automation pipeline generates content. 
+            Changes will affect all future recipe generations. Use variables like {'{recipeTitle}'} to insert dynamic content.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

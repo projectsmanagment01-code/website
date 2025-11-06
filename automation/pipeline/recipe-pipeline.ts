@@ -298,6 +298,7 @@ export class RecipePipelineOrchestrator {
   private static async generateImages(spyDataId: string): Promise<void> {
     // Import image generation service directly
     const { ImageGenerationService } = await import('@/automation/image-generation/service');
+    const sharp = (await import('sharp')).default;
     
     const spyData = await prisma.pinterestSpyData.findUnique({
       where: { id: spyDataId }
@@ -330,16 +331,25 @@ export class RecipePipelineOrchestrator {
         spyData.seoKeyword
       );
       
-      // Save image file
+      // Save image file and convert to WebP
       const fs = await import('fs/promises');
       const path = await import('path');
-      const uploadDir = path.join(process.cwd(), 'uploads', 'generated-recipes');
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'generated-recipes');
       await fs.mkdir(uploadDir, { recursive: true });
       
-      const filePath = path.join(uploadDir, result.filename);
-      await fs.writeFile(filePath, Buffer.from(result.imageData, 'base64'));
+      // Convert filename to .webp
+      const webpFilename = result.filename.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+      const webpPath = path.join(uploadDir, webpFilename);
       
-      imageUrls[`image${i}`] = `/uploads/generated-recipes/${result.filename}`;
+      // Convert image to WebP format
+      const imageBuffer = Buffer.from(result.imageData, 'base64');
+      await sharp(imageBuffer)
+        .webp({ quality: 85 })
+        .toFile(webpPath);
+      
+      console.log(`✅ Saved image ${i} as WebP: ${webpFilename}`);
+      
+      imageUrls[`image${i}`] = `/uploads/generated-recipes/${webpFilename}`;
     }
     
     // Update spy data with image URLs

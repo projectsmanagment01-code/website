@@ -29,9 +29,11 @@ import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import PinterestSpyManager from "@/automation/pinterest/PinterestSpyManager";
 import ImageGenerationManager from "@/automation/image-generation/ImageGenerationManager";
-import RecipeGenerationManager from "@/automation/recipe-generation/RecipeGenerationManager";
-import ScheduleManager from "@/components/automation/ScheduleManager";
-import PipelineReportsPage from "@/app/admin/automation/reports/page";
+import RecipeGenerationManager from '@/automation/recipe-generation/RecipeGenerationManager';
+import ScheduleManager from '@/components/automation/ScheduleManager';
+import PipelineReportsPage from '@/app/admin/automation/reports/page';
+import SEOResultsPage from '@/app/admin/automation/seo-results/page';
+import AutomationSettingsPage from '@/app/admin/automation/settings/page';
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -146,6 +148,18 @@ function AdminDashboardContent() {
         );
       case "pipeline-schedules":
         return <ScheduleManager />;
+      case "seo-results":
+        return (
+          <div className="space-y-6">
+            <SEOResultsPage />
+          </div>
+        );
+      case "automation-settings":
+        return (
+          <div className="space-y-6">
+            <AutomationSettingsPage />
+          </div>
+        );
       case "reports":
         return (
           <div className="space-y-6">

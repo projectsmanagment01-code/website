@@ -181,7 +181,7 @@ export class ImageGenerationService {
     const word2 = words[Math.floor(Math.random() * words.length)];
     const timestamp = Date.now();
     
-    return `${cleanKeyword}-${word1}-${word2}-${imageNumber}-${timestamp}.jpg`;
+    return `${cleanKeyword}-${word1}-${word2}-${imageNumber}-${timestamp}.webp`;
   }
 
   /**

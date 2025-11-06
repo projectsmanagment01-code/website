@@ -69,8 +69,9 @@ export async function GET(request: NextRequest) {
           schedule: {
             select: {
               id: true,
-              name: true,
-              cronExpression: true
+              scheduleType: true,
+              cronExpression: true,
+              enabled: true
             }
           }
         },
