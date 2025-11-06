@@ -308,23 +308,32 @@ export class RecipePipelineOrchestrator {
    * Generate images for spy data
    */
   private static async generateImages(spyDataId: string): Promise<void> {
-    // Import image generation service directly
-    const { ImageGenerationService } = await import('@/automation/image-generation/service');
-    const sharp = (await import('sharp')).default;
+    console.log(`\n${'='.repeat(80)}`);
+    console.log(`🖼️  IMAGE GENERATION START - Spy Data ID: ${spyDataId}`);
+    console.log(`${'='.repeat(80)}\n`);
     
-    const spyData = await prisma.pinterestSpyData.findUnique({
-      where: { id: spyDataId }
-    });
-    
-    if (!spyData) {
-      throw new Error('Spy data not found');
-    }
-    
-    if (!spyData.seoKeyword || !spyData.seoTitle) {
-      throw new Error('SEO data must be generated before images');
-    }
-    
-    console.log(`🖼️ Starting image generation for: ${spyData.seoTitle}`);
+    try {
+      // Import image generation service directly
+      const { ImageGenerationService } = await import('@/automation/image-generation/service');
+      const sharp = (await import('sharp')).default;
+      
+      const spyData = await prisma.pinterestSpyData.findUnique({
+        where: { id: spyDataId }
+      });
+      
+      if (!spyData) {
+        throw new Error('Spy data not found');
+      }
+      
+      if (!spyData.seoKeyword || !spyData.seoTitle) {
+        throw new Error('SEO data must be generated before images');
+      }
+      
+      console.log(`✅ Spy data loaded successfully`);
+      console.log(`   Title: ${spyData.seoTitle}`);
+      console.log(`   Keyword: ${spyData.seoKeyword}`);
+      console.log(`   Reference Image: ${spyData.spyImageUrl || 'NONE'}`);
+      console.log(`\n${'='.repeat(80)}\n`);
     
     // Generate 4 images
     const imageUrls: Record<string, string> = {};
@@ -491,6 +500,19 @@ export class RecipePipelineOrchestrator {
     });
     
     console.log(`✅ Spy data updated with all image URLs`);
+    console.log(`\n${'='.repeat(80)}`);
+    console.log(`✅ IMAGE GENERATION COMPLETE - All 4 images saved and verified`);
+    console.log(`${'='.repeat(80)}\n`);
+    
+    } catch (error) {
+      console.error(`\n${'='.repeat(80)}`);
+      console.error(`❌ IMAGE GENERATION FAILED`);
+      console.error(`${'='.repeat(80)}`);
+      console.error(`Error:`, error);
+      console.error(`Stack:`, error instanceof Error ? error.stack : 'No stack trace');
+      console.error(`${'='.repeat(80)}\n`);
+      throw error;
+    }
   }
   
   /**
