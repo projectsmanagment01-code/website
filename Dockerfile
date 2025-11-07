@@ -99,7 +99,7 @@ ENV MOCK=${MOCK}
 ENV DB_PASSWORD=${DB_PASSWORD}
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
-RUN mkdir -p uploads && chmod 755 uploads
+RUN mkdir -p public/uploads && chmod 755 public/uploads
 RUN apk add --no-cache wget
 RUN apk add --no-cache \
     vips \

@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const { path: pathParts } = await context.params;
-    const filePath = path.join(process.cwd(), "uploads", ...pathParts);
+    const filePath = path.join(process.cwd(), "public", "uploads", ...pathParts);
 
     console.log(`🔍 Requested: /uploads/${pathParts.join('/')}`);
     console.log(`📂 Looking for: ${filePath}`);
