@@ -9,6 +9,9 @@
  */
 
 import { getGeminiKey } from "@/lib/ai-settings-helper";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export interface ImagePromptInput {
   recipeTitle: string;
@@ -33,7 +36,34 @@ export interface GeneratedImage {
 }
 
 export class ImageGenerationService {
-  private static readonly DOMAIN = "recipeswebsite.com";
+  /**
+   * Get watermark domain from site settings
+   * Falls back to NEXT_PUBLIC_BASE_URL or default
+   */
+  private static async getWatermarkDomain(): Promise<string> {
+    try {
+      // Try to get from site settings in database
+      const settings = await prisma.siteSettings.findFirst({
+        select: { websiteName: true }
+      });
+      
+      if (settings?.websiteName) {
+        // Clean the website name to get domain format
+        // e.g., "My Recipe Site" -> "myrecipesite.com"
+        const cleanName = settings.websiteName
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '');
+        return `${cleanName}.com`;
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not fetch site settings for watermark, using fallback');
+    }
+    
+    // Fallback to environment variable or default
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'recipeswebsite.com';
+    // Extract domain from URL (remove protocol and paths)
+    return baseUrl.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
+  }
   
   /**
    * Step 1: Generate 4 image prompts using Gemini
@@ -97,6 +127,10 @@ export class ImageGenerationService {
 
     console.log(`🖼️ Generating image ${imageNumber}/4 using Gemini 2.5 Flash Image (Nano Banana)`);
 
+    // Get dynamic watermark domain
+    const watermarkDomain = await this.getWatermarkDomain();
+    console.log(`🏷️ Using watermark domain: ${watermarkDomain}`);
+
     // Add image-specific composition enforcement to prevent duplicates
     let compositionEnforcement = '';
     switch (imageNumber) {
@@ -114,8 +148,8 @@ export class ImageGenerationService {
         break;
     }
 
-    // Enhanced prompt with composition enforcement and watermark instruction
-    const enhancedPrompt = `${prompt}${compositionEnforcement}. CRITICAL: This is IMAGE ${imageNumber} of 4 - it MUST be visually distinct from the other 3 images with a completely different composition, subject, and angle. IMPORTANT: Add watermark text "www.${this.DOMAIN}" centered at the bottom of the image. The watermark must have a semi-transparent dark background overlay (rgba 0,0,0,0.5) behind the white text to ensure it is clearly visible on any background, especially white or light-colored foods. The watermark should be professional and subtle but always readable.`;
+    // Enhanced prompt with composition enforcement and DYNAMIC watermark instruction
+    const enhancedPrompt = `${prompt}${compositionEnforcement}. CRITICAL: This is IMAGE ${imageNumber} of 4 - it MUST be visually distinct from the other 3 images with a completely different composition, subject, and angle. IMPORTANT: Add watermark text "www.${watermarkDomain}" centered at the bottom of the image. The watermark must have a semi-transparent dark background overlay (rgba 0,0,0,0.5) behind the white text to ensure it is clearly visible on any background, especially white or light-colored foods. The watermark should be professional and subtle but always readable.`;
 
     // Build request parts - include reference image only if available
     const requestParts: any[] = [{ text: enhancedPrompt }];

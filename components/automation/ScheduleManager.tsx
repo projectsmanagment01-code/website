@@ -39,6 +39,13 @@ export default function ScheduleManager() {
     cronExpression: '0 */2 * * *',
     enabled: false
   });
+  const [intervalMinutes, setIntervalMinutes] = useState(120); // Default 2 hours
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     loadSchedules();
@@ -79,9 +86,9 @@ export default function ScheduleManager() {
 
       if (response.ok) {
         console.log('✅ Schedule created successfully');
-        alert('✅ Schedule created successfully!');
         setShowCreateModal(false);
         setNewSchedule({ name: '', cronExpression: '0 */2 * * *', enabled: false });
+        setIntervalMinutes(120); // Reset to 2 hours
         loadSchedules();
       } else {
         console.error('❌ Failed to create schedule:', data);
@@ -95,34 +102,25 @@ export default function ScheduleManager() {
 
   const toggleSchedule = async (id: string, currentEnabled: boolean) => {
     try {
-      console.log('🔄 Toggling schedule:', { id, currentEnabled, newState: !currentEnabled });
-      
       const response = await fetch('/api/admin/automation/pipeline/schedule', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, enabled: !currentEnabled })
       });
 
-      console.log('📡 Response status:', response.status);
-      
-      const data = await response.json();
-      console.log('📦 Response data:', data);
-
       if (response.ok) {
-        console.log('✅ Schedule toggled successfully');
         loadSchedules();
       } else {
-        console.error('❌ Failed to toggle:', data);
-        alert(`Failed to toggle schedule: ${data.error || 'Unknown error'}`);
+        const data = await response.json();
+        showToast(data.error || 'Failed to toggle schedule', 'error');
       }
     } catch (error) {
-      console.error('❌ Failed to toggle schedule:', error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showToast('Error toggling schedule', 'error');
     }
   };
 
   const deleteSchedule = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this schedule?')) return;
+    if (!confirm('Delete this schedule?')) return;
 
     try {
       const response = await fetch(`/api/admin/automation/pipeline/schedule?id=${id}`, {
@@ -130,15 +128,18 @@ export default function ScheduleManager() {
       });
 
       if (response.ok) {
+        showToast('Schedule deleted', 'success');
         loadSchedules();
+      } else {
+        showToast('Failed to delete', 'error');
       }
     } catch (error) {
-      console.error('Failed to delete schedule:', error);
+      showToast('Error deleting schedule', 'error');
     }
   };
 
   const runManualPipeline = async () => {
-    if (!confirm('Generate 1 recipe from next pending spy data?')) return;
+    if (!confirm('Generate 1 recipe now?')) return;
 
     try {
       const token = localStorage.getItem('admin_token');
@@ -153,23 +154,95 @@ export default function ScheduleManager() {
 
       const result = await response.json();
       if (result.success) {
-        alert(`✅ Recipe created: ${result.recipeUrl}`);
+        showToast('Recipe created!', 'success');
+        setTimeout(loadSchedules, 2000);
       } else {
-        alert(`❌ Failed: ${result.error}`);
+        showToast(result.error || 'Failed', 'error');
       }
     } catch (error) {
-      alert(`❌ Error: ${error}`);
+      showToast('Error starting pipeline', 'error');
     }
   };
 
-  const cronPresets = [
-    { label: 'Every 2 hours', value: '0 */2 * * *' },
-    { label: 'Every 4 hours', value: '0 */4 * * *' },
-    { label: 'Every 6 hours', value: '0 */6 * * *' },
-    { label: 'Daily at 9 AM', value: '0 9 * * *' },
-    { label: 'Twice daily (9AM & 9PM)', value: '0 9,21 * * *' },
-    { label: 'Every hour', value: '0 * * * *' },
-  ];
+  /**
+   * Convert minutes to cron expression
+   * Examples: 
+   * - 60 min = every hour
+   * - 120 min = every 2 hours
+   * - 30 min = every 30 minutes
+   */
+  const minutesToCron = (minutes: number): string => {
+    if (minutes < 60) {
+      // Less than 1 hour - use minute intervals
+      return `*/${minutes} * * * *`;
+    } else {
+      // 1 hour or more - use hour intervals
+      const hours = minutes / 60;
+      if (hours >= 24) {
+        // Daily or more
+        const days = Math.floor(hours / 24);
+        return `0 0 */${days} * *`;
+      }
+      return `0 */${hours} * * *`;
+    }
+  };
+
+  /**
+   * Update cron expression when minutes change
+   */
+  const handleMinutesChange = (minutes: number) => {
+    setIntervalMinutes(minutes);
+    const cronExpression = minutesToCron(minutes);
+    setNewSchedule({ ...newSchedule, cronExpression });
+  };
+
+  /**
+   * Get human-readable schedule description
+   */
+  const getScheduleDescription = (minutes: number): string => {
+    if (minutes < 60) {
+      return `Every ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    } else if (minutes < 1440) {
+      const hours = minutes / 60;
+      return `Every ${hours} hour${hours !== 1 ? 's' : ''}`;
+    } else {
+      const days = minutes / 1440;
+      return `Every ${days} day${days !== 1 ? 's' : ''}`;
+    }
+  };
+
+  /**
+   * Convert cron expression to human-readable text
+   */
+  const cronToHumanReadable = (cron: string | null): string => {
+    if (!cron) return 'Custom Schedule';
+    
+    // Parse cron: */30 * * * * = every 30 minutes
+    // Parse cron: 0 */2 * * * = every 2 hours
+    // Parse cron: 0 0 */1 * * = every 1 day
+    
+    const parts = cron.split(' ');
+    
+    // Every X minutes: */X * * * *
+    if (parts[0].startsWith('*/') && parts[1] === '*') {
+      const minutes = parseInt(parts[0].substring(2));
+      return `Every ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+    
+    // Every X hours: 0 */X * * *
+    if (parts[0] === '0' && parts[1].startsWith('*/')) {
+      const hours = parseInt(parts[1].substring(2));
+      return `Every ${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+    
+    // Every X days: 0 0 */X * *
+    if (parts[0] === '0' && parts[1] === '0' && parts[2].startsWith('*/')) {
+      const days = parseInt(parts[2].substring(2));
+      return `Every ${days} day${days !== 1 ? 's' : ''}`;
+    }
+    
+    return cron; // Fallback to showing cron expression
+  };
 
   if (loading) {
     return (
@@ -272,7 +345,7 @@ export default function ScheduleManager() {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                          {schedule.cronExpression || 'Custom Schedule'}
+                          {cronToHumanReadable(schedule.cronExpression)}
                         </h3>
                         <p className="text-sm text-slate-600 dark:text-slate-400">
                           {schedule.enabled ? 'Active' : 'Paused'} • Generates 1 recipe per run
@@ -355,22 +428,39 @@ export default function ScheduleManager() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Schedule (Cron Expression)
+                  Run Every (minutes)
                 </label>
-                <select
-                  value={newSchedule.cronExpression}
-                  onChange={(e) => setNewSchedule({ ...newSchedule, cronExpression: e.target.value })}
+                <input
+                  type="number"
+                  min="1"
+                  max="10080"
+                  value={intervalMinutes}
+                  onChange={(e) => handleMinutesChange(parseInt(e.target.value) || 1)}
+                  placeholder="120"
                   className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                >
-                  {cronPresets.map((preset) => (
-                    <option key={preset.value} value={preset.value}>
-                      {preset.label} ({preset.value})
-                    </option>
+                />
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  {getScheduleDescription(intervalMinutes)}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[30, 60, 120, 180, 360, 720, 1440].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => handleMinutesChange(mins)}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        intervalMinutes === mins
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      {mins < 60 ? `${mins}m` : mins < 1440 ? `${mins / 60}h` : `${mins / 1440}d`}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <input
                   type="checkbox"
                   id="enabled"
@@ -378,8 +468,8 @@ export default function ScheduleManager() {
                   onChange={(e) => setNewSchedule({ ...newSchedule, enabled: e.target.checked })}
                   className="w-4 h-4 text-blue-600 rounded"
                 />
-                <label htmlFor="enabled" className="text-sm text-slate-700 dark:text-slate-300">
-                  Start immediately
+                <label htmlFor="enabled" className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  ✅ Run first recipe now, then continue on schedule
                 </label>
               </div>
 
@@ -405,6 +495,20 @@ export default function ScheduleManager() {
                 Create
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]">
+          <div className={`px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 ${
+            toast.type === 'success' 
+              ? 'bg-green-600 text-white' 
+              : 'bg-red-600 text-white'
+          }`}>
+            {toast.type === 'success' ? '✅' : '❌'}
+            <span className="font-medium">{toast.message}</span>
           </div>
         </div>
       )}
