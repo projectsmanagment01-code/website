@@ -284,7 +284,8 @@ export default function AutomationSettingsPage() {
               <span className="ml-3 text-gray-600 dark:text-gray-400">Loading settings...</span>
             </div>
           ) : (
-          {/* AI System Prompts Tab */}
+            <>
+              {/* AI System Prompts Tab */}
           {activeTab === 'prompts' && (
             <div className="space-y-6">
               {/* Help Section */}
@@ -696,6 +697,8 @@ export default function AutomationSettingsPage() {
                 </div>
               </div>
             </div>
+          )}
+            </>
           )}
         </div>
 
