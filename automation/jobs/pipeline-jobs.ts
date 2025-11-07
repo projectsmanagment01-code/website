@@ -321,12 +321,28 @@ export async function scheduleRecipePipeline(
 export async function removeScheduledPipeline(scheduleId: string): Promise<void> {
   logger.info(`🗑️ Removing scheduled pipeline`, { scheduleId });
 
+  // Find the repeatable job for this schedule
+  const jobs = await pipelineQueue.getRepeatableJobs();
+  const job = jobs.find(j => j.id === `schedule-${scheduleId}`);
+  if (!job) {
+    logger.warn(`⚠️ No repeatable job found for scheduleId ${scheduleId}`);
+    return;
+  }
+
+  if (!job.pattern) {
+    logger.warn(`⚠️ Repeatable job for scheduleId ${scheduleId} has no pattern, cannot remove.`);
+    return;
+  }
+  if (!job.id || typeof job.id !== 'string') {
+    logger.warn(`⚠️ Repeatable job for scheduleId ${scheduleId} has invalid id, cannot remove.`);
+    return;
+  }
   await pipelineQueue.removeRepeatable(
     'scheduled-pipeline',
     {
-      pattern: '', // Will be looked up by jobId
+      pattern: job.pattern as string,
     },
-    `schedule-${scheduleId}`
+    job.id as string
   );
 
   logger.info(`✅ Scheduled pipeline removed`);

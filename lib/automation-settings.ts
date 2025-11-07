@@ -104,6 +104,11 @@ export async function getAutomationSettings(): Promise<AutomationSettingsRespons
     websiteApiTokenMasked: settings.websiteApiToken 
       ? '••••••••' + settings.websiteApiToken.slice(-8) 
       : undefined,
+    
+    // AI Prompts
+    imagePromptSystemPrompt: settings.imagePromptSystemPrompt || undefined,
+    recipePromptSystemPrompt: settings.recipePromptSystemPrompt || undefined,
+    seoPromptSystemPrompt: settings.seoPromptSystemPrompt || undefined,
   };
 
   return decryptedSettings;

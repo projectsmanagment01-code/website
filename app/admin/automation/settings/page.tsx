@@ -3,22 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { Save, RotateCcw, Settings, Info, HelpCircle, BookOpen } from 'lucide-react';
 
-interface PromptSettings {
-  // SEO Extraction Prompts
+interface AutomationSettings {
+  // AI Prompts (from database)
+  imagePromptSystemPrompt?: string;
+  recipePromptSystemPrompt?: string;
+  seoPromptSystemPrompt?: string;
+  
+  // Legacy localStorage fields (for backward compatibility)
   seoExtractionSystem: string;
   seoExtractionUser: string;
-  
-  // Image Generation Prompts (4 types)
-  imagePrompt1: string; // Finished dish hero shot
-  imagePrompt2: string; // Raw ingredients layout
-  imagePrompt3: string; // Cooking action shot
-  imagePrompt4: string; // Styled presentation
-  
-  // Recipe Generation Prompts
+  imagePrompt1: string;
+  imagePrompt2: string;
+  imagePrompt3: string;
+  imagePrompt4: string;
   recipeSystemPrompt: string;
   recipeDefaultPrompt: string;
-  
-  // Model Settings
   seoTemperature: number;
   seoMaxTokens: number;
   recipeTemperature: number;
@@ -123,48 +122,73 @@ Generate a complete, valid JSON recipe article following the schema. Ensure all 
 };
 
 export default function AutomationSettingsPage() {
-  const [settings, setSettings] = useState<PromptSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<AutomationSettings>(DEFAULT_SETTINGS);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [saveMessage, setSaveMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'seo' | 'images' | 'recipe' | 'models'>('seo');
+  const [activeTab, setActiveTab] = useState<'prompts' | 'seo' | 'images' | 'recipe' | 'models'>('prompts');
 
-  // Load settings from localStorage on mount
+  // Load settings from API on mount
   useEffect(() => {
-    const saved = localStorage.getItem('automation-prompt-settings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
-      } catch (error) {
-        console.error('Failed to load settings:', error);
-      }
-    }
+    loadSettings();
   }, []);
 
-  const handleSave = () => {
+  const loadSettings = async () => {
+    try {
+      const response = await fetch('/api/admin/automation/settings');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.settings) {
+          // Merge database settings with defaults
+          setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
+        }
+      } else {
+        console.error('Failed to load settings:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
     setIsSaving(true);
     try {
-      localStorage.setItem('automation-prompt-settings', JSON.stringify(settings));
-      setSaveMessage('✅ Settings saved successfully!');
-      setTimeout(() => setSaveMessage(''), 3000);
+      const response = await fetch('/api/admin/automation/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imagePromptSystemPrompt: settings.imagePromptSystemPrompt,
+          recipePromptSystemPrompt: settings.recipePromptSystemPrompt,
+          seoPromptSystemPrompt: settings.seoPromptSystemPrompt,
+        })
+      });
+
+      if (response.ok) {
+        setSaveMessage('✅ Settings saved successfully!');
+      } else {
+        const error = await response.json();
+        setSaveMessage(`❌ Failed to save: ${error.error || 'Unknown error'}`);
+      }
     } catch (error) {
       setSaveMessage('❌ Failed to save settings');
       console.error('Save error:', error);
     } finally {
       setIsSaving(false);
+      setTimeout(() => setSaveMessage(''), 5000);
     }
   };
 
   const handleReset = () => {
     if (confirm('Are you sure you want to reset all prompts to defaults? This cannot be undone.')) {
       setSettings(DEFAULT_SETTINGS);
-      localStorage.removeItem('automation-prompt-settings');
-      setSaveMessage('✅ Settings reset to defaults');
+      setSaveMessage('✅ Settings reset to defaults (save to apply)');
       setTimeout(() => setSaveMessage(''), 3000);
     }
   };
 
-  const updateSetting = (key: keyof PromptSettings, value: string | number) => {
+  const updateSetting = (key: keyof AutomationSettings, value: string | number) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
@@ -229,6 +253,7 @@ export default function AutomationSettingsPage() {
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex gap-4 px-6" aria-label="Settings tabs">
               {[
+                { id: 'prompts', label: 'AI System Prompts', icon: '🤖' },
                 { id: 'seo', label: 'SEO Extraction', icon: '🧠' },
                 { id: 'images', label: 'Image Generation', icon: '🖼️' },
                 { id: 'recipe', label: 'Recipe Generation', icon: '📝' },
@@ -253,6 +278,82 @@ export default function AutomationSettingsPage() {
 
         {/* Tab Content */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600 dark:text-gray-400">Loading settings...</span>
+            </div>
+          ) : (
+          {/* AI System Prompts Tab */}
+          {activeTab === 'prompts' && (
+            <div className="space-y-6">
+              {/* Help Section */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">AI System Prompts</h3>
+                    <p className="text-sm text-blue-800 dark:text-blue-400 mb-2">
+                      These are the core system prompts that define how each AI agent behaves during automation. 
+                      They control the overall behavior and output quality for image generation, recipe creation, and SEO optimization.
+                    </p>
+                    <p className="text-sm text-blue-800 dark:text-blue-400">
+                      <strong>💡 Tip:</strong> These prompts are used by the automation pipeline and override any hardcoded defaults.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image Generation System Prompt */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-white">
+                  Image Generation System Prompt
+                </label>
+                <textarea
+                  value={settings.imagePromptSystemPrompt || ''}
+                  onChange={(e) => updateSetting('imagePromptSystemPrompt', e.target.value)}
+                  placeholder="Enter the system prompt for image generation AI..."
+                  className="w-full h-48 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  This prompt defines how the AI generates image prompts from recipe data. Leave empty to use hardcoded defaults.
+                </p>
+              </div>
+
+              {/* Recipe Generation System Prompt */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-white">
+                  Recipe Generation System Prompt
+                </label>
+                <textarea
+                  value={settings.recipePromptSystemPrompt || ''}
+                  onChange={(e) => updateSetting('recipePromptSystemPrompt', e.target.value)}
+                  placeholder="Enter the system prompt for recipe generation AI..."
+                  className="w-full h-48 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  This prompt defines how the AI generates complete recipes. Leave empty to use hardcoded defaults.
+                </p>
+              </div>
+
+              {/* SEO Generation System Prompt */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-white">
+                  SEO Generation System Prompt
+                </label>
+                <textarea
+                  value={settings.seoPromptSystemPrompt || ''}
+                  onChange={(e) => updateSetting('seoPromptSystemPrompt', e.target.value)}
+                  placeholder="Enter the system prompt for SEO generation AI..."
+                  className="w-full h-48 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  This prompt defines how the AI generates SEO metadata. Leave empty to use hardcoded defaults.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* SEO Extraction Tab */}
           {activeTab === 'seo' && (
             <div className="space-y-6">
