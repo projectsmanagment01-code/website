@@ -60,14 +60,23 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
     let executionLog: any = null;
 
     try {
-      // Update schedule last run
-      await prisma.automationSchedule.update({
-        where: { id: scheduleId },
-        data: {
-          lastRun: new Date(),
-          runCount: { increment: 1 }
+      // Update schedule last run - handle case where schedule was deleted
+      try {
+        await prisma.automationSchedule.update({
+          where: { id: scheduleId },
+          data: {
+            lastRun: new Date(),
+            runCount: { increment: 1 }
+          }
+        });
+      } catch (scheduleError: any) {
+        if (scheduleError?.code === 'P2025') {
+          // Schedule was deleted - log warning and continue
+          logger.warn(`⚠️ Schedule ${scheduleId} no longer exists (may have been deleted). Completing job without schedule update.`);
+        } else {
+          throw scheduleError; // Re-throw other errors
         }
-      });
+      }
 
       // Get next single pending spy data entry (always process only 1)
       const spyDataEntries = await prisma.pinterestSpyData.findMany({
@@ -227,13 +236,21 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
         logger.error(`❌ Pipeline error for ${entry.id}:`, error);
       }
 
-      // Update schedule statistics
-      await prisma.automationSchedule.update({
-        where: { id: scheduleId },
-        data: {
-          runCount: { increment: 1 }
+      // Update schedule statistics - handle deleted schedule
+      try {
+        await prisma.automationSchedule.update({
+          where: { id: scheduleId },
+          data: {
+            runCount: { increment: 1 }
+          }
+        });
+      } catch (scheduleError: any) {
+        if (scheduleError?.code === 'P2025') {
+          logger.warn(`⚠️ Schedule ${scheduleId} no longer exists. Skipping statistics update.`);
+        } else {
+          throw scheduleError;
         }
-      });
+      }
 
       await job.updateProgress(100);
 
