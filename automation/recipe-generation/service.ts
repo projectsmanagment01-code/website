@@ -3,6 +3,7 @@
  */
 
 import { getGeminiKey } from '@/lib/ai-settings-helper';
+import { getAutomationSettings } from '@/lib/automation-settings';
 
 export interface RecipeGenerationInput {
   seoKeyword: string;
@@ -41,8 +42,27 @@ export class RecipeGenerationService {
 
   /**
    * Build the recipe generation prompt from recipeprompt.md
+   * Uses custom prompt from settings if available, otherwise uses default
    */
-  private static buildRecipePrompt(): string {
+  private static async buildRecipePrompt(): Promise<string> {
+    try {
+      const settings = await getAutomationSettings();
+      if (settings?.recipePromptSystemPrompt && settings.recipePromptSystemPrompt.trim()) {
+        console.log('📝 Using custom recipe prompt from settings');
+        return settings.recipePromptSystemPrompt;
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not load custom recipe prompt, using default');
+    }
+    
+    console.log('📝 Using default recipe prompt');
+    return this.getDefaultRecipePrompt();
+  }
+
+  /**
+   * Default hardcoded recipe prompt (fallback)
+   */
+  private static getDefaultRecipePrompt(): string {
     return `You are an advanced AI recipe generator. Generate ONLY a valid JSON object - no explanations, no markdown, no extra text.
 
 VOICE: Write as a warm 40-year-old woman home cook. Use conversational tone with words like "honestly," "yeah," "so," "I mean." Focus on feelings, textures, smells, and memories.
@@ -119,7 +139,7 @@ Generate complete JSON with ALL fields filled. No truncation.`;
 
       // Build the user prompt with all the input data
       const userPrompt = this.buildUserPrompt(input);
-      const systemPrompt = this.buildRecipePrompt();
+      const systemPrompt = await this.buildRecipePrompt();
 
       // Call Gemini API with maximum token limit for complete recipe generation
       // Using gemini-2.5-pro for highest quality and output capacity

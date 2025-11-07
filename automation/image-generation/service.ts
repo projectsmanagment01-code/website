@@ -10,6 +10,7 @@
 
 import { getGeminiKey } from "@/lib/ai-settings-helper";
 import { PrismaClient } from "@prisma/client";
+import { getAutomationSettings } from "@/lib/automation-settings";
 
 const prisma = new PrismaClient();
 
@@ -74,7 +75,7 @@ export class ImageGenerationService {
       throw new Error('Gemini API key not configured');
     }
 
-    const systemPrompt = this.buildPromptGenerationInstruction();
+    const systemPrompt = await this.buildPromptGenerationInstruction();
     const userPrompt = `Recipe: ${input.recipeTitle}\nDescription: ${input.recipeDescription}\nKeyword: ${input.recipeKeyword}\nCategory: ${input.recipeCategory}`;
 
     console.log('🎨 Generating 4 image prompts for:', input.recipeTitle);
@@ -245,8 +246,27 @@ export class ImageGenerationService {
 
   /**
    * Build the IGP.txt prompt instructions
+   * Uses custom prompt from settings if available, otherwise uses default
    */
-  private static buildPromptGenerationInstruction(): string {
+  private static async buildPromptGenerationInstruction(): Promise<string> {
+    try {
+      const settings = await getAutomationSettings();
+      if (settings?.imagePromptSystemPrompt && settings.imagePromptSystemPrompt.trim()) {
+        console.log('📝 Using custom image prompt from settings');
+        return settings.imagePromptSystemPrompt;
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not load custom image prompt, using default');
+    }
+    
+    console.log('📝 Using default image prompt');
+    return this.getDefaultImagePrompt();
+  }
+
+  /**
+   * Default hardcoded image prompt (fallback)
+   */
+  private static getDefaultImagePrompt(): string {
     return `You are an AI agent responsible for generating FOUR COMPLETELY DIFFERENT AND UNIQUE image prompts for a single recipe. Each prompt MUST describe a DISTINCT stage with DIFFERENT composition, angle, and subject matter. DUPLICATES ARE STRICTLY FORBIDDEN.
 
 CRITICAL REQUIREMENTS:

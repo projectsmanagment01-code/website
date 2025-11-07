@@ -6,6 +6,7 @@
 import { geminiFlash } from '../ai/gemini-flash.service';
 import { logger } from '../../utils/logger';
 import { AIError } from '../../utils/errors';
+import { getAutomationSettings } from '@/lib/automation-settings';
 
 export class SeoGenerationService {
   /**
@@ -26,29 +27,7 @@ export class SeoGenerationService {
     });
 
     try {
-      const prompt = `You are an expert SEO specialist for a recipe food blog. Generate optimized SEO data for the following recipe:
-
-**Original Title:** ${spyData.spyTitle}
-**Description:** ${spyData.spyDescription}
-**Category:** ${spyData.category}
-
-Generate:
-1. **SEO Keyword** - The main target keyword (2-4 words, highly searchable)
-2. **SEO Title** - Optimized title (50-60 characters, includes keyword, compelling)
-3. **SEO Description** - Meta description (150-160 characters, includes keyword, action-oriented)
-
-Requirements:
-- SEO Title must be catchy, clear, and include the keyword naturally
-- SEO Description must entice clicks and include a call-to-action
-- Both must be optimized for Google search
-- Maintain the essence of the original recipe
-
-Output format (JSON only, no markdown):
-{
-  "seoKeyword": "main keyword phrase",
-  "seoTitle": "Optimized Title Here",
-  "seoDescription": "Compelling meta description here."
-}`;
+      const prompt = await this.buildSeoPrompt(spyData);
 
       // Use Gemini Flash to generate (reuse existing method infrastructure)
       const apiKey = process.env.GEMINI_API_KEY || '';
@@ -109,6 +88,65 @@ Output format (JSON only, no markdown):
       logger.error('Failed to generate SEO data', error);
       throw new AIError('SEO generation failed');
     }
+  }
+
+  /**
+   * Build SEO prompt - uses custom from settings or default
+   */
+  private async buildSeoPrompt(spyData: {
+    spyTitle: string;
+    spyDescription: string;
+    category: string;
+  }): Promise<string> {
+    try {
+      const settings = await getAutomationSettings();
+      if (settings?.seoPromptSystemPrompt && settings.seoPromptSystemPrompt.trim()) {
+        console.log('📝 Using custom SEO prompt from settings');
+        // Replace placeholders in custom prompt
+        return settings.seoPromptSystemPrompt
+          .replace(/\{spyTitle\}/g, spyData.spyTitle)
+          .replace(/\{spyDescription\}/g, spyData.spyDescription)
+          .replace(/\{category\}/g, spyData.category);
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not load custom SEO prompt, using default');
+    }
+    
+    console.log('📝 Using default SEO prompt');
+    return this.getDefaultSeoPrompt(spyData);
+  }
+
+  /**
+   * Default SEO prompt
+   */
+  private getDefaultSeoPrompt(spyData: {
+    spyTitle: string;
+    spyDescription: string;
+    category: string;
+  }): string {
+    return `You are an expert SEO specialist for a recipe food blog. Generate optimized SEO data for the following recipe:
+
+**Original Title:** ${spyData.spyTitle}
+**Description:** ${spyData.spyDescription}
+**Category:** ${spyData.category}
+
+Generate:
+1. **SEO Keyword** - The main target keyword (2-4 words, highly searchable)
+2. **SEO Title** - Optimized title (50-60 characters, includes keyword, compelling)
+3. **SEO Description** - Meta description (150-160 characters, includes keyword, action-oriented)
+
+Requirements:
+- SEO Title must be catchy, clear, and include the keyword naturally
+- SEO Description must entice clicks and include a call-to-action
+- Both must be optimized for Google search
+- Maintain the essence of the original recipe
+
+Output format (JSON only, no markdown):
+{
+  "seoKeyword": "main keyword phrase",
+  "seoTitle": "Optimized Title Here",
+  "seoDescription": "Compelling meta description here."
+}`;
   }
 }
 

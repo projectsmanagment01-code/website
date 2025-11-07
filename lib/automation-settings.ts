@@ -31,6 +31,11 @@ export interface AutomationSettingsData {
   // Behavior
   maxRetries?: number;
   retryDelayMs?: number;
+  
+  // AI Prompts (Customizable)
+  imagePromptSystemPrompt?: string;
+  recipePromptSystemPrompt?: string;
+  seoPromptSystemPrompt?: string;
 }
 
 export interface AutomationSettingsResponse extends AutomationSettingsData {

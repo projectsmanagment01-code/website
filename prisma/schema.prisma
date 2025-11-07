@@ -322,6 +322,11 @@ model AutomationSettings {
   maxRetries                Int       @default(3)
   retryDelayMs              Int       @default(5000)
   
+  // AI Prompts (Customizable)
+  imagePromptSystemPrompt   String?   @db.Text // System prompt for image generation
+  recipePromptSystemPrompt  String?   @db.Text // System prompt for recipe generation
+  seoPromptSystemPrompt     String?   @db.Text // System prompt for SEO generation
+  
   // Status
   isConfigured              Boolean   @default(false) // True when all required fields are set
   lastTestedAt              DateTime?
