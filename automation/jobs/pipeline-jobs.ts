@@ -104,14 +104,10 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
       const entry = spyDataEntries[0];
 
       // Check if schedule still exists before creating execution log
-      let scheduleExists = true;
-      try {
-        await prisma.automationSchedule.findUnique({
-          where: { id: scheduleId }
-        });
-      } catch (error) {
-        scheduleExists = false;
-      }
+      const existingSchedule = await prisma.automationSchedule.findUnique({
+        where: { id: scheduleId }
+      });
+      const scheduleExists = existingSchedule !== null;
 
       // Create execution log - set scheduleId to null if schedule was deleted
       executionLog = await prisma.pipelineExecutionLog.create({

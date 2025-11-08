@@ -55,6 +55,12 @@ echo "✅ Redis is ready"
 
 # Run database migrations
 echo "🔧 Running database migrations..."
+echo "   This will update the database schema to include new fields like AI system prompts"
+echo "   and fix any foreign key constraint issues..."
+npx prisma db push --accept-data-loss
+
+# Verify database schema is up to date
+echo "🔍 Verifying database schema..."
 npx prisma db push --accept-data-loss
 
 # Build the application
