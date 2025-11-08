@@ -94,6 +94,11 @@ export async function getAutomationSettings(): Promise<AutomationSettingsRespons
     createdAt: settings.createdAt,
     updatedAt: settings.updatedAt,
     
+    // Include AI prompts
+    imagePromptSystemPrompt: settings.imagePromptSystemPrompt || undefined,
+    recipePromptSystemPrompt: settings.recipePromptSystemPrompt || undefined,
+    seoPromptSystemPrompt: settings.seoPromptSystemPrompt || undefined,
+    
     // Add masked versions for display
     googleCredentialsJsonMasked: settings.googleCredentialsJson 
       ? '••••••••' + settings.googleCredentialsJson.slice(-8) 
@@ -104,11 +109,6 @@ export async function getAutomationSettings(): Promise<AutomationSettingsRespons
     websiteApiTokenMasked: settings.websiteApiToken 
       ? '••••••••' + settings.websiteApiToken.slice(-8) 
       : undefined,
-    
-    // AI Prompts
-    imagePromptSystemPrompt: settings.imagePromptSystemPrompt || undefined,
-    recipePromptSystemPrompt: settings.recipePromptSystemPrompt || undefined,
-    seoPromptSystemPrompt: settings.seoPromptSystemPrompt || undefined,
   };
 
   return decryptedSettings;
@@ -135,11 +135,6 @@ export async function updateAutomationSettings(
     enableIndexing: data.enableIndexing,
     maxRetries: data.maxRetries,
     retryDelayMs: data.retryDelayMs,
-    
-    // AI Prompts (not encrypted)
-    imagePromptSystemPrompt: data.imagePromptSystemPrompt,
-    recipePromptSystemPrompt: data.recipePromptSystemPrompt,
-    seoPromptSystemPrompt: data.seoPromptSystemPrompt,
   };
 
   // Only encrypt and update if new value provided
@@ -159,6 +154,19 @@ export async function updateAutomationSettings(
     encryptedData.websiteApiToken = data.websiteApiToken 
       ? encrypt(data.websiteApiToken) 
       : null;
+  }
+
+  // Handle AI prompts (not encrypted, just stored as-is)
+  if (data.imagePromptSystemPrompt !== undefined) {
+    encryptedData.imagePromptSystemPrompt = data.imagePromptSystemPrompt;
+  }
+
+  if (data.recipePromptSystemPrompt !== undefined) {
+    encryptedData.recipePromptSystemPrompt = data.recipePromptSystemPrompt;
+  }
+
+  if (data.seoPromptSystemPrompt !== undefined) {
+    encryptedData.seoPromptSystemPrompt = data.seoPromptSystemPrompt;
   }
 
   // Check if all required fields are configured

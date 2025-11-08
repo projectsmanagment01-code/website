@@ -102,17 +102,11 @@ export const pipelineWorker = new Worker<PipelineJobData, PipelineJobResult>(
 
       // Process the single entry through the pipeline
       const entry = spyDataEntries[0];
-
-      // Check if schedule still exists before creating execution log
-      const existingSchedule = await prisma.automationSchedule.findUnique({
-        where: { id: scheduleId }
-      });
-      const scheduleExists = existingSchedule !== null;
-
-      // Create execution log - set scheduleId to null if schedule was deleted
+      
+      // Create execution log
       executionLog = await prisma.pipelineExecutionLog.create({
         data: {
-          scheduleId: scheduleExists ? scheduleId : null,
+          scheduleId: scheduleId,
           spyDataId: entry.id,
           spyTitle: entry.spyTitle,
           status: 'RUNNING',
@@ -327,28 +321,12 @@ export async function scheduleRecipePipeline(
 export async function removeScheduledPipeline(scheduleId: string): Promise<void> {
   logger.info(`🗑️ Removing scheduled pipeline`, { scheduleId });
 
-  // Find the repeatable job for this schedule
-  const jobs = await pipelineQueue.getRepeatableJobs();
-  const job = jobs.find(j => j.id === `schedule-${scheduleId}`);
-  if (!job) {
-    logger.warn(`⚠️ No repeatable job found for scheduleId ${scheduleId}`);
-    return;
-  }
-
-  if (!job.pattern) {
-    logger.warn(`⚠️ Repeatable job for scheduleId ${scheduleId} has no pattern, cannot remove.`);
-    return;
-  }
-  if (!job.id || typeof job.id !== 'string') {
-    logger.warn(`⚠️ Repeatable job for scheduleId ${scheduleId} has invalid id, cannot remove.`);
-    return;
-  }
   await pipelineQueue.removeRepeatable(
     'scheduled-pipeline',
     {
-      pattern: job.pattern as string,
+      pattern: '', // Will be looked up by jobId
     },
-    job.id as string
+    `schedule-${scheduleId}`
   );
 
   logger.info(`✅ Scheduled pipeline removed`);

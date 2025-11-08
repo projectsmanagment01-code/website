@@ -3,21 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { Save, RotateCcw, Settings, Info, HelpCircle, BookOpen } from 'lucide-react';
 
-interface AutomationSettings {
-  // AI Prompts (from database)
-  imagePromptSystemPrompt?: string;
-  recipePromptSystemPrompt?: string;
-  seoPromptSystemPrompt?: string;
-  
-  // Legacy localStorage fields (for backward compatibility)
+interface PromptSettings {
+  // SEO Extraction Prompts
   seoExtractionSystem: string;
   seoExtractionUser: string;
-  imagePrompt1: string;
-  imagePrompt2: string;
-  imagePrompt3: string;
-  imagePrompt4: string;
+  
+  // Image Generation Prompts (4 types)
+  imagePrompt1: string; // Finished dish hero shot
+  imagePrompt2: string; // Raw ingredients layout
+  imagePrompt3: string; // Cooking action shot
+  imagePrompt4: string; // Styled presentation
+  
+  // Recipe Generation Prompts
   recipeSystemPrompt: string;
   recipeDefaultPrompt: string;
+  
+  // Model Settings
   seoTemperature: number;
   seoMaxTokens: number;
   recipeTemperature: number;
@@ -25,7 +26,7 @@ interface AutomationSettings {
   imageGuidanceScale: number;
 }
 
-const DEFAULT_SETTINGS: AutomationSettings = {
+const DEFAULT_SETTINGS: PromptSettings = {
   // SEO Extraction Prompts
   seoExtractionSystem: `You are an expert SEO specialist for a recipe food blog. Your task is to analyze Pinterest spy data and extract optimized SEO metadata.
 
@@ -122,36 +123,60 @@ Generate a complete, valid JSON recipe article following the schema. Ensure all 
 };
 
 export default function AutomationSettingsPage() {
-  const [settings, setSettings] = useState<AutomationSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<PromptSettings>(DEFAULT_SETTINGS);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveMessage, setSaveMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'prompts' | 'seo' | 'images' | 'recipe' | 'models'>('prompts');
+  const [activeTab, setActiveTab] = useState<'seo' | 'images' | 'recipe' | 'models'>('seo');
 
-  // Load settings from API on mount
+  // Load settings from database on mount
   useEffect(() => {
     loadSettings();
   }, []);
 
   const loadSettings = async () => {
+    setIsLoading(true);
     try {
-      const token = localStorage.getItem('admin_token');
       const response = await fetch('/api/admin/automation/settings', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem('admin-token')}`
         }
       });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.settings) {
-          // Merge database settings with defaults
-          setSettings({ ...DEFAULT_SETTINGS, ...data.settings });
-        }
-      } else {
-        console.error('Failed to load settings:', response.statusText);
+      
+      if (!response.ok) {
+        throw new Error('Failed to load settings');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.settings) {
+        // Map database fields to UI fields
+        const dbSettings = data.settings;
+        const uiSettings: PromptSettings = {
+          ...DEFAULT_SETTINGS,
+          // Map the database prompt fields if they exist
+          ...(dbSettings.seoPromptSystemPrompt && {
+            seoExtractionSystem: dbSettings.seoPromptSystemPrompt,
+            seoExtractionUser: dbSettings.seoPromptSystemPrompt // Using same for both for now
+          }),
+          ...(dbSettings.imagePromptSystemPrompt && {
+            // Parse image prompt to extract individual prompts if needed
+            imagePrompt1: dbSettings.imagePromptSystemPrompt.split('IMAGE 1 -')[1]?.split('2. IMAGE 2 -')[0]?.trim() || settings.imagePrompt1,
+            imagePrompt2: dbSettings.imagePromptSystemPrompt.split('IMAGE 2 -')[1]?.split('3. IMAGE 3 -')[0]?.trim() || settings.imagePrompt2,
+            imagePrompt3: dbSettings.imagePromptSystemPrompt.split('IMAGE 3 -')[1]?.split('4. IMAGE 4 -')[0]?.trim() || settings.imagePrompt3,
+            imagePrompt4: dbSettings.imagePromptSystemPrompt.split('IMAGE 4 -')[1]?.trim() || settings.imagePrompt4,
+          }),
+          ...(dbSettings.recipePromptSystemPrompt && {
+            recipeSystemPrompt: dbSettings.recipePromptSystemPrompt,
+          }),
+        };
+        
+        setSettings(uiSettings);
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
+      setSaveMessage('⚠️ Using default settings - could not load from database');
+      setTimeout(() => setSaveMessage(''), 4000);
     } finally {
       setIsLoading(false);
     }
@@ -160,46 +185,96 @@ export default function AutomationSettingsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const token = localStorage.getItem('admin_token');
+      // Combine image prompts into single system prompt
+      const imagePromptSystemPrompt = `You are an AI agent responsible for generating FOUR COMPLETELY DIFFERENT AND UNIQUE image prompts for a single recipe.
+
+1. IMAGE 1 - FINISHED DISH HERO SHOT:
+${settings.imagePrompt1}
+
+2. IMAGE 2 - RAW INGREDIENTS LAYOUT:
+${settings.imagePrompt2}
+
+3. IMAGE 3 - COOKING ACTION SHOT:
+${settings.imagePrompt3}
+
+4. IMAGE 4 - STYLED PRESENTATION:
+${settings.imagePrompt4}
+
+Output ONLY valid JSON in this exact format:
+{
+  "image_1_feature": "Finished dish prompt with specific angle and composition",
+  "image_2_ingredients": "Raw ingredients prompt with different angle and composition",
+  "image_3_cooking": "Cooking process prompt with different angle and composition",
+  "image_4_final_presentation": "Styled presentation prompt with different angle and composition"
+}`;
+
+      // Map UI fields to database fields
+      const dbData = {
+        seoPromptSystemPrompt: settings.seoExtractionSystem,
+        imagePromptSystemPrompt: imagePromptSystemPrompt,
+        recipePromptSystemPrompt: settings.recipeSystemPrompt,
+      };
+
       const response = await fetch('/api/admin/automation/settings', {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem('admin-token')}`
         },
-        body: JSON.stringify({
-          imagePromptSystemPrompt: settings.imagePromptSystemPrompt,
-          recipePromptSystemPrompt: settings.recipePromptSystemPrompt,
-          seoPromptSystemPrompt: settings.seoPromptSystemPrompt,
-        })
+        body: JSON.stringify(dbData)
       });
 
-      if (response.ok) {
-        setSaveMessage('✅ Settings saved successfully!');
+      if (!response.ok) {
+        throw new Error('Failed to save settings');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setSaveMessage('✅ Settings saved to database successfully!');
+        setTimeout(() => setSaveMessage(''), 3000);
       } else {
-        const error = await response.json();
-        setSaveMessage(`❌ Failed to save: ${error.error || 'Unknown error'}`);
+        throw new Error(result.error || 'Save failed');
       }
     } catch (error) {
-      setSaveMessage('❌ Failed to save settings');
+      setSaveMessage('❌ Failed to save settings: ' + (error instanceof Error ? error.message : 'Unknown error'));
       console.error('Save error:', error);
     } finally {
       setIsSaving(false);
-      setTimeout(() => setSaveMessage(''), 5000);
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (confirm('Are you sure you want to reset all prompts to defaults? This cannot be undone.')) {
       setSettings(DEFAULT_SETTINGS);
-      setSaveMessage('✅ Settings reset to defaults (save to apply)');
-      setTimeout(() => setSaveMessage(''), 3000);
+      // Save defaults to database
+      setIsSaving(true);
+      try {
+        await handleSave();
+        setSaveMessage('✅ Settings reset to defaults and saved to database');
+        setTimeout(() => setSaveMessage(''), 3000);
+      } catch (error) {
+        setSaveMessage('⚠️ Reset to defaults but failed to save to database');
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
-  const updateSetting = (key: keyof AutomationSettings, value: string | number) => {
+  const updateSetting = (key: keyof PromptSettings, value: string | number) => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <Settings className="w-12 h-12 text-blue-600 dark:text-blue-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -262,7 +337,6 @@ export default function AutomationSettingsPage() {
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex gap-4 px-6" aria-label="Settings tabs">
               {[
-                { id: 'prompts', label: 'AI System Prompts', icon: '🤖' },
                 { id: 'seo', label: 'SEO Extraction', icon: '🧠' },
                 { id: 'images', label: 'Image Generation', icon: '🖼️' },
                 { id: 'recipe', label: 'Recipe Generation', icon: '📝' },
@@ -287,83 +361,6 @@ export default function AutomationSettingsPage() {
 
         {/* Tab Content */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600 dark:text-gray-400">Loading settings...</span>
-            </div>
-          ) : (
-            <>
-              {/* AI System Prompts Tab */}
-          {activeTab === 'prompts' && (
-            <div className="space-y-6">
-              {/* Help Section */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">AI System Prompts</h3>
-                    <p className="text-sm text-blue-800 dark:text-blue-400 mb-2">
-                      These are the core system prompts that define how each AI agent behaves during automation. 
-                      They control the overall behavior and output quality for image generation, recipe creation, and SEO optimization.
-                    </p>
-                    <p className="text-sm text-blue-800 dark:text-blue-400">
-                      <strong>💡 Tip:</strong> These prompts are used by the automation pipeline and override any hardcoded defaults.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Image Generation System Prompt */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-900 dark:text-white">
-                  Image Generation System Prompt
-                </label>
-                <textarea
-                  value={settings.imagePromptSystemPrompt || ''}
-                  onChange={(e) => updateSetting('imagePromptSystemPrompt', e.target.value)}
-                  placeholder="Enter the system prompt for image generation AI..."
-                  className="w-full h-48 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  This prompt defines how the AI generates image prompts from recipe data. Leave empty to use hardcoded defaults.
-                </p>
-              </div>
-
-              {/* Recipe Generation System Prompt */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-900 dark:text-white">
-                  Recipe Generation System Prompt
-                </label>
-                <textarea
-                  value={settings.recipePromptSystemPrompt || ''}
-                  onChange={(e) => updateSetting('recipePromptSystemPrompt', e.target.value)}
-                  placeholder="Enter the system prompt for recipe generation AI..."
-                  className="w-full h-48 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  This prompt defines how the AI generates complete recipes. Leave empty to use hardcoded defaults.
-                </p>
-              </div>
-
-              {/* SEO Generation System Prompt */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-900 dark:text-white">
-                  SEO Generation System Prompt
-                </label>
-                <textarea
-                  value={settings.seoPromptSystemPrompt || ''}
-                  onChange={(e) => updateSetting('seoPromptSystemPrompt', e.target.value)}
-                  placeholder="Enter the system prompt for SEO generation AI..."
-                  className="w-full h-48 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  This prompt defines how the AI generates SEO metadata. Leave empty to use hardcoded defaults.
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* SEO Extraction Tab */}
           {activeTab === 'seo' && (
             <div className="space-y-6">
@@ -453,7 +450,12 @@ export default function AutomationSettingsPage() {
                   <label className="block text-sm font-semibold text-gray-900 dark:text-white">
                     Image 1: Finished Dish Hero Shot
                   </label>
-                  <HelpCircle className="w-4 h-4 text-gray-400" />
+                  <div className="relative group">
+                    <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                    <span className="absolute left-6 top-0 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      Close-up 45° angle of plated final result
+                    </span>
+                  </div>
                 </div>
                 <textarea
                   value={settings.imagePrompt1}
@@ -471,7 +473,12 @@ export default function AutomationSettingsPage() {
                   <label className="block text-sm font-semibold text-gray-900 dark:text-white">
                     Image 2: Raw Ingredients Layout
                   </label>
-                  <HelpCircle className="w-4 h-4 text-gray-400" />
+                  <div className="relative group">
+                    <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                    <span className="absolute left-6 top-0 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      Overhead flat lay of uncooked ingredients
+                    </span>
+                  </div>
                 </div>
                 <textarea
                   value={settings.imagePrompt2}
@@ -489,7 +496,12 @@ export default function AutomationSettingsPage() {
                   <label className="block text-sm font-semibold text-gray-900 dark:text-white">
                     Image 3: Cooking Action Shot
                   </label>
-                  <HelpCircle className="w-4 h-4 text-gray-400" />
+                  <div className="relative group">
+                    <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                    <span className="absolute left-6 top-0 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      Side angle showing cooking process in action
+                    </span>
+                  </div>
                 </div>
                 <textarea
                   value={settings.imagePrompt3}
@@ -507,7 +519,12 @@ export default function AutomationSettingsPage() {
                   <label className="block text-sm font-semibold text-gray-900 dark:text-white">
                     Image 4: Styled Presentation
                   </label>
-                  <HelpCircle className="w-4 h-4 text-gray-400" />
+                  <div className="relative group">
+                    <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                    <span className="absolute left-6 top-0 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      Elegant table setting with different angle
+                    </span>
+                  </div>
                 </div>
                 <textarea
                   value={settings.imagePrompt4}
@@ -706,8 +723,6 @@ export default function AutomationSettingsPage() {
                 </div>
               </div>
             </div>
-          )}
-            </>
           )}
         </div>
 

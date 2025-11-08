@@ -102,13 +102,18 @@ export default function ScheduleManager() {
 
   const toggleSchedule = async (id: string, currentEnabled: boolean) => {
     try {
+      const token = localStorage.getItem('admin-token');
       const response = await fetch('/api/admin/automation/pipeline/schedule', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ id, enabled: !currentEnabled })
       });
 
       if (response.ok) {
+        showToast(currentEnabled ? 'Schedule paused' : 'Schedule started', 'success');
         loadSchedules();
       } else {
         const data = await response.json();
@@ -116,6 +121,7 @@ export default function ScheduleManager() {
       }
     } catch (error) {
       showToast('Error toggling schedule', 'error');
+      console.error('Toggle schedule error:', error);
     }
   };
 
@@ -123,18 +129,24 @@ export default function ScheduleManager() {
     if (!confirm('Delete this schedule?')) return;
 
     try {
+      const token = localStorage.getItem('admin-token');
       const response = await fetch(`/api/admin/automation/pipeline/schedule?id=${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
         showToast('Schedule deleted', 'success');
         loadSchedules();
       } else {
-        showToast('Failed to delete', 'error');
+        const data = await response.json();
+        showToast(data.error || 'Failed to delete', 'error');
       }
     } catch (error) {
       showToast('Error deleting schedule', 'error');
+      console.error('Delete schedule error:', error);
     }
   };
 

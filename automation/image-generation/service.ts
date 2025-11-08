@@ -43,21 +43,24 @@ export class ImageGenerationService {
    */
   private static async getWatermarkDomain(): Promise<string> {
     try {
-      // Try to get from site settings in database
-      const settings = await prisma.siteSettings.findFirst({
-        select: { websiteName: true }
+      // Try to get from site config in database
+      const config = await prisma.siteConfig.findFirst({
+        where: { key: 'site' },
+        select: { data: true }
       });
       
-      if (settings?.websiteName) {
-        // Clean the website name to get domain format
-        // e.g., "My Recipe Site" -> "myrecipesite.com"
-        const cleanName = settings.websiteName
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, '');
-        return `${cleanName}.com`;
+      if (config?.data && typeof config.data === 'object') {
+        const siteData = config.data as any;
+        if (siteData.name) {
+          // Clean the website name to get domain format
+          const cleanName = siteData.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '');
+          return `${cleanName}.com`;
+        }
       }
     } catch (error) {
-      console.warn('⚠️ Could not fetch site settings for watermark, using fallback');
+      console.warn('⚠️ Could not fetch site config for watermark, using fallback');
     }
     
     // Fallback to environment variable or default

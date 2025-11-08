@@ -74,12 +74,6 @@ Write-Host "✅ Redis is ready" -ForegroundColor Green
 
 # Run database migrations
 Write-Host "🔧 Running database migrations..." -ForegroundColor Cyan
-Write-Host "   This will update the database schema to include new fields like AI system prompts" -ForegroundColor Gray
-Write-Host "   and fix any foreign key constraint issues..." -ForegroundColor Gray
-npx prisma db push --accept-data-loss
-
-# Verify database schema is up to date
-Write-Host "🔍 Verifying database schema..." -ForegroundColor Cyan
 npx prisma db push --accept-data-loss
 
 # Build the application

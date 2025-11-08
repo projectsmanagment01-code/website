@@ -733,7 +733,7 @@ export default function Settings({ className }: SettingsProps) {
                             Save
                           </button>
                           <button
-                            onclick={cancelEdit}
+                            onClick={cancelEdit}
                             className="inline-flex items-center px-3 py-1 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600"
                           >
                             Cancel
