@@ -25,7 +25,7 @@ interface AutomationSettings {
   imageGuidanceScale: number;
 }
 
-const DEFAULT_SETTINGS: PromptSettings = {
+const DEFAULT_SETTINGS: AutomationSettings = {
   // SEO Extraction Prompts
   seoExtractionSystem: `You are an expert SEO specialist for a recipe food blog. Your task is to analyze Pinterest spy data and extract optimized SEO metadata.
 
@@ -135,7 +135,12 @@ export default function AutomationSettingsPage() {
 
   const loadSettings = async () => {
     try {
-      const response = await fetch('/api/admin/automation/settings');
+      const token = localStorage.getItem('admin_token');
+      const response = await fetch('/api/admin/automation/settings', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.settings) {
@@ -155,9 +160,13 @@ export default function AutomationSettingsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const token = localStorage.getItem('admin_token');
       const response = await fetch('/api/admin/automation/settings', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           imagePromptSystemPrompt: settings.imagePromptSystemPrompt,
           recipePromptSystemPrompt: settings.recipePromptSystemPrompt,
@@ -444,7 +453,7 @@ export default function AutomationSettingsPage() {
                   <label className="block text-sm font-semibold text-gray-900 dark:text-white">
                     Image 1: Finished Dish Hero Shot
                   </label>
-                  <HelpCircle className="w-4 h-4 text-gray-400" title="Close-up 45° angle of plated final result" />
+                  <HelpCircle className="w-4 h-4 text-gray-400" />
                 </div>
                 <textarea
                   value={settings.imagePrompt1}
@@ -462,7 +471,7 @@ export default function AutomationSettingsPage() {
                   <label className="block text-sm font-semibold text-gray-900 dark:text-white">
                     Image 2: Raw Ingredients Layout
                   </label>
-                  <HelpCircle className="w-4 h-4 text-gray-400" title="Overhead flat lay of uncooked ingredients" />
+                  <HelpCircle className="w-4 h-4 text-gray-400" />
                 </div>
                 <textarea
                   value={settings.imagePrompt2}
@@ -480,7 +489,7 @@ export default function AutomationSettingsPage() {
                   <label className="block text-sm font-semibold text-gray-900 dark:text-white">
                     Image 3: Cooking Action Shot
                   </label>
-                  <HelpCircle className="w-4 h-4 text-gray-400" title="Side angle showing cooking process in action" />
+                  <HelpCircle className="w-4 h-4 text-gray-400" />
                 </div>
                 <textarea
                   value={settings.imagePrompt3}
@@ -498,7 +507,7 @@ export default function AutomationSettingsPage() {
                   <label className="block text-sm font-semibold text-gray-900 dark:text-white">
                     Image 4: Styled Presentation
                   </label>
-                  <HelpCircle className="w-4 h-4 text-gray-400" title="Elegant table setting with different angle" />
+                  <HelpCircle className="w-4 h-4 text-gray-400" />
                 </div>
                 <textarea
                   value={settings.imagePrompt4}

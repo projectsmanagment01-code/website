@@ -135,6 +135,11 @@ export async function updateAutomationSettings(
     enableIndexing: data.enableIndexing,
     maxRetries: data.maxRetries,
     retryDelayMs: data.retryDelayMs,
+    
+    // AI Prompts (not encrypted)
+    imagePromptSystemPrompt: data.imagePromptSystemPrompt,
+    recipePromptSystemPrompt: data.recipePromptSystemPrompt,
+    seoPromptSystemPrompt: data.seoPromptSystemPrompt,
   };
 
   // Only encrypt and update if new value provided
