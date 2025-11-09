@@ -118,6 +118,7 @@ model Category {
   
   // Relations
   recipes     Recipe[] @relation("CategoryRecipes")
+  pinterestBoards PinterestBoard[] @relation("CategoryPinterestBoards")
   
   // Timestamps
   createdAt   DateTime @default(now())
@@ -144,6 +145,23 @@ model AdminSettings {
   value     String?
   updatedAt DateTime @updatedAt
   updatedBy String?
+}
+
+// Google Tag Manager and Analytics Settings
+model GTMSettings {
+  id              String   @id @default(cuid())
+  gtmId           String?  // GTM-XXXXXXX
+  ga4Id           String?  // G-XXXXXXXXXX
+  enableGTM       Boolean  @default(false)
+  enableGA4       Boolean  @default(false)
+  consentMode     Boolean  @default(true) // Enable Google Consent Mode v2
+  customHeadCode  String?  @db.Text // Additional custom code for <head>
+  customBodyCode  String?  @db.Text // Additional custom code for <body>
+  customFooterCode String? @db.Text // Additional custom code before </body>
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("gtm_settings")
 }
 
 // Store site configuration (hero content, site info, social links)
@@ -313,10 +331,13 @@ model AutomationSettings {
   
   // Pinterest Integration (Optional)
   enablePinterest           Boolean   @default(false)
-  makeWebhookUrl            String?   // Make.com webhook URL
+  pinterestWebhookUrl       String?   // Make.com webhook URL for Pinterest
+  pinterestImageEditPrompt  String?   @db.Text // Custom prompt for editing SpyPin images with Gemini
   
   // Google Indexing (Optional)
-  enableIndexing            Boolean   @default(false)
+  enableIndexing            Boolean   @default(false) // Kept for backward compatibility, use enableGoogleIndexing
+  enableGoogleIndexing      Boolean   @default(false)
+  googleIndexingCredentials String?   @db.Text // Encrypted Google service account JSON
   
   // Automation Behavior
   maxRetries                Int       @default(3)
@@ -532,4 +553,22 @@ model AutomationStepLog {
   @@index([stepNumber])
   @@index([status])
   @@map("automation_step_logs")
+}
+
+// Pinterest Board Mapping - Maps categories to Pinterest boards
+model PinterestBoard {
+  id          String    @id @default(cuid())
+  boardName   String    // Display name of Pinterest board
+  boardId     String    // Pinterest board ID from Pinterest
+  categoryId  String    // Foreign key to Category model
+  category    Category  @relation("CategoryPinterestBoards", fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@unique([categoryId]) // One board per category
+  @@index([categoryId])
+  @@index([isActive])
+  @@map("pinterest_boards")
 }

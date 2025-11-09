@@ -281,28 +281,59 @@ export default function PipelineReportsPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+        <button
+          onClick={() => setStatusFilter('')}
+          className={`bg-white dark:bg-slate-800 border rounded-lg p-4 text-left transition-all hover:shadow-md cursor-pointer ${
+            statusFilter === '' 
+              ? 'border-slate-400 dark:border-slate-500 ring-2 ring-slate-300 dark:ring-slate-600' 
+              : 'border-slate-200 dark:border-slate-700'
+          }`}
+        >
           <div className="text-sm text-slate-600 dark:text-slate-400">Total Executions</div>
           <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{pagination.total}</div>
-        </div>
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+        </button>
+        
+        <button
+          onClick={() => setStatusFilter(statusFilter === 'SUCCESS' ? '' : 'SUCCESS')}
+          className={`bg-green-50 dark:bg-green-900/20 border rounded-lg p-4 text-left transition-all hover:shadow-md cursor-pointer ${
+            statusFilter === 'SUCCESS' 
+              ? 'border-green-400 dark:border-green-600 ring-2 ring-green-300 dark:ring-green-700' 
+              : 'border-green-200 dark:border-green-800'
+          }`}
+        >
           <div className="text-sm text-green-700 dark:text-green-400">Successful</div>
           <div className="text-2xl font-bold text-green-800 dark:text-green-300 mt-1">
             {logs.filter(l => l.status === 'SUCCESS').length}
           </div>
-        </div>
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        </button>
+        
+        <button
+          onClick={() => setStatusFilter(statusFilter === 'FAILED' ? '' : 'FAILED')}
+          className={`bg-red-50 dark:bg-red-900/20 border rounded-lg p-4 text-left transition-all hover:shadow-md cursor-pointer ${
+            statusFilter === 'FAILED' 
+              ? 'border-red-400 dark:border-red-600 ring-2 ring-red-300 dark:ring-red-700' 
+              : 'border-red-200 dark:border-red-800'
+          }`}
+        >
           <div className="text-sm text-red-700 dark:text-red-400">Failed</div>
           <div className="text-2xl font-bold text-red-800 dark:text-red-300 mt-1">
             {logs.filter(l => l.status === 'FAILED').length}
           </div>
-        </div>
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        </button>
+        
+        <button
+          onClick={() => setStatusFilter(statusFilter === 'RUNNING' ? '' : 'RUNNING')}
+          className={`bg-blue-50 dark:bg-blue-900/20 border rounded-lg p-4 text-left transition-all hover:shadow-md cursor-pointer ${
+            statusFilter === 'RUNNING' 
+              ? 'border-blue-400 dark:border-blue-600 ring-2 ring-blue-300 dark:ring-blue-700' 
+              : 'border-blue-200 dark:border-blue-800'
+          }`}
+        >
           <div className="text-sm text-blue-700 dark:text-blue-400">Running</div>
           <div className="text-2xl font-bold text-blue-800 dark:text-blue-300 mt-1">
             {logs.filter(l => l.status === 'RUNNING').length}
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Logs List */}

@@ -256,7 +256,16 @@ export class ImageGenerationService {
       const settings = await getAutomationSettings();
       if (settings?.imagePromptSystemPrompt && settings.imagePromptSystemPrompt.trim()) {
         console.log('📝 Using custom image prompt from settings');
-        return settings.imagePromptSystemPrompt;
+        // Add JSON format instruction to custom prompt
+        return `${settings.imagePromptSystemPrompt}
+
+Output ONLY valid JSON in this exact format:
+{
+  "image_1_feature": "Finished dish prompt with specific angle and composition",
+  "image_2_ingredients": "Raw ingredients prompt with different angle and composition",
+  "image_3_cooking": "Cooking process prompt with different angle and composition",
+  "image_4_final_presentation": "Styled presentation prompt with different angle and composition"
+}`;
       }
     } catch (error) {
       console.warn('⚠️ Could not load custom image prompt, using default');

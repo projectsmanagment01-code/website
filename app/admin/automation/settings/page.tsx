@@ -24,6 +24,15 @@ interface PromptSettings {
   recipeTemperature: number;
   recipeMaxTokens: number;
   imageGuidanceScale: number;
+  
+  // Pinterest Integration
+  enablePinterest: boolean;
+  pinterestWebhookUrl: string;
+  pinterestImageEditPrompt: string;
+  
+  // Google Indexing
+  enableGoogleIndexing: boolean;
+  googleIndexingCredentials: string;
 }
 
 const DEFAULT_SETTINGS: PromptSettings = {
@@ -120,6 +129,27 @@ Generate a complete, valid JSON recipe article following the schema. Ensure all 
   recipeTemperature: 0.8,
   recipeMaxTokens: 8192,
   imageGuidanceScale: 7.5,
+  
+  // Pinterest Integration
+  enablePinterest: false,
+  pinterestWebhookUrl: '',
+  pinterestImageEditPrompt: `Transform the following Pinterest image into a recipe-optimized photo:
+
+EDITING INSTRUCTIONS:
+- Enhance colors and lighting to make food look appetizing
+- Add subtle text overlay with recipe title if specified
+- Optimize for Pinterest's 2:3 aspect ratio (1000x1500px)
+- Maintain food authenticity - no unrealistic enhancements
+- Add subtle branding watermark if needed
+
+Original Image: {spyPinImage}
+Recipe Title: {recipeTitle}
+
+Generate an edited, Pinterest-ready image that maximizes engagement while staying true to the original.`,
+  
+  // Google Indexing
+  enableGoogleIndexing: false,
+  googleIndexingCredentials: '',
 };
 
 export default function AutomationSettingsPage() {
@@ -127,7 +157,7 @@ export default function AutomationSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveMessage, setSaveMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'seo' | 'images' | 'recipe' | 'models'>('seo');
+  const [activeTab, setActiveTab] = useState<'seo' | 'images' | 'recipe' | 'models' | 'pinterest' | 'indexing'>('seo');
 
   // Load settings from database on mount
   useEffect(() => {
@@ -160,14 +190,32 @@ export default function AutomationSettingsPage() {
             seoExtractionUser: dbSettings.seoPromptSystemPrompt // Using same for both for now
           }),
           ...(dbSettings.imagePromptSystemPrompt && {
-            // Parse image prompt to extract individual prompts if needed
-            imagePrompt1: dbSettings.imagePromptSystemPrompt.split('IMAGE 1 -')[1]?.split('2. IMAGE 2 -')[0]?.trim() || settings.imagePrompt1,
-            imagePrompt2: dbSettings.imagePromptSystemPrompt.split('IMAGE 2 -')[1]?.split('3. IMAGE 3 -')[0]?.trim() || settings.imagePrompt2,
-            imagePrompt3: dbSettings.imagePromptSystemPrompt.split('IMAGE 3 -')[1]?.split('4. IMAGE 4 -')[0]?.trim() || settings.imagePrompt3,
-            imagePrompt4: dbSettings.imagePromptSystemPrompt.split('IMAGE 4 -')[1]?.trim() || settings.imagePrompt4,
+            // Parse image prompt to extract individual prompts
+            // Split by the section headers and clean up
+            imagePrompt1: dbSettings.imagePromptSystemPrompt.split('IMAGE 1 -')[1]?.split('2. IMAGE 2 -')[0]?.replace(/^\s*FINISHED DISH HERO SHOT:\s*/, '').trim() || settings.imagePrompt1,
+            imagePrompt2: dbSettings.imagePromptSystemPrompt.split('IMAGE 2 -')[1]?.split('3. IMAGE 3 -')[0]?.replace(/^\s*RAW INGREDIENTS LAYOUT:\s*/, '').trim() || settings.imagePrompt2,
+            imagePrompt3: dbSettings.imagePromptSystemPrompt.split('IMAGE 3 -')[1]?.split('4. IMAGE 4 -')[0]?.replace(/^\s*COOKING ACTION SHOT:\s*/, '').trim() || settings.imagePrompt3,
+            imagePrompt4: dbSettings.imagePromptSystemPrompt.split('IMAGE 4 -')[1]?.replace(/^\s*STYLED PRESENTATION:\s*/, '').split(/Output ONLY valid JSON/)[0]?.trim() || settings.imagePrompt4,
           }),
           ...(dbSettings.recipePromptSystemPrompt && {
             recipeSystemPrompt: dbSettings.recipePromptSystemPrompt,
+          }),
+          // Pinterest settings
+          ...(dbSettings.enablePinterest !== undefined && {
+            enablePinterest: dbSettings.enablePinterest,
+          }),
+          ...(dbSettings.pinterestWebhookUrl && {
+            pinterestWebhookUrl: dbSettings.pinterestWebhookUrl,
+          }),
+          ...(dbSettings.pinterestImageEditPrompt && {
+            pinterestImageEditPrompt: dbSettings.pinterestImageEditPrompt,
+          }),
+          // Google Indexing settings
+          ...(dbSettings.enableGoogleIndexing !== undefined && {
+            enableGoogleIndexing: dbSettings.enableGoogleIndexing,
+          }),
+          ...(dbSettings.googleIndexingCredentials && {
+            googleIndexingCredentials: dbSettings.googleIndexingCredentials,
           }),
         };
         
@@ -185,7 +233,7 @@ export default function AutomationSettingsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Combine image prompts into single system prompt
+      // Combine image prompts into single system prompt (without hardcoded JSON format)
       const imagePromptSystemPrompt = `You are an AI agent responsible for generating FOUR COMPLETELY DIFFERENT AND UNIQUE image prompts for a single recipe.
 
 1. IMAGE 1 - FINISHED DISH HERO SHOT:
@@ -198,21 +246,20 @@ ${settings.imagePrompt2}
 ${settings.imagePrompt3}
 
 4. IMAGE 4 - STYLED PRESENTATION:
-${settings.imagePrompt4}
-
-Output ONLY valid JSON in this exact format:
-{
-  "image_1_feature": "Finished dish prompt with specific angle and composition",
-  "image_2_ingredients": "Raw ingredients prompt with different angle and composition",
-  "image_3_cooking": "Cooking process prompt with different angle and composition",
-  "image_4_final_presentation": "Styled presentation prompt with different angle and composition"
-}`;
+${settings.imagePrompt4}`;
 
       // Map UI fields to database fields
       const dbData = {
         seoPromptSystemPrompt: settings.seoExtractionSystem,
         imagePromptSystemPrompt: imagePromptSystemPrompt,
         recipePromptSystemPrompt: settings.recipeSystemPrompt,
+        // Pinterest settings
+        enablePinterest: settings.enablePinterest,
+        pinterestWebhookUrl: settings.pinterestWebhookUrl,
+        pinterestImageEditPrompt: settings.pinterestImageEditPrompt,
+        // Google Indexing settings
+        enableGoogleIndexing: settings.enableGoogleIndexing,
+        googleIndexingCredentials: settings.googleIndexingCredentials,
       };
 
       const response = await fetch('/api/admin/automation/settings', {
@@ -259,6 +306,80 @@ Output ONLY valid JSON in this exact format:
         setIsSaving(false);
       }
     }
+  };
+
+  const handleResetTab = (tab: 'seo' | 'images' | 'recipe' | 'models' | 'pinterest' | 'indexing') => {
+    const tabNames = {
+      seo: 'SEO Extraction',
+      images: 'Image Generation',
+      recipe: 'Recipe Generation',
+      models: 'Model Settings',
+      pinterest: 'Pinterest Integration',
+      indexing: 'Google Indexing'
+    };
+    
+    if (!confirm(`Reset ${tabNames[tab]} prompts to defaults? This cannot be undone.`)) {
+      return;
+    }
+
+    switch (tab) {
+      case 'seo':
+        setSettings(prev => ({
+          ...prev,
+          seoExtractionSystem: DEFAULT_SETTINGS.seoExtractionSystem,
+          seoExtractionUser: DEFAULT_SETTINGS.seoExtractionUser,
+        }));
+        setSaveMessage(`✅ ${tabNames[tab]} reset to defaults`);
+        break;
+      case 'images':
+        setSettings(prev => ({
+          ...prev,
+          imagePrompt1: DEFAULT_SETTINGS.imagePrompt1,
+          imagePrompt2: DEFAULT_SETTINGS.imagePrompt2,
+          imagePrompt3: DEFAULT_SETTINGS.imagePrompt3,
+          imagePrompt4: DEFAULT_SETTINGS.imagePrompt4,
+        }));
+        setSaveMessage(`✅ ${tabNames[tab]} reset to defaults`);
+        break;
+      case 'recipe':
+        setSettings(prev => ({
+          ...prev,
+          recipeSystemPrompt: DEFAULT_SETTINGS.recipeSystemPrompt,
+          recipeDefaultPrompt: DEFAULT_SETTINGS.recipeDefaultPrompt,
+        }));
+        setSaveMessage(`✅ ${tabNames[tab]} reset to defaults`);
+        break;
+      case 'models':
+        setSettings(prev => ({
+          ...prev,
+          seoTemperature: DEFAULT_SETTINGS.seoTemperature,
+          seoMaxTokens: DEFAULT_SETTINGS.seoMaxTokens,
+          recipeTemperature: DEFAULT_SETTINGS.recipeTemperature,
+          recipeMaxTokens: DEFAULT_SETTINGS.recipeMaxTokens,
+          imageGuidanceScale: DEFAULT_SETTINGS.imageGuidanceScale,
+        }));
+        setSaveMessage(`✅ ${tabNames[tab]} reset to defaults`);
+        break;
+      case 'pinterest':
+        setSettings(prev => ({
+          ...prev,
+          enablePinterest: DEFAULT_SETTINGS.enablePinterest,
+          pinterestWebhookUrl: DEFAULT_SETTINGS.pinterestWebhookUrl,
+          pinterestImageEditPrompt: DEFAULT_SETTINGS.pinterestImageEditPrompt,
+        }));
+        setSaveMessage(`✅ ${tabNames[tab]} reset to defaults`);
+        break;
+      case 'indexing':
+        setSettings(prev => ({
+          ...prev,
+          enableGoogleIndexing: DEFAULT_SETTINGS.enableGoogleIndexing,
+          googleIndexingCredentials: DEFAULT_SETTINGS.googleIndexingCredentials,
+        }));
+        setSaveMessage(`✅ ${tabNames[tab]} reset to defaults`);
+        break;
+    }
+    
+    setTimeout(() => setSaveMessage(''), 3000);
   };
 
   const updateSetting = (key: keyof PromptSettings, value: string | number) => {
@@ -308,13 +429,6 @@ Output ONLY valid JSON in this exact format:
                 View Documentation
               </a>
               <button
-                onClick={handleReset}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-                Reset to Defaults
-              </button>
-              <button
                 onClick={handleSave}
                 disabled={isSaving}
                 className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
@@ -341,6 +455,8 @@ Output ONLY valid JSON in this exact format:
                 { id: 'images', label: 'Image Generation', icon: '🖼️' },
                 { id: 'recipe', label: 'Recipe Generation', icon: '📝' },
                 { id: 'models', label: 'Model Settings', icon: '⚙️' },
+                { id: 'pinterest', label: 'Pinterest', icon: '📌' },
+                { id: 'indexing', label: 'Google Indexing', icon: '🔍' },
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -364,6 +480,18 @@ Output ONLY valid JSON in this exact format:
           {/* SEO Extraction Tab */}
           {activeTab === 'seo' && (
             <div className="space-y-6">
+              {/* Tab Header with Reset Button */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">SEO Extraction Prompts</h2>
+                <button
+                  onClick={() => handleResetTab('seo')}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset This Tab
+                </button>
+              </div>
+              
               {/* Help Section */}
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <div className="flex items-start gap-3">
@@ -423,6 +551,18 @@ Output ONLY valid JSON in this exact format:
           {/* Image Generation Tab */}
           {activeTab === 'images' && (
             <div className="space-y-6">
+              {/* Tab Header with Reset Button */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Image Generation Prompts</h2>
+                <button
+                  onClick={() => handleResetTab('images')}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset This Tab
+                </button>
+              </div>
+              
               {/* Help Section */}
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                 <div className="flex items-start gap-3">
@@ -542,6 +682,18 @@ Output ONLY valid JSON in this exact format:
           {/* Recipe Generation Tab */}
           {activeTab === 'recipe' && (
             <div className="space-y-6">
+              {/* Tab Header with Reset Button */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Recipe Generation Prompts</h2>
+                <button
+                  onClick={() => handleResetTab('recipe')}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset This Tab
+                </button>
+              </div>
+              
               {/* Help Section */}
               <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
                 <div className="flex items-start gap-3">
@@ -598,6 +750,18 @@ Output ONLY valid JSON in this exact format:
           {/* Model Settings Tab */}
           {activeTab === 'models' && (
             <div className="space-y-8">
+              {/* Tab Header with Reset Button */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Model Settings</h2>
+                <button
+                  onClick={() => handleResetTab('models')}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset This Tab
+                </button>
+              </div>
+              
               {/* Help Section */}
               <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
                 <div className="flex items-start gap-3">
@@ -721,6 +885,174 @@ Output ONLY valid JSON in this exact format:
                     How closely the AI follows the prompt. Higher = more adherence, Lower = more creativity
                   </p>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Pinterest Integration Tab */}
+          {activeTab === 'pinterest' && (
+            <div className="space-y-6">
+              {/* Tab Header with Reset Button */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Pinterest Integration</h2>
+                <button
+                  onClick={() => handleResetTab('pinterest')}
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset Tab
+                </button>
+              </div>
+
+              {/* Enable Pinterest Toggle */}
+              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Enable Pinterest Automation</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Automatically send recipe data to Make.com webhook for Pinterest posting
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.enablePinterest}
+                    onChange={(e) => updateSetting('enablePinterest', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+
+              {/* Webhook URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Make.com Webhook URL <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://hook.us1.make.com/xxxxxxxxxxxxx"
+                  value={settings.pinterestWebhookUrl}
+                  onChange={(e) => updateSetting('pinterestWebhookUrl', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 font-mono text-sm"
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  The webhook URL from your Make.com scenario that will receive recipe data
+                </p>
+              </div>
+
+              {/* Image Edit Prompt */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Image Editing Prompt
+                </label>
+                <textarea
+                  value={settings.pinterestImageEditPrompt}
+                  onChange={(e) => updateSetting('pinterestImageEditPrompt', e.target.value)}
+                  rows={12}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 font-mono text-sm"
+                  placeholder="Enter prompt for editing SpyPin images with Gemini AI..."
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Custom prompt to instruct Gemini how to edit the SpyPin image. Variables: {'{spyPinImage}'}, {'{recipeTitle}'}
+                </p>
+              </div>
+
+              {/* Info Box */}
+              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                <h4 className="font-semibold text-purple-900 dark:text-purple-300 mb-2">
+                  📌 How Pinterest Integration Works:
+                </h4>
+                <ol className="text-sm text-purple-800 dark:text-purple-400 space-y-1 list-decimal list-inside">
+                  <li>Recipe is generated and posted to your website</li>
+                  <li>Google Indexing request is sent (if enabled)</li>
+                  <li>SpyPin image is edited using Gemini AI with your custom prompt</li>
+                  <li>Edited image is uploaded to your server</li>
+                  <li>Webhook sends data to Make.com: title, description, image URL, post link, board ID</li>
+                  <li>Make.com scenario posts to Pinterest automatically</li>
+                </ol>
+                <p className="mt-3 text-sm text-purple-800 dark:text-purple-400">
+                  <strong>Note:</strong> Don't forget to map your Pinterest boards to categories in the{' '}
+                  <a href="/admin/automation/pinterest-boards" className="underline hover:text-purple-600">
+                    Pinterest Boards page
+                  </a>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Google Indexing Tab */}
+          {activeTab === 'indexing' && (
+            <div className="space-y-6">
+              {/* Tab Header with Reset Button */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Google Indexing</h2>
+                <button
+                  onClick={() => handleResetTab('indexing')}
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset Tab
+                </button>
+              </div>
+
+              {/* Enable Google Indexing Toggle */}
+              <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Enable Google Indexing</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Automatically submit new recipe URLs to Google for faster indexing
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.enableGoogleIndexing}
+                    onChange={(e) => updateSetting('enableGoogleIndexing', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                </label>
+              </div>
+
+              {/* Service Account JSON */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Google Service Account JSON <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={settings.googleIndexingCredentials}
+                  onChange={(e) => updateSetting('googleIndexingCredentials', e.target.value)}
+                  rows={10}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 font-mono text-xs"
+                  placeholder='Paste your Google service account JSON here...'
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Service account credentials with Indexing API permissions (stored encrypted)
+                </p>
+              </div>
+
+              {/* Setup Instructions */}
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <h4 className="font-semibold text-yellow-900 dark:text-yellow-300 mb-2">
+                  🔍 Google Indexing API Setup Guide:
+                </h4>
+                <ol className="text-sm text-yellow-800 dark:text-yellow-400 space-y-2 list-decimal list-inside">
+                  <li>
+                    Go to{' '}
+                    <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-600">
+                      Google Cloud Console
+                    </a>
+                  </li>
+                  <li>Create a new project or select existing one</li>
+                  <li>Enable the "Indexing API" for your project</li>
+                  <li>Create a service account with "Indexing API" permissions</li>
+                  <li>Generate and download the JSON key file</li>
+                  <li>Add the service account email to your Search Console property as an owner</li>
+                  <li>Copy and paste the entire JSON content above</li>
+                </ol>
+                <p className="mt-3 text-sm text-yellow-800 dark:text-yellow-400">
+                  <strong>⚡ Benefit:</strong> New recipes will be indexed by Google within minutes instead of days or weeks
+                </p>
               </div>
             </div>
           )}

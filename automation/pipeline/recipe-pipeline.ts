@@ -15,6 +15,10 @@ import { PrismaClient } from '@prisma/client';
 import { CategoryMatcher } from '../recipe-generation/category-matcher';
 import { RecipeGenerationService } from '../recipe-generation/service';
 import { RecipeDatabaseService } from '../recipe-generation/database';
+import { getAutomationConfig } from '@/lib/automation-settings';
+import { requestGoogleIndexing } from '../google-indexing/service';
+import { editImageWithGemini } from '../pinterest/image-editor';
+import { buildPinterestPayload, sendPinterestWebhook } from '../pinterest/webhook';
 
 const prisma = new PrismaClient();
 
@@ -35,7 +39,7 @@ export interface PipelineResult {
 }
 
 export class RecipePipelineOrchestrator {
-  private static readonly TOTAL_STEPS = 5;
+  private static readonly TOTAL_STEPS = 7; // Updated to 7 steps (added Google Indexing + Pinterest)
 
   /**
    * Execute the complete recipe generation pipeline
@@ -52,7 +56,7 @@ export class RecipePipelineOrchestrator {
 
       // STEP 1: Fetch and validate spy data
       await context.onProgress?.(1, this.TOTAL_STEPS, 'Fetching spy data...');
-      log('📊 STEP 1/5: Fetching spy data...');
+      log('📊 STEP 1/7: Fetching spy data...');
 
       const spyData = await prisma.pinterestSpyData.findUnique({
         where: { id: context.spyDataId }
@@ -71,7 +75,7 @@ export class RecipePipelineOrchestrator {
 
       // STEP 2: Generate SEO if not exists
       await context.onProgress?.(2, this.TOTAL_STEPS, 'Generating SEO metadata...');
-      log('🔍 STEP 2/5: Generating SEO metadata...');
+      log('🔍 STEP 2/7: Generating SEO metadata...');
 
       if (!spyData.seoKeyword || !spyData.seoTitle || !spyData.seoDescription) {
         log('⚠️ SEO data missing, generating...');
@@ -94,7 +98,7 @@ export class RecipePipelineOrchestrator {
 
       // STEP 3: Generate images if not exists
       await context.onProgress?.(3, this.TOTAL_STEPS, 'Generating recipe images...');
-      log('🖼️ STEP 3/5: Generating recipe images...');
+      log('🖼️ STEP 3/7: Generating recipe images...');
 
       if (!spyData.generatedImage1Url || !spyData.generatedImage2Url || 
           !spyData.generatedImage3Url || !spyData.generatedImage4Url) {
@@ -134,7 +138,7 @@ export class RecipePipelineOrchestrator {
 
       // STEP 4: Match category and author
       await context.onProgress?.(4, this.TOTAL_STEPS, 'Matching category and author...');
-      log('🎯 STEP 4/5: Finding best category match...');
+      log('🎯 STEP 4/7: Finding best category match...');
 
       const categoryMatch = await CategoryMatcher.findBestCategory({
         title: spyData.seoTitle!,
@@ -184,7 +188,7 @@ export class RecipePipelineOrchestrator {
 
       // STEP 5: Generate and publish recipe
       await context.onProgress?.(5, this.TOTAL_STEPS, 'Generating recipe content...');
-      log('🍳 STEP 5/5: Generating complete recipe...');
+      log('🍳 STEP 5/7: Generating complete recipe...');
 
       const recipeId = RecipeGenerationService.generateRecipeId();
 
@@ -239,7 +243,117 @@ export class RecipePipelineOrchestrator {
       });
 
       const recipeUrl = `/recipes/${generationResult.recipeData.slug}`;
-      log(`🎉 Pipeline completed successfully! Recipe URL: ${recipeUrl}`);
+      log(`✅ Recipe published successfully! URL: ${recipeUrl}`);
+
+      // STEP 6: Google Indexing (if enabled)
+      await context.onProgress?.(6, this.TOTAL_STEPS, 'Submitting to Google Indexing...');
+      log('🔍 STEP 6/7: Google Indexing...');
+
+      try {
+        const automationConfig = await getAutomationConfig();
+        
+        if (automationConfig.indexing.enabled && automationConfig.indexing.credentials) {
+          const fullUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://yourdomain.com'}${recipeUrl}`;
+          log(`📡 Submitting URL to Google Indexing: ${fullUrl}`);
+          
+          const indexingResult = await requestGoogleIndexing(
+            fullUrl,
+            JSON.stringify(automationConfig.indexing.credentials)
+          );
+          
+          if (indexingResult.success) {
+            log(`✅ Google Indexing successful: ${indexingResult.message}`);
+          } else {
+            log(`⚠️ Google Indexing failed: ${indexingResult.error}`);
+          }
+        } else {
+          log(`⏭️ Google Indexing disabled or not configured, skipping...`);
+        }
+      } catch (error) {
+        log(`⚠️ Google Indexing error (non-fatal): ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+
+      // STEP 7: Pinterest Integration (if enabled)
+      await context.onProgress?.(7, this.TOTAL_STEPS, 'Processing Pinterest integration...');
+      log('📌 STEP 7/7: Pinterest Integration...');
+
+      try {
+        const automationConfig = await getAutomationConfig();
+        
+        if (automationConfig.pinterest.enabled && automationConfig.pinterest.webhookUrl) {
+          log(`🖼️ Editing image for Pinterest...`);
+          
+          // Edit image using Gemini
+          const imageEditResult = await editImageWithGemini(
+            spyData.spyImageUrl, // Original SpyPin image
+            generationResult.recipeData.title,
+            automationConfig.pinterest.imageEditPrompt || 'Enhance this image for Pinterest: {recipeTitle}',
+            process.env.GEMINI_API_KEY!
+          );
+          
+          if (imageEditResult.success && imageEditResult.editedImageUrl) {
+            log(`✅ Image edited: ${imageEditResult.editedImageUrl}`);
+            
+            // Get Pinterest board ID from category mapping
+            let boardId = 'default-board-id';
+            if (categoryId) {
+              const boardMapping = await prisma.pinterestBoard.findFirst({
+                where: {
+                  categoryId: categoryId,
+                  isActive: true
+                }
+              });
+              
+              if (boardMapping) {
+                boardId = boardMapping.boardId;
+                log(`✅ Found Pinterest board mapping: ${boardMapping.boardName} (${boardId})`);
+              } else {
+                log(`⚠️ No Pinterest board mapping found for category, using default`);
+              }
+            }
+            
+            // Build webhook payload
+            const fullRecipeUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://yourdomain.com'}${recipeUrl}`;
+            const fullImageUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://yourdomain.com'}${imageEditResult.editedImageUrl}`;
+            
+            const payload = buildPinterestPayload(
+              saveResult.recipeId!,
+              generationResult.recipeData.title,
+              generationResult.recipeData.description,
+              fullImageUrl,
+              process.env.NEXT_PUBLIC_SITE_URL || 'https://yourdomain.com',
+              boardId,
+              {
+                category: categoryMatch?.categoryName,
+                tags: [spyData.seoKeyword || '', categoryMatch?.categoryName || ''].filter(Boolean),
+                altText: generationResult.recipeData.title
+              }
+            );
+            
+            log(`📡 Sending webhook to Make.com...`);
+            
+            // Send webhook to Make.com
+            const webhookResult = await sendPinterestWebhook(
+              automationConfig.pinterest.webhookUrl,
+              payload
+            );
+            
+            if (webhookResult.success) {
+              log(`✅ Pinterest webhook sent successfully`);
+            } else {
+              log(`⚠️ Pinterest webhook failed: ${webhookResult.error}`);
+            }
+          } else {
+            log(`⚠️ Image editing failed: ${imageEditResult.error}`);
+          }
+        } else {
+          log(`⏭️ Pinterest integration disabled or not configured, skipping...`);
+        }
+      } catch (error) {
+        log(`⚠️ Pinterest integration error (non-fatal): ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+
+      log(`🎉 Pipeline completed successfully!`);
 
       return {
         success: true,

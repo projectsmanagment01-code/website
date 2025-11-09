@@ -35,6 +35,8 @@ import PipelineReportsPage from '@/app/admin/automation/reports/page';
 import SEOResultsPage from '@/app/admin/automation/seo-results/page';
 import AutomationSettingsPage from '@/app/admin/automation/settings/page';
 import AutomationHelpPage from '@/app/admin/automation/help/page';
+import PinterestBoardsPage from '@/app/admin/automation/pinterest-boards/page';
+import GTMSettingsPage from '@/app/admin/gtm-settings/page';
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -167,6 +169,12 @@ function AdminDashboardContent() {
             <AutomationHelpPage />
           </div>
         );
+      case "pinterest-boards":
+        return (
+          <div className="space-y-6">
+            <PinterestBoardsPage />
+          </div>
+        );
       case "reports":
         return (
           <div className="space-y-6">
@@ -195,6 +203,8 @@ function AdminDashboardContent() {
         return <ApiTokenManager />;
       case "settings":
         return <Settings />;
+      case "gtm-settings":
+        return <GTMSettingsPage />;
       case "profile":
         return <ProfileSettings />;
       default:

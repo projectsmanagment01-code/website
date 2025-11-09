@@ -23,10 +23,12 @@ export interface AutomationSettingsData {
   
   // Pinterest
   enablePinterest?: boolean;
-  makeWebhookUrl?: string;
+  pinterestWebhookUrl?: string;
+  pinterestImageEditPrompt?: string;
   
-  // Indexing
-  enableIndexing?: boolean;
+  // Google Indexing
+  enableGoogleIndexing?: boolean;
+  googleIndexingCredentials?: string; // Will be encrypted
   
   // Behavior
   maxRetries?: number;
@@ -51,6 +53,7 @@ export interface AutomationSettingsResponse extends AutomationSettingsData {
   googleCredentialsJsonMasked?: string;
   geminiApiKeyMasked?: string;
   websiteApiTokenMasked?: string;
+  googleIndexingCredentialsMasked?: string;
 }
 
 /**
@@ -83,8 +86,12 @@ export async function getAutomationSettings(): Promise<AutomationSettingsRespons
       ? decrypt(settings.websiteApiToken) 
       : undefined,
     enablePinterest: settings.enablePinterest,
-    makeWebhookUrl: settings.makeWebhookUrl || undefined,
-    enableIndexing: settings.enableIndexing,
+    pinterestWebhookUrl: settings.pinterestWebhookUrl || undefined,
+    pinterestImageEditPrompt: settings.pinterestImageEditPrompt || undefined,
+    enableGoogleIndexing: settings.enableGoogleIndexing,
+    googleIndexingCredentials: settings.googleIndexingCredentials
+      ? decrypt(settings.googleIndexingCredentials)
+      : undefined,
     maxRetries: settings.maxRetries,
     retryDelayMs: settings.retryDelayMs,
     isConfigured: settings.isConfigured,
@@ -109,6 +116,9 @@ export async function getAutomationSettings(): Promise<AutomationSettingsRespons
     websiteApiTokenMasked: settings.websiteApiToken 
       ? '••••••••' + settings.websiteApiToken.slice(-8) 
       : undefined,
+    googleIndexingCredentialsMasked: settings.googleIndexingCredentials
+      ? '••••••••' + settings.googleIndexingCredentials.slice(-8)
+      : undefined,
   };
 
   return decryptedSettings;
@@ -131,8 +141,9 @@ export async function updateAutomationSettings(
     geminiProModel: data.geminiProModel,
     websiteApiUrl: data.websiteApiUrl,
     enablePinterest: data.enablePinterest,
-    makeWebhookUrl: data.makeWebhookUrl,
-    enableIndexing: data.enableIndexing,
+    pinterestWebhookUrl: data.pinterestWebhookUrl,
+    pinterestImageEditPrompt: data.pinterestImageEditPrompt,
+    enableGoogleIndexing: data.enableGoogleIndexing,
     maxRetries: data.maxRetries,
     retryDelayMs: data.retryDelayMs,
   };
@@ -153,6 +164,12 @@ export async function updateAutomationSettings(
   if (data.websiteApiToken !== undefined) {
     encryptedData.websiteApiToken = data.websiteApiToken 
       ? encrypt(data.websiteApiToken) 
+      : null;
+  }
+
+  if (data.googleIndexingCredentials !== undefined) {
+    encryptedData.googleIndexingCredentials = data.googleIndexingCredentials 
+      ? encrypt(data.googleIndexingCredentials) 
       : null;
   }
 
@@ -302,10 +319,14 @@ export async function getAutomationConfig() {
     },
     pinterest: {
       enabled: settings.enablePinterest,
-      webhookUrl: settings.makeWebhookUrl,
+      webhookUrl: settings.pinterestWebhookUrl,
+      imageEditPrompt: settings.pinterestImageEditPrompt,
     },
     indexing: {
-      enabled: settings.enableIndexing,
+      enabled: settings.enableGoogleIndexing,
+      credentials: settings.googleIndexingCredentials 
+        ? JSON.parse(settings.googleIndexingCredentials)
+        : null,
     },
     behavior: {
       maxRetries: settings.maxRetries,
