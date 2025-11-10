@@ -19,6 +19,7 @@ import { getAutomationConfig } from '@/lib/automation-settings';
 import { requestGoogleIndexing } from '../google-indexing/service';
 import { editImageWithGemini } from '../pinterest/image-editor';
 import { buildPinterestPayload, sendPinterestWebhook } from '../pinterest/webhook';
+import { CheckpointManager } from './checkpoint-manager';
 
 const prisma = new PrismaClient();
 
@@ -73,6 +74,16 @@ export class RecipePipelineOrchestrator {
 
       log(`✅ Spy data loaded: ${spyData.spyTitle}`);
 
+      // Check for existing checkpoint to resume from
+      const checkpoint = await CheckpointManager.getLastCheckpoint(context.spyDataId);
+      if (checkpoint.lastStep) {
+        log(`📍 CHECKPOINT FOUND: Last successful step was ${checkpoint.lastStep}`);
+        log(`   Can resume: ${checkpoint.canResume}`);
+        log(`   Has SEO: ${checkpoint.hasSEO}`);
+        log(`   Has Images: ${checkpoint.hasImages}`);
+        log(`   Has Recipe: ${checkpoint.hasRecipe}`);
+      }
+
       // STEP 2: Generate SEO if not exists
       await context.onProgress?.(2, this.TOTAL_STEPS, 'Generating SEO metadata...');
       log('🔍 STEP 2/7: Generating SEO metadata...');
@@ -92,6 +103,11 @@ export class RecipePipelineOrchestrator {
         
         Object.assign(spyData, updatedSpyData);
         log(`✅ SEO generated: ${spyData.seoTitle}`);
+        
+        // CHECKPOINT: SEO Complete
+        await CheckpointManager.saveCheckpoint(context.spyDataId, 'SEO_COMPLETE', {
+          status: 'SEO_COMPLETED'
+        });
       } else {
         log(`✅ SEO data already exists`);
       }
@@ -132,6 +148,12 @@ export class RecipePipelineOrchestrator {
         log(`   Image 2: ${spyData.generatedImage2Url}`);
         log(`   Image 3: ${spyData.generatedImage3Url}`);
         log(`   Image 4: ${spyData.generatedImage4Url}`);
+        
+        // CHECKPOINT: Images Complete - THIS SAVES MONEY ON RETRIES!
+        await CheckpointManager.saveCheckpoint(context.spyDataId, 'IMAGES_COMPLETE', {
+          status: 'READY_FOR_GENERATION'
+        });
+        log(`💰 CHECKPOINT SAVED: Images will not be regenerated if recipe fails`);
       } else {
         log(`✅ Images already exist`);
       }
@@ -231,6 +253,9 @@ export class RecipePipelineOrchestrator {
       }
 
       log(`✅ Recipe saved with ID: ${saveResult.recipeId}`);
+
+      // CHECKPOINT: Recipe Complete
+      await CheckpointManager.saveCheckpoint(context.spyDataId, 'RECIPE_COMPLETE');
 
       // Update spy data to mark as completed
       await prisma.pinterestSpyData.update({
@@ -366,19 +391,27 @@ export class RecipePipelineOrchestrator {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       log(`❌ Pipeline failed: ${errorMessage}`);
 
-      // Update spy data status to failed
-      await prisma.pinterestSpyData.update({
-        where: { id: context.spyDataId },
-        data: {
-          status: 'FAILED',
-          generationError: errorMessage,
-          generationAttempts: { increment: 1 }
-        }
-      }).catch(e => log(`Failed to update spy data status: ${e}`));
+      // Determine which step failed and mark it
+      let failedStep = 'UNKNOWN';
+      if (errorMessage.includes('SEO') || errorMessage.includes('seo')) {
+        failedStep = 'SEO_GENERATION';
+      } else if (errorMessage.includes('image') || errorMessage.includes('Image')) {
+        failedStep = 'IMAGE_GENERATION';
+      } else if (errorMessage.includes('recipe') || errorMessage.includes('Recipe')) {
+        failedStep = 'RECIPE_GENERATION';
+      } else if (errorMessage.includes('Google') || errorMessage.includes('index')) {
+        failedStep = 'GOOGLE_INDEXING';
+      } else if (errorMessage.includes('Pinterest')) {
+        failedStep = 'PINTEREST_INTEGRATION';
+      }
+
+      // Mark as failed with checkpoint info
+      await CheckpointManager.markFailed(context.spyDataId, failedStep, errorMessage);
 
       return {
         success: false,
         error: errorMessage,
+        stage: failedStep,
         logs
       };
     }

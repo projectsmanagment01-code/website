@@ -427,6 +427,10 @@ model PinterestSpyData {
   generatedRecipeId     String?   // Link to created Recipe
   generationError       String?   @db.Text
   generationAttempts    Int       @default(0)
+  lastSuccessfulStep    String?   // SEO_COMPLETE, IMAGES_COMPLETE, RECIPE_COMPLETE, GOOGLE_INDEXED, PINTEREST_SENT
+  failedAt              DateTime? // When the failure occurred
+  failedStep            String?   // Which step failed
+  canRetry              Boolean   @default(true) // Whether entry can be retried
   
   // Batch/Import Tracking
   batchId               String?   // For bulk imports
