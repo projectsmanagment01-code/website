@@ -319,12 +319,12 @@ export default function CategoryManager() {
       </div>
 
       {/* Category IDs List - At the top */}
-      <div className="bg-white rounded-xl border border-gray-200">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Category IDs</h3>
-              <p className="text-sm text-gray-500">List of all category identifiers ({categories.length} total)</p>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Category IDs</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">List of all category identifiers ({categories.length} total)</p>
             </div>
             <div className="flex items-center gap-2">
               {showIdList && categories.length > 0 && (
@@ -376,7 +376,7 @@ export default function CategoryManager() {
                     {categories.map((category) => (
                       <div
                         key={category.id}
-                        className="bg-white rounded-lg px-4 py-3 text-sm font-mono text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer group shadow-sm"
+                        className="bg-white dark:bg-slate-700 rounded-lg px-4 py-3 text-sm font-mono text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors cursor-pointer group shadow-sm"
                         onClick={() => {
                           navigator.clipboard.writeText(category.id);
                           alert(`Copied: ${category.id}`);
@@ -401,10 +401,10 @@ export default function CategoryManager() {
       </div>
 
       {/* Toolbar */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-4 items-center justify-between">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 mb-6 flex flex-wrap gap-4 items-center justify-between">
         <div className="flex gap-2 flex-1">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Search categories..."
@@ -451,10 +451,10 @@ export default function CategoryManager() {
         <>
           {/* Categories Grid */}
           {filteredCategories.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow-sm">
-              <ImageIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No categories found</h3>
-              <p className="text-gray-600 mb-4">
+            <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+              <ImageIcon className="w-16 h-16 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+              <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">No categories found</h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-4">
                 {searchTerm ? 'Try a different search term' : 'Create your first category to get started'}
               </p>
               {!searchTerm && (
@@ -472,12 +472,12 @@ export default function CategoryManager() {
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className={`bg-white rounded-lg shadow-sm border-2 transition-all hover:shadow-md ${
-                    !category.isActive ? 'opacity-60 border-gray-200' : 'border-transparent'
+                  className={`bg-white dark:bg-slate-800 rounded-lg shadow-sm border-2 transition-all hover:shadow-md ${
+                    !category.isActive ? 'opacity-60 border-slate-200 dark:border-slate-700' : 'border-transparent'
                   }`}
                 >
                   {/* Image */}
-                  <div className="relative h-48 bg-gray-100 rounded-t-lg overflow-hidden">
+                  <div className="relative h-48 bg-slate-100 dark:bg-slate-700 rounded-t-lg overflow-hidden">
                     {category.image ? (
                       <img
                         src={category.image}
@@ -545,7 +545,7 @@ export default function CategoryManager() {
           )}
 
           {/* Stats */}
-          <div className="mt-6 bg-white rounded-lg shadow-sm p-4">
+          <div className="mt-6 bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-blue-600">{categories.length}</div>
@@ -577,7 +577,7 @@ export default function CategoryManager() {
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-slate-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <h2 className="text-2xl font-bold mb-6">
                 {editingCategory ? 'Edit Category' : 'Create Category'}
@@ -742,9 +742,9 @@ export default function CategoryManager() {
       {/* Delete Confirmation */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-bold mb-4">Delete Category?</h2>
-            <p className="text-gray-600 mb-6">
+          <div className="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100">Delete Category?</h2>
+            <p className="text-gray-600 dark:text-slate-300 mb-6">
               Are you sure you want to delete <strong>{deleteConfirm.name}</strong>? This action cannot be undone.
             </p>
             <div className="flex gap-3">

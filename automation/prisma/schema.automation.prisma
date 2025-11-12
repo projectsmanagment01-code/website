@@ -1,0 +1,110 @@
+// Automation System Database Schema
+// This schema handles the recipe automation workflow
+
+model AutomationConfig {
+  id              String   @id @default(cuid())
+  googleSheetId   String   // Google Sheet ID containing recipes
+  websiteApiToken String   // API token for posting to website
+  aiGenerator     String   @default("Gemini") // AI provider: "Gemini" or "Midjourney"
+  nakedDomain     String   // Domain name (e.g., "chocofeverdream.com")
+  geminiApiKey    String   // Gemini API key
+  makeWebhookUrl  String?  // Make.com webhook URL for Pinterest
+  enabled         Boolean  @default(true) // Master switch
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("automation_config")
+}
+
+model RecipeAutomation {
+  id            String              @id @default(cuid())
+  title         String              // Recipe title
+  description   String?             @db.Text // SEO description
+  keyword       String?             // SEO keyword
+  category      String              // Category name
+  categoryId    String?             // Category ID from website
+  authorId      String?             // Author ID from website
+  spyImageUrl   String?             // Reference Pinterest image URL
+  status        AutomationStatus    @default(PENDING) // Workflow status
+  rowNumber     Int                 // Row number in Google Sheet
+  sheetUrl      String              // Google Sheet URL
+  recipeId      String?             // Published recipe ID from website
+  postLink      String?             // Published post URL
+  error         String?             @db.Text // Last error message
+  retryCount    Int                 @default(0) // Number of retry attempts
+  
+  // Relations
+  imageSet      ImageSet?
+  logs          AutomationLog[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([rowNumber])
+  @@map("recipe_automation")
+}
+
+model ImageSet {
+  id                String   @id @default(cuid())
+  recipeId          String   @unique
+  recipe            RecipeAutomation @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  // 4 main recipe images
+  imageFeature      String?  // Feature/hero image URL
+  imageIngredients  String?  // Ingredients preparation image URL
+  imageCooking      String?  // Cooking process image URL
+  imageFinal        String?  // Final presentation image URL
+  
+  // Pinterest specific
+  pinterestImage    String?  // Pinterest pin image URL
+  pinterestTitle    String?  // Pinterest title
+  pinterestDesc     String?  @db.Text // Pinterest description
+  pinterestCategory String?  // Pinterest category
+  
+  // Image generation metadata
+  prompts           Json?    // AI image prompts used
+  referenceImage    String?  // Downloaded reference image path
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("image_set")
+}
+
+model AutomationLog {
+  id        String   @id @default(cuid())
+  recipeId  String
+  recipe    RecipeAutomation @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  timestamp DateTime @default(now())
+  event     String   // Event name (e.g., "IMAGE_GENERATED", "RECIPE_POSTED")
+  level     LogLevel @default(INFO) // Log severity
+  details   String   @db.Text // Message or payload (JSON)
+  step      Int?     // Workflow step number (1-11)
+  duration  Int?     // Duration in milliseconds
+  
+  @@index([recipeId])
+  @@index([timestamp])
+  @@index([level])
+  @@map("automation_log")
+}
+
+// Enums
+enum AutomationStatus {
+  PENDING        // Waiting to be processed
+  PROCESSING     // Currently being processed
+  IMAGES_GENERATED // Images generated successfully
+  RECIPE_POSTED  // Recipe posted to website
+  INDEXED        // Google indexing requested
+  COMPLETED      // Fully completed
+  FAILED         // Failed after retries
+  SKIPPED        // Manually skipped
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARNING
+  ERROR
+}

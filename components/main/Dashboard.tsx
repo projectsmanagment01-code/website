@@ -28,6 +28,16 @@ import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import HeroSlidesManager from "@/components/admin/HeroSlidesManager";
+import PinterestSpyManager from "@/automation/pinterest/PinterestSpyManager";
+import ImageGenerationManager from "@/automation/image-generation/ImageGenerationManager";
+import RecipeGenerationManager from '@/automation/recipe-generation/RecipeGenerationManager';
+import ScheduleManager from '@/components/automation/ScheduleManager';
+import PipelineReportsPage from '@/app/admin/automation/reports/page';
+import SEOResultsPage from '@/app/admin/automation/seo-results/page';
+import AutomationSettingsPage from '@/app/admin/automation/settings/page';
+import AutomationHelpPage from '@/app/admin/automation/help/page';
+import PinterestBoardsPage from '@/app/admin/automation/pinterest-boards/page';
+import GTMSettingsPage from '@/app/admin/gtm-settings/page';
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -112,14 +122,76 @@ function AdminDashboardContent() {
         return <CookiesPolicyCMS onBack={() => setActiveSection("content")} />;
       case "backup":
         return <BackupManager />;
+      case "pinterest-spy":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                Pinterest Spy Data Manager
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                Import Pinterest spy data and generate recipes with AI-powered SEO extraction
+              </p>
+            </div>
+            <PinterestSpyManager />
+          </div>
+        );
+      case "image-generation":
+        return <ImageGenerationManager />;
+      case "recipe-generation":
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                Recipe Generation
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                Generate complete recipes from entries with SEO data and AI-generated images
+              </p>
+            </div>
+            <RecipeGenerationManager />
+          </div>
+        );
+      case "pipeline-schedules":
+        return <ScheduleManager />;
+      case "seo-results":
+        return (
+          <div className="space-y-6">
+            <SEOResultsPage />
+          </div>
+        );
+      case "automation-settings":
+        return (
+          <div className="space-y-6">
+            <AutomationSettingsPage />
+          </div>
+        );
+      case "automation-help":
+        return (
+          <div className="space-y-6">
+            <AutomationHelpPage />
+          </div>
+        );
+      case "pinterest-boards":
+        return (
+          <div className="space-y-6">
+            <PinterestBoardsPage />
+          </div>
+        );
+      case "reports":
+        return (
+          <div className="space-y-6">
+            <PipelineReportsPage />
+          </div>
+        );
       case "seo-reports":
         return (
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                 AI SEO Reports
               </h1>
-              <p className="text-gray-600">
+              <p className="text-slate-600 dark:text-slate-400">
                 View and manage AI-generated SEO enhancements for your recipes
               </p>
             </div>
@@ -134,6 +206,8 @@ function AdminDashboardContent() {
         return <ApiTokenManager />;
       case "settings":
         return <Settings />;
+      case "gtm-settings":
+        return <GTMSettingsPage />;
       case "profile":
         return <ProfileSettings />;
       default:
@@ -144,7 +218,7 @@ function AdminDashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex relative">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex relative">
       <Sidebar
         activeSection={activeSection}
         onSectionChange={setActiveSection}
@@ -153,19 +227,21 @@ function AdminDashboardContent() {
         onMobileToggle={toggleMobileSidebar}
       />
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto min-h-screen">
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-900">Admin Dashboard</h1>
+        <div className="md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Admin Dashboard</h1>
           <button
             onClick={toggleMobileSidebar}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+            className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-200"
           >
             <Menu className="w-5 h-5" />
           </button>
         </div>
         
-        <div className="p-1 md:p-2">{renderContent()}</div>
+        <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-900 min-h-screen">
+          {renderContent()}
+        </div>
       </main>
 
       <RecipeModal

@@ -335,7 +335,7 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
     <div className="space-y-2">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1">
         <div>
-          <h1 className="text-lg md:text-xl font-bold text-gray-900 mb-0.5">
+          <h1 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 mb-0.5">
             Recipe Management
           </h1>
           <p className="text-xs text-gray-600">
@@ -347,8 +347,8 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg transition-colors ${
               showFilters || activeFiltersCount > 0
-                ? 'bg-blue-50 border-blue-300 text-blue-700'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300'
+                : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
             }`}
           >
             <Filter className="w-3 h-3" />
@@ -432,37 +432,37 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full table-fixed border-collapse min-w-[1000px]">
-            <thead className="bg-gray-50">
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-900 text-sm w-12">
+            <thead className="bg-slate-50 dark:bg-slate-700">
+              <tr className="border-b border-slate-200 dark:border-slate-600">
+                <th className="text-left py-3 px-4 font-medium text-slate-900 dark:text-slate-100 text-sm w-12">
                   <input
                     type="checkbox"
                     checked={paginatedRecipes.length > 0 && paginatedRecipes.every(recipe => selectedRecipes.includes(recipe.id))}
                     onChange={(e) => e.target.checked ? handleSelectCurrentPage() : handleClearSelection()}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-slate-300 dark:border-slate-600 text-slate-600 focus:ring-slate-500"
                   />
                 </th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900 text-sm w-70">Recipe</th>
-                <th className="text-left py-3 px-0.1 font-medium text-gray-900 text-sm w-25">Author</th>
-                <th className="text-left py-3 px-0.1 font-medium text-gray-900 text-sm w-30">Category</th>
-                <th className="text-left py-3 px-0.1 font-medium text-gray-900 text-sm w-20">Status</th>
-                <th className="text-left py-3 px-0.1 font-medium text-gray-900 text-sm w-15">Views</th>
-                <th className="text-left py-3 px-0.1 font-medium text-gray-900 text-sm w-25">SEO</th>
-                <th className="text-left py-3 px-0.1 font-medium text-gray-900 text-sm w-24">Actions</th>
+                <th className="text-left py-3 px-4 font-medium text-slate-900 dark:text-slate-100 text-sm w-70">Recipe</th>
+                <th className="text-left py-3 px-0.1 font-medium text-slate-900 dark:text-slate-100 text-sm w-25">Author</th>
+                <th className="text-left py-3 px-0.1 font-medium text-slate-900 dark:text-slate-100 text-sm w-30">Category</th>
+                <th className="text-left py-3 px-0.1 font-medium text-slate-900 dark:text-slate-100 text-sm w-20">Status</th>
+                <th className="text-left py-3 px-0.1 font-medium text-slate-900 dark:text-slate-100 text-sm w-15">Views</th>
+                <th className="text-left py-3 px-0.1 font-medium text-slate-900 dark:text-slate-100 text-sm w-25">SEO</th>
+                <th className="text-left py-3 px-0.1 font-medium text-slate-900 dark:text-slate-100 text-sm w-24">Actions</th>
               </tr>
             </thead>
             <tbody>
               {paginatedRecipes.map((recipe) => (
-                <tr key={recipe.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr key={recipe.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
                   <td className="py-1 px-4">
                     <input
                       type="checkbox"
                       checked={selectedRecipes.includes(recipe.id)}
                       onChange={(e) => handleSelectRecipe(recipe.id, e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="rounded border-slate-300 dark:border-slate-600 text-slate-600 focus:ring-slate-500"
                     />
                   </td>
                   <td className="py-3 ">
@@ -474,10 +474,10 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
                         onError={handleRecipeImageError}
                       />
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-medium text-gray-900 text-sm truncate">
+                        <h3 className="font-medium text-slate-900 dark:text-slate-100 text-sm truncate">
                           {recipe.title}
                         </h3>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                           {recipe.intro}
                         </p>
                       </div>
@@ -491,13 +491,13 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
                         className="w-6 h-6 rounded-full"
                         onError={handleAuthorImageError}
                       />
-                      <span className="text-sm font-medium text-gray-900 truncate">
+                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                         {recipe.author?.name || "Unknown"}
                       </span>
                     </div>
                   </td>
                   <td className="py-3 px-0.1">
-                    <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <div className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400">
                       <Tag className="w-3 h-3" />
                       <span className="text-sm truncate">{recipe.category}</span>
                     </div>
@@ -548,9 +548,9 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
 
       {/* Pagination */}
       {filteredRecipes.length > itemsPerPage && (
-        <div className="flex items-center justify-between bg-white border border-gray-200 px-4 py-3 rounded-lg">
+        <div className="flex items-center justify-between bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-3 rounded-lg">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-slate-700 dark:text-slate-300">
               Page {currentPage} of {totalPages}
             </span>
           </div>
@@ -631,8 +631,8 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
 
       {/* Empty State */}
       {filteredRecipes.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+          <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">
             {activeFiltersCount > 0 ? 'No matching recipes' : 'No recipes yet'}
           </h3>
           <p className="text-gray-600 mb-6">

@@ -532,3 +532,242 @@ main {
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;
 }
+
+/* Dark Theme Custom Styles */
+@layer utilities {
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-white/10 dark:bg-slate-800/10 backdrop-blur-md border border-white/20 dark:border-slate-700/20;
+  }
+  
+  /* Elegant shadows */
+  .shadow-elegant {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .dark .shadow-elegant {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Custom scrollbar for dark theme */
+  .scrollbar-elegant {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(148 163 184) transparent;
+  }
+  
+  .dark .scrollbar-elegant {
+    scrollbar-color: rgb(71 85 105) transparent;
+  }
+  
+  .scrollbar-elegant::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-elegant::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-elegant::-webkit-scrollbar-thumb {
+    background-color: rgb(148 163 184);
+    border-radius: 3px;
+  }
+  
+  .dark .scrollbar-elegant::-webkit-scrollbar-thumb {
+    background-color: rgb(71 85 105);
+  }
+  
+  .scrollbar-elegant::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(100 116 139);
+  }
+  
+  .dark .scrollbar-elegant::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(51 65 85);
+  }
+
+  /* Hide scrollbar completely */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+}
+
+/* Smooth theme transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Dark theme gradients */
+.bg-gradient-dark {
+  background: linear-gradient(135deg, rgb(15 23 42) 0%, rgb(30 41 59) 50%, rgb(15 23 42) 100%);
+}
+
+.bg-gradient-dark-subtle {
+  background: linear-gradient(135deg, rgb(248 250 252) 0%, rgb(241 245 249) 50%, rgb(248 250 252) 100%);
+}
+
+.dark .bg-gradient-dark-subtle {
+  background: linear-gradient(135deg, rgb(15 23 42) 0%, rgb(30 41 59) 25%, rgb(51 65 85) 50%, rgb(30 41 59) 75%, rgb(15 23 42) 100%);
+}
+
+/* Admin Dashboard Dark Theme - Elegant & Professional */
+@layer utilities {
+  /* Admin panel background variations */
+  .admin-bg-primary {
+    @apply bg-slate-50 dark:bg-slate-900;
+  }
+  
+  .admin-bg-secondary {
+    @apply bg-white dark:bg-slate-800;
+  }
+  
+  .admin-bg-tertiary {
+    @apply bg-slate-100 dark:bg-slate-700;
+  }
+  
+  /* Admin text variations */
+  .admin-text-primary {
+    @apply text-slate-900 dark:text-slate-100;
+  }
+  
+  .admin-text-secondary {
+    @apply text-slate-700 dark:text-slate-300;
+  }
+  
+  .admin-text-muted {
+    @apply text-slate-500 dark:text-slate-400;
+  }
+  
+  /* Admin borders */
+  .admin-border {
+    @apply border-slate-200 dark:border-slate-700;
+  }
+  
+  .admin-border-light {
+    @apply border-slate-100 dark:border-slate-600;
+  }
+  
+  /* Admin cards and containers */
+  .admin-card {
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm;
+  }
+  
+  .admin-card-hover {
+    @apply hover:shadow-md dark:hover:shadow-slate-900/20 transition-shadow duration-200;
+  }
+  
+  /* Admin buttons */
+  .admin-btn-primary {
+    @apply bg-slate-700 dark:bg-slate-600 hover:bg-slate-800 dark:hover:bg-slate-500 text-white;
+  }
+  
+  .admin-btn-secondary {
+    @apply bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300;
+  }
+  
+  .admin-btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white;
+  }
+  
+  /* Admin form elements */
+  .admin-input {
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400;
+  }
+  
+  .admin-input:focus {
+    @apply border-slate-400 dark:border-slate-500 ring-2 ring-slate-200 dark:ring-slate-600;
+  }
+  
+  /* Admin navigation */
+  .admin-nav-item {
+    @apply text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700;
+  }
+  
+  .admin-nav-item-active {
+    @apply bg-slate-700 dark:bg-slate-600 text-white;
+  }
+  
+  /* Admin sidebar */
+  .admin-sidebar {
+    @apply bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700;
+  }
+  
+  /* Admin status indicators */
+  .admin-status-success {
+    @apply bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800;
+  }
+  
+  .admin-status-warning {
+    @apply bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800;
+  }
+  
+  .admin-status-error {
+    @apply bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800;
+  }
+  
+  .admin-status-info {
+    @apply bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800;
+  }
+  
+  /* Admin loading states */
+  .admin-loading-skeleton {
+    @apply bg-slate-200 dark:bg-slate-700 animate-pulse rounded;
+  }
+  
+  /* Admin dropdown menus */
+  .admin-dropdown {
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg dark:shadow-slate-900/20;
+  }
+  
+  .admin-dropdown-item {
+    @apply text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100;
+  }
+  
+  /* Admin tables */
+  .admin-table {
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700;
+  }
+  
+  .admin-table-header {
+    @apply bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-600;
+  }
+  
+  .admin-table-row {
+    @apply border-b border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50;
+  }
+  
+  .admin-table-cell {
+    @apply text-slate-900 dark:text-slate-100;
+  }
+}
+
+/* Remove any remaining gradient transitions for professional look */
+.no-gradient * {
+  background-image: none !important;
+}
+
+/* Professional dark theme for admin components */
+.admin-theme {
+  --admin-primary: rgb(71 85 105);
+  --admin-primary-hover: rgb(51 65 85);
+  --admin-secondary: rgb(148 163 184);
+  --admin-success: rgb(34 197 94);
+  --admin-warning: rgb(251 191 36);
+  --admin-error: rgb(239 68 68);
+  --admin-info: rgb(59 130 246);
+}
+
+.dark .admin-theme {
+  --admin-primary: rgb(100 116 139);
+  --admin-primary-hover: rgb(148 163 184);
+  --admin-secondary: rgb(71 85 105);
+  --admin-success: rgb(74 222 128);
+  --admin-warning: rgb(253 224 71);
+  --admin-error: rgb(248 113 113);
+  --admin-info: rgb(96 165 250);
+}

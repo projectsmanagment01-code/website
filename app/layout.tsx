@@ -4,10 +4,12 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import Header from "./layout/Header";
 import Footer from "./layout/Footer";
-import InjectRawHtml from "@/components/InjectRawHtml";
-import { getAdminSettings } from "@/lib/admin-settings";
-import { Fragment } from "react";
+import GoogleTagManager from "@/components/GoogleTagManager";
 import { headers } from "next/headers";
+import prisma from "@/lib/db";
+
+// Auto-start automation worker on server boot
+import '@/lib/worker-init';
 
 // ISR: Revalidate every hour, but allow on-demand revalidation via cache tags
 export const revalidate = 3600; // 1 hour
@@ -136,62 +138,35 @@ export default async function RootLayout({
   
   console.log("🔍 Exclude layout for", pathname, ":", excludeLayout);
 
-  // Load custo
-  // Load custom code settings from database
-  const settings = await getAdminSettings();
-
-  // Extract code for each section
-  const headerCode = {
-    html: settings.header.html.join("\n"),
-    css: settings.header.css.join("\n"),
-    javascript: settings.header.javascript.join("\n"),
-  };
-
-  const bodyCode = {
-    html: settings.body.html.join("\n"),
-    css: settings.body.css.join("\n"),
-    javascript: settings.body.javascript.join("\n"),
-  };
-
-  const footerCode = {
-    html: settings.footer.html.join("\n"),
-    css: settings.footer.css.join("\n"),
-    javascript: settings.footer.javascript.join("\n"),
-  };
+  // Load GTM/Analytics settings from database
+  let gtmSettings = null;
+  if (!excludeScripts) {
+    try {
+      gtmSettings = await prisma.gTMSettings.findFirst({
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (error) {
+      console.warn("Failed to load GTM settings:", error);
+    }
+  }
 
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
       <head>
         <meta
           name="title"
           content="Recipes website - Delicious Family-Friendly Recipes"
         />
         
-        {/* Header Code Injection - Server-side rendered, visible in view-source */}
-        {!excludeScripts && settings.header?.html && settings.header.html.length > 0 && (
-          <InjectRawHtml html={settings.header.html} location="head" />
-        )}
-        
-        {/* Header CSS */}
-        {!excludeScripts && settings.header?.css && settings.header.css.length > 0 && (
-          <style dangerouslySetInnerHTML={{ __html: settings.header.css.join('\n') }} suppressHydrationWarning />
-        )}
-        
-        {/* Header JavaScript */}
-        {!excludeScripts && settings.header?.javascript && settings.header.javascript.length > 0 && (
-          <script dangerouslySetInnerHTML={{ __html: settings.header.javascript.join('\n') }} suppressHydrationWarning />
+        {/* Google Tag Manager & Analytics - New System */}
+        {!excludeScripts && gtmSettings && (
+          <GoogleTagManager settings={gtmSettings} location="head" />
         )}
       </head>
       <body className="layout-container" suppressHydrationWarning>
-        {/* Body Code Injection - Server-side rendered */}
-        {bodyCode.html && (
-          <InjectRawHtml html={settings.body.html} location="body" />
-        )}
-        {bodyCode.css && (
-          <style dangerouslySetInnerHTML={{ __html: bodyCode.css }} suppressHydrationWarning />
-        )}
-        {bodyCode.javascript && (
-          <script dangerouslySetInnerHTML={{ __html: bodyCode.javascript }} suppressHydrationWarning />
+        {/* GTM noscript and custom body code */}
+        {!excludeScripts && gtmSettings && (
+          <GoogleTagManager settings={gtmSettings} location="body" />
         )}
 
         {!excludeLayout && <Header />}
@@ -200,15 +175,9 @@ export default async function RootLayout({
         </main>
         {!excludeLayout && <Footer />}
 
-        {/* Footer Code Injection - Server-side rendered */}
-        {footerCode.html && (
-          <InjectRawHtml html={settings.footer.html} location="footer" />
-        )}
-        {footerCode.css && (
-          <style dangerouslySetInnerHTML={{ __html: footerCode.css }} suppressHydrationWarning />
-        )}
-        {footerCode.javascript && (
-          <script dangerouslySetInnerHTML={{ __html: footerCode.javascript }} suppressHydrationWarning />
+        {/* Custom footer code */}
+        {!excludeScripts && gtmSettings && (
+          <GoogleTagManager settings={gtmSettings} location="footer" />
         )}
       </body>
     </html>
