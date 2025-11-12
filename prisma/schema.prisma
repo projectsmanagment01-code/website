@@ -60,8 +60,9 @@ model Recipe {
   status              String    @default("published")
   
   // Relations
-  authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])
-  categoryRef         Category? @relation("CategoryRecipes", fields: [categoryId], references: [id], onDelete: SetNull)
+  authorRef           Author?            @relation("AuthorRecipes", fields: [authorId], references: [id])
+  categoryRef         Category?          @relation("CategoryRecipes", fields: [categoryId], references: [id], onDelete: SetNull)
+  spyData             PinterestSpyData[] @relation("SpyDataRecipe")
   
   @@index([categoryId])
   @@index([status])
@@ -571,4 +572,21 @@ model PinterestBoard {
   @@index([categoryId])
   @@index([isActive])
   @@map("pinterest_boards")
+}
+
+// Google Tag Manager Settings
+model GTMSettings {
+  id              String   @id @default(cuid())
+  gtmId           String?  // GTM-XXXXXXX
+  ga4Id           String?  // G-XXXXXXXXXX
+  enableGTM       Boolean  @default(false)
+  enableGA4       Boolean  @default(false)
+  consentMode     Boolean  @default(true) // Enable Google Consent Mode v2
+  customHeadCode  String?  @db.Text // Additional custom code for <head>
+  customBodyCode  String?  @db.Text // Additional custom code for <body>
+  customFooterCode String? @db.Text // Additional custom code before </body>
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("gtm_settings")
 }
