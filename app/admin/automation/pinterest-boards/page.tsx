@@ -26,6 +26,12 @@ export default function PinterestBoardsPage() {
   const [message, setMessage] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newBoard, setNewBoard] = useState<Partial<PinterestBoard> | null>(null);
+  
+  // Pinterest settings state
+  const [enablePinterest, setEnablePinterest] = useState(false);
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [imageEditPrompt, setImageEditPrompt] = useState('');
+  const [settingsChanged, setSettingsChanged] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -35,6 +41,18 @@ export default function PinterestBoardsPage() {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('admin-token');
+      
+      // Load automation settings for Pinterest config
+      const settingsRes = await fetch('/api/admin/automation/settings', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const settingsData = await settingsRes.json();
+      
+      if (settingsData.success) {
+        setEnablePinterest(settingsData.settings.enablePinterest || false);
+        setWebhookUrl(settingsData.settings.pinterestWebhookUrl || '');
+        setImageEditPrompt(settingsData.settings.pinterestImageEditPrompt || '');
+      }
       
       // Load categories
       const categoriesRes = await fetch('/api/categories', {
@@ -70,6 +88,39 @@ export default function PinterestBoardsPage() {
       categoryId: '',
       isActive: true
     });
+  };
+
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('admin-token');
+      const response = await fetch('/api/admin/automation/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          enablePinterest,
+          pinterestWebhookUrl: webhookUrl,
+          pinterestImageEditPrompt: imageEditPrompt
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showMessage('✅ Pinterest settings saved successfully!', 'success');
+        setSettingsChanged(false);
+      } else {
+        showMessage(`❌ ${data.error || 'Failed to save settings'}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      showMessage('❌ Failed to save settings', 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancelNew = () => {
@@ -232,17 +283,76 @@ export default function PinterestBoardsPage() {
           )}
         </div>
 
-        {/* Info Box */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-            📌 How to get your Pinterest Board ID:
-          </h3>
-          <ol className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-decimal list-inside">
-            <li>Go to your Pinterest profile and click on the board you want to use</li>
-            <li>Look at the URL in your browser: <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">pinterest.com/username/board-name/</code></li>
-            <li>The Board ID is the last part of the URL (e.g., "delicious-desserts")</li>
-            <li>Or use Pinterest's API to get the numeric Board ID</li>
-          </ol>
+        {/* Pinterest Configuration Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              📌 Pinterest Automation Settings
+            </h2>
+            {settingsChanged && (
+              <button
+                onClick={handleSaveSettings}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+              >
+                <Save className="w-4 h-4" />
+                {isSaving ? 'Saving...' : 'Save Settings'}
+              </button>
+            )}
+          </div>
+
+          {/* Enable Pinterest Toggle */}
+          <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg mb-4">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Enable Pinterest Automation</h3>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={enablePinterest}
+                onChange={(e) => {
+                  setEnablePinterest(e.target.checked);
+                  setSettingsChanged(true);
+                }}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+
+          {/* Webhook URL */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Make.com Webhook URL <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="url"
+              placeholder="https://hook.us1.make.com/xxxxxxxxxxxxx"
+              value={webhookUrl}
+              onChange={(e) => {
+                setWebhookUrl(e.target.value);
+                setSettingsChanged(true);
+              }}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 font-mono text-sm"
+            />
+          </div>
+
+          {/* Image Edit Prompt */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Image Editing Prompt (Optional)
+            </label>
+            <textarea
+              value={imageEditPrompt}
+              onChange={(e) => {
+                setImageEditPrompt(e.target.value);
+                setSettingsChanged(true);
+              }}
+              rows={6}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 font-mono text-sm"
+              placeholder="Optional: Add custom prompt for Gemini to edit images"
+            />
+          </div>
         </div>
 
         {/* Boards Table */}
@@ -374,14 +484,6 @@ export default function PinterestBoardsPage() {
               ))}
             </tbody>
           </table>
-        </div>
-
-        {/* Footer Info */}
-        <div className="mt-6 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
-          <p className="text-sm text-purple-900 dark:text-purple-300">
-            <strong>💡 How this works:</strong> When a recipe is generated in a specific category, the automation will automatically 
-            use the corresponding Pinterest Board ID when sending the webhook to Make.com. Make sure each category has a board mapped!
-          </p>
         </div>
       </div>
     </div>

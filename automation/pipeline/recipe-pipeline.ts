@@ -460,8 +460,8 @@ export class RecipePipelineOrchestrator {
     console.log(`${'='.repeat(80)}\n`);
     
     try {
-      // Import image generation service directly
-      const { ImageGenerationService } = await import('@/automation/image-generation/service');
+      // Import image provider factory
+      const { ImageProviderFactory } = await import('@/automation/image-providers/factory');
       const sharp = (await import('sharp')).default;
       
       const spyData = await prisma.pinterestSpyData.findUnique({
@@ -475,12 +475,95 @@ export class RecipePipelineOrchestrator {
       if (!spyData.seoKeyword || !spyData.seoTitle) {
         throw new Error('SEO data must be generated before images');
       }
+
+      // Get automation settings to determine provider
+      const config = await getAutomationConfig();
+      const imageProvider = config.imageProvider || 'gemini';
       
       console.log(`✅ Spy data loaded successfully`);
       console.log(`   Title: ${spyData.seoTitle}`);
       console.log(`   Keyword: ${spyData.seoKeyword}`);
       console.log(`   Reference Image: ${spyData.spyImageUrl || 'NONE'}`);
+      console.log(`   Image Provider: ${imageProvider.toUpperCase()}`);
       console.log(`\n${'='.repeat(80)}\n`);
+
+      // Create appropriate image provider
+      const provider = ImageProviderFactory.create({
+        provider: imageProvider as 'gemini' | 'midjourney',
+        geminiApiKey: config.geminiApiKey,
+        midjourneyApiKey: config.midjourneyApiKey,
+        midjourneyWebhookUrl: config.midjourneyWebhookUrl,
+        midjourneyWebhookSecret: config.midjourneyWebhookSecret
+      });
+
+      if (!provider) {
+        throw new Error(`Failed to create ${imageProvider} provider. Check configuration.`);
+      }
+
+      if (!provider.isConfigured()) {
+        throw new Error(`${imageProvider} provider is not properly configured`);
+      }
+
+      console.log(`✅ ${provider.getProviderName().toUpperCase()} provider initialized`);
+    
+    // Handle Midjourney async pattern
+    if (imageProvider === 'midjourney') {
+      console.log(`🎨 Midjourney selected - Using async webhook pattern`);
+      
+      // Process prompt template with variables
+      const promptTemplate = config.midjourneyPromptTemplate || 
+        'Create a high-quality, photorealistic food photography image for {recipeName}. Focus on: {seoKeyword}';
+      
+      const processedPrompt = promptTemplate
+        .replace(/\{recipeName\}/g, spyData.seoTitle)
+        .replace(/\{seoKeyword\}/g, spyData.seoKeyword)
+        .replace(/\{seoTitle\}/g, spyData.seoTitle)
+        .replace(/\{seoDescription\}/g, spyData.seoDescription || '');
+      
+      console.log(`📝 Processed prompt: ${processedPrompt.substring(0, 100)}...`);
+      
+      // Generate images with Midjourney (will return task ID)
+      const result = await provider.generateImages({
+        prompt: processedPrompt,
+        referenceImageUrl: spyData.spyImageUrl || undefined,
+        recipeTitle: spyData.seoTitle,
+        seoKeyword: spyData.seoKeyword,
+        imageNumber: 1 // Midjourney generates all 4 at once
+      });
+
+      if (!result.success || !result.taskId) {
+        throw new Error(result.error || 'Failed to initiate Midjourney generation');
+      }
+
+      console.log(`✅ Midjourney request sent successfully`);
+      console.log(`   Task ID: ${result.taskId}`);
+      console.log(`   Status: Images will arrive via webhook`);
+      
+      // Save task ID for webhook tracking
+      await prisma.pinterestSpyData.update({
+        where: { id: spyDataId },
+        data: {
+          midjourneyTaskId: result.taskId,
+          status: 'GENERATING',
+          imageGeneratedAt: new Date()
+        }
+      });
+
+      console.log(`\n${'='.repeat(80)}`);
+      console.log(`⏳ MIDJOURNEY GENERATION INITIATED`);
+      console.log(`   Task ID saved. Webhook will deliver images when ready.`);
+      console.log(`   Pipeline will continue when webhook updates the record.`);
+      console.log(`${'='.repeat(80)}\n`);
+      
+      // For Midjourney, we return here and let webhook complete the process
+      return;
+    }
+
+    // Gemini synchronous generation (existing logic)
+    console.log(`💎 Gemini selected - Using synchronous generation`);
+    
+    // Import Gemini service for backward compatibility
+    const { ImageGenerationService } = await import('@/automation/image-generation/service');
     
     // Generate 4 images
     const imageUrls: Record<string, string> = {};

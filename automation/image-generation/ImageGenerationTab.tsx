@@ -314,18 +314,6 @@ export default function ImageGenerationTab({ spyData, getAuthHeaders, onRefresh 
         ))}
       </div>
 
-      {/* Master Prompt */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded border border-gray-200 dark:border-gray-700">
-        <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">✨ Master Prompt Template</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Generates 4 image descriptions from recipe data</p>
-        <textarea
-          value={masterPrompt}
-          onChange={(e) => setMasterPrompt(e.target.value)}
-          rows={6}
-          className="w-full font-mono text-sm border border-gray-300 dark:border-gray-600 rounded p-3 focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
-        />
-      </div>
-
       {/* Controls */}
       <div className="flex gap-3">
         {stage === 'select' && (

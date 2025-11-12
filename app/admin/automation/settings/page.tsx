@@ -2,13 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { Save, RotateCcw, Settings, Info, HelpCircle, BookOpen } from 'lucide-react';
+import ImageProviderSettings from '@/components/automation/ImageProviderSettings';
 
 interface PromptSettings {
   // SEO Extraction Prompts
   seoExtractionSystem: string;
   seoExtractionUser: string;
   
-  // Image Generation Prompts (4 types)
+  // Image Provider Selection
+  imageProvider: 'gemini' | 'midjourney';
+  midjourneyApiKey: string;
+  midjourneyWebhookUrl: string;
+  midjourneyPromptTemplate: string;
+  midjourneyProcessMode: 'relax' | 'fast' | 'turbo';
+  
+  // Image Generation Prompts (4 types) - Only for Gemini
   imagePrompt1: string; // Finished dish hero shot
   imagePrompt2: string; // Raw ingredients layout
   imagePrompt3: string; // Cooking action shot
@@ -69,7 +77,14 @@ Generate SEO metadata in the following JSON format:
   "reasoning": "Brief explanation of SEO choices"
 }`,
 
-  // Image Generation Prompts
+  // Image Provider Selection
+  imageProvider: 'gemini',
+  midjourneyApiKey: '',
+  midjourneyWebhookUrl: '',
+  midjourneyPromptTemplate: 'Create a high-quality, photorealistic food photography image for {recipeName}. Focus on: {seoKeyword}',
+  midjourneyProcessMode: 'relax',
+
+  // Image Generation Prompts (for Gemini)
   imagePrompt1: `FINISHED DISH HERO SHOT: Close-up 45-degree angle of {recipeTitle} plated on kitchen surface. Show complete finished dish as main subject. NO raw ingredients, NO cooking process, ONLY final result. Kitchen environment, 16:9 tall aspect ratio.`,
   
   imagePrompt2: `RAW INGREDIENTS LAYOUT: ONLY raw, uncooked ingredients for {recipeTitle} laid out separately. NO finished dish, NO cooking in progress. Ingredients in bowls, measuring cups, on cutting board. Overhead flat lay view from directly above. Kitchen environment, 16:9 tall aspect ratio.`,
@@ -217,6 +232,22 @@ export default function AutomationSettingsPage() {
           ...(dbSettings.googleIndexingCredentials && {
             googleIndexingCredentials: dbSettings.googleIndexingCredentials,
           }),
+          // Image Provider settings
+          ...(dbSettings.imageProvider && {
+            imageProvider: dbSettings.imageProvider,
+          }),
+          ...(dbSettings.midjourneyApiKey && {
+            midjourneyApiKey: dbSettings.midjourneyApiKey,
+          }),
+          ...(dbSettings.midjourneyWebhookUrl && {
+            midjourneyWebhookUrl: dbSettings.midjourneyWebhookUrl,
+          }),
+          ...(dbSettings.midjourneyPromptTemplate && {
+            midjourneyPromptTemplate: dbSettings.midjourneyPromptTemplate,
+          }),
+          ...(dbSettings.midjourneyProcessMode && {
+            midjourneyProcessMode: dbSettings.midjourneyProcessMode,
+          }),
         };
         
         setSettings(uiSettings);
@@ -253,6 +284,12 @@ ${settings.imagePrompt4}`;
         seoPromptSystemPrompt: settings.seoExtractionSystem,
         imagePromptSystemPrompt: imagePromptSystemPrompt,
         recipePromptSystemPrompt: settings.recipeSystemPrompt,
+        // Image Provider settings
+        imageProvider: settings.imageProvider,
+        midjourneyApiKey: settings.midjourneyApiKey,
+        midjourneyWebhookUrl: settings.midjourneyWebhookUrl,
+        midjourneyPromptTemplate: settings.midjourneyPromptTemplate,
+        midjourneyProcessMode: settings.midjourneyProcessMode,
         // Pinterest settings
         enablePinterest: settings.enablePinterest,
         pinterestWebhookUrl: settings.pinterestWebhookUrl,
@@ -447,28 +484,32 @@ ${settings.imagePrompt4}`;
         </div>
 
         {/* Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-6 overflow-hidden">
           <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex gap-4 px-6" aria-label="Settings tabs">
+            <nav className="grid grid-cols-2 md:grid-cols-5 gap-0" aria-label="Settings tabs">
               {[
-                { id: 'seo', label: 'SEO Extraction', icon: '🧠' },
-                { id: 'images', label: 'Image Generation', icon: '🖼️' },
-                { id: 'recipe', label: 'Recipe Generation', icon: '📝' },
-                { id: 'models', label: 'Model Settings', icon: '⚙️' },
-                { id: 'pinterest', label: 'Pinterest', icon: '📌' },
-                { id: 'indexing', label: 'Google Indexing', icon: '🔍' },
+                { id: 'seo', label: 'SEO Extraction', icon: '🧠', color: 'purple' },
+                { id: 'images', label: 'Image Generation', icon: '🎨', color: 'blue' },
+                { id: 'recipe', label: 'Recipe Generation', icon: '📝', color: 'green' },
+                { id: 'models', label: 'Model Settings', icon: '⚙️', color: 'gray' },
+                { id: 'indexing', label: 'Google Indexing', icon: '🔍', color: 'yellow' },
               ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium transition-colors ${
+                  className={`relative flex items-center justify-center gap-3 px-6 py-4 font-medium transition-all duration-200 group ${
                     activeTab === tab.id
-                      ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                   }`}
                 >
-                  <span>{tab.icon}</span>
-                  {tab.label}
+                  <span className={`text-xl transition-transform duration-200 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-105'}`}>
+                    {tab.icon}
+                  </span>
+                  <span className="font-semibold">{tab.label}</span>
+                  {activeTab === tab.id && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500"></div>
+                  )}
                 </button>
               ))}
             </nav>
@@ -553,7 +594,7 @@ ${settings.imagePrompt4}`;
             <div className="space-y-6">
               {/* Tab Header with Reset Button */}
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Image Generation Prompts</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Image Generation Configuration</h2>
                 <button
                   onClick={() => handleResetTab('images')}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
@@ -562,28 +603,30 @@ ${settings.imagePrompt4}`;
                   Reset This Tab
                 </button>
               </div>
-              
-              {/* Help Section */}
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-green-900 dark:text-green-300 mb-2">About Image Generation Prompts</h3>
-                    <p className="text-sm text-green-800 dark:text-green-400 mb-2">
-                      These 4 prompts define the visual style and composition for each generated image. Each image serves a specific purpose in the recipe article.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-green-700 dark:text-green-500">
-                      <div><strong>Image 1:</strong> Finished dish hero shot (main photo)</div>
-                      <div><strong>Image 2:</strong> Raw ingredients layout (overhead view)</div>
-                      <div><strong>Image 3:</strong> Cooking process in action</div>
-                      <div><strong>Image 4:</strong> Styled table presentation</div>
-                    </div>
-                    <p className="text-xs text-green-700 dark:text-green-500 mt-2">
-                      <strong>Available Variable:</strong> <code className="bg-green-100 dark:bg-green-800 px-1 rounded">{'{recipeTitle}'}</code> - Recipe name
-                    </p>
-                  </div>
-                </div>
-              </div>
+
+              {/* Image Provider Selection */}
+              <ImageProviderSettings
+                currentProvider={settings.imageProvider}
+                midjourneyApiKey={settings.midjourneyApiKey}
+                midjourneyWebhookUrl={settings.midjourneyWebhookUrl}
+                midjourneyPromptTemplate={settings.midjourneyPromptTemplate}
+                midjourneyProcessMode={settings.midjourneyProcessMode}
+                onChange={(data) => {
+                  setSettings(prev => ({
+                    ...prev,
+                    imageProvider: data.imageProvider,
+                    midjourneyApiKey: data.midjourneyApiKey || '',
+                    midjourneyWebhookUrl: data.midjourneyWebhookUrl || '',
+                    midjourneyPromptTemplate: data.midjourneyPromptTemplate || '',
+                    midjourneyProcessMode: data.midjourneyProcessMode || 'relax'
+                  }));
+                }}
+              />
+
+              {/* Gemini-specific Image Prompts - Only show when Gemini is selected */}
+              {settings.imageProvider === 'gemini' && (
+                <>
+                  <hr className="border-gray-200 dark:border-gray-700 my-8" />
 
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -676,6 +719,8 @@ ${settings.imagePrompt4}`;
                   Variable: {'{recipeTitle}'}
                 </p>
               </div>
+                </>
+              )}
             </div>
           )}
 
@@ -885,97 +930,6 @@ ${settings.imagePrompt4}`;
                     How closely the AI follows the prompt. Higher = more adherence, Lower = more creativity
                   </p>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Pinterest Integration Tab */}
-          {activeTab === 'pinterest' && (
-            <div className="space-y-6">
-              {/* Tab Header with Reset Button */}
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Pinterest Integration</h2>
-                <button
-                  onClick={() => handleResetTab('pinterest')}
-                  className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  Reset Tab
-                </button>
-              </div>
-
-              {/* Enable Pinterest Toggle */}
-              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">Enable Pinterest Automation</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Automatically send recipe data to Make.com webhook for Pinterest posting
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.enablePinterest}
-                    onChange={(e) => updateSetting('enablePinterest', e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-
-              {/* Webhook URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Make.com Webhook URL <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://hook.us1.make.com/xxxxxxxxxxxxx"
-                  value={settings.pinterestWebhookUrl}
-                  onChange={(e) => updateSetting('pinterestWebhookUrl', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 font-mono text-sm"
-                />
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  The webhook URL from your Make.com scenario that will receive recipe data
-                </p>
-              </div>
-
-              {/* Image Edit Prompt */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image Editing Prompt
-                </label>
-                <textarea
-                  value={settings.pinterestImageEditPrompt}
-                  onChange={(e) => updateSetting('pinterestImageEditPrompt', e.target.value)}
-                  rows={12}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 font-mono text-sm"
-                  placeholder="Enter prompt for editing SpyPin images with Gemini AI..."
-                />
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Custom prompt to instruct Gemini how to edit the SpyPin image. Variables: {'{spyPinImage}'}, {'{recipeTitle}'}
-                </p>
-              </div>
-
-              {/* Info Box */}
-              <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
-                <h4 className="font-semibold text-purple-900 dark:text-purple-300 mb-2">
-                  📌 How Pinterest Integration Works:
-                </h4>
-                <ol className="text-sm text-purple-800 dark:text-purple-400 space-y-1 list-decimal list-inside">
-                  <li>Recipe is generated and posted to your website</li>
-                  <li>Google Indexing request is sent (if enabled)</li>
-                  <li>SpyPin image is edited using Gemini AI with your custom prompt</li>
-                  <li>Edited image is uploaded to your server</li>
-                  <li>Webhook sends data to Make.com: title, description, image URL, post link, board ID</li>
-                  <li>Make.com scenario posts to Pinterest automatically</li>
-                </ol>
-                <p className="mt-3 text-sm text-purple-800 dark:text-purple-400">
-                  <strong>Note:</strong> Don't forget to map your Pinterest boards to categories in the{' '}
-                  <a href="/admin/automation/pinterest-boards" className="underline hover:text-purple-600">
-                    Pinterest Boards page
-                  </a>
-                </p>
               </div>
             </div>
           )}

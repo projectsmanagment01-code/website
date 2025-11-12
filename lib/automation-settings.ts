@@ -17,6 +17,15 @@ export interface AutomationSettingsData {
   geminiFlashModel?: string;
   geminiProModel?: string;
   
+  // Image Provider Selection
+  imageProvider?: 'gemini' | 'midjourney';
+  
+  // Midjourney Configuration (GoAPI)
+  midjourneyApiKey?: string; // Will be encrypted
+  midjourneyWebhookUrl?: string;
+  midjourneyPromptTemplate?: string;
+  midjourneyProcessMode?: 'relax' | 'fast' | 'turbo';
+  
   // Website API
   websiteApiUrl?: string;
   websiteApiToken?: string; // Will be encrypted
@@ -52,6 +61,7 @@ export interface AutomationSettingsResponse extends AutomationSettingsData {
   // Masked versions of sensitive fields (for display only)
   googleCredentialsJsonMasked?: string;
   geminiApiKeyMasked?: string;
+  midjourneyApiKeyMasked?: string;
   websiteApiTokenMasked?: string;
   googleIndexingCredentialsMasked?: string;
 }
@@ -81,6 +91,18 @@ export async function getAutomationSettings(): Promise<AutomationSettingsRespons
       : undefined,
     geminiFlashModel: settings.geminiFlashModel,
     geminiProModel: settings.geminiProModel,
+    
+    // Image Provider
+    imageProvider: (settings.imageProvider as 'gemini' | 'midjourney') || 'gemini',
+    
+    // Midjourney Configuration
+    midjourneyApiKey: settings.midjourneyApiKey
+      ? decrypt(settings.midjourneyApiKey)
+      : undefined,
+    midjourneyWebhookUrl: settings.midjourneyWebhookUrl || undefined,
+    midjourneyPromptTemplate: settings.midjourneyPromptTemplate || undefined,
+    midjourneyProcessMode: (settings.midjourneyProcessMode as 'relax' | 'fast' | 'turbo') || 'fast',
+    
     websiteApiUrl: settings.websiteApiUrl || undefined,
     websiteApiToken: settings.websiteApiToken 
       ? decrypt(settings.websiteApiToken) 
@@ -113,6 +135,9 @@ export async function getAutomationSettings(): Promise<AutomationSettingsRespons
     geminiApiKeyMasked: settings.geminiApiKey 
       ? '••••••••' + settings.geminiApiKey.slice(-8) 
       : undefined,
+    midjourneyApiKeyMasked: settings.midjourneyApiKey
+      ? '••••••••' + settings.midjourneyApiKey.slice(-8)
+      : undefined,
     websiteApiTokenMasked: settings.websiteApiToken 
       ? '••••••••' + settings.websiteApiToken.slice(-8) 
       : undefined,
@@ -139,6 +164,10 @@ export async function updateAutomationSettings(
     googleSheetUrl: data.googleSheetUrl,
     geminiFlashModel: data.geminiFlashModel,
     geminiProModel: data.geminiProModel,
+    imageProvider: data.imageProvider || 'gemini',
+    midjourneyWebhookUrl: data.midjourneyWebhookUrl,
+    midjourneyPromptTemplate: data.midjourneyPromptTemplate,
+    midjourneyProcessMode: data.midjourneyProcessMode || 'fast',
     websiteApiUrl: data.websiteApiUrl,
     enablePinterest: data.enablePinterest,
     pinterestWebhookUrl: data.pinterestWebhookUrl,
@@ -158,6 +187,12 @@ export async function updateAutomationSettings(
   if (data.geminiApiKey !== undefined) {
     encryptedData.geminiApiKey = data.geminiApiKey 
       ? encrypt(data.geminiApiKey) 
+      : null;
+  }
+
+  if (data.midjourneyApiKey !== undefined) {
+    encryptedData.midjourneyApiKey = data.midjourneyApiKey
+      ? encrypt(data.midjourneyApiKey)
       : null;
   }
 
@@ -313,6 +348,12 @@ export async function getAutomationConfig() {
       flashModel: settings.geminiFlashModel,
       proModel: settings.geminiProModel,
     },
+    imageProvider: settings.imageProvider || 'gemini',
+    geminiApiKey: settings.geminiApiKey!,
+    midjourneyApiKey: settings.midjourneyApiKey,
+    midjourneyWebhookUrl: settings.midjourneyWebhookUrl,
+    midjourneyPromptTemplate: settings.midjourneyPromptTemplate,
+    midjourneyProcessMode: settings.midjourneyProcessMode || 'fast',
     website: {
       apiUrl: settings.websiteApiUrl!,
       apiToken: settings.websiteApiToken!,

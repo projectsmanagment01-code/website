@@ -325,6 +325,15 @@ model AutomationSettings {
   geminiFlashModel          String    @default("gemini-2.0-flash-exp")
   geminiProModel            String    @default("gemini-1.5-pro")
   
+  // Image Provider Selection
+  imageProvider             String    @default("gemini") // "gemini" or "midjourney"
+  
+  // Midjourney Configuration (GoAPI)
+  midjourneyApiKey          String?   // GoAPI API key
+  midjourneyWebhookUrl      String?   // Webhook URL for receiving images
+  midjourneyPromptTemplate  String?   @db.Text // Prompt template with {recipeName}, {seoKeyword} variables
+  midjourneyProcessMode     String    @default("relax") // "relax", "fast", or "turbo"
+  
   // Website API Configuration
   websiteApiUrl             String?   // Base URL of your website
   websiteApiToken           String?   // API token for authentication
@@ -411,6 +420,8 @@ model PinterestSpyData {
   generatedImage3Url    String?   @db.Text  // Cooking process image URL
   generatedImage4Url    String?   @db.Text  // Final presentation image URL
   imageGeneratedAt      DateTime?           // When images were generated
+  midjourneyTaskId      String?   @db.Text  // Midjourney task ID for webhook tracking
+  generatedImages       String[]  @default([]) // Array of generated image paths (from Midjourney or Gemini)
   
   // Processing Status Indicators
   status                String    @default("PENDING") // PENDING, SEO_PROCESSING, SEO_COMPLETED, READY_FOR_GENERATION, GENERATING, COMPLETED, FAILED
