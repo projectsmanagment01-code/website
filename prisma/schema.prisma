@@ -294,3 +294,262 @@ model HeroSlide {
   @@index([order])
   @@index([isActive])
 }
+
+// Automation Settings (stored encrypted in database)
+model AutomationSettings {
+  id                        String    @id @default(cuid())
+  
+  // Google Sheets Configuration
+  googleSheetId             String?   // The ID of the Google Sheet
+  googleSheetUrl            String?   // Full URL for reference
+  googleCredentialsJson     String?   @db.Text // Encrypted service account JSON
+  
+  // AI Configuration
+  geminiApiKey              String?   // Encrypted Gemini API key
+  geminiFlashModel          String    @default("gemini-2.0-flash-exp")
+  geminiProModel            String    @default("gemini-1.5-pro")
+  
+  // Image Provider Selection
+  imageProvider             String    @default("gemini") // "gemini" or "midjourney"
+  
+  // Midjourney Configuration (GoAPI)
+  midjourneyApiKey          String?   // GoAPI API key
+  midjourneyWebhookUrl      String?   // Webhook URL for receiving images
+  midjourneyPromptTemplate  String?   @db.Text // Prompt template with {recipeName}, {seoKeyword} variables
+  midjourneyProcessMode     String    @default("relax") // "relax", "fast", or "turbo"
+  
+  // Website API Configuration
+  websiteApiUrl             String?   // Base URL of your website
+  websiteApiToken           String?   // API token for authentication
+  
+  // Pinterest Integration (Optional)
+  enablePinterest           Boolean   @default(false)
+  pinterestWebhookUrl       String?   // Make.com webhook URL for Pinterest
+  pinterestImageEditPrompt  String?   @db.Text // Custom prompt for editing SpyPin images with Gemini
+  
+  // Google Indexing (Optional)
+  enableIndexing            Boolean   @default(false) // Kept for backward compatibility, use enableGoogleIndexing
+  enableGoogleIndexing      Boolean   @default(false)
+  googleIndexingCredentials String?   @db.Text // Encrypted Google service account JSON
+  
+  // Automation Behavior
+  maxRetries                Int       @default(3)
+  retryDelayMs              Int       @default(5000)
+  
+  // AI Prompts (Customizable)
+  imagePromptSystemPrompt   String?   @db.Text // System prompt for image generation
+  recipePromptSystemPrompt  String?   @db.Text // System prompt for recipe generation
+  seoPromptSystemPrompt     String?   @db.Text // System prompt for SEO generation
+  
+  // Status
+  isConfigured              Boolean   @default(false) // True when all required fields are set
+  lastTestedAt              DateTime?
+  testStatus                String?   // "success", "failed", "not_tested"
+  testMessage               String?   @db.Text
+  
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  @@map("automation_settings")
+}
+
+// Recipe Automation Job Tracking
+model RecipeAutomation {
+  id                String    @id @default(cuid())
+  recipeRowNumber   Int       // Row number in Google Sheet
+  status            String    // PENDING, PROCESSING, SUCCESS, FAILED
+  currentStep       Int       @default(0)
+  totalSteps        Int       @default(12)
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  error             String?   @db.Text
+  jobId             String?   // BullMQ job ID
+  
+  // Recipe details (from sheet)
+  spyTitle          String?
+  seoKeyword        String?
+  recipeId          String?   // Final published recipe ID
+  postLink          String?   // Final published URL
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([status])
+  @@index([startedAt])
+  @@map("recipe_automation")
+}
+
+// Pinterest Spy Data Management
+model PinterestSpyData {
+  id                    String    @id @default(cuid())
+  
+  // Raw Pinterest Spy Data (User Input)
+  spyTitle              String    @db.Text
+  spyDescription        String    @db.Text
+  spyImageUrl           String    @db.Text
+  spyArticleUrl         String    @db.Text
+  spyPinImage           String?   @db.Text
+  annotation            String?   @db.Text
+  
+  // AI-Extracted SEO Metadata
+  seoKeyword            String?   @db.Text
+  seoTitle              String?   @db.Text
+  seoDescription        String?   @db.Text
+  seoCategory           String?   @db.Text  // AI-selected category slug from website categories
+  
+  // AI-Generated Images (4 images per recipe)
+  generatedImagePrompts Json?                // Stores all 4 prompts as JSON
+  generatedImage1Url    String?   @db.Text  // Feature image URL
+  generatedImage2Url    String?   @db.Text  // Ingredients image URL
+  generatedImage3Url    String?   @db.Text  // Cooking process image URL
+  generatedImage4Url    String?   @db.Text  // Final presentation image URL
+  imageGeneratedAt      DateTime?           // When images were generated
+  midjourneyTaskId      String?   @db.Text  // Midjourney task ID for webhook tracking
+  generatedImages       String[]  @default([]) // Array of generated image paths (from Midjourney or Gemini)
+  
+  // Processing Status Indicators
+  status                String    @default("PENDING") // PENDING, SEO_PROCESSING, SEO_COMPLETED, READY_FOR_GENERATION, GENERATING, COMPLETED, FAILED
+  isMarkedForGeneration Boolean   @default(false)
+  isProcessed           Boolean   @default(false)
+  
+  // AI Processing Metadata
+  seoProcessedAt        DateTime?
+  seoProcessingError    String?   @db.Text
+  seoProcessingAttempts Int       @default(0)
+  
+  // Recipe Generation Tracking
+  recipeGeneratedAt     DateTime?
+  generatedRecipeId     String?   // Link to created Recipe
+  generationError       String?   @db.Text
+  generationAttempts    Int       @default(0)
+  lastSuccessfulStep    String?   // SEO_COMPLETE, IMAGES_COMPLETE, RECIPE_COMPLETE, GOOGLE_INDEXED, PINTEREST_SENT
+  failedAt              DateTime? // When the failure occurred
+  failedStep            String?   // Which step failed
+  canRetry              Boolean   @default(true) // Whether entry can be retried
+  
+  // Batch/Import Tracking
+  batchId               String?   // For bulk imports
+  importedAt            DateTime?
+  importedBy            String?   // User ID who imported
+  
+  // Additional Metadata
+  priority              Int       @default(0) // Higher number = higher priority
+  tags                  String[]  @default([]) // Custom tags for organization
+  notes                 String?   @db.Text     // Internal notes
+  
+  // Audit Fields
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  createdBy             String?   // User ID who created
+  lastProcessedBy       String?   // User ID who last processed
+  
+  // Relations
+  generatedRecipe       Recipe?   @relation("SpyDataRecipe", fields: [generatedRecipeId], references: [id], onDelete: SetNull)
+  
+  // Indexes for performance
+  @@index([status])
+  @@index([isMarkedForGeneration])
+  @@index([createdAt])
+  @@index([priority])
+  @@index([batchId])
+  @@index([importedAt])
+  
+  @@map("pinterest_spy_data")
+}
+
+// Automation Scheduler Configuration
+model AutomationSchedule {
+  id                String    @id @default(cuid())
+  enabled           Boolean   @default(false)
+  scheduleType      String    @default("manual") // manual, hourly, daily, weekly, custom
+  cronExpression    String?   // For custom schedules
+  timeOfDay         String?   // HH:MM format for daily schedules
+  dayOfWeek         Int?      // 0-6 for weekly schedules (0=Sunday)
+  lastRun           DateTime?
+  nextRun           DateTime?
+  runCount          Int       @default(0)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  executions        PipelineExecutionLog[]
+
+  @@map("automation_schedule")
+}
+
+// Pipeline Execution Logs - Track each pipeline run with detailed steps
+model PipelineExecutionLog {
+  id                String    @id @default(cuid())
+  scheduleId        String?   // If triggered by schedule
+  schedule          AutomationSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  
+  spyDataId         String?   // Entry being processed
+  spyTitle          String?   // For easy reference
+  
+  status            String    @default("RUNNING") // RUNNING, SUCCESS, FAILED
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  durationMs        Int?
+  
+  // Pipeline stages
+  stage             String?   // Which stage it's in or failed at
+  progress          Int       @default(0) // 0-100
+  
+  // Results
+  recipeId          String?   // Generated recipe ID
+  recipeUrl         String?   // URL to recipe
+  
+  // Detailed logs
+  logs              Json[]    // Array of log entries with timestamps
+  
+  // Error details
+  error             String?   @db.Text
+  errorStage        String?   // Which stage failed
+  
+  // Metadata
+  triggeredBy       String    @default("schedule") // schedule, manual, api
+  authorId          String?
+  
+  createdAt         DateTime  @default(now())
+  
+  @@index([scheduleId])
+  @@index([spyDataId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("pipeline_execution_log")
+}
+
+// Automation Step Logs - Track each step execution
+model AutomationStepLog {
+  id              String    @id @default(cuid())
+  automationId    String    // References RecipeAutomation.id
+  stepNumber      Int       // 1-12
+  stepName        String    // "Fetch Google Sheet", "Generate SEO Title", etc.
+  status          String    // PENDING, RUNNING, SUCCESS, FAILED
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  durationMs      Int?      // Duration in milliseconds
+  
+  // Data passed in/out of step
+  inputData       Json?     // What went into this step
+  outputData      Json?     // What came out of this step
+  
+  // Configuration used for this step
+  config          Json?     // Prompt, model, image settings, etc.
+  
+  // Error details
+  error           String?   @db.Text
+  stackTrace      String?   @db.Text
+  
+  // Cost tracking (for AI steps)
+  tokensUsed      Int?
+  costUsd         Decimal?  @db.Decimal(10, 6)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([automationId])
+  @@index([stepNumber])
+  @@index([status])
+  @@map("automation_step_logs")
+}
