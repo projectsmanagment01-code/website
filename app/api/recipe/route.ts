@@ -298,25 +298,45 @@ export async function POST(request: NextRequest) {
       hasEmbeddedAuthor: !!recipeData.author
     });
 
-    // Check if recipe with this slug already exists
-    const existingRecipe = await prisma.recipe.findUnique({
-      where: { slug: recipeData.slug }
+    // Check if recipe with this slug already exists and generate unique slug if needed
+    let finalSlug = recipeData.slug;
+    let slugSuffix = 1;
+    let existingRecipe = await prisma.recipe.findUnique({
+      where: { slug: finalSlug }
     });
 
-    if (existingRecipe) {
-      console.log("⚠️ Recipe with slug already exists, updating instead");
-      const createdRecipe = await prisma.recipe.update({
-        where: { slug: recipeData.slug },
-        data: recipeData,
+    // Keep incrementing suffix until we find a unique slug
+    while (existingRecipe) {
+      finalSlug = `${recipeData.slug}-${slugSuffix}`;
+      console.log(`⚠️ Slug '${recipeData.slug}' already exists, trying '${finalSlug}'`);
+      
+      existingRecipe = await prisma.recipe.findUnique({
+        where: { slug: finalSlug }
       });
       
-      return NextResponse.json({
-        message: "Recipe updated successfully (slug already existed)",
-        recipe: createdRecipe,
-      });
+      slugSuffix++;
+      
+      // Safety check to prevent infinite loops
+      if (slugSuffix > 100) {
+        console.error("❌ Could not generate unique slug after 100 attempts");
+        return NextResponse.json(
+          { 
+            error: "Failed to generate unique slug",
+            details: "Too many recipes with similar slugs exist. Please provide a more unique title.",
+            originalSlug: recipeData.slug
+          },
+          { status: 400 }
+        );
+      }
     }
 
-    // Create the recipe using processed data
+    // Update the slug if it was modified
+    if (finalSlug !== recipeData.slug) {
+      console.log(`✅ Generated unique slug: ${finalSlug}`);
+      recipeData.slug = finalSlug;
+    }
+
+    // Create the recipe using processed data with unique slug
     const createdRecipe = await prisma.recipe.create({
       data: recipeData,
     });
