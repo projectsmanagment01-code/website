@@ -51,7 +51,7 @@ export default function ImageProviderSettings({
     {
       id: 'gemini' as const,
       name: 'Google Gemini',
-      icon: '=ƒÆÄ',
+      icon: 'ðŸ’Ž',
       description: 'Fast and cost-effective image generation using Gemini',
       pros: ['Free tier available', 'Fast generation', 'Integrated with existing AI'],
       cons: ['Lower quality', 'Less control']
@@ -59,7 +59,7 @@ export default function ImageProviderSettings({
     {
       id: 'midjourney' as const,
       name: 'Midjourney',
-      icon: '=ƒÄ¿',
+      icon: 'ðŸŽ¨',
       description: 'Premium quality images via GoAPI Midjourney integration',
       pros: ['Photorealistic quality', 'Style reference support', '4 variations per request'],
       cons: ['Requires paid GoAPI account', 'Async webhook pattern', 'Higher cost']
@@ -124,10 +124,10 @@ SEO Title: {seoTitle}`;
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{provider.description}</p>
                 <div className="mt-3 space-y-1">
                   <div className="text-xs text-green-600 dark:text-green-400">
-                    G£ô {provider.pros.join(' GÇó ')}
+                    âœ“ {provider.pros.join(' â€¢ ')}
                   </div>
                   <div className="text-xs text-amber-600 dark:text-amber-400">
-                    GÜá {provider.cons.join(' GÇó ')}
+                    âš  {provider.cons.join(' â€¢ ')}
                   </div>
                 </div>
               </div>
