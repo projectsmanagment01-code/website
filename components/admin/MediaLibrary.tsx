@@ -4,11 +4,12 @@ import { ImageGallery } from "./ImageGallery";
 import { EnhancedImageGallery } from "./EnhancedImageGallery";
 import { FileUpload } from "./FileUpload";
 import { ImageUsageViewer } from "./ImageUsageViewer";
-import { Upload, Image, FolderOpen, Link } from "lucide-react";
+import { Upload, Image, FolderOpen, Link, Sparkles } from "lucide-react";
 
 const categories = [
   { id: "all", name: "All Images", icon: FolderOpen },
   { id: "recipes", name: "Recipe Images", icon: Image },
+  { id: "generated-recipes", name: "Generated Recipes", icon: Sparkles },
   { id: "general", name: "General", icon: Upload },
   { id: "ingredients", name: "Ingredients", icon: Image },
   { id: "authors", name: "Authors", icon: Image },
@@ -32,23 +33,23 @@ export const MediaLibrary: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-gray-50">
+      <div className="border-b border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700">
         <div className="px-4 md:px-6 py-4">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+              <h2 className="text-lg md:text-xl font-semibold text-slate-900 dark:text-slate-100">
                 Media Library
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Manage your uploaded images and recipe assignments
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
               {/* Tab Navigation */}
-              <div className="flex space-x-1 bg-white rounded-lg p-1 border border-gray-200">
+              <div className="flex space-x-1 bg-white dark:bg-slate-700 rounded-lg p-1 border border-gray-200 dark:border-slate-600">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -80,7 +81,7 @@ export const MediaLibrary: React.FC = () => {
 
           {/* Upload Section */}
           {showUpload && (
-            <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
+            <div className="mt-6 p-4 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
               <FileUpload onFileUploaded={handleFileUploaded} />
             </div>
           )}

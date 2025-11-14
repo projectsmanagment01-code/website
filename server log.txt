@@ -1,0 +1,565 @@
+2025-11-05T20:47:18.051191843Z ⏳ Waiting for database...
+2025-11-05T20:47:18.054823780Z ✅ DB ready
+2025-11-05T20:47:18.054889391Z ⏳ Waiting for Redis...
+2025-11-05T20:47:18.061139657Z ✅ Redis ready
+2025-11-05T20:47:21.872010316Z Prisma schema loaded from prisma/schema.prisma
+2025-11-05T20:47:21.881835631Z Datasource "db": PostgreSQL database "recipes", schema "public" at "db:5432"
+2025-11-05T20:47:22.465728373Z 
+2025-11-05T20:47:22.465779382Z 🚀  Your database is now in sync with your Prisma schema. Done in 407ms
+2025-11-05T20:47:22.466609408Z 
+2025-11-05T20:47:22.469697269Z Running generate... (Use --skip-generate to skip the generators)
+2025-11-05T20:47:22.836280559Z KAKRunning generate... - Prisma Client
+2025-11-05T20:47:23.515567043Z KAK✔ Generated Prisma Client (v6.19.0) to ./node_modules/@prisma/client in 674ms
+2025-11-05T20:47:23.516796513Z 
+2025-11-05T20:47:23.549362060Z npm notice 
+2025-11-05T20:47:23.549500130Z npm notice New major version of npm available! 10.5.2 -> 11.6.2
+2025-11-05T20:47:23.549564518Z npm notice Changelog: <https://github.com/npm/cli/releases/tag/v11.6.2>
+2025-11-05T20:47:23.550139133Z npm notice Run `npm install -g npm@11.6.2` to update!
+2025-11-05T20:47:23.550245581Z npm notice 
+2025-11-05T20:47:23.564937629Z 🚀 Starting app with automation worker...
+2025-11-05T20:47:24.090126666Z yarn run v1.22.19
+2025-11-05T20:47:24.144924768Z $ concurrently "yarn media-server:prod" "yarn automation-worker" "next start"
+2025-11-05T20:47:25.293850193Z [1] $ tsx automation/queue/automation.worker.ts
+2025-11-05T20:47:25.343462994Z [0] $ tsx server/index.ts
+2025-11-05T20:47:25.866282102Z [2]    ▲ Next.js 15.2.4
+2025-11-05T20:47:25.870676749Z [2]    - Local:        http://localhost:3000
+2025-11-05T20:47:25.870731805Z [2]    - Network:      http://10.0.4.5:3000
+2025-11-05T20:47:25.870739736Z [2] 
+2025-11-05T20:47:25.870746346Z [2]  ✓ Starting...
+2025-11-05T20:47:26.122552314Z [1] 
+2025-11-05T20:47:26.122600672Z [1] node:internal/modules/run_main:129
+2025-11-05T20:47:26.122605762Z [1]     triggerUncaughtException(
+2025-11-05T20:47:26.122609974Z [1]     ^
+2025-11-05T20:47:26.132005802Z [1] Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/app/automation/queue/automation.worker.ts' imported from /app/
+2025-11-05T20:47:26.132057602Z [1]     at finalizeResolution (node:internal/modules/esm/resolve:265:11)
+2025-11-05T20:47:26.132067047Z [1]     at moduleResolve (node:internal/modules/esm/resolve:933:10)
+2025-11-05T20:47:26.132073889Z [1]     at defaultResolve (node:internal/modules/esm/resolve:1157:11)
+2025-11-05T20:47:26.132081056Z [1]     at nextResolve (node:internal/modules/esm/hooks:866:28)
+2025-11-05T20:47:26.132110477Z [1]     at resolveBase (file:///app/node_modules/tsx/dist/esm/index.mjs?1762375645875:2:3744)
+2025-11-05T20:47:26.132115815Z [1]     at async resolveDirectory (file:///app/node_modules/tsx/dist/esm/index.mjs?1762375645875:2:4237)
+2025-11-05T20:47:26.132121077Z [1]     at async resolve (file:///app/node_modules/tsx/dist/esm/index.mjs?1762375645875:2:5355)
+2025-11-05T20:47:26.132126164Z [1]     at async nextResolve (node:internal/modules/esm/hooks:866:22)
+2025-11-05T20:47:26.132131324Z [1]     at async Hooks.resolve (node:internal/modules/esm/hooks:304:24)
+2025-11-05T20:47:26.132136588Z [1]     at async handleMessage (node:internal/modules/esm/worker:196:18) {
+2025-11-05T20:47:26.132141838Z [1]   code: 'ERR_MODULE_NOT_FOUND',
+2025-11-05T20:47:26.132147425Z [1]   url: 'file:///app/automation/queue/automation.worker.ts'
+2025-11-05T20:47:26.132152706Z [1] }
+2025-11-05T20:47:26.132157556Z [1] 
+2025-11-05T20:47:26.132162216Z [1] Node.js v20.13.1
+2025-11-05T20:47:26.185870182Z [1] error Command failed with exit code 1.
+2025-11-05T20:47:26.186730563Z [1] info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+2025-11-05T20:47:26.211890188Z [1] yarn automation-worker exited with code 1
+2025-11-05T20:47:26.444045873Z [2]  ✓ Ready in 1422ms
+2025-11-05T20:47:27.359947443Z [0] 🚀 Media server running on port 3001
+2025-11-05T20:47:27.360507854Z [0] 📊 Health check: http://localhost:3001/health
+2025-11-05T20:47:27.360544515Z [0] 🖼️  Media API: http://localhost:3001/api/media
+2025-11-05T20:49:21.594523085Z [2] prisma:error 
+2025-11-05T20:49:21.594577597Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:49:21.594583174Z [2] 
+2025-11-05T20:49:21.594588612Z [2] {
+2025-11-05T20:49:21.594592755Z [2]   where: {},
+2025-11-05T20:49:21.594596683Z [2]   include: {
+2025-11-05T20:49:21.594600986Z [2]     schedule: {
+2025-11-05T20:49:21.594605045Z [2]       select: {
+2025-11-05T20:49:21.594609597Z [2]         id: true,
+2025-11-05T20:49:21.594614489Z [2]         name: true,
+2025-11-05T20:49:21.594618424Z [2]         ~~~~
+2025-11-05T20:49:21.594622303Z [2]         cronExpression: true,
+2025-11-05T20:49:21.594626645Z [2] ?       enabled?: true,
+2025-11-05T20:49:21.594630695Z [2] ?       scheduleType?: true,
+2025-11-05T20:49:21.594634445Z [2] ?       timeOfDay?: true,
+2025-11-05T20:49:21.594638273Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:49:21.594642001Z [2] ?       lastRun?: true,
+2025-11-05T20:49:21.594646027Z [2] ?       nextRun?: true,
+2025-11-05T20:49:21.594650624Z [2] ?       runCount?: true,
+2025-11-05T20:49:21.594675117Z [2] ?       createdAt?: true,
+2025-11-05T20:49:21.594678924Z [2] ?       updatedAt?: true,
+2025-11-05T20:49:21.594681764Z [2] ?       executions?: true,
+2025-11-05T20:49:21.594684655Z [2] ?       _count?: true
+2025-11-05T20:49:21.594687659Z [2]       }
+2025-11-05T20:49:21.594690780Z [2]     }
+2025-11-05T20:49:21.594694174Z [2]   },
+2025-11-05T20:49:21.594698040Z [2]   orderBy: {
+2025-11-05T20:49:21.594701971Z [2]     createdAt: "desc"
+2025-11-05T20:49:21.594706090Z [2]   },
+2025-11-05T20:49:21.594715185Z [2]   skip: 0,
+2025-11-05T20:49:21.594719238Z [2]   take: 20
+2025-11-05T20:49:21.594722883Z [2] }
+2025-11-05T20:49:21.594727025Z [2] 
+2025-11-05T20:49:21.594730267Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:49:30.056334055Z [2] prisma:error 
+2025-11-05T20:49:30.056391221Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:49:30.056397736Z [2] 
+2025-11-05T20:49:30.056402564Z [2] {
+2025-11-05T20:49:30.056407621Z [2]   where: {
+2025-11-05T20:49:30.056412039Z [2]     status: "RUNNING"
+2025-11-05T20:49:30.056417160Z [2]   },
+2025-11-05T20:49:30.056422306Z [2]   include: {
+2025-11-05T20:49:30.056427270Z [2]     schedule: {
+2025-11-05T20:49:30.056432034Z [2]       select: {
+2025-11-05T20:49:30.056436853Z [2]         id: true,
+2025-11-05T20:49:30.056441629Z [2]         name: true,
+2025-11-05T20:49:30.056446726Z [2]         ~~~~
+2025-11-05T20:49:30.056452172Z [2]         cronExpression: true,
+2025-11-05T20:49:30.056457011Z [2] ?       enabled?: true,
+2025-11-05T20:49:30.056462477Z [2] ?       scheduleType?: true,
+2025-11-05T20:49:30.056484445Z [2] ?       timeOfDay?: true,
+2025-11-05T20:49:30.056487669Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:49:30.056490623Z [2] ?       lastRun?: true,
+2025-11-05T20:49:30.056493520Z [2] ?       nextRun?: true,
+2025-11-05T20:49:30.056496604Z [2] ?       runCount?: true,
+2025-11-05T20:49:30.056499586Z [2] ?       createdAt?: true,
+2025-11-05T20:49:30.056502519Z [2] ?       updatedAt?: true,
+2025-11-05T20:49:30.056505417Z [2] ?       executions?: true,
+2025-11-05T20:49:30.056508306Z [2] ?       _count?: true
+2025-11-05T20:49:30.056511184Z [2]       }
+2025-11-05T20:49:30.056514859Z [2]     }
+2025-11-05T20:49:30.056517735Z [2]   },
+2025-11-05T20:49:30.056520664Z [2]   orderBy: {
+2025-11-05T20:49:30.056545189Z [2]     createdAt: "desc"
+2025-11-05T20:49:30.056548779Z [2]   },
+2025-11-05T20:49:30.056551867Z [2]   skip: 0,
+2025-11-05T20:49:30.056554900Z [2]   take: 20
+2025-11-05T20:49:30.056557906Z [2] }
+2025-11-05T20:49:30.056560811Z [2] 
+2025-11-05T20:49:30.056563779Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:49:32.947374760Z [2] prisma:error 
+2025-11-05T20:49:32.947414075Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:49:32.947418166Z [2] 
+2025-11-05T20:49:32.947421133Z [2] {
+2025-11-05T20:49:32.947423914Z [2]   where: {
+2025-11-05T20:49:32.947426678Z [2]     status: "SUCCESS"
+2025-11-05T20:49:32.947429709Z [2]   },
+2025-11-05T20:49:32.947432931Z [2]   include: {
+2025-11-05T20:49:32.947435679Z [2]     schedule: {
+2025-11-05T20:49:32.947438425Z [2]       select: {
+2025-11-05T20:49:32.947441068Z [2]         id: true,
+2025-11-05T20:49:32.947443756Z [2]         name: true,
+2025-11-05T20:49:32.947446442Z [2]         ~~~~
+2025-11-05T20:49:32.947449239Z [2]         cronExpression: true,
+2025-11-05T20:49:32.947452052Z [2] ?       enabled?: true,
+2025-11-05T20:49:32.947455563Z [2] ?       scheduleType?: true,
+2025-11-05T20:49:32.947459616Z [2] ?       timeOfDay?: true,
+2025-11-05T20:49:32.947590974Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:49:32.947599960Z [2] ?       lastRun?: true,
+2025-11-05T20:49:32.947602950Z [2] ?       nextRun?: true,
+2025-11-05T20:49:32.947605664Z [2] ?       runCount?: true,
+2025-11-05T20:49:32.947608414Z [2] ?       createdAt?: true,
+2025-11-05T20:49:32.947611109Z [2] ?       updatedAt?: true,
+2025-11-05T20:49:32.947614089Z [2] ?       executions?: true,
+2025-11-05T20:49:32.947616907Z [2] ?       _count?: true
+2025-11-05T20:49:32.947619671Z [2]       }
+2025-11-05T20:49:32.947622376Z [2]     }
+2025-11-05T20:49:32.947625049Z [2]   },
+2025-11-05T20:49:32.947628684Z [2]   orderBy: {
+2025-11-05T20:49:32.947631458Z [2]     createdAt: "desc"
+2025-11-05T20:49:32.947634393Z [2]   },
+2025-11-05T20:49:32.947637080Z [2]   skip: 0,
+2025-11-05T20:49:32.947639716Z [2]   take: 20
+2025-11-05T20:49:32.947642368Z [2] }
+2025-11-05T20:49:32.947645010Z [2] 
+2025-11-05T20:49:32.947647801Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:50:37.946891422Z [2] prisma:error 
+2025-11-05T20:50:37.946932685Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:50:37.946936587Z [2] 
+2025-11-05T20:50:37.946939425Z [2] {
+2025-11-05T20:50:37.946942381Z [2]   where: {},
+2025-11-05T20:50:37.946945395Z [2]   include: {
+2025-11-05T20:50:37.946948110Z [2]     schedule: {
+2025-11-05T20:50:37.946950992Z [2]       select: {
+2025-11-05T20:50:37.946953715Z [2]         id: true,
+2025-11-05T20:50:37.946956491Z [2]         name: true,
+2025-11-05T20:50:37.946959257Z [2]         ~~~~
+2025-11-05T20:50:37.946961971Z [2]         cronExpression: true,
+2025-11-05T20:50:37.946964675Z [2] ?       enabled?: true,
+2025-11-05T20:50:37.946971946Z [2] ?       scheduleType?: true,
+2025-11-05T20:50:37.946974792Z [2] ?       timeOfDay?: true,
+2025-11-05T20:50:37.946977464Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:50:37.946980134Z [2] ?       lastRun?: true,
+2025-11-05T20:50:37.946982883Z [2] ?       nextRun?: true,
+2025-11-05T20:50:37.946985642Z [2] ?       runCount?: true,
+2025-11-05T20:50:37.946988373Z [2] ?       createdAt?: true,
+2025-11-05T20:50:37.946991190Z [2] ?       updatedAt?: true,
+2025-11-05T20:50:37.946993954Z [2] ?       executions?: true,
+2025-11-05T20:50:37.946996773Z [2] ?       _count?: true
+2025-11-05T20:50:37.946999478Z [2]       }
+2025-11-05T20:50:37.947002263Z [2]     }
+2025-11-05T20:50:37.947004956Z [2]   },
+2025-11-05T20:50:37.947007715Z [2]   orderBy: {
+2025-11-05T20:50:37.947010408Z [2]     createdAt: "desc"
+2025-11-05T20:50:37.947013220Z [2]   },
+2025-11-05T20:50:37.947015868Z [2]   skip: 0,
+2025-11-05T20:50:37.947018539Z [2]   take: 20
+2025-11-05T20:50:37.947021178Z [2] }
+2025-11-05T20:50:37.947023806Z [2] 
+2025-11-05T20:50:37.947026550Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:50:46.656964745Z [2] prisma:error 
+2025-11-05T20:50:46.657008167Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:50:46.657012788Z [2] 
+2025-11-05T20:50:46.657016523Z [2] {
+2025-11-05T20:50:46.657020213Z [2]   where: {
+2025-11-05T20:50:46.657024037Z [2]     status: "RUNNING"
+2025-11-05T20:50:46.657028697Z [2]   },
+2025-11-05T20:50:46.657032800Z [2]   include: {
+2025-11-05T20:50:46.657036613Z [2]     schedule: {
+2025-11-05T20:50:46.657040318Z [2]       select: {
+2025-11-05T20:50:46.657062057Z [2]         id: true,
+2025-11-05T20:50:46.657065071Z [2]         name: true,
+2025-11-05T20:50:46.657067836Z [2]         ~~~~
+2025-11-05T20:50:46.657070547Z [2]         cronExpression: true,
+2025-11-05T20:50:46.657073297Z [2] ?       enabled?: true,
+2025-11-05T20:50:46.657076068Z [2] ?       scheduleType?: true,
+2025-11-05T20:50:46.657078774Z [2] ?       timeOfDay?: true,
+2025-11-05T20:50:46.657081456Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:50:46.657084129Z [2] ?       lastRun?: true,
+2025-11-05T20:50:46.657086789Z [2] ?       nextRun?: true,
+2025-11-05T20:50:46.657089466Z [2] ?       runCount?: true,
+2025-11-05T20:50:46.657092123Z [2] ?       createdAt?: true,
+2025-11-05T20:50:46.657094790Z [2] ?       updatedAt?: true,
+2025-11-05T20:50:46.657097506Z [2] ?       executions?: true,
+2025-11-05T20:50:46.657100176Z [2] ?       _count?: true
+2025-11-05T20:50:46.657102840Z [2]       }
+2025-11-05T20:50:46.657105516Z [2]     }
+2025-11-05T20:50:46.657108159Z [2]   },
+2025-11-05T20:50:46.657110815Z [2]   orderBy: {
+2025-11-05T20:50:46.657113446Z [2]     createdAt: "desc"
+2025-11-05T20:50:46.657116223Z [2]   },
+2025-11-05T20:50:46.657118993Z [2]   skip: 0,
+2025-11-05T20:50:46.657121678Z [2]   take: 20
+2025-11-05T20:50:46.657124326Z [2] }
+2025-11-05T20:50:46.657126952Z [2] 
+2025-11-05T20:50:46.657129677Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:50:50.682980291Z [2] prisma:error 
+2025-11-05T20:50:50.683021436Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:50:50.683025263Z [2] 
+2025-11-05T20:50:50.683027532Z [2] {
+2025-11-05T20:50:50.683030022Z [2]   where: {
+2025-11-05T20:50:50.683032121Z [2]     status: "RUNNING",
+2025-11-05T20:50:50.683034485Z [2]     triggeredBy: "schedule"
+2025-11-05T20:50:50.683036627Z [2]   },
+2025-11-05T20:50:50.683038742Z [2]   include: {
+2025-11-05T20:50:50.683040682Z [2]     schedule: {
+2025-11-05T20:50:50.683042838Z [2]       select: {
+2025-11-05T20:50:50.683045060Z [2]         id: true,
+2025-11-05T20:50:50.683047102Z [2]         name: true,
+2025-11-05T20:50:50.683049103Z [2]         ~~~~
+2025-11-05T20:50:50.683051080Z [2]         cronExpression: true,
+2025-11-05T20:50:50.683053152Z [2] ?       enabled?: true,
+2025-11-05T20:50:50.683055167Z [2] ?       scheduleType?: true,
+2025-11-05T20:50:50.683072310Z [2] ?       timeOfDay?: true,
+2025-11-05T20:50:50.683074606Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:50:50.683076623Z [2] ?       lastRun?: true,
+2025-11-05T20:50:50.683078615Z [2] ?       nextRun?: true,
+2025-11-05T20:50:50.683080604Z [2] ?       runCount?: true,
+2025-11-05T20:50:50.683082606Z [2] ?       createdAt?: true,
+2025-11-05T20:50:50.683084593Z [2] ?       updatedAt?: true,
+2025-11-05T20:50:50.683086635Z [2] ?       executions?: true,
+2025-11-05T20:50:50.683089795Z [2] ?       _count?: true
+2025-11-05T20:50:50.683091874Z [2]       }
+2025-11-05T20:50:50.683093848Z [2]     }
+2025-11-05T20:50:50.683095881Z [2]   },
+2025-11-05T20:50:50.683097841Z [2]   orderBy: {
+2025-11-05T20:50:50.683099843Z [2]     createdAt: "desc"
+2025-11-05T20:50:50.683101911Z [2]   },
+2025-11-05T20:50:50.683103860Z [2]   skip: 0,
+2025-11-05T20:50:50.683105865Z [2]   take: 20
+2025-11-05T20:50:50.683107830Z [2] }
+2025-11-05T20:50:50.683110102Z [2] 
+2025-11-05T20:50:50.683112137Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:50:52.998721705Z [2] prisma:error 
+2025-11-05T20:50:52.998760506Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:50:52.998764518Z [2] 
+2025-11-05T20:50:52.998767547Z [2] {
+2025-11-05T20:50:52.998770508Z [2]   where: {
+2025-11-05T20:50:52.998773283Z [2]     status: "RUNNING",
+2025-11-05T20:50:52.998776227Z [2]     triggeredBy: "manual"
+2025-11-05T20:50:52.998779183Z [2]   },
+2025-11-05T20:50:52.998788816Z [2]   include: {
+2025-11-05T20:50:52.998791575Z [2]     schedule: {
+2025-11-05T20:50:52.998794255Z [2]       select: {
+2025-11-05T20:50:52.998796958Z [2]         id: true,
+2025-11-05T20:50:52.998799711Z [2]         name: true,
+2025-11-05T20:50:52.998802467Z [2]         ~~~~
+2025-11-05T20:50:52.998805231Z [2]         cronExpression: true,
+2025-11-05T20:50:52.998808104Z [2] ?       enabled?: true,
+2025-11-05T20:50:52.998810859Z [2] ?       scheduleType?: true,
+2025-11-05T20:50:52.998813709Z [2] ?       timeOfDay?: true,
+2025-11-05T20:50:52.998816402Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:50:52.998819104Z [2] ?       lastRun?: true,
+2025-11-05T20:50:52.998821828Z [2] ?       nextRun?: true,
+2025-11-05T20:50:52.998824778Z [2] ?       runCount?: true,
+2025-11-05T20:50:52.998827470Z [2] ?       createdAt?: true,
+2025-11-05T20:50:52.998830865Z [2] ?       updatedAt?: true,
+2025-11-05T20:50:52.998849110Z [2] ?       executions?: true,
+2025-11-05T20:50:52.998852435Z [2] ?       _count?: true
+2025-11-05T20:50:52.998855171Z [2]       }
+2025-11-05T20:50:52.998858207Z [2]     }
+2025-11-05T20:50:52.998860954Z [2]   },
+2025-11-05T20:50:52.998863625Z [2]   orderBy: {
+2025-11-05T20:50:52.998866282Z [2]     createdAt: "desc"
+2025-11-05T20:50:52.998869192Z [2]   },
+2025-11-05T20:50:52.998871889Z [2]   skip: 0,
+2025-11-05T20:50:52.998874711Z [2]   take: 20
+2025-11-05T20:50:52.998877418Z [2] }
+2025-11-05T20:50:52.998880092Z [2] 
+2025-11-05T20:50:52.998882862Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:51:26.793102717Z [2] prisma:error 
+2025-11-05T20:51:26.793150039Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:51:26.793154209Z [2] 
+2025-11-05T20:51:26.793157121Z [2] {
+2025-11-05T20:51:26.793160040Z [2]   where: {},
+2025-11-05T20:51:26.793162980Z [2]   include: {
+2025-11-05T20:51:26.793166294Z [2]     schedule: {
+2025-11-05T20:51:26.793174182Z [2]       select: {
+2025-11-05T20:51:26.793176977Z [2]         id: true,
+2025-11-05T20:51:26.793179699Z [2]         name: true,
+2025-11-05T20:51:26.793182498Z [2]         ~~~~
+2025-11-05T20:51:26.793185204Z [2]         cronExpression: true,
+2025-11-05T20:51:26.793188102Z [2] ?       enabled?: true,
+2025-11-05T20:51:26.793190831Z [2] ?       scheduleType?: true,
+2025-11-05T20:51:26.793193599Z [2] ?       timeOfDay?: true,
+2025-11-05T20:51:26.793196292Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:51:26.793199728Z [2] ?       lastRun?: true,
+2025-11-05T20:51:26.793202754Z [2] ?       nextRun?: true,
+2025-11-05T20:51:26.793205505Z [2] ?       runCount?: true,
+2025-11-05T20:51:26.793208132Z [2] ?       createdAt?: true,
+2025-11-05T20:51:26.793211153Z [2] ?       updatedAt?: true,
+2025-11-05T20:51:26.793213826Z [2] ?       executions?: true,
+2025-11-05T20:51:26.793216602Z [2] ?       _count?: true
+2025-11-05T20:51:26.793219402Z [2]       }
+2025-11-05T20:51:26.793222046Z [2]     }
+2025-11-05T20:51:26.793224700Z [2]   },
+2025-11-05T20:51:26.793227442Z [2]   orderBy: {
+2025-11-05T20:51:26.793230170Z [2]     createdAt: "desc"
+2025-11-05T20:51:26.793232974Z [2]   },
+2025-11-05T20:51:26.793235588Z [2]   skip: 0,
+2025-11-05T20:51:26.793238379Z [2]   take: 20
+2025-11-05T20:51:26.793254484Z [2] }
+2025-11-05T20:51:26.793256840Z [2] 
+2025-11-05T20:51:26.793258882Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:51:32.556914892Z [2] prisma:error 
+2025-11-05T20:51:32.556968417Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:51:32.556973642Z [2] 
+2025-11-05T20:51:32.556977409Z [2] {
+2025-11-05T20:51:32.556980352Z [2]   where: {
+2025-11-05T20:51:32.556983620Z [2]     triggeredBy: "schedule"
+2025-11-05T20:51:32.556987211Z [2]   },
+2025-11-05T20:51:32.556991740Z [2]   include: {
+2025-11-05T20:51:32.556994876Z [2]     schedule: {
+2025-11-05T20:51:32.556998495Z [2]       select: {
+2025-11-05T20:51:32.557003948Z [2]         id: true,
+2025-11-05T20:51:32.557006960Z [2]         name: true,
+2025-11-05T20:51:32.557009922Z [2]         ~~~~
+2025-11-05T20:51:32.557012964Z [2]         cronExpression: true,
+2025-11-05T20:51:32.557015858Z [2] ?       enabled?: true,
+2025-11-05T20:51:32.557018827Z [2] ?       scheduleType?: true,
+2025-11-05T20:51:32.557021908Z [2] ?       timeOfDay?: true,
+2025-11-05T20:51:32.557024845Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:51:32.557028194Z [2] ?       lastRun?: true,
+2025-11-05T20:51:32.557031438Z [2] ?       nextRun?: true,
+2025-11-05T20:51:32.557034594Z [2] ?       runCount?: true,
+2025-11-05T20:51:32.557037616Z [2] ?       createdAt?: true,
+2025-11-05T20:51:32.557041081Z [2] ?       updatedAt?: true,
+2025-11-05T20:51:32.557044349Z [2] ?       executions?: true,
+2025-11-05T20:51:32.557047252Z [2] ?       _count?: true
+2025-11-05T20:51:32.557050596Z [2]       }
+2025-11-05T20:51:32.557054010Z [2]     }
+2025-11-05T20:51:32.557058256Z [2]   },
+2025-11-05T20:51:32.557061171Z [2]   orderBy: {
+2025-11-05T20:51:32.557064246Z [2]     createdAt: "desc"
+2025-11-05T20:51:32.557067653Z [2]   },
+2025-11-05T20:51:32.557070991Z [2]   skip: 0,
+2025-11-05T20:51:32.557074585Z [2]   take: 20
+2025-11-05T20:51:32.557077432Z [2] }
+2025-11-05T20:51:32.557080721Z [2] 
+2025-11-05T20:51:32.557084011Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T20:51:34.962852380Z [2] prisma:error 
+2025-11-05T20:51:34.962925358Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-05T20:51:34.962930094Z [2] 
+2025-11-05T20:51:34.962932476Z [2] {
+2025-11-05T20:51:34.962948976Z [2]   where: {
+2025-11-05T20:51:34.962951332Z [2]     triggeredBy: "manual"
+2025-11-05T20:51:34.962953714Z [2]   },
+2025-11-05T20:51:34.962955714Z [2]   include: {
+2025-11-05T20:51:34.962957969Z [2]     schedule: {
+2025-11-05T20:51:34.962960035Z [2]       select: {
+2025-11-05T20:51:34.962962072Z [2]         id: true,
+2025-11-05T20:51:34.962964037Z [2]         name: true,
+2025-11-05T20:51:34.962966021Z [2]         ~~~~
+2025-11-05T20:51:34.962968054Z [2]         cronExpression: true,
+2025-11-05T20:51:34.962970102Z [2] ?       enabled?: true,
+2025-11-05T20:51:34.962972116Z [2] ?       scheduleType?: true,
+2025-11-05T20:51:34.962974105Z [2] ?       timeOfDay?: true,
+2025-11-05T20:51:34.962976824Z [2] ?       dayOfWeek?: true,
+2025-11-05T20:51:34.962979267Z [2] ?       lastRun?: true,
+2025-11-05T20:51:34.962981306Z [2] ?       nextRun?: true,
+2025-11-05T20:51:34.962983273Z [2] ?       runCount?: true,
+2025-11-05T20:51:34.962998047Z [2] ?       createdAt?: true,
+2025-11-05T20:51:34.963000177Z [2] ?       updatedAt?: true,
+2025-11-05T20:51:34.963002260Z [2] ?       executions?: true,
+2025-11-05T20:51:34.963004284Z [2] ?       _count?: true
+2025-11-05T20:51:34.963006301Z [2]       }
+2025-11-05T20:51:34.963008304Z [2]     }
+2025-11-05T20:51:34.963010245Z [2]   },
+2025-11-05T20:51:34.963012190Z [2]   orderBy: {
+2025-11-05T20:51:34.963014169Z [2]     createdAt: "desc"
+2025-11-05T20:51:34.963016297Z [2]   },
+2025-11-05T20:51:34.963018233Z [2]   skip: 0,
+2025-11-05T20:51:34.963020194Z [2]   take: 20
+2025-11-05T20:51:34.963022116Z [2] }
+2025-11-05T20:51:34.963024051Z [2] 
+2025-11-05T20:51:34.963026094Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-05T21:29:19.999758841Z [2]  ⨯ [Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.] {
+2025-11-05T21:29:19.999840442Z [2]   digest: 'DYNAMIC_SERVER_USAGE'
+2025-11-05T21:29:19.999845679Z [2] }
+2025-11-06T14:30:22.447840898Z [2]  ⨯ [Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.] {
+2025-11-06T14:30:22.448245530Z [2]   digest: 'DYNAMIC_SERVER_USAGE'
+2025-11-06T14:30:22.448254030Z [2] }
+2025-11-06T15:18:56.956594159Z [2]  ⨯ [Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.] {
+2025-11-06T15:18:56.956639073Z [2]   digest: 'DYNAMIC_SERVER_USAGE'
+2025-11-06T15:18:56.956645674Z [2] }
+2025-11-06T15:19:13.620297142Z [2]  ⨯ [Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.] {
+2025-11-06T15:19:13.620362966Z [2]   digest: 'DYNAMIC_SERVER_USAGE'
+2025-11-06T15:19:13.620367883Z [2] }
+2025-11-06T15:19:28.030434353Z [2] prisma:error 
+2025-11-06T15:19:28.030501033Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-06T15:19:28.030507366Z [2] 
+2025-11-06T15:19:28.030511702Z [2] {
+2025-11-06T15:19:28.030515718Z [2]   where: {},
+2025-11-06T15:19:28.030519968Z [2]   include: {
+2025-11-06T15:19:28.030524016Z [2]     schedule: {
+2025-11-06T15:19:28.030528011Z [2]       select: {
+2025-11-06T15:19:28.030532013Z [2]         id: true,
+2025-11-06T15:19:28.030536095Z [2]         name: true,
+2025-11-06T15:19:28.030540237Z [2]         ~~~~
+2025-11-06T15:19:28.030544269Z [2]         cronExpression: true,
+2025-11-06T15:19:28.030548654Z [2] ?       enabled?: true,
+2025-11-06T15:19:28.030552680Z [2] ?       scheduleType?: true,
+2025-11-06T15:19:28.030557081Z [2] ?       timeOfDay?: true,
+2025-11-06T15:19:28.030561155Z [2] ?       dayOfWeek?: true,
+2025-11-06T15:19:28.030565300Z [2] ?       lastRun?: true,
+2025-11-06T15:19:28.030569449Z [2] ?       nextRun?: true,
+2025-11-06T15:19:28.030573508Z [2] ?       runCount?: true,
+2025-11-06T15:19:28.030577634Z [2] ?       createdAt?: true,
+2025-11-06T15:19:28.030581647Z [2] ?       updatedAt?: true,
+2025-11-06T15:19:28.030585787Z [2] ?       executions?: true,
+2025-11-06T15:19:28.030589989Z [2] ?       _count?: true
+2025-11-06T15:19:28.030594083Z [2]       }
+2025-11-06T15:19:28.030598276Z [2]     }
+2025-11-06T15:19:28.030609798Z [2]   },
+2025-11-06T15:19:28.030613913Z [2]   orderBy: {
+2025-11-06T15:19:28.030618285Z [2]     createdAt: "desc"
+2025-11-06T15:19:28.030622626Z [2]   },
+2025-11-06T15:19:28.030626670Z [2]   skip: 0,
+2025-11-06T15:19:28.030630923Z [2]   take: 20
+2025-11-06T15:19:28.030635232Z [2] }
+2025-11-06T15:19:28.030639388Z [2] 
+2025-11-06T15:19:28.030662230Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-06T16:17:46.796638722Z [2] prisma:error 
+2025-11-06T16:17:46.796682365Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-06T16:17:46.796686266Z [2] 
+2025-11-06T16:17:46.796689694Z [2] {
+2025-11-06T16:17:46.796692699Z [2]   where: {},
+2025-11-06T16:17:46.796695475Z [2]   include: {
+2025-11-06T16:17:46.796698866Z [2]     schedule: {
+2025-11-06T16:17:46.796701732Z [2]       select: {
+2025-11-06T16:17:46.796704629Z [2]         id: true,
+2025-11-06T16:17:46.796707304Z [2]         name: true,
+2025-11-06T16:17:46.796710085Z [2]         ~~~~
+2025-11-06T16:17:46.796712836Z [2]         cronExpression: true,
+2025-11-06T16:17:46.796715583Z [2] ?       enabled?: true,
+2025-11-06T16:17:46.796718293Z [2] ?       scheduleType?: true,
+2025-11-06T16:17:46.796721110Z [2] ?       timeOfDay?: true,
+2025-11-06T16:17:46.796723861Z [2] ?       dayOfWeek?: true,
+2025-11-06T16:17:46.796726565Z [2] ?       lastRun?: true,
+2025-11-06T16:17:46.796729261Z [2] ?       nextRun?: true,
+2025-11-06T16:17:46.796731961Z [2] ?       runCount?: true,
+2025-11-06T16:17:46.796734696Z [2] ?       createdAt?: true,
+2025-11-06T16:17:46.796737401Z [2] ?       updatedAt?: true,
+2025-11-06T16:17:46.796740107Z [2] ?       executions?: true,
+2025-11-06T16:17:46.796742843Z [2] ?       _count?: true
+2025-11-06T16:17:46.796745485Z [2]       }
+2025-11-06T16:17:46.796748152Z [2]     }
+2025-11-06T16:17:46.796750815Z [2]   },
+2025-11-06T16:17:46.796754202Z [2]   orderBy: {
+2025-11-06T16:17:46.796756944Z [2]     createdAt: "desc"
+2025-11-06T16:17:46.796759761Z [2]   },
+2025-11-06T16:17:46.796762430Z [2]   skip: 0,
+2025-11-06T16:17:46.796765170Z [2]   take: 20
+2025-11-06T16:17:46.796767839Z [2] }
+2025-11-06T16:17:46.796770512Z [2] 
+2025-11-06T16:17:46.796773251Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-06T16:21:58.681270614Z [2]  ⨯ [Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.] {
+2025-11-06T16:21:58.681322370Z [2]   digest: 'DYNAMIC_SERVER_USAGE'
+2025-11-06T16:21:58.681327341Z [2] }
+2025-11-06T17:42:57.004871480Z [2]  ⨯ [Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details. A digest property is included on this error instance which may provide additional details about the nature of the error.] {
+2025-11-06T17:42:57.004978101Z [2]   digest: 'DYNAMIC_SERVER_USAGE'
+2025-11-06T17:42:57.004986115Z [2] }
+2025-11-06T17:49:20.377975566Z [2] prisma:error 
+2025-11-06T17:49:20.378021691Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-06T17:49:20.378026802Z [2] 
+2025-11-06T17:49:20.378031456Z [2] {
+2025-11-06T17:49:20.378035194Z [2]   where: {},
+2025-11-06T17:49:20.378038905Z [2]   include: {
+2025-11-06T17:49:20.378042562Z [2]     schedule: {
+2025-11-06T17:49:20.378046237Z [2]       select: {
+2025-11-06T17:49:20.378049847Z [2]         id: true,
+2025-11-06T17:49:20.378053504Z [2]         name: true,
+2025-11-06T17:49:20.378057152Z [2]         ~~~~
+2025-11-06T17:49:20.378060837Z [2]         cronExpression: true,
+2025-11-06T17:49:20.378064543Z [2] ?       enabled?: true,
+2025-11-06T17:49:20.378068229Z [2] ?       scheduleType?: true,
+2025-11-06T17:49:20.378071868Z [2] ?       timeOfDay?: true,
+2025-11-06T17:49:20.378075513Z [2] ?       dayOfWeek?: true,
+2025-11-06T17:49:20.378080010Z [2] ?       lastRun?: true,
+2025-11-06T17:49:20.378083692Z [2] ?       nextRun?: true,
+2025-11-06T17:49:20.378087391Z [2] ?       runCount?: true,
+2025-11-06T17:49:20.378091176Z [2] ?       createdAt?: true,
+2025-11-06T17:49:20.378094801Z [2] ?       updatedAt?: true,
+2025-11-06T17:49:20.378098427Z [2] ?       executions?: true,
+2025-11-06T17:49:20.378102042Z [2] ?       _count?: true
+2025-11-06T17:49:20.378105678Z [2]       }
+2025-11-06T17:49:20.378109308Z [2]     }
+2025-11-06T17:49:20.378112923Z [2]   },
+2025-11-06T17:49:20.378116538Z [2]   orderBy: {
+2025-11-06T17:49:20.378120478Z [2]     createdAt: "desc"
+2025-11-06T17:49:20.378124255Z [2]   },
+2025-11-06T17:49:20.378127870Z [2]   skip: 0,
+2025-11-06T17:49:20.378131528Z [2]   take: 20
+2025-11-06T17:49:20.378135151Z [2] }
+2025-11-06T17:49:20.378138744Z [2] 
+2025-11-06T17:49:20.378142422Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.
+2025-11-06T17:53:56.643528674Z [2] prisma:error 
+2025-11-06T17:53:56.643575618Z [2] Invalid `prisma.pipelineExecutionLog.findMany()` invocation:
+2025-11-06T17:53:56.643582261Z [2] 
+2025-11-06T17:53:56.643587526Z [2] {
+2025-11-06T17:53:56.643592607Z [2]   where: {},
+2025-11-06T17:53:56.643597421Z [2]   include: {
+2025-11-06T17:53:56.643614639Z [2]     schedule: {
+2025-11-06T17:53:56.643617656Z [2]       select: {
+2025-11-06T17:53:56.643620546Z [2]         id: true,
+2025-11-06T17:53:56.643623278Z [2]         name: true,
+2025-11-06T17:53:56.643626023Z [2]         ~~~~
+2025-11-06T17:53:56.643628801Z [2]         cronExpression: true,
+2025-11-06T17:53:56.643631516Z [2] ?       enabled?: true,
+2025-11-06T17:53:56.643635169Z [2] ?       scheduleType?: true,
+2025-11-06T17:53:56.643639116Z [2] ?       timeOfDay?: true,
+2025-11-06T17:53:56.643642841Z [2] ?       dayOfWeek?: true,
+2025-11-06T17:53:56.643646823Z [2] ?       lastRun?: true,
+2025-11-06T17:53:56.643650681Z [2] ?       nextRun?: true,
+2025-11-06T17:53:56.643653617Z [2] ?       runCount?: true,
+2025-11-06T17:53:56.643656275Z [2] ?       createdAt?: true,
+2025-11-06T17:53:56.643658942Z [2] ?       updatedAt?: true,
+2025-11-06T17:53:56.643661570Z [2] ?       executions?: true,
+2025-11-06T17:53:56.643664886Z [2] ?       _count?: true
+2025-11-06T17:53:56.643667567Z [2]       }
+2025-11-06T17:53:56.643670263Z [2]     }
+2025-11-06T17:53:56.643672886Z [2]   },
+2025-11-06T17:53:56.643675556Z [2]   orderBy: {
+2025-11-06T17:53:56.643678191Z [2]     createdAt: "desc"
+2025-11-06T17:53:56.643680974Z [2]   },
+2025-11-06T17:53:56.643683611Z [2]   skip: 0,
+2025-11-06T17:53:56.643686313Z [2]   take: 20
+2025-11-06T17:53:56.643688936Z [2] }
+2025-11-06T17:53:56.643691601Z [2] 
+2025-11-06T17:53:56.643694287Z [2] Unknown field `name` for select statement on model `AutomationSchedule`. Available options are marked with ?.

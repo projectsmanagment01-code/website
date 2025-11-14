@@ -232,9 +232,9 @@ const AuthorManagement: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Authors</h1>
           <p className="text-gray-600">Manage recipe authors and contributors</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Loading authors...</p>
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600 mx-auto"></div>
+          <p className="text-slate-500 dark:text-slate-400 mt-4">Loading authors...</p>
         </div>
       </div>
     );
@@ -260,22 +260,22 @@ const AuthorManagement: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Authors</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.totalAuthors}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Total Authors</p>
+              <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{stats.totalAuthors}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Users className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-slate-100 dark:bg-slate-700 rounded-lg">
+              <Users className="w-6 h-6 text-slate-600 dark:text-slate-400" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">With Recipes</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">With Recipes</p>
               <p className="text-2xl font-semibold text-gray-900">{stats.authorsWithRecipes}</p>
             </div>
             <div className="p-3 bg-green-100 rounded-lg">
@@ -284,11 +284,11 @@ const AuthorManagement: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Without Recipes</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.authorsWithoutRecipes}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Without Recipes</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-slate-100">{stats.authorsWithoutRecipes}</p>
             </div>
             <div className="p-3 bg-yellow-100 rounded-lg">
               <AlertCircle className="w-6 h-6 text-yellow-600" />
@@ -296,11 +296,11 @@ const AuthorManagement: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Avg Recipes</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats.averageRecipesPerAuthor}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Average Recipes per Author</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-slate-100">{stats.averageRecipesPerAuthor}</p>
             </div>
             <div className="p-3 bg-purple-100 rounded-lg">
               <Calendar className="w-6 h-6 text-purple-600" />
@@ -310,12 +310,12 @@ const AuthorManagement: React.FC = () => {
       </div>
 
       {/* Author IDs List */}
-      <div className="bg-white rounded-xl border border-gray-200">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Author IDs</h3>
-              <p className="text-sm text-gray-500">List of all author identifiers ({authors.length} total)</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Author IDs</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400">List of all author identifiers ({authors.length} total)</p>
             </div>
             <div className="flex items-center gap-2">
               {showIdList && authors.length > 0 && (
@@ -357,7 +357,7 @@ const AuthorManagement: React.FC = () => {
                     {authors.map((author) => (
                       <div
                         key={author.id}
-                        className="bg-white rounded-lg px-4 py-3 text-sm font-mono text-gray-700 border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer group shadow-sm"
+                        className="bg-white dark:bg-slate-700 rounded-lg px-4 py-3 text-sm font-mono text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-slate-500 hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors cursor-pointer group shadow-sm"
                         onClick={() => navigator.clipboard.writeText(author.id)}
                         title={`Click to copy: ${author.id}\nAuthor: ${author.name}`}
                       >
@@ -454,7 +454,7 @@ const AuthorManagement: React.FC = () => {
       )}
 
       {/* Authors List */}
-      <div className="bg-white rounded-xl border border-gray-200">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
         <AuthorList
           onCreateAuthor={() => setShowCreateForm(true)}
           onEditAuthor={(author) => {

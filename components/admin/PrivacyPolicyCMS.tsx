@@ -595,7 +595,7 @@ Generate the content now:`;
           value={value}
           onChange={(e) => handleInputChange(fieldName, e.target.value, sectionId)}
           placeholder={placeholder}
-          className="w-full px-3 py-2 border border-gray-300 rounded bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
         />
       ) : (
         <textarea
@@ -603,7 +603,7 @@ Generate the content now:`;
           onChange={(e) => handleInputChange(fieldName, e.target.value, sectionId)}
           placeholder={placeholder}
           rows={type === "textarea" && fieldName === "content" ? 12 : 3}
-          className="w-full px-3 py-2 border border-gray-300 rounded bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-all duration-200 font-mono text-sm"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-all duration-200 font-mono text-sm"
         />
       )}
       
@@ -618,7 +618,7 @@ Generate the content now:`;
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center gap-4">
@@ -652,7 +652,7 @@ Generate the content now:`;
               </button>
               <button
                 onClick={handlePreview}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:scale-105 transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded text-sm font-medium text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 hover:scale-105 transition-all duration-200"
               >
                 <Eye className="w-4 h-4" />
                 Preview
@@ -676,7 +676,7 @@ Generate the content now:`;
 
       {/* Messages */}
       {(error || success) && (
-        <div className="bg-white border-b">
+        <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
           <div className="mx-auto px-4 sm:px-6 lg:px-8">
             <div className="py-3">
               {error && (
@@ -783,10 +783,10 @@ Generate the content now:`;
               {content.sections.map((section, index) => (
                 <div
                   key={section.id}
-                  className="p-4 rounded border-2 border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-300"
+                  className="p-4 rounded border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all duration-300"
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-md font-semibold text-gray-800">
+                    <h3 className="text-md font-semibold text-gray-800 dark:text-slate-100">
                       Section {index + 1}
                     </h3>
                     {content.sections.length > 1 && (

@@ -126,7 +126,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
         <div className="mb-8">
           <Link 
             href="/authors"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium"
+            className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Authors
@@ -134,7 +134,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
         </div>
 
         {/* Author Header */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 mb-8">
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Author Avatar */}
             <div className="flex-shrink-0">
@@ -146,12 +146,12 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
 
             {/* Author Info */}
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                 {author.name}
               </h1>
 
               {author.bio && (
-                <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                   {author.bio}
                 </p>
               )}
@@ -159,12 +159,12 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
               {/* Author Specialties */}
               {author.tags && author.tags.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">Specialties:</h3>
+                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Specialties:</h3>
                   <div className="flex flex-wrap gap-2">
                     {author.tags.map((tag, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700"
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300"
                       >
                         {tag}
                       </span>
@@ -175,39 +175,39 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
 
               {/* Author Stats */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-blue-50 rounded-lg p-4 text-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <BookOpen className="w-4 h-4 text-blue-600" />
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
+                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-800/50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-blue-900 mb-1">
+                  <h3 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-1">
                     {authorRecipes.length}
                   </h3>
-                  <p className="text-blue-600 text-sm">
+                  <p className="text-blue-600 dark:text-blue-300 text-sm">
                     Recipe{authorRecipes.length !== 1 ? 's' : ''}
                   </p>
                 </div>
 
-                <div className="bg-green-50 rounded-lg p-4 text-center">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <Clock className="w-4 h-4 text-green-600" />
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-800/50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <Clock className="w-4 h-4 text-green-600 dark:text-green-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-green-900 mb-1">
+                  <h3 className="text-2xl font-bold text-green-900 dark:text-green-100 mb-1">
                     {authorRecipes.length > 0 ? 
                       Math.round(authorRecipes.reduce((sum, recipe) => sum + (parseInt(recipe.timing?.prepTime || '30')), 0) / authorRecipes.length)
                       : 0
                     }m
                   </h3>
-                  <p className="text-green-600 text-sm">Avg Prep Time</p>
+                  <p className="text-green-600 dark:text-green-300 text-sm">Avg Prep Time</p>
                 </div>
 
-                <div className="bg-purple-50 rounded-lg p-4 text-center">
-                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-                    <Users className="w-4 h-4 text-purple-600" />
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 text-center">
+                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-800/50 rounded-lg flex items-center justify-center mx-auto mb-2">
+                    <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <h3 className="text-2xl font-bold text-purple-900 mb-1">
+                  <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-100 mb-1">
                     {author.tags?.length || 0}
                   </h3>
-                  <p className="text-purple-600 text-sm">
+                  <p className="text-purple-600 dark:text-purple-300 text-sm">
                     Specialt{(author.tags?.length || 0) !== 1 ? 'ies' : 'y'}
                   </p>
                 </div>
@@ -218,24 +218,24 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
 
         {/* Author Recipes */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             Recipes by {author.name}
           </h2>
 
           {authorRecipes.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Recipes Yet</h3>
-              <p className="text-gray-600">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+              <BookOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Recipes Yet</h3>
+              <p className="text-gray-600 dark:text-gray-400">
                 This author hasn't published any recipes yet. Check back soon!
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {authorRecipes.map((recipe) => (
-                <div key={recipe.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                <div key={recipe.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
                   {/* Recipe Image */}
-                  <div className="aspect-video bg-gray-100 relative">
+                  <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
                     {recipe.img && (
                       <img
                         src={recipe.img}
@@ -254,17 +254,17 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
 
                   {/* Recipe Info */}
                   <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                       {recipe.title}
                     </h3>
 
                     {recipe.description && (
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
                         {recipe.description}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
                         <span>{recipe.timing?.prepTime || '30'}m</span>
@@ -289,11 +289,11 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
         </div>
 
         {/* Related Authors */}
-        <div className="mt-16 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="mt-16 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-8 text-center border border-orange-100 dark:border-orange-800/30">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Discover More Authors
           </h2>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+          <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
             Explore our community of passionate cooks and discover new flavors 
             and cooking techniques from around the world.
           </p>

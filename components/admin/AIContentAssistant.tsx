@@ -341,11 +341,11 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
               </div>
 
               <div className="mb-3">
-                <div className="text-xs text-gray-700 mb-1">Current Content:</div>
+                <div className="text-xs text-gray-700 dark:text-slate-300 mb-1">Current Content:</div>
                 <textarea
                   value={currentValue || ""}
                   onChange={(e) => onUpdate(field.key, e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-300 rounded p-2 text-sm text-gray-900 min-h-[60px] resize-none"
+                  className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded p-2 text-sm text-gray-900 dark:text-slate-100 min-h-[60px] resize-none"
                   placeholder={`Enter ${field.label.toLowerCase()}...`}
                   rows={2}
                 />

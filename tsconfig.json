@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     "app/admin/page.jsx",
     "tailwind.config.js"
-  ],
+, "app/admin/automation/jobs/[jobId]/page.tsxx"  ],
   "exclude": ["node_modules"]
 }

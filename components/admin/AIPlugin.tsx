@@ -393,7 +393,7 @@ export default function AIPlugin() {
                           apiKeys: { ...prev.apiKeys, openai: e.target.value }
                         }))}
                         placeholder="sk-..."
-                        className="w-full px-3 py-2 pr-20 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 pr-20 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                       <button
                         type="button"
@@ -431,7 +431,7 @@ export default function AIPlugin() {
                           apiKeys: { ...prev.apiKeys, gemini: e.target.value }
                         }))}
                         placeholder="AIza..."
-                        className="w-full px-3 py-2 pr-20 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 pr-20 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       />
                       <button
                         type="button"
@@ -551,7 +551,7 @@ export default function AIPlugin() {
                     ...prev, 
                     maxTokens: parseInt(e.target.value) 
                   }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
             </div>

@@ -15,7 +15,20 @@ import {
   Archive,
   Sparkles,
   Presentation,
+  Zap,
+  ChevronDown,
+  ChevronRight,
+  Activity,
+  ImageIcon,
+  Target,
+  Clock,
+  ChefHat,
+  BarChart3,
+  BookOpen,
+  Pin,
+  BarChart2,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/admin/ThemeToggle";
 
 interface SidebarProps {
   activeSection: string;
@@ -33,11 +46,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onMobileToggle,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [automationExpanded, setAutomationExpanded] = useState(false);
   
   // Handle mobile state
   useEffect(() => {
     setIsOpen(isMobileOpen);
   }, [isMobileOpen]);
+  
+  // Auto expand automation if one of its sub-items is active
+  useEffect(() => {
+    if (activeSection === 'pipeline-schedules' || activeSection === 'reports' || activeSection === 'pinterest-spy' || activeSection === 'seo-results' || activeSection === 'image-generation' || activeSection === 'recipe-generation' || activeSection === 'automation-settings' || activeSection === 'automation-help' || activeSection === 'pinterest-boards') {
+      setAutomationExpanded(true);
+    }
+  }, [activeSection]);
   
   const handleSectionChange = (section: string) => {
     onSectionChange(section);
@@ -62,6 +83,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "api-tokens", label: "API Tokens", icon: Key },
     { id: "profile", label: "Login Settings", icon: User },
     { id: "settings", label: "Settings", icon: Settings },
+    { id: "gtm-settings", label: "GTM & Analytics", icon: BarChart2 },
+  ];
+
+  const automationItems = [
+    { id: "pipeline-schedules", label: "Pipeline Schedules", icon: Clock },
+    { id: "pinterest-spy", label: "Data Manager", icon: Target },
+    { id: "seo-results", label: "SEO Results", icon: Activity },
+    { id: "image-generation", label: "Image Generation", icon: ImageIcon },
+    { id: "recipe-generation", label: "Recipe Generation", icon: ChefHat },
+    { id: "pinterest-boards", label: "Pinterest Boards", icon: Pin },
+    { id: "reports", label: "Execution Reports", icon: BarChart3 },
+    { id: "automation-settings", label: "Automation Settings", icon: Settings },
+    { id: "automation-help", label: "Help & Documentation", icon: BookOpen },
   ];
 
   return (
@@ -69,52 +103,61 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={onMobileToggle}
         />
-      )}
+ )}
       
       {/* Sidebar */}
       <div className={`
-        fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 h-screen flex flex-col transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        fixed md:sticky inset-y-0 left-0 top-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 md:h-screen flex flex-col transform transition-all duration-300 ease-in-out shadow-lg overflow-hidden
+        ${isOpen ? 'translate-x-0 h-screen' : '-translate-x-full md:translate-x-0 h-screen'}
       `}>
         {/* Logo */}
-        <div className="p-4 md:p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
+        <div className="p-4 md:p-6 border-b border-slate-200 dark:border-slate-700">          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 md:w-10 h-8 md:h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
+              <div className="w-8 md:w-10 h-8 md:h-10 bg-slate-700 dark:bg-slate-600 rounded-lg flex items-center justify-center">
                 <FileText className="w-4 md:w-6 h-4 md:h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg md:text-xl font-bold text-gray-900">Recipe CMS</h1>
-                <p className="text-xs md:text-sm text-gray-500">Content Management</p>
+                <h1 className="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100">Recipe CMS</h1>
+                <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400">Content Management</p>
               </div>
             </div>
-            {/* Mobile Close Button */}
-            <button
-              onClick={onMobileToggle}
-              className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {/* Theme Toggle & Mobile Close */}
+            <div className="flex items-center gap-2">
+              <div className="hidden md:block">
+                <ThemeToggle />
+              </div>
+              <button
+                onClick={onMobileToggle}
+                className="md:hidden p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-700">
           <button
             onClick={onAddRecipe}
-            className="w-full bg-stone-100 border-2 border-dashed border-stone-300 px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-stone-200 hover:border-stone-400 transition-colors duration-200 flex items-center justify-center gap-2"
+            className="w-full bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-4 py-3 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors duration-200 flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            New Recipe
+            <span>New Recipe</span>
           </button>
+          
+          {/* Mobile Theme Toggle */}
+          <div className="md:hidden mt-3 flex justify-center">
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
+        <nav className="flex-1 p-4 overflow-y-auto scrollbar-hide pb-30">
+          <ul className="space-y-1">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
@@ -123,18 +166,68 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <li key={item.id}>
                   <button
                     onClick={() => handleSectionChange(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
                       isActive
-                        ? "bg-blue-50 text-blue-700 border border-blue-200"
-                        : "text-gray-700 hover:bg-gray-50"
+                        ? "bg-slate-700 dark:bg-slate-600 text-white"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
-                    {item.label}
+                    <span>{item.label}</span>
                   </button>
                 </li>
               );
             })}
+            
+            {/* Automation Section with Submenu */}
+            <li>
+              <button
+                onClick={() => setAutomationExpanded(!automationExpanded)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  (activeSection === 'pipeline-schedules' || activeSection === 'reports' || activeSection === 'pinterest-spy' || activeSection === 'seo-results' || activeSection === 'image-generation' || activeSection === 'recipe-generation' || activeSection === 'automation-settings' || activeSection === 'pinterest-boards')
+                    ? "bg-slate-700 dark:bg-slate-600 text-white"
+                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100"
+                }`}
+              >
+                <Zap className="w-4 h-4" />
+                <span className="flex-1 text-left">Automation</span>
+                <div className={`transition-transform duration-300 ${automationExpanded ? 'rotate-180' : 'rotate-0'}`}>
+                  {automationExpanded ? (
+                    <ChevronDown className="w-4 h-4" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
+                </div>
+              </button>
+              
+              {/* Submenu */}
+              {automationExpanded && (
+                <div className="overflow-hidden">
+                  <ul className="ml-6 mt-2 pb-2 space-y-1 border-l border-slate-300 dark:border-slate-600 pl-4">
+                    {automationItems.map((subItem) => {
+                      const SubIcon = subItem.icon;
+                      const isSubActive = activeSection === subItem.id;
+
+                      return (
+                        <li key={subItem.id}>
+                          <button
+                            onClick={() => handleSectionChange(subItem.id)}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 truncate ${
+                              isSubActive
+                                ? "bg-slate-600 dark:bg-slate-500 text-white"
+                                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200"
+                            }`}
+                          >
+                            <SubIcon className="w-4 h-4" />
+                            {subItem.label}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+            </li>
           </ul>
         </nav>
       </div>

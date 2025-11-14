@@ -93,10 +93,10 @@ export default function SEOReportsView() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-8">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
-          <span className="ml-3 text-gray-600">Loading SEO reports...</span>
+          <span className="ml-3 text-gray-600 dark:text-slate-300">Loading SEO reports...</span>
         </div>
       </div>
     );
@@ -126,9 +126,9 @@ export default function SEOReportsView() {
     <div className="space-y-6">
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <div className="text-sm text-gray-600">Total Reports</div>
-          <div className="text-2xl font-bold text-gray-900 mt-1">{reports.length}</div>
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+          <div className="text-sm text-gray-600 dark:text-slate-400">Total Reports</div>
+          <div className="text-2xl font-bold text-gray-900 dark:text-slate-100 mt-1">{reports.length}</div>
         </div>
         <div className="bg-green-50 rounded-lg border border-green-200 p-4">
           <div className="text-sm text-green-600">Success</div>
@@ -145,7 +145,7 @@ export default function SEOReportsView() {
       </div>
 
       {/* Filter Buttons */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setFilter('all')} className={getFilterButtonClass('all') + ' px-4 py-2 rounded-md text-sm font-medium'}>
             All Reports
@@ -166,12 +166,12 @@ export default function SEOReportsView() {
       </div>
 
       {/* Reports Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
         {reports.length === 0 ? (
           <div className="p-8 text-center">
             <div className="text-6xl mb-4">📊</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No SEO Reports Yet</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">No SEO Reports Yet</h3>
+            <p className="text-gray-600 dark:text-slate-300">
               Create a new recipe to automatically generate SEO enhancements.
             </p>
           </div>
@@ -189,12 +189,12 @@ export default function SEOReportsView() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
                 {reports.map((report) => (
-                  <tr key={report.id} className="hover:bg-gray-50">
+                  <tr key={report.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{report.recipeTitle}</div>
-                      <div className="text-sm text-gray-500">ID: {report.recipeId}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-slate-100">{report.recipeTitle}</div>
+                      <div className="text-sm text-gray-500 dark:text-slate-400">ID: {report.recipeId}</div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={getStatusClass(report.status) + ' px-3 py-1 rounded-full text-xs font-medium'}>

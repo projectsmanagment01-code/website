@@ -217,9 +217,9 @@ export default function ApiTokenManager() {
   };
 
   const getStatusColor = (token: ApiToken) => {
-    if (isExpired(token.expiresAt)) return 'text-red-600 bg-red-50';
-    if (!token.isActive) return 'text-yellow-600 bg-yellow-50';
-    return 'text-green-600 bg-green-50';
+    if (isExpired(token.expiresAt)) return 'text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
+    if (!token.isActive) return 'text-amber-700 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30';
+    return 'text-emerald-700 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/30';
   };
 
   const getStatusText = (token: ApiToken) => {
@@ -231,7 +231,7 @@ export default function ApiTokenManager() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
           <RefreshCw className="w-5 h-5 animate-spin" />
           <span>Loading API tokens...</span>
         </div>
@@ -244,14 +244,14 @@ export default function ApiTokenManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">API Token Management</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">API Token Management</h1>
+          <p className="text-slate-600 dark:text-slate-400">
             Generate and manage API tokens for accessing your website's API endpoints
           </p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          className="bg-slate-800 dark:bg-slate-700 text-white px-4 py-2 rounded-lg hover:bg-slate-900 dark:hover:bg-slate-600 transition-colors flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Create Token
@@ -260,43 +260,43 @@ export default function ApiTokenManager() {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <Key className="w-8 h-8 text-blue-600" />
+            <Key className="w-8 h-8 text-slate-600 dark:text-slate-400" />
             <div>
-              <p className="text-sm text-gray-500">Total Tokens</p>
-              <p className="text-2xl font-bold text-gray-900">{tokens.length}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Total Tokens</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{tokens.length}</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <CheckCircle className="w-8 h-8 text-green-600" />
+            <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             <div>
-              <p className="text-sm text-gray-500">Active</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Active</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {tokens.filter(t => t.isActive && !isExpired(t.expiresAt)).length}
               </p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-8 h-8 text-red-600" />
+            <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
             <div>
-              <p className="text-sm text-gray-500">Expired</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Expired</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {tokens.filter(t => isExpired(t.expiresAt)).length}
               </p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-yellow-600" />
+            <Shield className="w-8 h-8 text-amber-600 dark:text-amber-400" />
             <div>
-              <p className="text-sm text-gray-500">Inactive</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Inactive</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {tokens.filter(t => !t.isActive).length}
               </p>
             </div>
@@ -305,60 +305,60 @@ export default function ApiTokenManager() {
       </div>
 
       {/* Tokens Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">API Tokens</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">API Tokens</h2>
         </div>
         
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-slate-50 dark:bg-slate-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Token
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Expires
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
               {tokens.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                    <Key className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                    <Key className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
                     <p className="text-lg font-medium">No API tokens yet</p>
                     <p>Create your first API token to get started</p>
                   </td>
                 </tr>
               ) : (
                 tokens.map((token) => (
-                  <tr key={token.id} className="hover:bg-gray-50">
+                  <tr key={token.id} className="hover:bg-slate-50 dark:hover:bg-slate-700">
                     <td className="px-6 py-4">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{token.name}</div>
+                        <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{token.name}</div>
                         {token.description && (
-                          <div className="text-sm text-gray-500">{token.description}</div>
+                          <div className="text-sm text-slate-500 dark:text-slate-400">{token.description}</div>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
+                        <code className="bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded text-sm font-mono text-slate-800 dark:text-slate-200">
                           {visibleTokens.has(token.id) ? getFullToken(token.id, token.token) : token.token}
                         </code>
                         <button
                           onClick={() => toggleTokenVisibility(token.id)}
-                          className="p-1 hover:bg-gray-200 rounded"
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-slate-600 dark:text-slate-400"
                           title={visibleTokens.has(token.id) ? "Hide token" : "Show full token"}
                         >
                           {visibleTokens.has(token.id) ? (
@@ -369,11 +369,11 @@ export default function ApiTokenManager() {
                         </button>
                         <button
                           onClick={() => copyToClipboard(getFullToken(token.id, token.token), token.id)}
-                          className="p-1 hover:bg-gray-200 rounded"
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-slate-600 dark:text-slate-400"
                           title="Copy token"
                         >
                           {copiedToken === token.id ? (
-                            <CheckCircle className="w-4 h-4 text-green-600" />
+                            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                           ) : (
                             <Copy className="w-4 h-4" />
                           )}
@@ -385,7 +385,7 @@ export default function ApiTokenManager() {
                         {getStatusText(token)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                       {formatDate(token.expiresAt)}
                     </td>
                     <td className="px-6 py-4">
@@ -395,8 +395,8 @@ export default function ApiTokenManager() {
                             onClick={() => toggleTokenStatus(token.id, token.isActive)}
                             className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
                               token.isActive
-                                ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-900/50'
+                                : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50'
                             }`}
                           >
                             {token.isActive ? 'Deactivate' : 'Activate'}
@@ -404,7 +404,7 @@ export default function ApiTokenManager() {
                         )}
                         <button
                           onClick={() => deleteToken(token.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          className="p-1 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -421,12 +421,12 @@ export default function ApiTokenManager() {
       {/* Create Token Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Create New API Token</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Create New API Token</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Token Name *
                 </label>
                 <input
@@ -434,18 +434,18 @@ export default function ApiTokenManager() {
                   value={newToken.name}
                   onChange={(e) => setNewToken({ ...newToken, name: e.target.value })}
                   placeholder="e.g., Mobile App Token"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Duration
                 </label>
                 <select
                   value={newToken.duration}
                   onChange={(e) => setNewToken({ ...newToken, duration: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 >
                   {DURATION_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -456,7 +456,7 @@ export default function ApiTokenManager() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -464,7 +464,7 @@ export default function ApiTokenManager() {
                   onChange={(e) => setNewToken({ ...newToken, description: e.target.value })}
                   placeholder="Optional description for this token"
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -475,14 +475,14 @@ export default function ApiTokenManager() {
                   setShowCreateModal(false);
                   setNewToken({ name: '', duration: '1month', description: '' });
                 }}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Cancel
               </button>
               <button
                 onClick={createToken}
                 disabled={creating}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white rounded-lg hover:bg-slate-900 dark:hover:bg-slate-600 disabled:opacity-50 flex items-center gap-2"
               >
                 {creating && <RefreshCw className="w-4 h-4 animate-spin" />}
                 Create Token
@@ -495,18 +495,18 @@ export default function ApiTokenManager() {
       {/* Token Created Modal */}
       {createdToken && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-lg">
             <div className="flex items-center gap-3 mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Token Created Successfully!</h3>
+              <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Token Created Successfully!</h3>
             </div>
             
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg p-4 mb-4">
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-slate-600 dark:text-slate-400 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-blue-800">Token Created!</p>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Token Created!</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">
                     Copy your token now. You can also view it later by clicking the eye icon in the token list.
                   </p>
                 </div>
@@ -514,16 +514,16 @@ export default function ApiTokenManager() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Your API Token:
               </label>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-gray-100 px-3 py-2 rounded border font-mono text-sm break-all">
+                <code className="flex-1 bg-slate-100 dark:bg-slate-700 px-3 py-2 rounded border border-slate-200 dark:border-slate-600 font-mono text-sm break-all text-slate-800 dark:text-slate-200">
                   {createdToken}
                 </code>
                 <button
                   onClick={() => copyToClipboard(createdToken, 'created')}
-                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
+                  className="px-3 py-2 bg-slate-800 dark:bg-slate-700 text-white rounded hover:bg-slate-900 dark:hover:bg-slate-600 flex items-center gap-1"
                 >
                   {copiedToken === 'created' ? (
                     <CheckCircle className="w-4 h-4" />
@@ -541,7 +541,7 @@ export default function ApiTokenManager() {
                   setCreatedToken(null);
                   setShowCreateModal(false);
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white rounded-lg hover:bg-slate-900 dark:hover:bg-slate-600"
               >
                 Done
               </button>

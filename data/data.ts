@@ -395,6 +395,21 @@ async function getRecipe(slug: string): Promise<Recipe | null> {
           };
         }
         
+        // Safety sanitizer: ensure array fields exist (should always be populated by AI)
+        if (recipe) {
+          const r = recipe as any;
+          r.sections = r.sections || [];
+          r.images = r.images || [];
+          r.mustKnowTips = r.mustKnowTips || [];
+          r.notes = r.notes || [];
+          r.tools = r.tools || [];
+          r.professionalSecrets = r.professionalSecrets || [];
+          
+          // Ensure nested arrays exist
+          if (r.whyYouLove) r.whyYouLove.items = r.whyYouLove.items || [];
+          if (r.questions) r.questions.items = r.questions.items || [];
+        }
+        
         return recipe as unknown as Recipe | null;
       },
       `${BASE_URL}/api/recipe?slug=${encodeURIComponent(slug)}`,

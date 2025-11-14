@@ -1,0 +1,120 @@
+/**
+ * Recipe Automation Job Queue Schema
+ * Tracks automated recipe generation jobs and their progress through the pipeline
+ */
+
+// Add to prisma/schema.prisma:
+
+/*
+
+model RecipeGenerationJob {
+  id              String    @id @default(cuid())
+  status          String    @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED, CANCELLED
+  stage           String    @default("QUEUED") // QUEUED, SEO, IMAGES, RECIPE, PUBLISHED
+  
+  // Source data
+  spyDataId       String    @unique
+  spyData         Json?     // Snapshot of spy data at job creation
+  
+  // Job configuration
+  priority        Int       @default(0) // Higher = processed first
+  scheduledFor    DateTime? // When to start (null = immediate)
+  
+  // Progress tracking
+  currentStep     String?
+  progress        Int       @default(0) // 0-100
+  logs            Json[]    @default([])
+  
+  // Results
+  generatedRecipeId String?
+  error           String?
+  errorStack      String?
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  startedAt       DateTime?
+  completedAt     DateTime?
+  duration        Int?      // Duration in seconds
+  retryCount      Int       @default(0)
+  maxRetries      Int       @default(3)
+  
+  @@index([status])
+  @@index([stage])
+  @@index([scheduledFor])
+  @@index([priority])
+  @@map("recipe_generation_jobs")
+}
+
+model GeneratedRecipeArchive {
+  id                    String    @id @default(cuid())
+  recipeId              String    @unique
+  
+  // Original spy data (archived)
+  originalSpyData       Json
+  spyDataId             String
+  
+  // Generation metadata
+  generationJobId       String?
+  generatedAt           DateTime  @default(now())
+  generationDuration    Int?      // Seconds
+  
+  // Recipe details (for quick reference)
+  title                 String
+  slug                  String
+  category              String?
+  authorId              String?
+  
+  // Images URLs (archived)
+  images                String[]
+  
+  // SEO data (archived)
+  seoKeyword            String?
+  seoTitle              String?
+  seoDescription        String?
+  
+  // Status
+  publishedAt           DateTime?
+  status                String    @default("ACTIVE") // ACTIVE, ARCHIVED, DELETED
+  
+  @@index([recipeId])
+  @@index([spyDataId])
+  @@index([generatedAt])
+  @@index([status])
+  @@map("generated_recipe_archive")
+}
+
+model AutomationSchedule {
+  id              String    @id @default(cuid())
+  name            String    @unique
+  description     String?
+  
+  // Schedule configuration
+  enabled         Boolean   @default(false)
+  cronExpression  String    // e.g., "0 */2 * * *" = every 2 hours
+  timezone        String    @default("UTC")
+  
+  // Job configuration
+  jobType         String    // SEO_GENERATION, IMAGE_GENERATION, RECIPE_GENERATION, FULL_PIPELINE
+  batchSize       Int       @default(1) // How many items to process per run
+  
+  // Filters for job selection
+  filters         Json?     // { minImages: 4, hasKeyword: true, etc. }
+  
+  // Execution tracking
+  lastRun         DateTime?
+  nextRun         DateTime?
+  runCount        Int       @default(0)
+  successCount    Int       @default(0)
+  failureCount    Int       @default(0)
+  
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdBy       String?
+  
+  @@index([enabled])
+  @@index([nextRun])
+  @@map("automation_schedules")
+}
+
+*/

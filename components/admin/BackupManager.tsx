@@ -703,7 +703,7 @@ const BackupManager: React.FC = () => {
                 value={downloadUrl}
                 onChange={(e) => setDownloadUrl(e.target.value)}
                 placeholder="https://example.com/backup.zip or backup share link"
-                className="w-full bg-gray-50 border border-gray-300 rounded p-3 text-sm text-gray-900 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded p-3 text-sm text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -761,7 +761,7 @@ const BackupManager: React.FC = () => {
                   type="file"
                   accept=".zip,.gz"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="w-full bg-gray-50 border border-gray-300 rounded p-3 text-sm text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                  className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded p-3 text-sm text-gray-900 dark:text-slate-100 focus:ring-2 focus:ring-green-500 focus:border-green-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                   required
                 />
               </div>

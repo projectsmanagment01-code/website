@@ -27,6 +27,7 @@ ENV ADMIN_SECRET=${ADMIN_SECRET}
 ENV STATIC_EXPORT=${STATIC_EXPORT}
 ENV MOCK=${MOCK}
 ENV DB_PASSWORD=${DB_PASSWORD}
+ENV SKIP_REDIS_CONNECTION=true
 
 COPY package.json ./
 RUN apk add --no-cache \
@@ -98,7 +99,7 @@ ENV MOCK=${MOCK}
 ENV DB_PASSWORD=${DB_PASSWORD}
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
-RUN mkdir -p uploads && chmod 755 uploads
+RUN mkdir -p public/uploads && chmod 755 public/uploads
 RUN apk add --no-cache wget
 RUN apk add --no-cache \
     vips \
@@ -139,4 +140,4 @@ EXPOSE 3000
 # ... rest of runner stage
 
 #CMD ["sh", "-c", "echo '⏳ Waiting for database to be ready...' && until nc -z db 5432; do echo 'Database not ready, waiting...'; sleep 2; done && echo '✅ Database is ready, running migrations...' && npx prisma migrate deploy && echo '🚀 Starting application...' && yarn build && yarn start"]
-CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ yaaay DB ready' && npx prisma db push --accept-data-loss && echo '🚀 Starting app...' && yarn start"]
+CMD ["sh", "-c", "echo '⏳ Waiting for database...' && until nc -z db 5432; do sleep 2; done && echo '✅ DB ready' && echo '⏳ Waiting for Redis...' && until nc -z redis 6379; do sleep 2; done && echo '✅ Redis ready' && npx prisma db push --accept-data-loss && echo '🚀 Starting app with automation worker...' && yarn start"]
