@@ -10,17 +10,33 @@ export async function GET(
 ) {
   try {
     const { path: pathParts } = await context.params;
-    const filePath = path.join(process.cwd(), "public", "uploads", ...pathParts);
+    
+    // Try multiple possible locations for the file
+    const possiblePaths = [
+      path.join(process.cwd(), "public", "uploads", ...pathParts),  // public/uploads (Next.js static)
+      path.join(process.cwd(), "uploads", ...pathParts),             // uploads (root directory)
+      path.join(process.cwd(), "..", "uploads", ...pathParts),      // parent directory
+    ];
 
     console.log(`🔍 Requested: /uploads/${pathParts.join('/')}`);
-    console.log(`📂 Looking for: ${filePath}`);
 
-    // Check if file exists
-    try {
-      await fs.access(filePath);
-      console.log(`✅ File found: ${filePath}`);
-    } catch {
-      console.error(`❌ File NOT found: ${filePath}`);
+    let filePath: string | null = null;
+    
+    // Check each possible location
+    for (const testPath of possiblePaths) {
+      try {
+        await fs.access(testPath);
+        filePath = testPath;
+        console.log(`✅ File found: ${filePath}`);
+        break;
+      } catch {
+        console.log(`❌ Not found: ${testPath}`);
+      }
+    }
+
+    // If file not found in any location
+    if (!filePath) {
+      console.error(`❌ File NOT found in any location: ${pathParts.join('/')}`);
       return new NextResponse("File not found", { status: 404 });
     }
 

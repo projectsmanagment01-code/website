@@ -23,11 +23,7 @@ export function getAuthorImageUrl(author: AuthorImageData): string {
 
   // 2. Check for local img file
   if (author.img && author.img.trim()) {
-    // If it already starts with /api/uploads/, return as-is
-    if (author.img.startsWith('/api/uploads/')) {
-      return author.img;
-    }
-    // If it already starts with /uploads/, return as-is (will be rewritten by Next.js)
+    // If it already starts with /uploads/, return as-is
     if (author.img.startsWith('/uploads/')) {
       return author.img;
     }
@@ -35,8 +31,8 @@ export function getAuthorImageUrl(author: AuthorImageData): string {
     if (author.img.startsWith('http')) {
       return author.img;
     }
-    // Otherwise, prepend the API uploads path directly
-    return `/api/uploads/authors/${author.img}`;
+    // Otherwise, prepend the uploads path (served by /api/uploads/[...path])
+    return `/uploads/authors/${author.img}`;
   }
 
   // 3. Fallback to placeholder
