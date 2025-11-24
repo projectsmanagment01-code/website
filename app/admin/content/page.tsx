@@ -13,11 +13,13 @@ import {
   Cookie,
   ArrowLeft,
   Settings,
+  Share2,
 } from "lucide-react";
 
 // Import all CMS components
 import AboutContentEditor from "@/components/admin/AboutContentEditor";
 import PrivacyPolicyCMS from "@/components/admin/PrivacyPolicyCMS";
+import SocialMediaManager from "@/components/admin/SocialMediaManager";
 
 const contentPages = [
   {
@@ -33,6 +35,13 @@ const contentPages = [
     icon: Home,
     component: null, // Will route to separate page
     description: "Manage homepage content and hero section",
+  },
+  {
+    id: "social",
+    label: "Social Media",
+    icon: Share2,
+    component: SocialMediaManager,
+    description: "Manage social media links and profiles",
   },
   {
     id: "about",

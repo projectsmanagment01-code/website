@@ -2,41 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { PrivacyPolicyAIService } from '@/lib/privacy-policy-ai';
 import { verifyAdminToken } from '@/lib/auth';
-import { promises as fs } from 'fs';
-import path from 'path';
-
-// SECURE: AI settings stored in non-public directory
-const AI_SETTINGS_PATH = path.join(process.cwd(), "data", "config", "ai-settings.json");
-
-interface AISettings {
-  enabled: boolean;
-  provider: "openai" | "gemini";
-  apiKeys: {
-    openai: string;
-    gemini: string;
-  };
-  model: string;
-  temperature: number;
-  maxTokens: number;
-  features: {
-    contentGeneration: boolean;
-    recipeAssistance: boolean;
-    seoOptimization: boolean;
-    imageAnalysis: boolean;
-    imageDescriptions: boolean;
-    objectDetection: boolean;
-  };
-}
-
-async function loadAISettings(): Promise<AISettings | null> {
-  try {
-    const data = await fs.readFile(AI_SETTINGS_PATH, "utf-8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Error loading AI settings:", error);
-    return null;
-  }
-}
+import { loadAISettings, getOpenAIKey, getGeminiKey } from "@/lib/ai-settings-helper";
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,7 +23,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Get API key for the current provider
-    const apiKey = aiSettings.apiKeys[aiSettings.provider];
+    const apiKey = aiSettings.provider === 'openai' 
+      ? await getOpenAIKey()
+      : await getGeminiKey();
+
     if (!apiKey) {
       return jsonResponseNoCache(
         { error: `${aiSettings.provider} API key not configured` }, 400);

@@ -1,59 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
-import { promises as fs } from "fs";
-import path from "path";
+import { loadAISettings, getOpenAIKey, getGeminiKey, type AISettings } from "@/lib/ai-settings-helper";
 
-const AI_SETTINGS_PATH = path.join(process.cwd(), "data", "config", "ai-settings.json");
-
-interface AISettings {
-  enabled: boolean;
-  provider: "openai" | "gemini";
-  model: string;
-  temperature: number;
-  maxTokens: number;
-  features: {
-    contentGeneration: boolean;
-  };
-  apiKeys?: {
-    openai: string;
-    gemini: string;
-  };
-}
-
-async function loadAISettings(): Promise<AISettings> {
-  try {
-    const data = await fs.readFile(AI_SETTINGS_PATH, "utf-8");
-    const settings = JSON.parse(data);
-    
-    // Merge with environment variables for API keys (more secure)
-    return {
-      ...settings,
-      apiKeys: {
-        openai: process.env.OPENAI_API_KEY || settings.apiKeys?.openai || "",
-        gemini: process.env.GEMINI_API_KEY || settings.apiKeys?.gemini || "",
-      }
-    };
-  } catch {
-    return {
-      enabled: false,
-      provider: "openai",
-      model: "gpt-4o-mini",
-      temperature: 0.7,
-      maxTokens: 1000,
-      features: {
-        contentGeneration: true,
-      },
-      apiKeys: {
-        openai: process.env.OPENAI_API_KEY || "",
-        gemini: process.env.GEMINI_API_KEY || "",
-      }
-    };
-  }
-}
-
-async function generateWithOpenAI(prompt: string, settings: AISettings): Promise<string> {
-  const apiKey = settings.apiKeys?.openai || process.env.OPENAI_API_KEY;
+async function generateWithOpenAI(prompt: string, settings: AISettings, apiKey: string): Promise<string> {
   if (!apiKey) {
     throw new Error("OpenAI API key not configured");
   }
@@ -90,8 +40,7 @@ async function generateWithOpenAI(prompt: string, settings: AISettings): Promise
   return data.choices[0]?.message?.content?.trim() || "";
 }
 
-async function generateWithGemini(prompt: string, settings: AISettings): Promise<string> {
-  const apiKey = settings.apiKeys?.gemini || process.env.GEMINI_API_KEY;
+async function generateWithGemini(prompt: string, settings: AISettings, apiKey: string): Promise<string> {
   if (!apiKey) {
     throw new Error("Gemini API key not configured");
   }
@@ -149,12 +98,22 @@ export async function POST(request: NextRequest) {
     // Load AI settings
     const settings = await loadAISettings();
 
-    if (!settings.enabled) {
+    if (!settings || !settings.enabled) {
       return errorResponseNoCache('AI content generation is disabled. Enable it in AI Plugin settings.', 403);
     }
 
     if (!settings.features.contentGeneration) {
       return errorResponseNoCache('Content generation feature is disabled in AI settings.', 403);
+    }
+
+    // Get API key based on provider
+    const apiKey = settings.provider === 'openai' 
+      ? await getOpenAIKey()
+      : await getGeminiKey();
+
+    if (!apiKey) {
+      return jsonResponseNoCache(
+        { error: `${settings.provider === 'openai' ? 'OpenAI' : 'Gemini'} API key not configured. Please add it in AI Settings.` }, 400);
     }
 
     // Generate content using the configured provider
@@ -183,9 +142,9 @@ export async function POST(request: NextRequest) {
 
     try {
       if (settings.provider === "gemini") {
-        generatedContent = await generateWithGemini(prompt, requestSettings);
+        generatedContent = await generateWithGemini(prompt, requestSettings, apiKey);
       } else {
-        generatedContent = await generateWithOpenAI(prompt, requestSettings);
+        generatedContent = await generateWithOpenAI(prompt, requestSettings, apiKey);
       }
 
       console.log('Generated content length:', generatedContent.length);

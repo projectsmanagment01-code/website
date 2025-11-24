@@ -1,30 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
-
-const AI_SETTINGS_PATH = path.join(process.cwd(), "data", "config", "ai-settings.json");
-
-interface AISettings {
-  enabled: boolean;
-  provider: string;
-  apiKeys: {
-    openai?: string;
-    gemini?: string;
-  };
-  model: string;
-  temperature: number;
-  maxTokens: number;
-}
-
-async function loadAISettings(): Promise<AISettings | null> {
-  try {
-    const data = await fs.readFile(AI_SETTINGS_PATH, "utf-8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Error loading AI settings:", error);
-    return null;
-  }
-}
+import { loadAISettings, getOpenAIKey, getGeminiKey } from "@/lib/ai-settings-helper";
 
 async function generateWithOpenAI(apiKey: string, model: string, prompt: string, temperature: number) {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -159,10 +134,8 @@ export async function POST(request: NextRequest) {
     // Get API key based on provider (case-insensitive)
     const provider = aiSettings.provider.toLowerCase();
     const apiKey = provider === "openai" 
-      ? aiSettings.apiKeys.openai 
-      : provider === "gemini" 
-      ? aiSettings.apiKeys.gemini 
-      : null;
+      ? await getOpenAIKey()
+      : await getGeminiKey();
       
     if (!apiKey) {
       return NextResponse.json(
