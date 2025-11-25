@@ -311,7 +311,9 @@ async function getRecipesPaginated(
   return await fetchWithFallback(
     async () => {
       const prisma = await getPrisma();
-      const skip = (page - 1) * limit;
+      // Ensure page is at least 1 to avoid negative skip values
+      const safePage = Math.max(1, page);
+      const skip = (safePage - 1) * limit;
 
       const [recipes, totalCount] = await Promise.all([
         prisma.recipe.findMany({
