@@ -319,7 +319,10 @@ async function getRecipesPaginated(
         prisma.recipe.findMany({
           where: { href: { not: null } }, // Only show published recipes (with href)
           include: {
-            authorRef: true  // ✅ Include author in same query
+            authorRef: true,  // ✅ Include author in same query
+            categoryRef: {    // Include category with default author
+              include: { defaultAuthor: true }
+            }
           },
           orderBy: { createdAt: "desc" },
           skip: skip,

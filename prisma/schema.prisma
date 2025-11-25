@@ -70,17 +70,20 @@ model Recipe {
 }
 
 model Author {
-  id         String              @id @default(cuid())
-  name       String
-  bio        String?
-  img        String?
-  avatar     String?
-  slug       String              @unique
-  link       String?
-  tags       String[]            @default([]) // Simple category tags (no relation to Category model)
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-  recipes    Recipe[]            @relation("AuthorRecipes")
+  id                      String              @id @default(cuid())
+  name                    String
+  bio                     String?
+  img                     String?
+  avatar                  String?
+  slug                    String              @unique
+  link                    String?
+  tags                    String[]            @default([]) // Simple category tags (no relation to Category model)
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  recipes                 Recipe[]            @relation("AuthorRecipes")
+  categoriesAsDefault     Category[]          @relation("CategoryDefaultAuthor")
+  categorySpecializations AuthorCategorySpecialization[]
+  systemAsGlobalFallback  SystemSettings[]    @relation("SystemFallbackAuthor")
 
   @@map("authors")
 }
@@ -100,9 +103,14 @@ model Category {
   metaTitle       String?  @db.Text
   metaDescription String?  @db.Text
   
+  // Default Author for orphaned recipes
+  defaultAuthorId String?  // Foreign key to Author model
+  defaultAuthor   Author?  @relation("CategoryDefaultAuthor", fields: [defaultAuthorId], references: [id], onDelete: SetNull)
+  
   // Relations
   recipes         Recipe[]          @relation("CategoryRecipes")
   pinterestBoards PinterestBoard[]  @relation("CategoryPinterestBoards")
+  specializations AuthorCategorySpecialization[]
   
   // Timestamps
   createdAt   DateTime @default(now())
@@ -111,6 +119,7 @@ model Category {
   @@index([slug])
   @@index([isActive])
   @@index([order])
+  @@index([defaultAuthorId])
   @@map("categories")
 }
 
@@ -589,4 +598,38 @@ model GTMSettings {
   updatedAt       DateTime @updatedAt
 
   @@map("gtm_settings")
+}
+
+// Author-Category Specialization - Tracks which authors specialize in which categories
+model AuthorCategorySpecialization {
+  id         String   @id @default(cuid())
+  authorId   String
+  categoryId String
+  count      Int      @default(0) // Number of recipes this author has in this category
+  author     Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([authorId, categoryId])
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([count])
+  @@map("author_category_specialization")
+}
+
+// System-wide Settings
+model SystemSettings {
+  id                    String   @id @default(cuid())
+  globalFallbackAuthorId String?  // Global fallback author for all orphaned recipes
+  globalFallbackAuthor   Author?  @relation("SystemFallbackAuthor", fields: [globalFallbackAuthorId], references: [id], onDelete: SetNull)
+  
+  // Auto-assignment settings
+  autoAssignAuthors     Boolean  @default(true) // Auto-assign based on category specialization
+  autoReassignOnDelete  Boolean  @default(true) // Auto-reassign recipes when author is deleted
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("system_settings")
 }

@@ -301,19 +301,22 @@ export async function updateAuthor(id: string, data: UpdateAuthorData): Promise<
  */
 export async function deleteAuthor(id: string): Promise<boolean> {
   try {
+    const { reassignOrphanedRecipes } = await import('./author-resolver');
+    
     // First check if author has any recipes
     const recipeCount = await prisma.recipe.count({
       where: { authorId: id }
     });
 
     if (recipeCount > 0) {
-      // Simply remove the author relationship - recipes will show no author
-      await prisma.recipe.updateMany({
-        where: { authorId: id },
-        data: { authorId: null }
-      });
+      // Auto-reassign recipes to appropriate authors based on fallback chain
+      const result = await reassignOrphanedRecipes(id);
       
-      console.log(`🔄 Removed author relationship from ${recipeCount} recipes`);
+      console.log(`🔄 Reassigned ${result.totalRecipes} recipes:`, {
+        byCategoryDefault: result.assignments.filter(a => a.source === 'category-default').length,
+        bySpecialization: result.assignments.filter(a => a.source === 'specialization').length,
+        byGlobalFallback: result.assignments.filter(a => a.source === 'global-fallback').length
+      });
     }
 
     // Delete the author
@@ -321,7 +324,7 @@ export async function deleteAuthor(id: string): Promise<boolean> {
       where: { id }
     });
 
-    console.log(`✅ Author deleted successfully (${recipeCount} recipes updated)`);
+    console.log(`✅ Author deleted successfully (${recipeCount} recipes reassigned)`);
     return true;
   } catch (error) {
     console.error('❌ Error deleting author:', error);

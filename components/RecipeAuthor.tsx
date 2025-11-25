@@ -2,10 +2,12 @@
  * Recipe Author Display Component (Server Component)
  * 
  * Handles displaying author information for recipes using authorRef relationship
+ * Falls back to category default or global fallback if no author assigned
  */
 
 import { Recipe } from '@/outils/types';
 import { getAuthorImageUrl } from '@/lib/author-image';
+import { resolveRecipeAuthor } from '@/lib/author-resolver';
 import Image from 'next/image';
 import Link from 'next/link';
 import { User, Calendar } from 'lucide-react';
@@ -18,28 +20,32 @@ interface RecipeAuthorProps {
 }
 
 /**
- * Get author data for display using authorRef
+ * Get author data for display using authorRef with fallback chain
  */
-function getRecipeAuthorData(recipe: Recipe) {
-  if (!recipe.authorRef) {
+async function getRecipeAuthorData(recipe: Recipe) {
+  // Use resolver to handle fallback chain
+  const author = await resolveRecipeAuthor(recipe);
+  
+  if (!author) {
     return null;
   }
 
-  const imageUrl = getAuthorImageUrl(recipe.authorRef);
+  const imageUrl = getAuthorImageUrl(author);
   return {
-    name: recipe.authorRef.name,
-    bio: recipe.authorRef.bio || '',
+    name: author.name,
+    bio: author.bio || '',
     avatar: imageUrl,
     link: '/authors', // Always link to authors page
-    image: imageUrl
+    image: imageUrl,
+    source: author.source
   };
 }
 
 /**
  * Recipe Author Hero Display (for RecipeHero component)
  */
-export function RecipeAuthorHero({ recipe, className = '' }: RecipeAuthorProps) {
-  const author = getRecipeAuthorData(recipe);
+export async function RecipeAuthorHero({ recipe, className = '' }: RecipeAuthorProps) {
+  const author = await getRecipeAuthorData(recipe);
   
   if (!author) {
     return null;
@@ -93,8 +99,8 @@ export function RecipeAuthorHero({ recipe, className = '' }: RecipeAuthorProps) 
 /**
  * Recipe Author Sidebar Display (for Side component)
  */
-export function RecipeAuthorSidebar({ recipe, className = '' }: RecipeAuthorProps) {
-  const author = getRecipeAuthorData(recipe);
+export async function RecipeAuthorSidebar({ recipe, className = '' }: RecipeAuthorProps) {
+  const author = await getRecipeAuthorData(recipe);
   
   if (!author) {
     return null;
@@ -172,8 +178,8 @@ export function RecipeAuthorSidebar({ recipe, className = '' }: RecipeAuthorProp
 /**
  * Simple Recipe Author Display (for cards, tables, etc.)
  */
-export function RecipeAuthorSimple({ recipe, size = 'medium', className = '' }: RecipeAuthorProps) {
-  const author = getRecipeAuthorData(recipe);
+export async function RecipeAuthorSimple({ recipe, size = 'medium', className = '' }: RecipeAuthorProps) {
+  const author = await getRecipeAuthorData(recipe);
   
   if (!author) {
     return (
