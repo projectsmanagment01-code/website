@@ -1,49 +1,21 @@
 import { getHostname } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { getAuthorById } from '@/lib/author-integration';
 import { getAuthorImageUrl } from '@/lib/author-image';
 
 async function AuthorCard({ recipe }: { recipe: any }) {
   let authorData = null;
   let authorImageUrl = '/placeholder-user.jpg';
 
-  // Fetch author by authorId
-  if (recipe.authorId) {
-    try {
-      const authorEntity = await getAuthorById(recipe.authorId);
-      if (authorEntity) {
-        // Use the unified image helper
-        authorImageUrl = getAuthorImageUrl(authorEntity);
-        
-        authorData = {
-          name: authorEntity.name,
-          bio: authorEntity.bio || '',
-          avatar: authorImageUrl,
-          link: `/authors`  // Always link to authors page, no individual profiles
-        };
-      }
-    } catch (error) {
-      console.error('Error fetching author:', error);
-    }
-  }
-
-  // Fallback: use embedded author (backward compatibility)
-  if (!authorData && recipe.author) {
-    // If author has avatar or img, use the helper
-    if (recipe.author.avatar || recipe.author.img) {
-      authorImageUrl = getAuthorImageUrl({
-        avatar: recipe.author.avatar,
-        img: recipe.author.img,
-        name: recipe.author.name
-      });
-    }
+  // Use authorRef from database query
+  if (recipe.authorRef) {
+    authorImageUrl = getAuthorImageUrl(recipe.authorRef);
     
     authorData = {
-      name: recipe.author.name,
-      bio: recipe.author.bio,
+      name: recipe.authorRef.name,
+      bio: recipe.authorRef.bio || '',
       avatar: authorImageUrl,
-      link: '/authors'  // Always link to authors page
+      link: `/authors`  // Always link to authors page, no individual profiles
     };
   }
 

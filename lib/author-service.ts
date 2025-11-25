@@ -271,30 +271,7 @@ export async function updateAuthor(id: string, data: UpdateAuthorData): Promise<
       tagsIsArray: Array.isArray(author.tags)
     });
 
-    // Update all recipes that reference this author (embedded author data)
-    if (data.img || data.avatar || data.name || data.bio) {
-      console.log('🔄 Updating embedded author data in recipes...');
-      
-      const recipes = await prisma.recipe.findMany({
-        where: { authorId: id }
-      });
-
-      for (const recipe of recipes) {
-        await prisma.recipe.update({
-          where: { id: recipe.id },
-          data: {
-            author: {
-              name: author.name,
-              bio: author.bio || "",
-              avatar: author.avatar || author.img || "",
-              link: author.link || `/authors/${author.slug}`
-            }
-          }
-        });
-      }
-
-      console.log(`✅ Updated ${recipes.length} recipes with new author data`);
-    }
+    // No need to update embedded author - using authorRef relationship now
 
     return {
       id: author.id,
@@ -330,29 +307,13 @@ export async function deleteAuthor(id: string): Promise<boolean> {
     });
 
     if (recipeCount > 0) {
-      // Get the author data before deleting to create a generic replacement
-      const author = await prisma.author.findUnique({ where: { id } });
+      // Simply remove the author relationship - recipes will show no author
+      await prisma.recipe.updateMany({
+        where: { authorId: id },
+        data: { authorId: null }
+      });
       
-      if (author) {
-        // Create a generic "Deleted Author" placeholder
-        const deletedAuthorData = {
-          name: "Unknown Author",
-          bio: "This author has been removed",
-          avatar: author.avatar || author.img || "",
-          link: "/authors"
-        };
-
-        // Update both the relationship AND the embedded JSON author field
-        await prisma.recipe.updateMany({
-          where: { authorId: id },
-          data: { 
-            authorId: null,
-            author: deletedAuthorData // Update the embedded JSON field
-          }
-        });
-        
-        console.log(`🔄 Removed author relationship and updated embedded author data for ${recipeCount} recipes`);
-      }
+      console.log(`🔄 Removed author relationship from ${recipeCount} recipes`);
     }
 
     // Delete the author

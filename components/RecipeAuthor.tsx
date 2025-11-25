@@ -1,12 +1,10 @@
 /**
  * Recipe Author Display Component (Server Component)
  * 
- * Handles fetching and displaying author information for recipes
- * Supports both new authorId approach and legacy embedded author objects
+ * Handles displaying author information for recipes using authorRef relationship
  */
 
 import { Recipe } from '@/outils/types';
-import { getAuthorById } from '@/lib/author-integration';
 import { getAuthorImageUrl } from '@/lib/author-image';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,53 +18,28 @@ interface RecipeAuthorProps {
 }
 
 /**
- * Get author data for display (server-side)
+ * Get author data for display using authorRef
  */
-async function getRecipeAuthorData(recipe: Recipe) {
-  // New approach: fetch by authorId
-  if (recipe.authorId) {
-    try {
-      const authorEntity = await getAuthorById(recipe.authorId);
-      if (authorEntity) {
-        const imageUrl = getAuthorImageUrl(authorEntity);
-        return {
-          name: authorEntity.name,
-          bio: authorEntity.bio || '',
-          avatar: imageUrl,
-          link: '/authors', // Always link to authors page, no individual profiles
-          image: imageUrl
-        };
-      }
-    } catch (error) {
-      console.error('Error fetching author:', error);
-    }
+function getRecipeAuthorData(recipe: Recipe) {
+  if (!recipe.authorRef) {
+    return null;
   }
 
-  // Fallback: use embedded author (backward compatibility)
-  if (recipe.author) {
-    const imageUrl = getAuthorImageUrl({
-      avatar: recipe.author.avatar,
-      img: recipe.author.img,
-      name: recipe.author.name
-    });
-    
-    return {
-      name: recipe.author.name,
-      bio: recipe.author.bio,
-      avatar: imageUrl,
-      link: '/authors', // Always link to authors page
-      image: imageUrl
-    };
-  }
-
-  return null;
+  const imageUrl = getAuthorImageUrl(recipe.authorRef);
+  return {
+    name: recipe.authorRef.name,
+    bio: recipe.authorRef.bio || '',
+    avatar: imageUrl,
+    link: '/authors', // Always link to authors page
+    image: imageUrl
+  };
 }
 
 /**
  * Recipe Author Hero Display (for RecipeHero component)
  */
-export async function RecipeAuthorHero({ recipe, className = '' }: RecipeAuthorProps) {
-  const author = await getRecipeAuthorData(recipe);
+export function RecipeAuthorHero({ recipe, className = '' }: RecipeAuthorProps) {
+  const author = getRecipeAuthorData(recipe);
   
   if (!author) {
     return null;
@@ -120,8 +93,8 @@ export async function RecipeAuthorHero({ recipe, className = '' }: RecipeAuthorP
 /**
  * Recipe Author Sidebar Display (for Side component)
  */
-export async function RecipeAuthorSidebar({ recipe, className = '' }: RecipeAuthorProps) {
-  const author = await getRecipeAuthorData(recipe);
+export function RecipeAuthorSidebar({ recipe, className = '' }: RecipeAuthorProps) {
+  const author = getRecipeAuthorData(recipe);
   
   if (!author) {
     return null;
@@ -199,8 +172,8 @@ export async function RecipeAuthorSidebar({ recipe, className = '' }: RecipeAuth
 /**
  * Simple Recipe Author Display (for cards, tables, etc.)
  */
-export async function RecipeAuthorSimple({ recipe, size = 'medium', className = '' }: RecipeAuthorProps) {
-  const author = await getRecipeAuthorData(recipe);
+export function RecipeAuthorSimple({ recipe, size = 'medium', className = '' }: RecipeAuthorProps) {
+  const author = getRecipeAuthorData(recipe);
   
   if (!author) {
     return (

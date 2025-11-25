@@ -66,21 +66,21 @@ export const Card: React.FC<{
           <div className="flex items-center text-white mb-4">
             <ChefHat className="h-4 w-4 mr-2" style={{ color: '#7FAD8A' }} />
             <span>Author: </span>
-            {recipe.author?.link ? (
+            {recipe.authorRef?.link ? (
               <NextLink 
-                href={recipe.author.link}
+                href={recipe.authorRef.link}
                 className="text-green-200 hover:text-green-100 hover:underline transition-colors duration-200 ml-1 cursor-pointer"
                 style={{ textDecoration: 'none' }}
               >
-                {recipe.author.name}
+                {recipe.authorRef.name}
               </NextLink>
-            ) : recipe.author?.name ? (
+            ) : recipe.authorRef?.name ? (
               <NextLink 
-                href={`/authors/${recipe.author.name.toLowerCase().replace(/\s+/g, '-')}`}
+                href={`/authors/${recipe.authorRef.name.toLowerCase().replace(/\s+/g, '-')}`}
                 className="text-green-200 hover:text-green-100 hover:underline transition-colors duration-200 ml-1 cursor-pointer"
                 style={{ textDecoration: 'none' }}
               >
-                {recipe.author.name}
+                {recipe.authorRef.name}
               </NextLink>
             ) : (
               <span className="ml-1">Unknown Author</span>

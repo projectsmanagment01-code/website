@@ -44,7 +44,7 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
       const searchMatch = searchTerm === "" || 
         recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (recipe.author?.name && recipe.author.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        (recipe.authorRef?.name && recipe.authorRef.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
       // Status filter
       const statusMatch = statusFilter === "all" || recipe.status === statusFilter;
@@ -240,12 +240,12 @@ export const RecipeTable: React.FC<RecipeTableProps> = ({
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">
                       <img
-                        src={getAuthorImage(recipe.author)}
-                        alt={recipe.author?.name}
+                        src={getAuthorImage(recipe.authorRef)}
+                        alt={recipe.authorRef?.name}
                         className="w-6 h-6 rounded-full"
                       />
                       <span className="text-sm font-medium text-gray-900 truncate">
-                        {recipe.author?.name || "Unknown"}
+                        {recipe.authorRef?.name || "Unknown"}
                       </span>
                     </div>
                   </td>

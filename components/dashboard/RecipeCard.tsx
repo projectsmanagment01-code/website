@@ -51,12 +51,12 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onEdit }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img
-              src={getAuthorImage(recipe.author)}
-              alt={recipe.author?.name || "Author"}
+              src={getAuthorImage(recipe.authorRef)}
+              alt={recipe.authorRef?.name || "Author"}
               className="w-6 h-6 rounded-full"
             />
             <span className="text-sm text-gray-600">
-              {recipe.author?.name || "Unknown Author"}
+              {recipe.authorRef?.name || "Unknown Author"}
             </span>
           </div>
 

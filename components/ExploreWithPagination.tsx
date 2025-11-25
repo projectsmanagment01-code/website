@@ -136,14 +136,14 @@ const RecipeCard = ({ recipe }: { recipe: Recipe }) => {
         <span className="text-gray-500">
           {recipe.timing?.totalTime || "N/A"}
         </span>
-        {recipe.author?.name && (
+        {recipe.authorRef?.name && (
           <>
             <span className="text-gray-500">•</span>
             <Link
-              href={`/authors/${recipe.author.name.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`/authors/${recipe.authorRef.name.toLowerCase().replace(/\s+/g, '-')}`}
               className="text-orange-600 font-medium hover:text-orange-700 transition-colors"
             >
-              {recipe.author.name}
+              {recipe.authorRef.name}
             </Link>
           </>
         )}

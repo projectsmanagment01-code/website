@@ -135,8 +135,8 @@ export class AdminRecipeService {
       errors.push("Introduction is required");
     }
 
-    if (!recipe.author?.name?.trim()) {
-      errors.push("Author name is required");
+    if (!recipe.authorId?.trim()) {
+      errors.push("Author is required");
     }
 
     if (!recipe.img?.trim()) {

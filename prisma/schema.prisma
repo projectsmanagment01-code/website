@@ -16,7 +16,7 @@ model Recipe {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   allergyInfo         String
-  author              Json
+  author              Json?     // DEPRECATED: Use authorRef relationship instead
   categoryHref        String?   // DEPRECATED: Will be removed after migration
   categoryLink        String    // DEPRECATED: Will be removed after migration
   completeProcess     Json?

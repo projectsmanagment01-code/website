@@ -66,8 +66,8 @@ export default async function RecipeSchema({ recipe }: RecipeSchemaProps) {
     // Author information
     author: {
       "@type": "Person",
-      name: recipe.author?.name || "Recipe Author",
-      ...(recipe.author?.link && { url: recipe.author.link })
+      name: recipe.authorRef?.name || "Recipe Author",
+      ...(recipe.authorRef?.link && { url: recipe.authorRef.link })
     },
 
     // Date information

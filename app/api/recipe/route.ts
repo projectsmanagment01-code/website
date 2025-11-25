@@ -11,7 +11,6 @@ import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 import prisma from "@/lib/prisma";
 import { withRetry } from "@/lib/prisma-helpers";
 import { revalidateTag, revalidatePath } from "next/cache";
-import { processRecipeAuthor } from "@/lib/author-integration";
 import { revalidateAdminPaths } from "@/lib/cache-busting";
 
 // Ensure Node.js types are available
@@ -189,7 +188,6 @@ export async function POST(request: NextRequest) {
     console.log("📥 Received recipe data:", {
       title: recipe.title,
       keys: Object.keys(recipe),
-      hasAuthor: !!recipe.author,
       hasAuthorId: !!recipe.authorId
     });
 
@@ -218,25 +216,12 @@ export async function POST(request: NextRequest) {
       imagesCount: Array.isArray(recipe.images) ? recipe.images.length : 0,
       ingredientsCount: Array.isArray(recipe.ingredients) ? recipe.ingredients.length : 0,
       instructionsCount: Array.isArray(recipe.instructions) ? recipe.instructions.length : 0,
-      hasAuthor: !!recipe.author,
       authorId: recipe.authorId,
       timing: recipe.timing
     });
 
-    // Process author data and get authorId
-    let finalAuthorId = recipe.authorId;
-    
-    // If recipe has embedded author but no authorId, process it
-    if (recipe.author && !recipe.authorId) {
-      console.log("🔄 Processing embedded author to create authorId relationship");
-      try {
-        finalAuthorId = await processRecipeAuthor(recipe.author);
-        console.log("✅ Created/found author with ID:", finalAuthorId);
-      } catch (error) {
-        console.error("❌ Failed to process embedded author:", error);
-        // Continue without authorId - recipe will use embedded author
-      }
-    }
+    // Use authorId directly (no more processing embedded author JSON)
+    const finalAuthorId = recipe.authorId;
     
     // If authorId is provided, validate it exists
     if (finalAuthorId) {
