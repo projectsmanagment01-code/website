@@ -1,5 +1,8 @@
-// Import global error handlers (TypeScript file)
-import './app/error-handlers.ts';
+// Note: Error handlers are initialized in server startup files
+// Importing TS files in next.config.mjs causes production build issues
+// Error handlers are loaded via:
+// - server/index.ts (Express server)
+// - instrumentation.ts (Next.js runtime - if needed)
 
 // Remove static import of 'path' and use dynamic import in webpack function
 /** @type {import('next').NextConfig} */
@@ -57,6 +60,8 @@ const nextConfig = {
   // Experimental features for better performance
   experimental: {
     webpackMemoryOptimizations: true,
+    // Enable instrumentation for error handlers
+    instrumentationHook: true,
   },
 
   // Compiler options
