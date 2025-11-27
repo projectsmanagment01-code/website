@@ -1,3 +1,6 @@
+// Import global error handlers (TypeScript file)
+import './app/error-handlers.ts';
+
 // Remove static import of 'path' and use dynamic import in webpack function
 /** @type {import('next').NextConfig} */
 const nextConfig = {

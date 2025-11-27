@@ -1,10 +1,13 @@
 generator client {
   provider = "prisma-client-js"
+  // Note: tracing and metrics are now built-in features (no longer preview features)
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Optional: Use directUrl for migrations if using connection pooler
+  // directUrl = env("DATABASE_URL_DIRECT")
 }
 
 model Recipe {

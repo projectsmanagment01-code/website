@@ -12,12 +12,54 @@ export class AppError extends Error {
   }
 }
 
+// Logging middleware for errors
+export const logErrors = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  console.error('[ERROR] Detailed Report:', {
+    message: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+    timestamp: new Date().toISOString(),
+  });
+  next(err);
+};
+
+// Client error handler (for XHR requests)
+export const clientErrorHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (req.xhr) {
+    res.status(500).json({ 
+      error: 'Something failed!',
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    next(err);
+  }
+};
+
+// Main error handler
 export const errorHandler = (
   err: Error | AppError,
   req: Request,
   res: Response,
   next: NextFunction
 ): void => {
+  // Prevent sending headers if already sent
+  if (res.headersSent) {
+    return next(err);
+  }
+
   // Default error values
   let statusCode = 500;
   let message = 'Internal Server Error';
@@ -40,14 +82,12 @@ export const errorHandler = (
     message = err.message;
   }
 
-  // Log error details
-  console.error('Error occurred:', {
+  // Log error details (if not already logged by logErrors middleware)
+  console.error('[ERROR_HANDLER]', {
     message: err.message,
     statusCode,
-    stack: err.stack,
     url: req.url,
     method: req.method,
-    ip: req.ip,
     timestamp: new Date().toISOString(),
   });
 

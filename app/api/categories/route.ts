@@ -195,9 +195,15 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    console.error("[CATEGORIES_GET] Database error:", error);
     
-    // Provide fallback categories instead of just error
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+    
+    // Provide fallback categories instead of crashing
     const fallbackCategories: Category[] = [
       {
         id: "breakfast",

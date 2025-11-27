@@ -155,7 +155,14 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching recipes:", error);
+    console.error("[RECIPES_GET] Database error:", error);
+    
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+    
     return NextResponse.json(
       { error: "Failed to fetch recipes" },
       { status: 500 }
