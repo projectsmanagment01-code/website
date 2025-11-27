@@ -60,8 +60,6 @@ const nextConfig = {
   // Experimental features for better performance
   experimental: {
     webpackMemoryOptimizations: true,
-    // Enable instrumentation for error handlers
-    instrumentationHook: true,
   },
 
   // Compiler options

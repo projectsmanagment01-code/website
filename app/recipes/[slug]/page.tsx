@@ -1,5 +1,4 @@
-// Force static generation for maximum performance
-export const dynamic = "force-static";
+// Use ISR for recipe pages - static with revalidation
 export const revalidate = 3600; // Revalidate every hour
 
 import { RecipeContent } from "@/components/RecipeContent";

@@ -1,4 +1,5 @@
-export const dynamic = "force-static";
+// Allow dynamic rendering for category pages
+export const revalidate = 3600; // Cache for 1 hour
 
 import React from "react";
 import { Recipe } from "@/outils/types";
