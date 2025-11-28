@@ -1,7 +1,3 @@
-// Homepage needs dynamic rendering for database queries
-export const dynamic = "force-dynamic";
-export const revalidate = 3600; // Cache for 1 hour
-
 import { Metadata } from "next";
 import CategoriesSection from "@/components/main/CategoriesSection";
 import HeroSection from "@/components/main/HeroSection";
