@@ -6,6 +6,7 @@
  */
 
 import { prisma } from './prisma';
+import { Prisma } from '@prisma/client';
 import { Author, AuthorEntity } from '@/outils/types';
 
 /**
@@ -120,11 +121,12 @@ export async function getAuthorById(id: string): Promise<(AuthorEntity & { recip
     return {
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio ?? undefined,
+      img: author.img ?? undefined,
+      avatar: author.avatar ?? undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link ?? undefined,
+      tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt,
       recipeCount: author._count.recipes
@@ -154,11 +156,11 @@ export async function getAuthorBySlug(slug: string): Promise<(AuthorEntity & { r
     return {
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio ?? undefined,
+      img: author.img ?? undefined,
+      avatar: author.avatar ?? undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link ?? undefined,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt,
       recipeCount: author._count.recipes
@@ -188,11 +190,12 @@ export async function getAllAuthors(): Promise<(AuthorEntity & { recipeCount: nu
     return authors.map(author => ({
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio ?? undefined,
+      img: author.img ?? undefined,
+      avatar: author.avatar ?? undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link ?? undefined,
+      tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt,
       recipeCount: author._count.recipes
@@ -228,7 +231,7 @@ export async function migrateExistingAuthors() {
       where: {
         authorId: null, // Only process recipes without author relationships
         author: {
-          not: null
+          not: Prisma.JsonNull
         }
       }
     });

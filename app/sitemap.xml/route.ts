@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { siteConfig } from "@/config/site";
 import prisma from "@/lib/prisma";
-import { withRetry } from "@/lib/prisma-helpers";
+import { executeWithRetry } from "@/lib/db-utils";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: Request) {
   try {
@@ -9,6 +10,8 @@ export async function GET(request: Request) {
     const host = request.headers.get("host") || "localhost:3000";
     const protocol = host.includes("localhost") ? "http" : "https";
     const baseUrl = `${protocol}://${host}`;
+
+    logger.info("Generating sitemap", { host, baseUrl });
 
     // Static pages
     const staticPages = [
@@ -88,11 +91,22 @@ export async function GET(request: Request) {
     ];
 
     // Fetch dynamic categories from database
-    const categories = await withRetry(() =>
-      prisma.category.findMany({
-        orderBy: { name: "asc" },
-      })
-    );
+    let categories: Array<{ slug: string }> = [];
+    try {
+      categories = await executeWithRetry(
+        () =>
+          prisma.category.findMany({
+            select: { slug: true },
+            orderBy: { name: "asc" },
+          }),
+        3,
+        1000
+      );
+      logger.info(`Fetched ${categories.length} categories for sitemap`);
+    } catch (error) {
+      logger.error("Failed to fetch categories for sitemap", { error });
+      // Continue with empty categories array
+    }
 
     // Dynamic category pages
     const categoryPages = categories.map((category) => ({
@@ -103,16 +117,26 @@ export async function GET(request: Request) {
     }));
 
     // Fetch all recipes from database
-    const recipes = await withRetry(() =>
-      prisma.recipe.findMany({
-        select: {
-          slug: true,
-          updatedAt: true,
-          createdAt: true,
-        },
-        orderBy: { createdAt: "desc" },
-      })
-    );
+    let recipes: Array<{ slug: string; updatedAt: Date | null; createdAt: Date }> = [];
+    try {
+      recipes = await executeWithRetry(
+        () =>
+          prisma.recipe.findMany({
+            select: {
+              slug: true,
+              updatedAt: true,
+              createdAt: true,
+            },
+            orderBy: { createdAt: "desc" },
+          }),
+        3,
+        1000
+      );
+      logger.info(`Fetched ${recipes.length} recipes for sitemap`);
+    } catch (error) {
+      logger.error("Failed to fetch recipes for sitemap", { error });
+      // Continue with empty recipes array
+    }
 
     // Dynamic recipe pages
     const recipePages = recipes.map((recipe) => ({
@@ -127,6 +151,8 @@ export async function GET(request: Request) {
 
     // Combine all pages
     const allPages = [...staticPages, ...categoryPages, ...recipePages];
+
+    logger.info(`Generated sitemap with ${allPages.length} URLs`);
 
     // Generate XML
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -151,7 +177,25 @@ ${allPages
       },
     });
   } catch (error) {
-    console.error("Error generating sitemap:", error);
-    return new NextResponse("Error generating sitemap", { status: 500 });
+    logger.error("Fatal error generating sitemap", { error });
+    
+    // Return minimal sitemap with just static pages on error
+    const minimalSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://${request.headers.get("host") || "localhost:3000"}/</loc>
+    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+    
+    return new NextResponse(minimalSitemap, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/xml",
+        "Cache-Control": "s-maxage=3600, stale-while-revalidate", // Shorter cache on error
+      },
+    });
   }
 }

@@ -91,7 +91,7 @@ export class PerformanceMonitor {
           logger.performance(name, Math.round(measure.duration))
         }
       } catch (error) {
-        logger.warn('Performance measurement failed', error)
+        logger.warn('Performance measurement failed', { error: error instanceof Error ? error.message : String(error) })
       }
     }
   }

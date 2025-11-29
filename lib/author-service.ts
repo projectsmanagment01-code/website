@@ -9,6 +9,24 @@ import { prisma } from './prisma';
 import { AuthorEntity } from '@/outils/types';
 import { generateAuthorSlug } from './author-integration';
 
+/**
+ * Convert Prisma author (with null) to AuthorEntity (with undefined)
+ */
+function convertPrismaAuthor(author: any): AuthorEntity {
+  return {
+    id: author.id,
+    name: author.name,
+    bio: author.bio ?? undefined,
+    img: author.img ?? undefined,
+    avatar: author.avatar ?? undefined,
+    slug: author.slug,
+    link: author.link ?? undefined,
+    tags: author.tags,
+    createdAt: author.createdAt,
+    updatedAt: author.updatedAt,
+  };
+}
+
 export interface CreateAuthorData {
   name: string;
   bio?: string;
@@ -36,7 +54,7 @@ export async function getAuthorBySlug(slug: string): Promise<AuthorEntity | null
       where: { slug }
     });
     
-    return author;
+    return author ? convertPrismaAuthor(author) : null;
   } catch (error) {
     console.error('[Author Service] Error getting author by slug:', error);
     return null;
@@ -124,11 +142,11 @@ export async function getAuthors(page: number = 1, limit: number = 20): Promise<
     const authorEntities = authors.map(author => ({
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio ?? undefined,
+      img: author.img ?? undefined,
+      avatar: author.avatar ?? undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link ?? undefined,
       tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt,
@@ -161,11 +179,11 @@ export async function getAllAuthors(): Promise<AuthorEntity[]> {
     return authors.map(author => ({
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio ?? undefined,
+      img: author.img ?? undefined,
+      avatar: author.avatar ?? undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link ?? undefined,
       tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt
@@ -358,11 +376,11 @@ export async function searchAuthors(query: string, limit: number = 10): Promise<
     return authors.map(author => ({
       id: author.id,
       name: author.name,
-      bio: author.bio,
-      img: author.img,
-      avatar: author.avatar,
+      bio: author.bio ?? undefined,
+      img: author.img ?? undefined,
+      avatar: author.avatar ?? undefined,
       slug: author.slug,
-      link: author.link,
+      link: author.link ?? undefined,
       tags: author.tags,
       createdAt: author.createdAt,
       updatedAt: author.updatedAt,
