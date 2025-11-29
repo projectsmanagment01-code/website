@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import CategoriesSection from "@/components/main/CategoriesSection";
 import HeroSection from "@/components/main/HeroSection";
-import LatestRecipesSection from "@/components/main/LatestRecipesSection";
+import LatestRecipesSectionPaginated from "@/components/main/LatestRecipesSectionPaginated";
 import TrendingSection from "@/components/main/TrendingSection";
 import SubscriptionSection from "@/components/main/SubscriptionSection";
 import BackToTop from "@/components/BackToTop";
@@ -68,7 +68,7 @@ export default function HomePage() {
       <main className="container-wide section-md">
         <CategoriesSection />
         <div className="section-sm">
-          <LatestRecipesSection limit={8} />
+          <LatestRecipesSectionPaginated recipesPerPage={8} />
         </div>
         <div className="section-sm">
           <TrendingSection limit={8} />
