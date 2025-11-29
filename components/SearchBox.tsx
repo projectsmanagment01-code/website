@@ -1,7 +1,36 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { X, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function SearchBox() {
+  const [query, setQuery] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    // Track search
+    try {
+      const sessionId = sessionStorage.getItem('analytics_session_id');
+      await fetch('/api/admin/analytics/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: query.trim(),
+          sessionId
+        })
+      });
+    } catch (err) {
+      console.error('Search tracking failed', err);
+    }
+
+    // Navigate to search page
+    router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+  };
+
   return (
     <div
       id="search"
@@ -12,7 +41,7 @@ export default function SearchBox() {
         transition-all duration-300
       "
     >
-      <form className="flex items-center w-full">
+      <form className="flex items-center w-full" onSubmit={handleSubmit}>
         {/* Input */}
         <div className="flex items-center h-[42px] flex-1 border-none">
           <input
@@ -21,24 +50,30 @@ export default function SearchBox() {
             type="text"
             autoComplete="off"
             aria-label="Rechercher"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             className="
               w-full h-auto 
               bg-white border border-gray-300 text-base
               placeholder-gray-500
+              px-2
             "
           />
         </div>
 
         {/* Clear button (hidden by default, show when text entered) */}
-        <button
-          type="button"
-          className="
-            hidden text-[#c64118] font-bold
-            ml-2 hover:underline
-          "
-        >
-          <X size={18} />
-        </button>
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            className="
+              text-[#c64118] font-bold
+              ml-2 hover:underline
+            "
+          >
+            <X size={18} />
+          </button>
+        )}
 
         {/* Search button */}
         <button

@@ -325,9 +325,38 @@ model AnalyticsVisitor {
   longitude  Float    @default(0)
   visitedAt  DateTime @default(now())
   
+  // Phase 1: Traffic Sources & Device Analytics
+  referrer    String?   @db.VarChar(500)
+  sourceType  String?   @default("direct") // organic, social, direct, referral, email
+  deviceType  String?   @default("desktop") // mobile, desktop, tablet
+  browser     String?   @default("unknown")
+  os          String?   @default("unknown")
+  sessionId   String?   // For grouping page views into sessions
+  duration    Int       @default(0) // Time on page in seconds
+  scrollDepth Int       @default(0) // Max scroll percentage (0-100)
+  
+  // UTM Parameters
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+
   @@map("analytics_visitors")
   @@unique([ip, page, visitedAt])
   @@index([country])
   @@index([visitedAt])
   @@index([page])
+}
+
+model SearchQuery {
+  id            String   @id @default(cuid())
+  query         String
+  resultsCount  Int      @default(0)
+  clickedResult Boolean  @default(false)
+  sessionId     String?
+  visitorId     String?
+  searchedAt    DateTime @default(now())
+
+  @@map("search_queries")
+  @@index([searchedAt])
+  @@index([query])
 }

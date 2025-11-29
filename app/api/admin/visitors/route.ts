@@ -2,21 +2,78 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { executeWithRetry } from '@/lib/db-utils';
 
+// Helper functions for analytics
+function getSourceType(referrer: string, currentHost: string): string {
+  if (!referrer) return 'direct';
+  
+  try {
+    const refUrl = new URL(referrer);
+    if (refUrl.hostname.includes(currentHost)) return 'internal';
+    
+    const socialDomains = ['facebook.com', 'twitter.com', 't.co', 'instagram.com', 'pinterest.com', 'linkedin.com', 'reddit.com', 'tiktok.com'];
+    if (socialDomains.some(d => refUrl.hostname.includes(d))) return 'social';
+    
+    const searchDomains = ['google.', 'bing.com', 'yahoo.com', 'duckduckgo.com', 'baidu.com', 'yandex.com'];
+    if (searchDomains.some(d => refUrl.hostname.includes(d))) return 'organic';
+    
+    return 'referral';
+  } catch {
+    return 'direct';
+  }
+}
+
+function getDeviceType(ua: string): string {
+  ua = ua.toLowerCase();
+  if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return 'tablet';
+  if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) return 'mobile';
+  return 'desktop';
+}
+
+function getBrowser(ua: string): string {
+  if (ua.includes('Firefox')) return 'Firefox';
+  if (ua.includes('SamsungBrowser')) return 'Samsung Internet';
+  if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
+  if (ua.includes('Trident')) return 'Internet Explorer';
+  if (ua.includes('Edge')) return 'Edge';
+  if (ua.includes('Chrome')) return 'Chrome';
+  if (ua.includes('Safari')) return 'Safari';
+  return 'Unknown';
+}
+
+function getOS(ua: string): string {
+  if (ua.includes('Windows')) return 'Windows';
+  if (ua.includes('Mac')) return 'macOS';
+  if (ua.includes('Linux')) return 'Linux';
+  if (ua.includes('Android')) return 'Android';
+  if (ua.includes('iOS') || ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+  return 'Unknown';
+}
+
 // POST - Track visitor
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { page, country, city, latitude, longitude, userAgent } = body;
+    const { page, country, city, latitude, longitude, userAgent, referrer, sessionId } = body;
 
     // Get IP from headers
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
+    const host = request.headers.get('host') || '';
+
+    // Parse analytics data
+    const sourceType = getSourceType(referrer, host);
+    const deviceType = getDeviceType(userAgent || '');
+    const browser = getBrowser(userAgent || '');
+    const os = getOS(userAgent || '');
 
     // Store visitor data using Prisma (handles column mapping automatically)
+    let visitId = '';
+    
     await executeWithRetry(
       async () => {
         try {
-          await prisma.analyticsVisitor.create({
+          // @ts-ignore - Ignore type errors until Prisma client is regenerated
+          const visitor = await prisma.analyticsVisitor.create({
             data: {
               ip,
               country: country || 'Unknown',
@@ -26,8 +83,16 @@ export async function POST(request: NextRequest) {
               userAgent: userAgent || 'Unknown',
               page,
               visitedAt: new Date(),
+              // New fields
+              referrer: referrer || null,
+              sourceType,
+              deviceType,
+              browser,
+              os,
+              sessionId: sessionId || null,
             },
           });
+          visitId = visitor.id;
         } catch (error: any) {
           // Ignore unique constraint violations (visitor already tracked today)
           if (!error.code || error.code !== 'P2002') {
@@ -38,25 +103,78 @@ export async function POST(request: NextRequest) {
       { maxRetries: 3, retryDelay: 1000, operationName: 'trackVisitor' }
     );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, id: visitId });
   } catch (error) {
     console.error('Error tracking visitor:', error);
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
 
-// GET - Get visitor statistics
-export async function GET() {
+// PUT - Update visitor duration (Heartbeat)
+export async function PUT(request: NextRequest) {
   try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const body = await request.json();
+    const { id, duration, scrollDepth } = body;
 
-    // Get all visitors from last 30 days using Prisma
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Invalid data' }, { status: 400 });
+    }
+
+    await executeWithRetry(
+      async () => {
+        const updateData: any = {};
+        if (typeof duration === 'number') updateData.duration = duration;
+        if (typeof scrollDepth === 'number') updateData.scrollDepth = scrollDepth;
+
+        if (Object.keys(updateData).length > 0) {
+          await prisma.analyticsVisitor.update({
+            where: { id },
+            data: updateData,
+          });
+        }
+      },
+      { maxRetries: 3, retryDelay: 1000, operationName: 'updateVisitorDuration' }
+    );
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    // console.error('Error updating visitor duration:', error);
+    return NextResponse.json({ success: false }, { status: 500 });
+  }
+}
+
+// GET - Get visitor statistics
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const range = searchParams.get('range') || '30d';
+    
+    const startDate = new Date();
+    switch (range) {
+      case '24h':
+        startDate.setHours(startDate.getHours() - 24);
+        break;
+      case '7d':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case '90d':
+        startDate.setDate(startDate.getDate() - 90);
+        break;
+      case 'all':
+        startDate.setTime(0);
+        break;
+      case '30d':
+      default:
+        startDate.setDate(startDate.getDate() - 30);
+        break;
+    }
+
+    // Get all visitors from selected range using Prisma
     const visitors = await executeWithRetry(
       async () => await prisma.analyticsVisitor.findMany({
         where: {
           visitedAt: {
-            gte: thirtyDaysAgo,
+            gte: startDate,
           },
         },
         select: {

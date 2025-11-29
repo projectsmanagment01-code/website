@@ -12,8 +12,10 @@ import {
   BarChart3,
   Activity,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Search
 } from 'lucide-react';
+import TimeRangeSelector, { TimeRange } from './TimeRangeSelector';
 
 interface AnalyticsData {
   overview: {
@@ -26,7 +28,13 @@ interface AnalyticsData {
     activeSubscribers: number;
     recentSubscribers: number;
     subscriberGrowthRate: number;
+    bounceRate?: number;
+    totalSessions?: number;
+    activeUsers?: number;
+    avgDuration?: number;
+    avgScrollDepth?: number;
   };
+  topSearchQueries?: Array<{ query: string; count: number }>;
   topRecipes: Array<{
     id: string;
     title: string;
@@ -36,6 +44,7 @@ interface AnalyticsData {
     img?: string;
     heroImage?: string;
   }>;
+  topExitPages?: Array<{ page: string; count: number }>;
   recentRecipes: Array<{
     id: string;
     title: string;
@@ -50,6 +59,9 @@ interface AnalyticsData {
     count: number;
     percentage: number;
   }>;
+  trafficSources?: Array<{ source: string; count: number; percentage: number }>;
+  deviceStats?: Array<{ device: string; count: number; percentage: number }>;
+  browserStats?: Array<{ browser: string; count: number; percentage: number }>;
 }
 
 // Simple Line Chart Component
@@ -132,6 +144,12 @@ const DonutChart = ({ data, colors }: { data: Array<{ label: string, value: numb
   );
 };
 
+const formatDuration = (seconds: number) => {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}m ${s}s`;
+};
+
 // Simple World Map Component
 const WorldMap = ({ locations }: { locations: Array<{ latitude: number; longitude: number; country: string; city: string }> }) => {
   // Convert lat/lng to SVG coordinates (Mercator projection)
@@ -192,6 +210,7 @@ export default function ModernAnalyticsDashboard() {
   const [visitors, setVisitors] = useState<VisitorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [timeRange, setTimeRange] = useState<TimeRange>('30d');
 
   useEffect(() => {
     fetchAnalytics();
@@ -200,11 +219,11 @@ export default function ModernAnalyticsDashboard() {
     // Refresh visitor data every 30 seconds
     const interval = setInterval(fetchVisitors, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [timeRange]);
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch('/api/admin/analytics');
+      const response = await fetch(`/api/admin/analytics?range=${timeRange}`);
       if (!response.ok) throw new Error('Failed to fetch analytics');
       const data = await response.json();
       setAnalytics(data);
@@ -217,7 +236,7 @@ export default function ModernAnalyticsDashboard() {
 
   const fetchVisitors = async () => {
     try {
-      const response = await fetch('/api/admin/visitors');
+      const response = await fetch(`/api/admin/visitors?range=${timeRange}`);
       if (response.ok) {
         const data = await response.json();
         setVisitors(data);
@@ -272,16 +291,24 @@ export default function ModernAnalyticsDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
               Analytics Overview
             </h1>
             <p className="text-slate-500 mt-1">Comprehensive insights into your platform performance</p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Activity className="w-4 h-4" />
-            <span>Live</span>
+          <div className="flex flex-col items-end gap-2">
+            <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
+            <div className="flex items-center gap-2 text-sm text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
+              <div className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </div>
+              <span className="font-medium text-slate-700">
+                {analytics?.overview.activeUsers || 0} Active Now
+              </span>
+            </div>
           </div>
         </div>
 
@@ -444,6 +471,138 @@ export default function ModernAnalyticsDashboard() {
           </div>
         </div>
 
+        {/* Audience Insights */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Traffic Sources */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-3 border-b border-slate-100">
+              <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-slate-600" />
+                Traffic Sources
+              </h3>
+            </div>
+            <div className="p-3 space-y-3">
+              {analytics.trafficSources && analytics.trafficSources.length > 0 ? (
+                analytics.trafficSources.map((source, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${
+                        source.source === 'organic' ? 'bg-emerald-500' :
+                        source.source === 'social' ? 'bg-blue-500' :
+                        source.source === 'direct' ? 'bg-slate-500' : 'bg-amber-500'
+                      }`} />
+                      <span className="capitalize text-slate-700">{source.source}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-slate-900">{source.count}</span>
+                      <span className="text-xs text-slate-500">({source.percentage}%)</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 text-center py-4">No traffic data yet</p>
+              )}
+            </div>
+          </div>
+
+          {/* Device Breakdown */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-3 border-b border-slate-100">
+              <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-slate-600" />
+                Devices
+              </h3>
+            </div>
+            <div className="p-3 space-y-3">
+              {analytics.deviceStats && analytics.deviceStats.length > 0 ? (
+                analytics.deviceStats.map((device, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="capitalize text-slate-700">{device.device}</span>
+                      <span className="text-slate-500">{device.percentage}%</span>
+                    </div>
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-slate-600 rounded-full" 
+                        style={{ width: `${device.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 text-center py-4">No device data yet</p>
+              )}
+            </div>
+          </div>
+
+          {/* Browser Stats */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-3 border-b border-slate-100">
+              <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-slate-600" />
+                Browsers
+              </h3>
+            </div>
+            <div className="p-3 space-y-3">
+              {analytics.browserStats && analytics.browserStats.length > 0 ? (
+                analytics.browserStats.slice(0, 5).map((browser, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm">
+                    <span className="text-slate-700">{browser.browser}</span>
+                    <span className="font-medium text-slate-900">{browser.percentage}%</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 text-center py-4">No browser data yet</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Engagement Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Bounce Rate & Sessions */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-4">
+            <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2 mb-4">
+              <Activity className="w-4 h-4 text-slate-600" />
+              Engagement Overview
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <p className="text-sm text-slate-500 mb-1">Bounce Rate</p>
+                <p className="text-2xl font-bold text-slate-800">{overview.bounceRate || 0}%</p>
+                <p className="text-xs text-slate-400 mt-1">Single-page sessions</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                <p className="text-sm text-slate-500 mb-1">Avg Time on Page</p>
+                <p className="text-2xl font-bold text-slate-800">{formatDuration(overview.avgDuration || 0)}</p>
+                <p className="text-xs text-slate-400 mt-1">Per visit</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Exit Pages */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-4">
+            <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2 mb-4">
+              <ArrowDownRight className="w-4 h-4 text-slate-600" />
+              Top Exit Pages
+            </h3>
+            <div className="space-y-2">
+              {analytics.topExitPages && analytics.topExitPages.length > 0 ? (
+                analytics.topExitPages.map((page, i) => (
+                  <div key={i} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors">
+                    <span className="text-sm text-slate-600 truncate max-w-[70%]">{page.page}</span>
+                    <span className="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
+                      {page.count} exits
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 text-center py-4">No exit data yet</p>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Visitor Geography */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-100">
@@ -523,6 +682,67 @@ export default function ModernAnalyticsDashboard() {
                 </p>
               </>
             )}
+          </div>
+        </div>
+
+        {/* User Behavior Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          {/* Top Search Queries */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-3 border-b border-slate-100">
+              <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                <Search className="w-4 h-4 text-slate-600" />
+                Top Search Queries
+              </h3>
+            </div>
+            <div className="p-3">
+              {analytics.topSearchQueries && analytics.topSearchQueries.length > 0 ? (
+                <div className="space-y-2">
+                  {analytics.topSearchQueries.map((q, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm p-2 bg-slate-50 rounded-lg">
+                      <span className="text-slate-700 font-medium">{q.query}</span>
+                      <span className="text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 text-xs">
+                        {q.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-500 text-sm">
+                  No search data available yet
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Engagement Metrics */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-3 border-b border-slate-100">
+              <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-slate-600" />
+                Engagement Metrics
+              </h3>
+            </div>
+            <div className="p-3 grid grid-cols-2 gap-4">
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
+                <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Avg Time on Page</p>
+                <p className="text-2xl font-bold text-slate-800">
+                  {analytics.overview.avgDuration ? Math.round(analytics.overview.avgDuration / 60) : 0}m {analytics.overview.avgDuration ? analytics.overview.avgDuration % 60 : 0}s
+                </p>
+              </div>
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
+                <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-1">Avg Scroll Depth</p>
+                <p className="text-2xl font-bold text-slate-800">
+                  {analytics.overview.avgScrollDepth || 0}%
+                </p>
+                <div className="w-full bg-slate-200 rounded-full h-1.5 mt-2">
+                  <div 
+                    className="bg-emerald-500 h-1.5 rounded-full transition-all" 
+                    style={{ width: `${analytics.overview.avgScrollDepth || 0}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
