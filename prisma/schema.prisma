@@ -313,3 +313,21 @@ model Subscriber {
   @@index([status])
   @@index([subscribedAt])
 }
+
+model AnalyticsVisitor {
+  id         String   @id @default(cuid())
+  ip         String
+  country    String   @default("Unknown")
+  city       String   @default("Unknown")
+  userAgent  String   @default("Unknown")
+  page       String
+  latitude   Float    @default(0)
+  longitude  Float    @default(0)
+  visitedAt  DateTime @default(now())
+  
+  @@map("analytics_visitors")
+  @@unique([ip, page, visitedAt])
+  @@index([country])
+  @@index([visitedAt])
+  @@index([page])
+}

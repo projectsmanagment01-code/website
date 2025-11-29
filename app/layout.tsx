@@ -8,6 +8,7 @@ import InjectRawHtml from "@/components/InjectRawHtml";
 import { getAdminSettings } from "@/lib/admin-settings";
 import { Fragment } from "react";
 import { headers } from "next/headers";
+import VisitorTracker from "@/components/VisitorTracker";
 
 // ISR: Revalidate every hour, but allow on-demand revalidation via cache tags
 export const revalidate = 3600; // 1 hour
@@ -183,6 +184,7 @@ export default async function RootLayout({
         )}
       </head>
       <body className="layout-container" suppressHydrationWarning>
+        <VisitorTracker />
         {/* Body Code Injection - Server-side rendered */}
         {bodyCode.html && (
           <InjectRawHtml html={settings.body.html} location="body" />
