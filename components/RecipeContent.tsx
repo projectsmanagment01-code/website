@@ -7,6 +7,7 @@ import { renderSafeHtml, hasHtmlTags } from "@/lib/utils";
 import { PinterestPinButton } from "./PinterestPinButton";
 import { getWebsiteName } from "@/lib/site-name-helper";
 import { SafeImage } from "./SafeImage";
+import RecipeBottomSubscription from "./RecipeBottomSubscription";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -338,6 +339,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
       )}
 
       <Card recipe={recipe} />
+
+      {/* Subscription Form */}
+      <RecipeBottomSubscription />
     </div>
   );
 }

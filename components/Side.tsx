@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getAuthorById } from '@/lib/author-integration';
 import { getAuthorImageUrl } from '@/lib/author-image';
+import SidebarSubscription from './SidebarSubscription';
 
 async function AuthorCard({ recipe }: { recipe: any }) {
   let authorData = null;
@@ -117,6 +118,11 @@ export default function Side({ recipe, relatedRecipes = [] }: any) {
       {/* Author Card Section */}
       <div className="mb-8">
         <AuthorCard recipe={recipe} />
+      </div>
+
+      {/* Subscription Form */}
+      <div className="mb-8">
+        <SidebarSubscription />
       </div>
 
       <div className="bg-white">

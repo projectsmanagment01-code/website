@@ -15,6 +15,7 @@ import {
   Archive,
   Sparkles,
   Presentation,
+  Mail,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -53,6 +54,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "categories", label: "Categories", icon: Tags },
     { id: "authors", label: "Authors", icon: Users },
     { id: "hero-slides", label: "Hero Slides", icon: Presentation },
+    { id: "subscribers", label: "Subscribers", icon: Mail },
     { id: "media", label: "Media Library", icon: Image },
     { id: "content", label: "Content Management", icon: Edit },
     { id: "backup", label: "Backup & Restore", icon: Archive },

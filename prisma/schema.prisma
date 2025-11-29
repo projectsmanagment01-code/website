@@ -297,3 +297,19 @@ model HeroSlide {
   @@index([order])
   @@index([isActive])
 }
+
+// Newsletter Subscribers
+model Subscriber {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  status        String    @default("active") // active, unsubscribed
+  subscribedAt  DateTime  @default(now())
+  unsubscribedAt DateTime?
+  source        String?   // Where they subscribed from (homepage, recipe-page, etc.)
+  
+  @@map("subscribers")
+  @@index([email])
+  @@index([status])
+  @@index([subscribedAt])
+}

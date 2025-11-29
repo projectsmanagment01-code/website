@@ -81,6 +81,22 @@ export async function verifyAdminAuth(request: NextRequest): Promise<JwtPayload 
 // Combined auth verification (supports both JWT and API tokens)
 export async function verifyAuth(request: NextRequest): Promise<{ type: 'jwt' | 'api', payload: JwtPayload | ApiTokenPayload } | null> {
   try {
+    // Skip auth in development mode or if SKIP_AUTH is set
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const skipAuth = process.env.SKIP_AUTH === 'true';
+    
+    if (isDevelopment || skipAuth) {
+      // Return a mock admin payload for development
+      return {
+        type: 'jwt',
+        payload: {
+          email: 'dev@localhost',
+          username: 'dev',
+          role: 'admin'
+        }
+      };
+    }
+    
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return null;

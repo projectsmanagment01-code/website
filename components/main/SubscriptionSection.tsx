@@ -26,12 +26,37 @@ export default function SubscriptionSection({ className }: SubscriptionSectionPr
     setIsSubmitting(true);
     setMessage("");
 
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setMessage("Thank you for subscribing!");
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          source: 'homepage',
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        let errorMessage = "Something went wrong. Please try again.";
+        try {
+          const data = JSON.parse(text);
+          errorMessage = data.error || errorMessage;
+        } catch {
+          console.error('Non-JSON error response:', text);
+        }
+        setMessage(errorMessage);
+        return;
+      }
+
+      const data = await response.json();
+      setMessage(data.message || "Thank you for subscribing!");
       setFormData({ name: "", email: "" });
     } catch (error) {
+      console.error('Subscription error:', error);
       setMessage("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);

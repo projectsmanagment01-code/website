@@ -28,6 +28,7 @@ import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import HeroSlidesManager from "@/components/admin/HeroSlidesManager";
+import SubscribersPage from "@/app/admin/subscribers/page";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 
@@ -74,6 +75,8 @@ function AdminDashboardContent() {
         return <AuthorManagement />;
       case "hero-slides":
         return <HeroSlidesManager />;
+      case "subscribers":
+        return <SubscribersPage />;
       case "media":
         return (
           <div className="space-y-6">
