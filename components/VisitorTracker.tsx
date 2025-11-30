@@ -1,13 +1,44 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
 export default function VisitorTracker() {
   const pathname = usePathname();
+  const visitIdRef = useRef<string | null>(null);
+  const maxScrollRef = useRef(0);
+  const startTimeRef = useRef(Date.now());
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Reset state for new page view
+    visitIdRef.current = null;
+    maxScrollRef.current = 0;
+    startTimeRef.current = Date.now();
+    
+    // Clear any existing interval
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    // Scroll tracker
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = Math.round((scrollTop / docHeight) * 100);
+      if (scrollPercent > maxScrollRef.current) {
+        maxScrollRef.current = scrollPercent;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
     const trackVisitor = async () => {
+      // Check if user is admin (don't track admins)
+      const token = localStorage.getItem('admin_token');
+      if (token) {
+        console.debug('Admin visit detected, skipping tracking');
+        return;
+      }
+
       try {
         let country = 'Unknown';
         let city = 'Unknown';
@@ -59,42 +90,25 @@ export default function VisitorTracker() {
         if (response.ok) {
           const data = await response.json();
           if (data.id) {
-            const visitId = data.id;
-            let duration = 0;
-            let maxScroll = 0;
-
-            // Scroll tracker
-            const handleScroll = () => {
-              const scrollTop = window.scrollY;
-              const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-              const scrollPercent = Math.round((scrollTop / docHeight) * 100);
-              if (scrollPercent > maxScroll) {
-                maxScroll = scrollPercent;
-              }
-            };
-
-            window.addEventListener('scroll', handleScroll);
+            visitIdRef.current = data.id;
             
-            // Start heartbeat
-            const interval = setInterval(() => {
-              duration += 10;
+            // Start heartbeat (every 10s)
+            intervalRef.current = setInterval(() => {
+              if (!visitIdRef.current) return;
+              
+              const currentDuration = Math.round((Date.now() - startTimeRef.current) / 1000);
+              
               fetch('/api/admin/visitors', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                  id: visitId, 
-                  duration,
-                  scrollDepth: maxScroll 
+                  id: visitIdRef.current, 
+                  duration: currentDuration,
+                  scrollDepth: maxScrollRef.current 
                 }),
                 keepalive: true,
               }).catch(() => {});
             }, 10000);
-
-            // Cleanup on unmount
-            return () => {
-              clearInterval(interval);
-              window.removeEventListener('scroll', handleScroll);
-            };
           }
         }
       } catch (error) {
@@ -102,12 +116,39 @@ export default function VisitorTracker() {
       }
     };
 
+    // Function to send final data on unmount/leave
+    const sendFinalData = () => {
+      if (!visitIdRef.current) return;
+      
+      const finalDuration = Math.round((Date.now() - startTimeRef.current) / 1000);
+      
+      fetch('/api/admin/visitors', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id: visitIdRef.current, 
+          duration: finalDuration,
+          scrollDepth: maxScrollRef.current 
+        }),
+        keepalive: true,
+      }).catch(() => {});
+    };
+
+    // Add beforeunload listener for tab closing
+    window.addEventListener('beforeunload', sendFinalData);
+
     // Track after a short delay to not block page load
     const timeout = setTimeout(() => {
       trackVisitor();
     }, 2000);
     
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('beforeunload', sendFinalData);
+      sendFinalData(); // Flush on component unmount (navigation)
+    };
   }, [pathname]);
 
   return null; // This component doesn't render anything

@@ -1,9 +1,30 @@
+"use client";
+
 import { Share2, Mail, Printer, ArrowDown } from "lucide-react";
 import Recipe from "@/outils/types";
 
 export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
 
+  const trackConversion = async (eventType: string, meta: any = {}) => {
+    try {
+      const sessionId = sessionStorage.getItem('analytics_session_id');
+      await fetch('/api/admin/analytics/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventType,
+          recipeId: recipe?.id,
+          sessionId,
+          meta
+        })
+      });
+    } catch (err) {
+      console.error('Tracking failed', err);
+    }
+  };
+
   const handleShareIt = () => {
+    trackConversion('share', { platform: 'facebook' });
     const url = window.location.href;
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
@@ -17,6 +38,8 @@ export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
       return;
     }
     
+    trackConversion('share', { platform: 'email' });
+    
     const subject = `Check out this recipe: ${recipe.title}`;
     const description = recipe.shortDescription || recipe.description || '';
     const body = `${recipe.title}\n\n${description}\n\nView the full recipe here:\n${window.location.href}`;
@@ -29,6 +52,7 @@ export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
   };
 
   const handlePrintIt = async () => {
+    trackConversion('print');
     const recipeCard = document.getElementById("recipe");
     if (recipeCard) {
       // Create a new window for printing
@@ -589,6 +613,7 @@ export default function SocialShareButtons({ recipe }: { recipe?: Recipe }) {
   };
 
   const handleJumpToRecipe = () => {
+    trackConversion('jump_to_recipe');
     const recipeCard = document.getElementById("recipe");
     if (recipeCard) {
       recipeCard.scrollIntoView({ behavior: "smooth" });

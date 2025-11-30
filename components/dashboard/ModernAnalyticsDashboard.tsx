@@ -13,9 +13,21 @@ import {
   Activity,
   ArrowUpRight,
   ArrowDownRight,
-  Search
+  Search,
+  Upload,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  Target,
+  Printer,
+  Share2,
+  Bookmark,
+  Download,
+  Layout,
+  Settings
 } from 'lucide-react';
 import TimeRangeSelector, { TimeRange } from './TimeRangeSelector';
+import EmailReports from './EmailReports';
 
 interface AnalyticsData {
   overview: {
@@ -35,6 +47,14 @@ interface AnalyticsData {
     avgScrollDepth?: number;
   };
   topSearchQueries?: Array<{ query: string; count: number }>;
+  recentActivity?: Array<{
+    country: string;
+    city: string;
+    page: string;
+    visitedAt: string;
+    deviceType: string;
+  }>;
+  conversions?: Array<{ event: string; count: number }>;
   topRecipes: Array<{
     id: string;
     title: string;
@@ -62,7 +82,63 @@ interface AnalyticsData {
   trafficSources?: Array<{ source: string; count: number; percentage: number }>;
   deviceStats?: Array<{ device: string; count: number; percentage: number }>;
   browserStats?: Array<{ browser: string; count: number; percentage: number }>;
+  heatmap?: number[][];
 }
+
+// Heatmap Widget
+const HeatmapWidget = ({ data }: { data: number[][] }) => {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  // Find max value for scaling opacity
+  let max = 1;
+  data.forEach(row => row.forEach(val => max = Math.max(max, val)));
+  
+  return (
+    <div className="w-full overflow-x-auto">
+      <div className="min-w-[600px]">
+        <div className="flex mb-2">
+          <div className="w-12"></div>
+          <div className="flex-1 grid grid-cols-12 gap-1">
+            {[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22].map(h => (
+              <div key={h} className="text-xs text-slate-400 col-span-1 text-left pl-1">{h}h</div>
+            ))}
+          </div>
+        </div>
+        {days.map((day, dIndex) => (
+          <div key={day} className="flex items-center mb-1">
+            <div className="w-12 text-xs text-slate-500 font-medium">{day}</div>
+            <div className="flex-1 grid grid-cols-24 gap-1">
+              {data[dIndex].map((val, hIndex) => (
+                <div 
+                  key={hIndex}
+                  className="h-8 rounded-sm transition-all hover:ring-2 hover:ring-slate-400 relative group cursor-help"
+                  style={{ 
+                    backgroundColor: val > 0 ? `rgba(16, 185, 129, ${Math.max(0.1, val / max)})` : '#f1f5f9' 
+                  }}
+                >
+                  {val > 0 && (
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10 pointer-events-none">
+                      {val} visitors • {day} {hIndex}:00
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-end gap-2 mt-2 text-xs text-slate-400">
+        <span>Less</span>
+        <div className="w-3 h-3 bg-slate-100 rounded-sm"></div>
+        <div className="w-3 h-3 bg-emerald-200 rounded-sm"></div>
+        <div className="w-3 h-3 bg-emerald-400 rounded-sm"></div>
+        <div className="w-3 h-3 bg-emerald-600 rounded-sm"></div>
+        <span>More</span>
+      </div>
+    </div>
+  );
+};
 
 // Simple Line Chart Component
 const LineChart = ({ data, color }: { data: number[], color: string }) => {
@@ -152,6 +228,28 @@ const formatDuration = (seconds: number) => {
 
 // Simple World Map Component
 const WorldMap = ({ locations }: { locations: Array<{ latitude: number; longitude: number; country: string; city: string }> }) => {
+  const [bgImage, setBgImage] = useState("/uploads/general/world-map.png");
+
+  useEffect(() => {
+    const savedBg = localStorage.getItem('analytics_world_map_bg');
+    if (savedBg) {
+      setBgImage(savedBg);
+    }
+  }, []);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setBgImage(base64);
+        localStorage.setItem('analytics_world_map_bg', base64);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Convert lat/lng to SVG coordinates (Mercator projection)
   const latToY = (lat: number) => {
     // Mercator projection formula
@@ -165,13 +263,24 @@ const WorldMap = ({ locations }: { locations: Array<{ latitude: number; longitud
   };
 
   return (
-    <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: '50%' }}>
+    <div className="relative w-full rounded-lg overflow-hidden group" style={{ paddingBottom: '50%' }}>
       {/* World map background image */}
       <img 
-        src="/uploads/general/world-map.png" 
+        src={bgImage} 
         alt="World Map" 
         className="absolute inset-0 w-full h-full object-cover"
       />
+
+      {/* Upload Button */}
+      <label className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-md shadow-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity z-10 border border-slate-200" title="Change Map Background">
+        <input 
+          type="file" 
+          accept="image/*" 
+          className="hidden" 
+          onChange={handleImageUpload}
+        />
+        <Upload className="w-4 h-4 text-slate-600" />
+      </label>
       
       {/* SVG overlay for visitor dots */}
       <svg viewBox="0 0 100 50" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
@@ -211,6 +320,40 @@ export default function ModernAnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+  
+  // Activity Feed Pagination
+  const [activityPage, setActivityPage] = useState(1);
+  const [activityData, setActivityData] = useState<any[]>([]);
+  const [totalActivities, setTotalActivities] = useState(0);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  
+  // Dashboard Customization
+  const [showCustomizer, setShowCustomizer] = useState(false);
+  const [widgets, setWidgets] = useState({
+    overview: true,
+    traffic: true,
+    devices: true,
+    map: true,
+    heatmap: true,
+    search: true,
+    activity: true,
+    reports: true,
+    conversions: true
+  });
+
+  useEffect(() => {
+    const savedWidgets = localStorage.getItem('analytics_widgets_pref');
+    if (savedWidgets) {
+      setWidgets(JSON.parse(savedWidgets));
+    }
+  }, []);
+
+  const toggleWidget = (key: keyof typeof widgets) => {
+    const newWidgets = { ...widgets, [key]: !widgets[key] };
+    setWidgets(newWidgets);
+    localStorage.setItem('analytics_widgets_pref', JSON.stringify(newWidgets));
+  };
 
   useEffect(() => {
     fetchAnalytics();
@@ -221,12 +364,36 @@ export default function ModernAnalyticsDashboard() {
     return () => clearInterval(interval);
   }, [timeRange]);
 
+  useEffect(() => {
+    fetchActivity(activityPage);
+  }, [activityPage]);
+
+  const fetchActivity = async (page: number) => {
+    setLoadingActivity(true);
+    try {
+      const response = await fetch(`/api/admin/analytics/activity?page=${page}&limit=10`);
+      if (response.ok) {
+        const data = await response.json();
+        setActivityData(data.activities);
+        setTotalActivities(data.pagination.total);
+      }
+    } catch (err) {
+      console.error('Failed to fetch activity:', err);
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+
   const fetchAnalytics = async () => {
     try {
       const response = await fetch(`/api/admin/analytics?range=${timeRange}`);
       if (!response.ok) throw new Error('Failed to fetch analytics');
       const data = await response.json();
       setAnalytics(data);
+      // Initial activity load if not loaded yet
+      if (activityData.length === 0 && data.recentActivity) {
+        setActivityData(data.recentActivity);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load analytics');
     } finally {
@@ -243,6 +410,28 @@ export default function ModernAnalyticsDashboard() {
       }
     } catch (err) {
       console.error('Failed to fetch visitor data:', err);
+    }
+  };
+
+  const handleExport = async (type: 'visitors' | 'conversions' | 'search') => {
+    setExporting(true);
+    try {
+      const response = await fetch(`/api/admin/analytics/export?type=${type}&range=${timeRange}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${type}-export-${timeRange}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+    } catch (err) {
+      console.error('Export failed:', err);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -299,7 +488,39 @@ export default function ModernAnalyticsDashboard() {
             <p className="text-slate-500 mt-1">Comprehensive insights into your platform performance</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowCustomizer(!showCustomizer)}
+                className={`p-2 rounded-lg border transition-colors ${showCustomizer ? 'bg-slate-100 border-slate-300 text-slate-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                title="Customize Dashboard"
+              >
+                <Layout className="w-4 h-4" />
+              </button>
+              
+              <div className="relative group">
+                <button 
+                  disabled={exporting}
+                  className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors disabled:opacity-50"
+                >
+                  <Download className="w-4 h-4" />
+                  {exporting ? 'Exporting...' : 'Export Data'}
+                </button>
+                <div className="absolute right-0 top-full pt-2 w-48 hidden group-hover:block z-50">
+                  <div className="bg-white rounded-lg shadow-xl border border-slate-100 overflow-hidden">
+                    <button onClick={() => handleExport('visitors')} className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                      Visitor Logs (CSV)
+                    </button>
+                    <button onClick={() => handleExport('conversions')} className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                      Conversions (CSV)
+                    </button>
+                    <button onClick={() => handleExport('search')} className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+                      Search Queries (CSV)
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
+            </div>
             <div className="flex items-center gap-2 text-sm text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">
               <div className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -312,7 +533,34 @@ export default function ModernAnalyticsDashboard() {
           </div>
         </div>
 
+        {/* Customizer Panel */}
+        {showCustomizer && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-4 mb-6 animate-in slide-in-from-top-2">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Dashboard Layout
+              </h3>
+              <button onClick={() => setShowCustomizer(false)} className="text-slate-400 hover:text-slate-600 text-sm">Close</button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {Object.entries(widgets).map(([key, enabled]) => (
+                <label key={key} className="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-slate-50 border border-transparent hover:border-slate-100">
+                  <input 
+                    type="checkbox" 
+                    checked={enabled} 
+                    onChange={() => toggleWidget(key as any)}
+                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  <span className="text-sm text-slate-700 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Key Metrics */}
+        {widgets.overview && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
           {/* Total Recipes */}
           <div className="group bg-white rounded-xl p-2 border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300">
@@ -373,36 +621,39 @@ export default function ModernAnalyticsDashboard() {
             </div>
           </div>
 
-          {/* Growth Rate */}
+          {/* Conversions (New) */}
           <div className="group bg-white rounded-xl p-2 border border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all duration-300">
             <div className="flex items-start justify-between mb-1">
               <div className="p-2 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-slate-700" />
+                <Target className="w-5 h-5 text-slate-700" />
               </div>
-              <div className={`flex items-center gap-1 text-xs font-medium ${
-                overview.subscriberGrowthRate >= 0 ? 'text-emerald-600' : 'text-rose-600'
-              }`}>
-                {overview.subscriberGrowthRate >= 0 ? (
-                  <ArrowUpRight className="w-3 h-3" />
-                ) : (
-                  <ArrowDownRight className="w-3 h-3" />
-                )}
-                <span>{Math.abs(overview.subscriberGrowthRate)}%</span>
+              <div className="flex items-center gap-1 text-emerald-600 text-xs font-medium">
+                <ArrowUpRight className="w-3 h-3" />
+                <span>
+                  {analytics.conversions ? analytics.conversions.reduce((acc, curr) => acc + curr.count, 0) : 0}
+                </span>
               </div>
             </div>
             <div>
               <p className="text-xl font-bold text-slate-800">
-                {overview.subscriberGrowthRate >= 0 ? '+' : ''}{overview.subscriberGrowthRate}%
+                {analytics.conversions ? analytics.conversions.reduce((acc, curr) => acc + curr.count, 0) : 0}
               </p>
-              <p className="text-xs text-slate-500">Growth Rate</p>
-              <div className="pt-1 flex items-end h-8 gap-0.5">
-                {[3, 5, 4, 6, 8, 7, 9, 10, 9, 11, 13, 12].map((h, i) => (
-                  <div key={i} className="flex-1 bg-gradient-to-t from-slate-600 to-slate-400 rounded-t" style={{ height: `${h * 8}%` }}></div>
-                ))}
+              <p className="text-xs text-slate-500">Total Conversions</p>
+              <div className="pt-1 flex gap-1">
+                {/* Mini breakdown */}
+                <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <Printer className="w-3 h-3" />
+                  {analytics.conversions?.find(c => c.event === 'print')?.count || 0}
+                </div>
+                <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                  <Share2 className="w-3 h-3" />
+                  {analytics.conversions?.find(c => c.event === 'share')?.count || 0}
+                </div>
               </div>
             </div>
           </div>
         </div>
+        )}
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
@@ -474,6 +725,7 @@ export default function ModernAnalyticsDashboard() {
         {/* Audience Insights */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Traffic Sources */}
+          {widgets.traffic && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-3 border-b border-slate-100">
               <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -504,8 +756,10 @@ export default function ModernAnalyticsDashboard() {
               )}
             </div>
           </div>
+          )}
 
           {/* Device Breakdown */}
+          {widgets.devices && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-3 border-b border-slate-100">
               <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -534,8 +788,10 @@ export default function ModernAnalyticsDashboard() {
               )}
             </div>
           </div>
+          )}
 
           {/* Browser Stats */}
+          {widgets.devices && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-3 border-b border-slate-100">
               <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -556,6 +812,7 @@ export default function ModernAnalyticsDashboard() {
               )}
             </div>
           </div>
+          )}
         </div>
 
         {/* Engagement Metrics */}
@@ -659,6 +916,7 @@ export default function ModernAnalyticsDashboard() {
         </div>
 
         {/* World Map */}
+        {widgets.map && (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 border-b border-slate-100">
             <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -684,10 +942,34 @@ export default function ModernAnalyticsDashboard() {
             )}
           </div>
         </div>
+        )}
+
+        {/* Heatmap Section */}
+        {widgets.heatmap && analytics.heatmap && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-4">
+            <div className="p-4 border-b border-slate-100">
+              <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-slate-600" />
+                Activity Heatmap (Time of Day)
+              </h3>
+            </div>
+            <div className="p-4 overflow-x-auto">
+              <HeatmapWidget data={analytics.heatmap} />
+            </div>
+          </div>
+        )}
+
+        {/* Email Reports */}
+        {widgets.reports && (
+          <div className="mt-4">
+            <EmailReports analytics={analytics} />
+          </div>
+        )}
 
         {/* User Behavior Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {/* Top Search Queries */}
+          {widgets.search && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-3 border-b border-slate-100">
               <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
@@ -714,6 +996,7 @@ export default function ModernAnalyticsDashboard() {
               )}
             </div>
           </div>
+          )}
 
           {/* Engagement Metrics */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -745,6 +1028,103 @@ export default function ModernAnalyticsDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Live Activity Feed */}
+        {widgets.activity && (
+        <div className="mt-4 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-3 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-slate-600" />
+              Live Activity Feed
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-xs text-slate-500">Real-time</span>
+            </div>
+          </div>
+          <div className="p-0">
+            {activityData.length > 0 ? (
+              <>
+                <div className="divide-y divide-slate-100">
+                  {activityData.map((activity, i) => {
+                    const date = new Date(activity.visitedAt);
+                    const timeAgo = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+                    let timeString = 'just now';
+                    
+                    if (timeAgo < 60) {
+                      timeString = 'just now';
+                    } else if (timeAgo < 3600) {
+                      timeString = `${Math.floor(timeAgo / 60)}m ago`;
+                    } else if (timeAgo < 86400) {
+                      timeString = `${Math.floor(timeAgo / 3600)}h ago`;
+                    } else if (timeAgo < 604800) {
+                      timeString = `${Math.floor(timeAgo / 86400)}d ago`;
+                    } else {
+                      timeString = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    }
+
+                    return (
+                      <div key={i} className="flex items-center justify-between p-3 hover:bg-slate-50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                            activity.deviceType === 'mobile' ? 'bg-blue-100 text-blue-600' : 
+                            activity.deviceType === 'tablet' ? 'bg-purple-100 text-purple-600' : 
+                            'bg-slate-100 text-slate-600'
+                          }`}>
+                            {activity.deviceType === 'mobile' ? (
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                            ) : (
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm text-slate-800 font-medium">
+                              Visitor from <span className="text-slate-900">{activity.city !== 'Unknown' ? activity.city : activity.country}</span> viewed <span className="text-emerald-600">{activity.page}</span>
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {activity.country} • {activity.deviceType}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
+                          {timeString}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Pagination Controls */}
+                <div className="flex items-center justify-between p-3 border-t border-slate-100 bg-slate-50">
+                  <button
+                    onClick={() => setActivityPage(p => Math.max(1, p - 1))}
+                    disabled={activityPage === 1 || loadingActivity}
+                    className="p-1 rounded-md hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronLeft className="w-4 h-4 text-slate-600" />
+                  </button>
+                  <span className="text-xs text-slate-500 font-medium">
+                    Page {activityPage} of {Math.ceil(totalActivities / 10)}
+                  </span>
+                  <button
+                    onClick={() => setActivityPage(p => p + 1)}
+                    disabled={activityPage >= Math.ceil(totalActivities / 10) || loadingActivity}
+                    className="p-1 rounded-md hover:bg-white hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    <ChevronRight className="w-4 h-4 text-slate-600" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="p-8 text-center text-slate-500 text-sm">
+                {loadingActivity ? 'Loading activity...' : 'Waiting for activity...'}
+              </div>
+            )}
+          </div>
+        </div>
+        )}
       </div>
     </div>
   );

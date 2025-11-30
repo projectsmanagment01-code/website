@@ -44,7 +44,9 @@ export async function GET(request: NextRequest) {
       browserStatsRaw,
       activeUsersRaw,
       topSearchQueriesRaw,
+      recentActivityRaw,
       avgEngagementRaw,
+      conversionEventsRaw,
     ] = await Promise.all([
       // Total recipes
       executeWithRetry(async () => await prisma.recipe.count(), { operationName: 'countRecipes' }),
@@ -170,7 +172,6 @@ export async function GET(request: NextRequest) {
       // Top Search Queries
       executeWithRetry(
         async () => {
-          // Safety check for when Prisma Client hasn't been regenerated yet
           // @ts-ignore
           if (!prisma.searchQuery) return [];
           
@@ -179,10 +180,25 @@ export async function GET(request: NextRequest) {
             _count: { query: true },
             orderBy: { _count: { query: 'desc' } },
             take: 10,
-            where: { searchedAt: { gte: startDate } } // Fixed: searchedAt instead of createdAt
+            where: { searchedAt: { gte: startDate } }
           });
         },
         { operationName: 'getTopSearchQueries' }
+      ),
+      // Recent Activity (Live Feed)
+      executeWithRetry(
+        async () => await prisma.analyticsVisitor.findMany({
+          take: 10,
+          orderBy: { visitedAt: 'desc' },
+          select: {
+            country: true,
+            city: true,
+            page: true,
+            visitedAt: true,
+            deviceType: true
+          }
+        }),
+        { operationName: 'getRecentActivity' }
       ),
       // Avg Engagement
       executeWithRetry(
@@ -194,6 +210,19 @@ export async function GET(request: NextRequest) {
           where: { visitedAt: { gte: startDate } }
         }),
         { operationName: 'getAvgEngagement' }
+      ),
+      // Conversion Events
+      executeWithRetry(
+        async () => {
+          // @ts-ignore
+          if (!prisma.conversionEvent) return [];
+          return await prisma.conversionEvent.groupBy({
+            by: ['eventType'],
+            _count: { eventType: true },
+            where: { createdAt: { gte: startDate } }
+          });
+        },
+        { operationName: 'getConversionEvents' }
       ),
     ]);
 
@@ -300,6 +329,16 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
+    // Heatmap Processing (Day x Hour)
+    const heatmapGrid = Array(7).fill(0).map(() => Array(24).fill(0));
+    // @ts-ignore
+    visitorsInPeriod.forEach(v => {
+      const date = new Date(v.visitedAt);
+      const day = date.getDay(); // 0-6
+      const hour = date.getHours(); // 0-23
+      heatmapGrid[day][hour]++;
+    });
+
     return NextResponse.json({
       overview: {
         totalRecipes,
@@ -318,6 +357,8 @@ export async function GET(request: NextRequest) {
         avgScrollDepth: Math.round(avgEngagementRaw._avg.scrollDepth || 0),
       },
       topSearchQueries: topSearchQueriesRaw.map((q: any) => ({ query: q.query, count: q._count.query })),
+      recentActivity: recentActivityRaw,
+      conversions: conversionEventsRaw.map((c: any) => ({ event: c.eventType, count: c._count.eventType })),
       topExitPages,
       topRecipes,
       recentRecipes,
@@ -333,6 +374,7 @@ export async function GET(request: NextRequest) {
       trafficSources,
       deviceStats,
       browserStats,
+      heatmap: heatmapGrid,
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);

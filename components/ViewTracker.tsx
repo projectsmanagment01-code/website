@@ -26,6 +26,14 @@ export default function ViewTracker({
       return;
     }
 
+    // Check if user is admin (don't track admins)
+    const adminToken = localStorage.getItem('admin_token');
+    if (adminToken) {
+      console.log('Admin detected, skipping view tracking');
+      hasTrackedRef.current = true;
+      return;
+    }
+
     // Check if we've already tracked this recipe in this session
     const viewedRecipes = getViewedRecipesFromStorage();
     if (viewedRecipes.has(recipeId)) {

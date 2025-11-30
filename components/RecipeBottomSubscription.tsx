@@ -21,6 +21,22 @@ export default function RecipeBottomSubscription() {
         body: JSON.stringify({ name, email, source: 'recipe-bottom' }),
       });
 
+      if (response.ok) {
+        // Track conversion
+        try {
+          const sessionId = sessionStorage.getItem('analytics_session_id');
+          fetch('/api/admin/analytics/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventType: 'subscribe',
+              sessionId,
+              meta: { source: 'recipe-bottom' }
+            })
+          });
+        } catch (e) { console.error(e); }
+      }
+
       if (!response.ok) {
         const text = await response.text();
         let errorMessage = "Something went wrong. Please try again.";

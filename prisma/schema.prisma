@@ -345,6 +345,9 @@ model AnalyticsVisitor {
   @@index([country])
   @@index([visitedAt])
   @@index([page])
+  @@index([sessionId])
+  @@index([sourceType])
+  @@index([deviceType])
 }
 
 model SearchQuery {
@@ -359,4 +362,20 @@ model SearchQuery {
   @@map("search_queries")
   @@index([searchedAt])
   @@index([query])
+}
+
+model ConversionEvent {
+  id        String   @id @default(cuid())
+  eventType String   // 'subscribe', 'print', 'share', 'save', 'copy_ingredients'
+  recipeId  String?
+  visitorId String?
+  sessionId String?
+  meta      Json?    // Extra data (e.g., which social platform)
+  createdAt DateTime @default(now())
+
+  @@map("conversion_events")
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([sessionId])
+  @@index([visitorId])
 }
