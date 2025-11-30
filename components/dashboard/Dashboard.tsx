@@ -5,11 +5,13 @@ import ModernAnalyticsDashboard from "./ModernAnalyticsDashboard";
 interface DashboardProps {
   recipes: Recipe[];
   onEditRecipe: (recipe: Recipe) => void;
+  onNavigate?: (section: string) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   recipes,
   onEditRecipe,
+  onNavigate,
 }) => {
-  return <ModernAnalyticsDashboard />;
+  return <ModernAnalyticsDashboard onNavigate={onNavigate} />;
 };

@@ -72,15 +72,51 @@ export async function GET(request: NextRequest) {
         }),
         { operationName: 'countPeriodSubscribers' }
       ),
-      // Top 10 recipes
+      // Top 10 recipes (Calculated from AnalyticsVisitor for the period)
       executeWithRetry(
-        async () => await prisma.recipe.findMany({
-          take: 10,
-          orderBy: { views: 'desc' },
-          select: {
-            id: true, title: true, slug: true, category: true, views: true, img: true, heroImage: true, lastViewedAt: true,
-          },
-        }),
+        async () => {
+          // 1. Get top pages from analytics for the period
+          const topPages = await prisma.analyticsVisitor.groupBy({
+            by: ['page'],
+            where: {
+              visitedAt: { gte: startDate },
+              page: { startsWith: '/recipes/' }
+            },
+            _count: {
+              page: true
+            },
+            orderBy: {
+              _count: {
+                page: 'desc'
+              }
+            },
+            take: 10
+          });
+
+          // 2. Extract slugs
+          const slugs = topPages.map(p => p.page.split('/').pop() || '').filter(s => s);
+
+          // 3. Fetch recipe details
+          const recipes = await prisma.recipe.findMany({
+            where: {
+              slug: { in: slugs }
+            },
+            select: {
+              id: true, title: true, slug: true, category: true, views: true, img: true, heroImage: true, lastViewedAt: true,
+            }
+          });
+
+          // 4. Merge and sort
+          return topPages.map(p => {
+            const slug = p.page.split('/').pop();
+            const recipe = recipes.find(r => r.slug === slug);
+            if (!recipe) return null;
+            return {
+              ...recipe,
+              views: p._count.page // Override total views with period views
+            };
+          }).filter(Boolean);
+        },
         { operationName: 'getTopRecipes' }
       ),
       // Recent recipes
@@ -98,6 +134,10 @@ export async function GET(request: NextRequest) {
       executeWithRetry(
         async () => await prisma.recipe.groupBy({
           by: ['category'],
+          where: { 
+            status: 'published',
+            category: { not: '' }
+          },
           _count: { category: true },
           orderBy: { _count: { category: 'desc' } },
         }),

@@ -14,7 +14,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Search,
-  Upload,
   Clock,
   ChevronLeft,
   ChevronRight,
@@ -26,6 +25,7 @@ import {
   Layout,
   Settings
 } from 'lucide-react';
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import TimeRangeSelector, { TimeRange } from './TimeRangeSelector';
 import EmailReports from './EmailReports';
 
@@ -111,15 +111,25 @@ const HeatmapWidget = ({ data }: { data: number[][] }) => {
               {data[dIndex].map((val, hIndex) => (
                 <div 
                   key={hIndex}
-                  className="h-8 rounded-sm transition-all hover:ring-2 hover:ring-slate-400 relative group cursor-help"
+                  className="h-6 rounded-sm transition-all hover:ring-2 hover:ring-slate-400 relative group cursor-help"
                   style={{ 
                     backgroundColor: val > 0 ? `rgba(16, 185, 129, ${Math.max(0.1, val / max)})` : '#f1f5f9' 
                   }}
                 >
                   {val > 0 && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10 pointer-events-none">
+                    <div className={`absolute mb-2 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10 pointer-events-none ${
+                      hIndex > 18 ? 'right-0' : 'left-1/2 -translate-x-1/2'
+                    } ${
+                      dIndex < 2 ? 'top-full mt-2' : 'bottom-full mb-2'
+                    }`}>
                       {val} visitors • {day} {hIndex}:00
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                      <div className={`absolute border-4 border-transparent ${
+                        dIndex < 2 
+                          ? 'bottom-full border-b-slate-800 top-[-8px]' 
+                          : 'top-full border-t-slate-800 bottom-[-8px]'
+                      } ${
+                        hIndex > 18 ? 'right-2' : 'left-1/2 -translate-x-1/2'
+                      }`}></div>
                     </div>
                   )}
                 </div>
@@ -201,13 +211,20 @@ const DonutChart = ({ data, colors }: { data: Array<{ label: string, value: numb
             fill="${color}" opacity="0.9" />
     `;
   };
+
+  const topItems = data.slice(0, 5);
+  const totalShownPercentage = topItems.reduce((acc, item) => acc + item.percentage, 0);
+  const remainingPercentage = Math.max(0, 100 - totalShownPercentage);
   
   return (
     <div className="relative">
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        {data.slice(0, 5).map((item, index) => (
+        {topItems.map((item, index) => (
           <g key={index} dangerouslySetInnerHTML={{ __html: createArc(item.percentage, colors[index % colors.length]) }} />
         ))}
+        {remainingPercentage > 0 && (
+          <g dangerouslySetInnerHTML={{ __html: createArc(remainingPercentage, '#e2e8f0') }} />
+        )}
         <circle cx={centerX} cy={centerY} r={25} fill="white" />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
@@ -227,82 +244,47 @@ const formatDuration = (seconds: number) => {
 };
 
 // Simple World Map Component
+const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+
 const WorldMap = ({ locations }: { locations: Array<{ latitude: number; longitude: number; country: string; city: string }> }) => {
-  const [bgImage, setBgImage] = useState("/uploads/general/world-map.png");
-
-  useEffect(() => {
-    const savedBg = localStorage.getItem('analytics_world_map_bg');
-    if (savedBg) {
-      setBgImage(savedBg);
-    }
-  }, []);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64 = reader.result as string;
-        setBgImage(base64);
-        localStorage.setItem('analytics_world_map_bg', base64);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Convert lat/lng to SVG coordinates (Mercator projection)
-  const latToY = (lat: number) => {
-    // Mercator projection formula
-    const latRad = (lat * Math.PI) / 180;
-    const mercN = Math.log(Math.tan(Math.PI / 4 + latRad / 2));
-    return 50 - (mercN * 50) / Math.PI;
-  };
-  
-  const lngToX = (lng: number) => {
-    return ((lng + 180) / 360) * 100;
-  };
-
   return (
-    <div className="relative w-full rounded-lg overflow-hidden group" style={{ paddingBottom: '50%' }}>
-      {/* World map background image */}
-      <img 
-        src={bgImage} 
-        alt="World Map" 
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-
-      {/* Upload Button */}
-      <label className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-md shadow-sm cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity z-10 border border-slate-200" title="Change Map Background">
-        <input 
-          type="file" 
-          accept="image/*" 
-          className="hidden" 
-          onChange={handleImageUpload}
-        />
-        <Upload className="w-4 h-4 text-slate-600" />
-      </label>
-      
-      {/* SVG overlay for visitor dots */}
-      <svg viewBox="0 0 100 50" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
-        {/* Visitor location dots */}
-        {locations.map((loc, index) => {
-          const x = lngToX(loc.longitude);
-          const y = latToY(loc.latitude);
-          return (
-            <g key={index}>
-              {/* Main dot */}
-              <circle cx={x} cy={y} r="0.8" fill="#ef4444" opacity="1" stroke="#ffffff" strokeWidth="0.15" />
-              {/* Pulsing outer ring */}
-              <circle cx={x} cy={y} r="1.2" fill="#ef4444" opacity="0.6">
-                <animate attributeName="r" from="1.2" to="2.5" dur="2s" repeatCount="indefinite" />
-                <animate attributeName="opacity" from="0.6" to="0" dur="2s" repeatCount="indefinite" />
-              </circle>
-              {/* Tooltip */}
-              <title>{loc.city}, {loc.country}</title>
+    <div className="relative w-full rounded-lg overflow-hidden bg-slate-50 border border-slate-200 h-[400px]">
+      <ComposableMap
+        projection="geoMercator"
+        projectionConfig={{
+          scale: 140,
+        }}
+        width={980}
+        height={400}
+        style={{ width: "100%", height: "100%" }}
+      >
+        <Geographies geography={geoUrl}>
+          {({ geographies }) =>
+            geographies.map((geo) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                fill="#EAEAEC"
+                stroke="#D6D6DA"
+                style={{
+                  default: { outline: "none" },
+                  hover: { outline: "none", fill: "#D6D6DA" },
+                  pressed: { outline: "none" },
+                }}
+              />
+            ))
+          }
+        </Geographies>
+        {locations.map((loc, index) => (
+          <Marker key={index} coordinates={[loc.longitude, loc.latitude]}>
+            <g>
+              <circle r={4} fill="#ef4444" stroke="#FFF" strokeWidth={2} />
+              <circle r={8} fill="#ef4444" opacity={0.3} className="animate-ping" />
             </g>
-          );
-        })}
-      </svg>
+            <title>{loc.city}, {loc.country}</title>
+          </Marker>
+        ))}
+      </ComposableMap>
     </div>
   );
 };
@@ -314,7 +296,11 @@ interface VisitorData {
   visitorLocations: Array<{ latitude: number; longitude: number; country: string; city: string }>;
 }
 
-export default function ModernAnalyticsDashboard() {
+interface ModernAnalyticsDashboardProps {
+  onNavigate?: (section: string) => void;
+}
+
+export default function ModernAnalyticsDashboard({ onNavigate }: ModernAnalyticsDashboardProps) {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [visitors, setVisitors] = useState<VisitorData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -345,7 +331,12 @@ export default function ModernAnalyticsDashboard() {
   useEffect(() => {
     const savedWidgets = localStorage.getItem('analytics_widgets_pref');
     if (savedWidgets) {
-      setWidgets(JSON.parse(savedWidgets));
+      try {
+        const parsed = JSON.parse(savedWidgets);
+        setWidgets(prev => ({ ...prev, ...parsed }));
+      } catch (e) {
+        console.error('Failed to parse saved widgets preference', e);
+      }
     }
   }, []);
 
@@ -962,7 +953,7 @@ export default function ModernAnalyticsDashboard() {
         {/* Email Reports */}
         {widgets.reports && (
           <div className="mt-4">
-            <EmailReports analytics={analytics} />
+            <EmailReports analytics={analytics} onNavigate={onNavigate} />
           </div>
         )}
 

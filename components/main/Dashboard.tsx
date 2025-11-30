@@ -26,6 +26,7 @@ import ApiTokenManager from "@/components/admin/ApiTokenManager";
 import BackupManager from "@/components/admin/BackupManager";
 import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
+import IntegrationsSettings from "@/components/admin/IntegrationsSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import HeroSlidesManager from "@/components/admin/HeroSlidesManager";
 import SubscribersPage from "@/app/admin/subscribers/page";
@@ -58,7 +59,11 @@ function AdminDashboardContent() {
     switch (activeSection) {
       case "dashboard":
         return (
-          <Dashboard recipes={state.recipes} onEditRecipe={handleEditRecipe} />
+          <Dashboard 
+            recipes={state.recipes} 
+            onEditRecipe={handleEditRecipe} 
+            onNavigate={setActiveSection}
+          />
         );
       case "recipes":
         return (
@@ -131,6 +136,8 @@ function AdminDashboardContent() {
         );
       case "google-search":
         return <GoogleSearchSettings />;
+      case "integrations":
+        return <IntegrationsSettings />;
       case "plugins":
         return <AIPlugin />;
       case "api-tokens":

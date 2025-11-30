@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { unstable_cache } from "next/cache";
+import { unstable_cache, revalidateTag } from "next/cache";
 
 const prisma = new PrismaClient();
 
@@ -138,6 +138,17 @@ export interface AdminSettingsData {
     primaryLanguage: string;
     siteDomain: string;
   };
+  googleTagManagerId?: string;
+  emailSettings?: {
+    provider: 'gmail' | 'custom';
+    email: string;
+    appPassword?: string; // For Gmail
+    host?: string;
+    port?: number;
+    user?: string;
+    pass?: string;
+    from?: string;
+  };
   lastUpdated: string | null;
   updatedBy: string | null;
 }
@@ -231,6 +242,10 @@ Allow: /search`,
             : undefined,
           aiContextSettings: settingsMap.get("aiContextSettings")
             ? JSON.parse(settingsMap.get("aiContextSettings")!)
+            : undefined,
+          googleTagManagerId: settingsMap.get("googleTagManagerId") || undefined,
+          emailSettings: settingsMap.get("emailSettings")
+            ? JSON.parse(settingsMap.get("emailSettings")!)
             : undefined,
           lastUpdated: settingsMap.get("lastUpdated") || null,
           updatedBy: settingsMap.get("updatedBy") || null,
@@ -355,6 +370,11 @@ export async function saveAdminSettings(
         key: "aiContextSettings", 
         value: settings.aiContextSettings ? JSON.stringify(settings.aiContextSettings) : "" 
       },
+      { key: "googleTagManagerId", value: settings.googleTagManagerId || "" },
+      { 
+        key: "emailSettings", 
+        value: settings.emailSettings ? JSON.stringify(settings.emailSettings) : "" 
+      },
       { key: "lastUpdated", value: new Date().toISOString() },
       { key: "updatedBy", value: updatedBy || "admin" },
     ];
@@ -370,6 +390,7 @@ export async function saveAdminSettings(
       )
     );
 
+    revalidateTag("admin-settings");
     return true;
   } catch (error) {
     console.error("Error saving admin settings:", error);

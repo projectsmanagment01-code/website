@@ -9,6 +9,7 @@ import { getAdminSettings } from "@/lib/admin-settings";
 import { Fragment } from "react";
 import { headers } from "next/headers";
 import VisitorTracker from "@/components/VisitorTracker";
+import GoogleTagManagerComponent from "@/components/GoogleTagManagerComponent";
 
 // ISR: Revalidate every hour, but allow on-demand revalidation via cache tags
 export const revalidate = 3600; // 1 hour
@@ -162,6 +163,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <GoogleTagManagerComponent />
       <head>
         <meta
           name="title"

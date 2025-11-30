@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
-import { Mail, Calendar, Send, Check, AlertCircle, FileText } from 'lucide-react';
+import { Mail, Calendar, Send, Check, AlertCircle, FileText, Settings } from 'lucide-react';
 import { AnalyticsData } from '@/types/analytics';
+import Link from 'next/link';
 
 interface EmailReportsProps {
   analytics: AnalyticsData;
+  onNavigate?: (section: string) => void;
 }
 
-export default function EmailReports({ analytics }: EmailReportsProps) {
+export default function EmailReports({ analytics, onNavigate }: EmailReportsProps) {
   const [email, setEmail] = useState('');
   const [enabled, setEnabled] = useState(false);
   const [frequency, setFrequency] = useState('weekly');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = () => {
     // Save settings to local storage or backend
@@ -21,11 +25,34 @@ export default function EmailReports({ analytics }: EmailReportsProps) {
 
   const handleSendTest = async () => {
     setSending(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setSending(false);
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/admin/analytics/email-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          analytics
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send email');
+      }
+
+      setSent(true);
+      setTimeout(() => setSent(false), 3000);
+    } catch (err) {
+      console.error('Failed to send test email:', err);
+      setError(err instanceof Error ? err.message : 'Failed to send email');
+    } finally {
+      setSending(false);
+    }
   };
 
   // Calculate report metrics
@@ -95,6 +122,28 @@ export default function EmailReports({ analytics }: EmailReportsProps) {
               {sent ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />}
               {sending ? 'Sending...' : sent ? 'Sent!' : 'Send Test'}
             </button>
+          </div>
+          
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm mt-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="pt-4 border-t border-slate-100">
+            <div className="flex items-start gap-2 text-sm text-slate-600">
+              <Settings className="w-4 h-4 mt-0.5 text-slate-400" />
+              <div>
+                <p>Need to configure your email provider?</p>
+                <button 
+                  onClick={() => onNavigate?.('integrations')} 
+                  className="text-orange-600 hover:text-orange-700 font-medium hover:underline text-left"
+                >
+                  Go to Email Settings &rarr;
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         
