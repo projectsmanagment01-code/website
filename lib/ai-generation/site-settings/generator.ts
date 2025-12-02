@@ -24,6 +24,8 @@ export async function generateSiteTitle(
   try {
     const content = provider === 'openai' 
       ? await generateWithOpenAI(prompt, apiKey, 100)
+      : provider === 'ollama'
+      ? await generateWithOllama(prompt, apiKey, 100)
       : await generateWithGemini(prompt, apiKey, 100);
       
     return {
@@ -53,6 +55,8 @@ export async function generateSiteDescription(
   try {
     const content = provider === 'openai' 
       ? await generateWithOpenAI(prompt, apiKey, 200)
+      : provider === 'ollama'
+      ? await generateWithOllama(prompt, apiKey, 200)
       : await generateWithGemini(prompt, apiKey, 200);
       
     return {
@@ -82,6 +86,8 @@ export async function generateLogoText(
   try {
     const content = provider === 'openai' 
       ? await generateWithOpenAI(prompt, apiKey, 50)
+      : provider === 'ollama'
+      ? await generateWithOllama(prompt, apiKey, 50)
       : await generateWithGemini(prompt, apiKey, 50);
       
     return {
@@ -111,6 +117,8 @@ export async function generateLogoTagline(
   try {
     const content = provider === 'openai' 
       ? await generateWithOpenAI(prompt, apiKey, 80)
+      : provider === 'ollama'
+      ? await generateWithOllama(prompt, apiKey, 80)
       : await generateWithGemini(prompt, apiKey, 80);
       
     return {
@@ -127,7 +135,7 @@ export async function generateLogoTagline(
 }
 
 // ============================================================================
-// AI API FUNCTIONS - OpenAI and Google Gemini
+// AI API FUNCTIONS - OpenAI, Google Gemini, and Ollama Cloud
 // ============================================================================
 
 async function generateWithOpenAI(prompt: string, apiKey: string, maxTokens: number = 100): Promise<string> {
@@ -198,3 +206,34 @@ async function generateWithGemini(prompt: string, apiKey: string, maxTokens: num
   return data.candidates[0].content.parts[0].text;
 }
 
+async function generateWithOllama(prompt: string, apiKey: string, maxTokens: number = 100): Promise<string> {
+  const response = await fetch('https://ollama.com/api/chat', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'deepseek-v3.1:671b-cloud',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert SEO copywriter. Generate concise, optimized content. Return ONLY the requested content with no explanations or formatting.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      stream: false,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Ollama API error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.message.content;
+}

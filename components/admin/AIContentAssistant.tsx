@@ -115,7 +115,34 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
   const [lastGenerated, setLastGenerated] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
-  const [aiProvider, setAiProvider] = useState<'openai' | 'gemini'>('gemini'); // Default to Gemini
+  const [aiSettings, setAiSettings] = useState<any>(null);
+
+  React.useEffect(() => {
+    loadAISettings();
+  }, []);
+
+  const loadAISettings = async () => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      const response = await adminFetch("/api/admin/ai-settings", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAiSettings(data);
+      }
+    } catch (error) {
+      console.error("Error loading AI settings:", error);
+    }
+  };
+
+  const getProviderName = (provider: string) => {
+    if (provider === 'gemini') return 'Google Gemini';
+    if (provider === 'ollama') return 'Ollama Cloud';
+    return 'OpenAI';
+  };
 
   const generateContent = async (field: ContentField) => {
     try {
@@ -142,7 +169,7 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
         body: JSON.stringify({
           field: field.key,
           context,
-          provider: aiProvider // Use selected provider
+          // Provider is automatically read from AI settings in the API
         }),
       });
 
@@ -152,7 +179,7 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
         const generatedContent = result.content.trim();
         setLastGenerated(prev => ({ ...prev, [field.key]: generatedContent }));
         onUpdate(field.key, generatedContent);
-        const providerName = aiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT-4';
+        const providerName = getProviderName(result.provider);
         setMessage({
           type: "success",
           text: `Generated ${field.label} successfully with ${providerName}! ✨`
@@ -173,12 +200,12 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
 
   const generateAllContent = async () => {
     setMessage(null);
-    const providerName = aiProvider === 'gemini' ? 'Google Gemini' : 'OpenAI GPT-4';
     for (const field of contentFields) {
       await generateContent(field);
       // Small delay between generations
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
+    const providerName = aiSettings?.provider ? getProviderName(aiSettings.provider) : 'AI';
     setMessage({
       type: "success",
       text: `Generated all content successfully with ${providerName}! 🎉`
@@ -251,18 +278,15 @@ export default function AIContentAssistant({ settings, onUpdate, websiteType = "
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {/* AI Provider Selector */}
-          <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
-            <Sparkles className="w-4 h-4 text-gray-500" />
-            <select
-              value={aiProvider}
-              onChange={(e) => setAiProvider(e.target.value as 'openai' | 'gemini')}
-              className="text-sm border-none outline-none bg-transparent cursor-pointer font-medium text-gray-700"
-            >
-              <option value="gemini">Google Gemini (Default)</option>
-              <option value="openai">OpenAI GPT-4</option>
-            </select>
-          </div>
+          {/* AI Provider Info */}
+          {aiSettings?.provider && (
+            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
+              <Sparkles className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">
+                {getProviderName(aiSettings.provider)}
+              </span>
+            </div>
+          )}
           <button
             onClick={generateAllContent}
             disabled={!!generating}

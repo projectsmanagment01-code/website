@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "provider": "ollama",
+  "apiKeys": {
+    "openai": "",
+    "gemini": "",
+    "ollama": "27ac9b0e41da4ef8a50782f267a39270.vub0D4i4FswPT3qHQOER1_OB"
+  },
+  "model": "deepseek-v3.1:671b-cloud",
+  "temperature": 0.7,
+  "maxTokens": 1000,
+  "features": {
+    "contentGeneration": true,
+    "recipeAssistance": true,
+    "seoOptimization": true,
+    "imageAnalysis": true,
+    "imageDescriptions": true,
+    "objectDetection": true
+  },
+  "lastTested": "2025-12-02T20:12:58.044Z",
+  "connectionStatus": "connected",
+  "lastUpdated": "2025-12-02T20:13:00.701Z",
+  "updatedBy": "admin@yourrecipesite.com"
+}

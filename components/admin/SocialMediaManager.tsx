@@ -315,7 +315,8 @@ export default function SocialMediaManager({ onBack }: SocialMediaManagerProps) 
         </div>
 
         <div className="p-6 space-y-4">
-          {content.socialMediaLinks.map((link, index) => (
+          {content?.socialMediaLinks && content.socialMediaLinks.length > 0 ? (
+            content.socialMediaLinks.map((link, index) => (
             <div
               key={link.platform}
               className={`p-4 border rounded-lg transition-all ${
@@ -412,7 +413,12 @@ export default function SocialMediaManager({ onBack }: SocialMediaManagerProps) 
                 )}
               </div>
             </div>
-          ))}
+          ))
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No social media links found. Please refresh the page.</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -441,7 +447,7 @@ export default function SocialMediaManager({ onBack }: SocialMediaManagerProps) 
           </p>
         </div>
         <div className="p-6">
-          {content.socialMediaLinks.filter(link => link.enabled && link.url).length > 0 ? (
+          {content?.socialMediaLinks && content.socialMediaLinks.filter(link => link.enabled && link.url).length > 0 ? (
             <div className="flex gap-4">
               {content.socialMediaLinks
                 .filter(link => link.enabled && link.url)

@@ -173,7 +173,7 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
         body: JSON.stringify({
           field: field.key,
           context,
-          provider: "gemini"  // Default to Gemini
+          // Provider is automatically read from AI settings in the API
         }),
       });
 
@@ -185,7 +185,7 @@ export default function HomeContentEditor({ onBack }: { onBack?: () => void }) {
         updateField(field.key, generatedContent);
         setMessage({
           type: "success",
-          text: `Generated ${field.label} successfully with ${result.provider === 'gemini' ? 'Google Gemini' : 'OpenAI'}! ✨`
+          text: `Generated ${field.label} successfully with ${result.provider === 'gemini' ? 'Google Gemini' : result.provider === 'ollama' ? 'Ollama Cloud' : 'OpenAI'}! ✨`
         });
       } else {
         throw new Error(result.error || "Failed to generate content");

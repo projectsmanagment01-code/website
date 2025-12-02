@@ -3,12 +3,13 @@ import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-he
 import { verifyAdminToken } from "@/lib/auth";
 import { promises as fs } from "fs";
 import path from "path";
+import { generateWithOllama } from "@/lib/ollama";
 
 const AI_SETTINGS_PATH = path.join(process.cwd(), "data", "config", "ai-settings.json");
 
 interface AISettings {
   enabled: boolean;
-  provider: "openai" | "gemini";
+  provider: "openai" | "gemini" | "ollama";
   model: string;
   temperature: number;
   maxTokens: number;
@@ -18,6 +19,7 @@ interface AISettings {
   apiKeys?: {
     openai: string;
     gemini: string;
+    ollama: string;
   };
 }
 
@@ -32,6 +34,7 @@ async function loadAISettings(): Promise<AISettings> {
       apiKeys: {
         openai: process.env.OPENAI_API_KEY || settings.apiKeys?.openai || "",
         gemini: process.env.GEMINI_API_KEY || settings.apiKeys?.gemini || "",
+        ollama: process.env.OLLAMA_API_KEY || settings.apiKeys?.ollama || "",
       }
     };
   } catch {
@@ -47,6 +50,7 @@ async function loadAISettings(): Promise<AISettings> {
       apiKeys: {
         openai: process.env.OPENAI_API_KEY || "",
         gemini: process.env.GEMINI_API_KEY || "",
+        ollama: process.env.OLLAMA_API_KEY || "",
       }
     };
   }
@@ -54,9 +58,6 @@ async function loadAISettings(): Promise<AISettings> {
 
 async function generateWithOpenAI(prompt: string, settings: AISettings): Promise<string> {
   const apiKey = settings.apiKeys?.openai || process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OpenAI API key not configured");
-  }
 
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -92,9 +93,6 @@ async function generateWithOpenAI(prompt: string, settings: AISettings): Promise
 
 async function generateWithGemini(prompt: string, settings: AISettings): Promise<string> {
   const apiKey = settings.apiKeys?.gemini || process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("Gemini API key not configured");
-  }
 
   const model = settings.model || "gemini-2.0-flash-exp";
   const response = await fetch(
@@ -157,6 +155,22 @@ export async function POST(request: NextRequest) {
       return errorResponseNoCache('Content generation feature is disabled in AI settings.', 403);
     }
 
+    // Verify API key for selected provider
+    const providerKey = settings.apiKeys?.[settings.provider] || "";
+    if (!providerKey) {
+      const providerNames = {
+        openai: "OpenAI",
+        gemini: "Google Gemini",
+        ollama: "Ollama Cloud"
+      };
+      return jsonResponseNoCache({
+          error: `${providerNames[settings.provider]} API key not configured`,
+          details: `Please configure your ${providerNames[settings.provider]} API key in AI Plugin settings.`,
+          provider: settings.provider
+        },
+        { status: 400 });
+    }
+
     // Generate content using the configured provider
     let generatedContent: string;
 
@@ -178,12 +192,18 @@ export async function POST(request: NextRequest) {
       maxLength,
       calculatedMaxTokens,
       finalMaxTokens: requestSettings.maxTokens,
-      provider: settings.provider
+      provider: settings.provider,
+      model: settings.model
     });
 
     try {
       if (settings.provider === "gemini") {
         generatedContent = await generateWithGemini(prompt, requestSettings);
+      } else if (settings.provider === "ollama") {
+        const ollamaEndpoint = "https://ollama.com"; // Ollama Cloud endpoint
+        const apiKey = settings.apiKeys?.ollama || "";
+        const systemPrompt = "You are a professional content writer specializing in food blogs and recipe websites. Generate concise, engaging content that matches the brand voice.\n\n" + prompt;
+        generatedContent = await generateWithOllama(ollamaEndpoint, apiKey, settings.model, systemPrompt, settings.temperature, requestSettings.maxTokens);
       } else {
         generatedContent = await generateWithOpenAI(prompt, requestSettings);
       }

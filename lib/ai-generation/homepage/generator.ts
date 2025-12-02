@@ -106,6 +106,57 @@ async function generateWithGemini(
   }
 }
 
+// Ollama Cloud
+async function generateWithOllama(
+  prompt: string,
+  apiKey: string
+): Promise<AIGenerationResult> {
+  try {
+    const response = await fetch('https://ollama.com/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-v3.1:671b-cloud',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert copywriter and SEO specialist for food and recipe websites. Generate exactly what is requested with no additional formatting, explanations, or alternatives.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        stream: false,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Ollama API request failed');
+    }
+
+    const data = await response.json();
+    const content = data.message?.content?.trim() || '';
+
+    return {
+      success: true,
+      content: content,
+      provider: 'ollama'
+    };
+  } catch (error) {
+    return {
+      success: false,
+      content: '',
+      error: error instanceof Error ? error.message : 'Failed to generate with Ollama',
+      provider: 'ollama'
+    };
+  }
+}
+
 // Helper function to select AI provider
 async function generateContent(
   prompt: string,
@@ -114,6 +165,8 @@ async function generateContent(
 ): Promise<AIGenerationResult> {
   if (provider === 'openai') {
     return generateWithOpenAI(prompt, apiKey);
+  } else if (provider === 'ollama') {
+    return generateWithOllama(prompt, apiKey);
   } else {
     return generateWithGemini(prompt, apiKey);
   }

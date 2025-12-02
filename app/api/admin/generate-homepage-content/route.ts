@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
-import { loadAISettings, getOpenAIKey, getGeminiKey } from "@/lib/ai-settings-helper";
+import { loadAISettings, getOpenAIKey, getGeminiKey, getOllamaKey } from "@/lib/ai-settings-helper";
 import { 
   generateHeroTitle, 
   generateHeroDescription, 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: GenerateRequest = await request.json();
-    const { field, context, provider = 'gemini' } = body;
+    const { field, context } = body;
 
     // Validate context
     if (!context.websiteName || !context.businessType) {
@@ -40,14 +40,26 @@ export async function POST(request: NextRequest) {
       return errorResponseNoCache('AI generation is disabled. Please enable it in AI Settings.', 403);
     }
 
+    // Use provider from AI settings
+    const provider = aiSettings.provider || 'gemini';
+
     // Get API key based on provider using helper functions
     const apiKey = provider === 'openai' 
       ? await getOpenAIKey()
+      : provider === 'ollama'
+      ? await getOllamaKey()
       : await getGeminiKey();
 
     if (!apiKey) {
+      const providerNames = {
+        openai: 'OpenAI',
+        gemini: 'Google Gemini',
+        ollama: 'Ollama Cloud'
+      };
       return jsonResponseNoCache(
-        { error: `${provider === 'openai' ? 'OpenAI' : 'Gemini'} API key not configured. Please add it in AI Settings.` }, 400);
+        { error: `${providerNames[provider as keyof typeof providerNames]} API key not configured. Please add it in AI Settings.` },
+        { status: 400 }
+      );
     }
 
     // Generate content based on field

@@ -12,10 +12,11 @@ const OLD_AI_SETTINGS_PATH = path.join(process.cwd(), "uploads", "ai-settings.js
 
 export interface AISettings {
   enabled: boolean;
-  provider: "openai" | "gemini";
+  provider: "openai" | "gemini" | "ollama";
   apiKeys: {
     openai: string;
     gemini: string;
+    ollama: string; // Ollama Cloud API key
   };
   model: string;
   temperature: number;
@@ -118,6 +119,34 @@ export async function getGeminiKey(): Promise<string> {
 }
 
 /**
+ * Get Ollama API key from admin settings or environment
+ * Priority: Admin Settings > Environment Variable
+ * Note: For Ollama Cloud, the "API key" field stores the API key from ollama.com/settings/keys
+ */
+export async function getOllamaKey(): Promise<string> {
+  try {
+    const settings = await loadAISettings();
+    
+    if (settings?.apiKeys?.ollama) {
+      console.log("✅ Using Ollama API key from admin settings");
+      return settings.apiKeys.ollama;
+    }
+  } catch (error) {
+    console.log("Could not load admin AI settings:", error);
+  }
+
+  // Fallback to environment variable
+  const envKey = process.env.OLLAMA_API_KEY || '';
+  if (envKey) {
+    console.log("✅ Using Ollama API key from environment variable");
+  } else {
+    console.log("❌ No Ollama API key found in admin settings or environment");
+  }
+  
+  return envKey;
+}
+
+/**
  * Check if AI SEO features are enabled
  */
 export async function isSEOEnabled(): Promise<boolean> {
@@ -130,9 +159,9 @@ export async function isSEOEnabled(): Promise<boolean> {
 }
 
 /**
- * Get AI provider preference (openai or gemini)
+ * Get AI provider preference (openai, gemini, or ollama)
  */
-export async function getAIProvider(): Promise<"openai" | "gemini"> {
+export async function getAIProvider(): Promise<"openai" | "gemini" | "ollama"> {
   try {
     const settings = await loadAISettings();
     return settings?.provider || "openai";

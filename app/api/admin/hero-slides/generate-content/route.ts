@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { generateWithOllama } from "@/lib/ollama";
 
 const AI_SETTINGS_PATH = path.join(process.cwd(), "data", "config", "ai-settings.json");
 
@@ -10,6 +11,7 @@ interface AISettings {
   apiKeys: {
     openai?: string;
     gemini?: string;
+    ollama?: string;
   };
   model: string;
   temperature: number;
@@ -162,11 +164,13 @@ export async function POST(request: NextRequest) {
       ? aiSettings.apiKeys.openai 
       : provider === "gemini" 
       ? aiSettings.apiKeys.gemini 
+      : provider === "ollama"
+      ? aiSettings.apiKeys.ollama
       : null;
       
     if (!apiKey) {
       return NextResponse.json(
-        { error: `${aiSettings.provider} API key not configured` },
+        { error: `${aiSettings.provider} API key/endpoint not configured` },
         { status: 400 }
       );
     }
@@ -220,6 +224,9 @@ Return ONLY the JSON object, nothing else.`;
       result = await generateWithOpenAI(apiKey, aiSettings.model, prompt, aiSettings.temperature);
     } else if (provider === "gemini") {
       result = await generateWithGemini(apiKey, aiSettings.model, prompt, aiSettings.temperature);
+    } else if (provider === "ollama") {
+      const ollamaEndpoint = "https://ollama.com"; // Ollama Cloud endpoint
+      result = await generateWithOllama(ollamaEndpoint, apiKey, aiSettings.model, prompt, aiSettings.temperature, aiSettings.maxTokens);
     } else {
       return NextResponse.json(
         { error: `Unsupported AI provider: ${aiSettings.provider}` },

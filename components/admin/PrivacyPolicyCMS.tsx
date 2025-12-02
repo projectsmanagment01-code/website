@@ -239,146 +239,24 @@ Task: Generate a clear 2-6 word section title for a Privacy Policy section about
         
         // Detailed prompts for each privacy section
         const sectionPrompts: Record<string, string> = {
-          'intro': `Write a comprehensive introduction for ${websiteContext.websiteName}'s Privacy Policy (300-500 words).
-
-CRITICAL INSTRUCTIONS:
-- Use "${websiteContext.websiteName}" as the website name - DO NOT use placeholders like [Your Website Name] or [Website Name]
-- Use "${websiteContext.siteDomain}" as the website URL - DO NOT use placeholders like [Your Website URL]
-- Replace ALL placeholders with actual values provided in context
-- Be specific and use the actual website name throughout the content
-
-Include:
-- Welcome and purpose of this privacy policy for ${websiteContext.websiteName}
-- Commitment to protecting user privacy and data
-- What information is covered in this policy
-- Effective date and compliance with ${websiteContext.country} privacy laws
-- Brief overview of ${websiteContext.businessType} data practices
-
-Use HTML formatting: <p> tags for paragraphs, <strong> for emphasis. Write in ${websiteContext.primaryLanguage}. Professional, transparent, legally appropriate tone.`,
+          'intro': `Generate a Privacy Policy introduction for ${websiteContext.websiteName}, a ${websiteContext.businessType} at ${websiteContext.siteDomain}. State the commitment to protecting user privacy, what information is covered, effective date, and compliance with ${websiteContext.country} privacy laws. Use HTML paragraphs (<p>) and bold text (<strong>). Write in ${websiteContext.primaryLanguage}. Professional tone. 300-500 words. Return ONLY the HTML content, no explanations.`,
           
-          'info-collect': `Write detailed content about what information ${websiteContext.websiteName} collects (400-600 words).
-
-CRITICAL: Use "${websiteContext.websiteName}" as the website name - NO placeholders like [Your Website] or [Website Name]. Be specific.
-
-Cover:
-- Personal information (name, email, contact details)
-- Technical information (IP address, browser type, device info)
-- Usage data (pages visited, time on site, interactions)
-- Newsletter subscription data
-- Comment/form submission data
-- Cookies and tracking data
-- Information for ${websiteContext.businessType} features
-
-Use HTML: <p> paragraphs, <ul><li> lists, <strong> emphasis. ${websiteContext.primaryLanguage} language. Clear, comprehensive, legally sound.`,
+          'info-collect': `Generate content about what information ${websiteContext.websiteName} collects. Address personal information (name, email, contact), technical information (IP, browser, device), usage data (pages, time, interactions), newsletter subscriptions, comment/form submissions, cookies and tracking, and data specific to ${websiteContext.businessType} features. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 400-600 words. Return ONLY the HTML content.`,
           
-          'how-use': `Write comprehensive content about how ${websiteContext.websiteName} uses collected data (400-600 words).
-
-CRITICAL: Use "${websiteContext.websiteName}" explicitly - NO placeholders. Be specific with the actual website name.
-
-Explain uses:
-- Providing and improving ${websiteContext.businessType} services
-- Sending newsletters and updates (with consent)
-- Responding to inquiries and support
-- Personalizing user experience
-- Analytics and performance improvement
-- Legal compliance and safety
-- Marketing (if applicable)
-- Specific to ${websiteContext.country} regulations
-
-HTML format: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Transparent, detailed, professional.`,
+          'how-use': `Generate content about how ${websiteContext.websiteName} uses collected data. Explain uses for providing and improving ${websiteContext.businessType} services, sending newsletters, responding to inquiries, personalizing experience, analytics, legal compliance, marketing if applicable, and compliance with ${websiteContext.country} regulations. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 400-600 words. Return ONLY the HTML content.`,
           
-          'cookies': `Write detailed cookie policy content for ${websiteContext.websiteName} (400-600 words).
-
-CRITICAL: Use "${websiteContext.websiteName}" as the actual website name - NO placeholders or brackets.
-
-Cover:
-- What cookies are and why ${websiteContext.websiteName} uses them
-- Types of cookies: essential, analytics, advertising, preferences
-- First-party vs third-party cookies
-- Specific services: Google Analytics, AdSense, social media
-- How users can control/disable cookies
-- Impact of disabling cookies on ${websiteContext.businessType} functionality
-- Cookie consent and ${websiteContext.country} cookie laws
-
-HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Thorough, user-friendly explanation.`,
+          'cookies': `Generate cookie policy content for ${websiteContext.websiteName}. Explain what cookies are, why they're used, types of cookies (essential, analytics, advertising, preferences), first-party vs third-party, specific services (Google Analytics, AdSense, social media), how to control/disable cookies, impact on ${websiteContext.businessType} functionality, and ${websiteContext.country} cookie laws. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 400-600 words. Return ONLY the HTML content.`,
           
-          'third-party': `Write comprehensive third-party services section for ${websiteContext.websiteName} (400-600 words).
-
-CRITICAL: Use "${websiteContext.websiteName}" explicitly throughout - NO placeholders like [Website Name].
-
-List and explain services used by ${websiteContext.websiteName}:
-- Google Analytics (traffic analysis)
-- Google AdSense (advertising)
-- Social media platforms (sharing, embedding)
-- Email services (newsletters)
-- Comment systems
-- CDN services
-- Payment processors (if applicable)
-
-For each: purpose, data shared, their privacy policies, user control. Relevant to ${websiteContext.businessType} in ${websiteContext.country}.
-
-HTML: <p>, <ul><li>, <strong>, <a href> for privacy policy links. ${websiteContext.primaryLanguage}. Detailed, transparent.`,
+          'third-party': `Generate content about third-party services used by ${websiteContext.websiteName}. List and explain services like Google Analytics (traffic), Google AdSense (advertising), social media (sharing/embedding), email services (newsletters), comment systems, CDN services, and payment processors if applicable. For each, state purpose, data shared, their privacy policies, and user control. Relevant to ${websiteContext.businessType} in ${websiteContext.country}. Use HTML paragraphs (<p>), lists (<ul><li>), bold (<strong>), and links (<a href>). Write in ${websiteContext.primaryLanguage}. 400-600 words. Return ONLY the HTML content.`,
           
-          'data-security': `Write detailed data security section for ${websiteContext.websiteName} (300-500 words).
-
-CRITICAL: Use "${websiteContext.websiteName}" as the actual name - NO placeholders.
-
-Cover:
-- Technical security measures used by ${websiteContext.websiteName} (encryption, secure servers, SSL)
-- Access controls and authentication
-- Regular security updates and monitoring
-- Data breach notification procedures
-- Limitations (no system is 100% secure)
-- ${websiteContext.country} security standards and compliance
-- How long ${websiteContext.websiteName} retains data
-- Data storage locations
-
-HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Reassuring yet realistic, professionally worded.`,
+          'data-security': `Generate data security content for ${websiteContext.websiteName}. Address technical security measures (encryption, secure servers, SSL), access controls, regular updates and monitoring, data breach procedures, security limitations, ${websiteContext.country} standards, data retention periods, and storage locations. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. Reassuring yet realistic tone. 300-500 words. Return ONLY the HTML content.`,
           
-          'your-rights': `Write comprehensive user rights section for ${websiteContext.websiteName} (400-600 words).
-
-CRITICAL: Use "${websiteContext.websiteName}" explicitly - NO placeholders or brackets.
-
-Detail privacy rights at ${websiteContext.websiteName}:
-- Right to access personal data
-- Right to correction/rectification
-- Right to deletion (right to be forgotten)
-- Right to opt-out of marketing
-- Right to data portability
-- Right to withdraw consent
-- ${websiteContext.country} specific rights (GDPR, CCPA, etc.)
-- How to exercise these rights
-- Response timeframes
-- Complaint procedures
-
-HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Empowering, clear, legally compliant.`,
+          'your-rights': `Generate user rights content for ${websiteContext.websiteName}. Detail privacy rights including access to data, correction/rectification, deletion (right to be forgotten), opt-out of marketing, data portability, withdrawing consent, ${websiteContext.country} specific rights (GDPR, CCPA), how to exercise rights, response timeframes, and complaint procedures. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 400-600 words. Return ONLY the HTML content.`,
           
-          'contact': `Write contact information section for privacy concerns at ${websiteContext.websiteName} (200-300 words).
-
-CRITICAL: Use "${websiteContext.websiteName}" as the actual website name - NO placeholders.
-
-Include for ${websiteContext.websiteName}:
-- How to contact about privacy matters
-- Email address for privacy inquiries
-- Postal address (if available)
-- Response timeframe expectations
-- Data Protection Officer contact (if applicable)
-- Privacy-related complaint procedures
-- Alternative contact methods
-- Relevant to ${websiteContext.country}
-
-HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Accessible, helpful tone.`
+          'contact': `Generate contact information for privacy concerns at ${websiteContext.websiteName}. Explain how to contact about privacy matters, provide email for inquiries, postal address if available, response timeframe, Data Protection Officer contact if applicable, complaint procedures, alternative contact methods, relevant to ${websiteContext.country}. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. Helpful tone. 200-300 words. Return ONLY the HTML content.`
         };
 
-        prompt = `Context: ${websiteContext.websiteName} (${websiteContext.businessType}) in ${websiteContext.country}
-Website Domain: ${websiteContext.siteDomain}
-Section: "${sectionTitle}"
-
-CRITICAL INSTRUCTION: You MUST use "${websiteContext.websiteName}" as the website name throughout the content. DO NOT use ANY placeholders like [Your Website], [Website Name], [Your Website URL], or any text in brackets. Use the actual website name "${websiteContext.websiteName}" and domain "${websiteContext.siteDomain}" provided above.
-
-${sectionPrompts[sectionId] || `Write comprehensive, legally appropriate content for the "${sectionTitle}" section of a Privacy Policy for ${websiteContext.websiteName} (300-500 words). Include transparency about data practices, user rights, and compliance with ${websiteContext.country} laws. Use HTML <p> and <ul><li> tags. ${websiteContext.primaryLanguage} language. Use "${websiteContext.websiteName}" explicitly - NO placeholders.`}
-
-Generate the content now:`;
+        prompt = sectionPrompts[sectionId] || `Generate comprehensive Privacy Policy content for the "${sectionTitle}" section of ${websiteContext.websiteName} (${websiteContext.businessType}) at ${websiteContext.siteDomain}. Address transparency about data practices, user rights, and compliance with ${websiteContext.country} laws. Use HTML paragraphs (<p>) and lists (<ul><li>). Write in ${websiteContext.primaryLanguage}. 300-500 words. Return ONLY the HTML content, no explanations.`;
         maxLength = 6000;
       }
 
@@ -439,7 +317,8 @@ Generate the content now:`;
         }));
       }
 
-      setSuccess(`Generated with ${data.provider === 'gemini' ? 'Google Gemini' : 'OpenAI'}! ✨`);
+      const providerName = data.provider === 'gemini' ? 'Google Gemini' : data.provider === 'ollama' ? 'Ollama Cloud' : 'OpenAI';
+      setSuccess(`Generated with ${providerName}! ✨`);
       setTimeout(() => setSuccess(null), 3000);
 
     } catch (err) {

@@ -9,10 +9,11 @@ const AI_SETTINGS_PATH = path.join(process.cwd(), "data", "config", "ai-settings
 
 interface AISettings {
   enabled: boolean;
-  provider: "openai" | "gemini";
+  provider: "openai" | "gemini" | "ollama";
   apiKeys: {
     openai: string;
     gemini: string;
+    ollama: string;
   };
   model: string;
   temperature: number;
@@ -36,6 +37,7 @@ function getAPIKeys() {
   return {
     openai: process.env.OPENAI_API_KEY || '',
     gemini: process.env.GEMINI_API_KEY || '',
+    ollama: process.env.OLLAMA_API_KEY || '',
   };
 }
 
@@ -45,6 +47,7 @@ function hasAPIKeys() {
   return {
     openai: !!keys.openai,
     gemini: !!keys.gemini,
+    ollama: !!keys.ollama,
   };
 }
 
@@ -54,6 +57,7 @@ const defaultSettings: AISettings = {
   apiKeys: {
     openai: "",
     gemini: "",
+    ollama: "",
   },
   model: "gpt-4o-mini",
   temperature: 0.7,
@@ -112,6 +116,7 @@ export async function GET(request: NextRequest) {
       apiKeys: {
         openai: settings.apiKeys.openai ? "***" + settings.apiKeys.openai.slice(-4) : "",
         gemini: settings.apiKeys.gemini ? "***" + settings.apiKeys.gemini.slice(-4) : "",
+        ollama: settings.apiKeys.ollama ? "***" + settings.apiKeys.ollama.slice(-4) : "",
       },
     };
 
@@ -140,6 +145,7 @@ export async function POST(request: NextRequest) {
       apiKeys: {
         openai: body.apiKeys.openai.startsWith("***") ? existingSettings.apiKeys.openai : body.apiKeys.openai,
         gemini: body.apiKeys.gemini.startsWith("***") ? existingSettings.apiKeys.gemini : body.apiKeys.gemini,
+        ollama: body.apiKeys.ollama.startsWith("***") ? existingSettings.apiKeys.ollama : body.apiKeys.ollama,
       },
       lastUpdated: new Date().toISOString(),
       updatedBy: authResult.payload?.email || "admin",

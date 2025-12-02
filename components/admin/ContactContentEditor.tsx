@@ -167,7 +167,7 @@ Task: Generate a 150-160 character SEO meta description for the Contact page. Sh
         updateMetaField(field, generatedContent);
         setMessage({
           type: "success",
-          text: `Generated ${field} with ${result.provider === 'gemini' ? 'Google Gemini' : 'OpenAI'}! ✨`
+          text: `Generated ${field} with ${result.provider === 'gemini' ? 'Google Gemini' : result.provider === 'ollama' ? 'Ollama Cloud' : 'OpenAI'}! ✨`
         });
       } else {
         throw new Error(result.error || "Failed to generate content");

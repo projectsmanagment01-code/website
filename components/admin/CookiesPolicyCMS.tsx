@@ -238,126 +238,28 @@ Task: Generate a clear 2-6 word section title for a Cookie Policy section about 
         
         // Detailed prompts for each cookie section
         const sectionPrompts: Record<string, string> = {
-          'intro': `Write a comprehensive introduction for ${websiteContext.websiteName}'s Cookie Policy (300-500 words).
-
-Include:
-- Welcome and purpose of this cookie policy
-- Brief explanation of what cookies are
-- Why we use cookies on our ${websiteContext.businessType} site
-- Link to ${websiteContext.country} cookie regulations (GDPR/CCPA if applicable)
-- User's right to control cookies
-
-Use HTML formatting: <p> tags for paragraphs, <strong> for emphasis. Write in ${websiteContext.primaryLanguage}. Clear, user-friendly tone.`,
+          'intro': `Generate a Cookie Policy introduction for ${websiteContext.websiteName}, a ${websiteContext.businessType}. Explain what cookies are, why the site uses them, reference ${websiteContext.country} cookie regulations (GDPR/CCPA if applicable), and state users' rights to control cookies. Use HTML paragraphs (<p>) and bold text (<strong>). Write in ${websiteContext.primaryLanguage}. User-friendly tone. 300-500 words. Return ONLY the HTML content, no explanations.`,
           
-          'what-are-cookies': `Write detailed content about what cookies are (300-400 words).
-
-Explain:
-- Simple definition of cookies
-- How cookies work (stored on device, sent with requests)
-- Difference between first-party and third-party cookies
-- Session vs persistent cookies
-- How ${websiteContext.websiteName} uses them
-
-HTML format: <p>, <strong>. ${websiteContext.primaryLanguage}. Educational, accessible language.`,
+          'what-are-cookies': `Generate content explaining what cookies are. Define cookies in simple terms, how they work (stored on device, sent with requests), difference between first-party and third-party cookies, session vs persistent cookies, and how ${websiteContext.websiteName} uses them. Use HTML paragraphs (<p>) and bold (<strong>). Write in ${websiteContext.primaryLanguage}. Educational tone. 300-400 words. Return ONLY the HTML content.`,
           
-          'types-of-cookies': `Write comprehensive content about types of cookies ${websiteContext.websiteName} uses (400-500 words).
-
-Cover:
-- Essential/necessary cookies
-- Functional cookies
-- Analytics/performance cookies
-- Marketing/advertising cookies
-- Preference cookies
-- Specific to ${websiteContext.businessType} functionality
-
-HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Organized, clear categories.`,
+          'types-of-cookies': `Generate content about types of cookies ${websiteContext.websiteName} uses. Address essential/necessary cookies, functional cookies, analytics/performance cookies, marketing/advertising cookies, preference cookies, and functionality specific to ${websiteContext.businessType}. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 400-500 words. Return ONLY the HTML content.`,
           
-          'essential-cookies': `Write about essential cookies for ${websiteContext.websiteName} (300-400 words).
-
-Include:
-- What makes a cookie "essential"
-- Examples: authentication, security, basic site functionality
-- Why they can't be disabled
-- How they enable ${websiteContext.businessType} features
-- ${websiteContext.country} legal basis for essential cookies
-
-HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Clear technical explanation.`,
+          'essential-cookies': `Generate content about essential cookies for ${websiteContext.websiteName}. Explain what makes a cookie "essential," provide examples (authentication, security, basic functionality), why they can't be disabled, how they enable ${websiteContext.businessType} features, and ${websiteContext.country} legal basis. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 300-400 words. Return ONLY the HTML content.`,
           
-          'analytics-cookies': `Write about analytics cookies on ${websiteContext.websiteName} (300-400 words).
-
-Detail:
-- Purpose: understanding user behavior, improving site
-- Specific services: Google Analytics, etc.
-- What data is collected (pages, time, interactions)
-- How it helps improve ${websiteContext.businessType} content
-- User control options
-- ${websiteContext.country} compliance
-
-HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Transparent, specific.`,
+          'analytics-cookies': `Generate content about analytics cookies on ${websiteContext.websiteName}. Explain their purpose (understanding user behavior, site improvement), specific services used (like Google Analytics), what data is collected (pages, time, interactions), how it helps improve ${websiteContext.businessType} content, user control options, and ${websiteContext.country} compliance. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 300-400 words. Return ONLY the HTML content.`,
           
-          'advertising-cookies': `Write about advertising cookies (if applicable) on ${websiteContext.websiteName} (300-400 words).
-
-Cover:
-- Purpose: delivering relevant ads
-- Services used: Google AdSense, etc.
-- How targeting works
-- Third-party ad networks
-- User control and opt-out options
-- ${websiteContext.country} advertising regulations
-
-HTML: <p>, <ul><li>, <strong>. ${websiteContext.primaryLanguage}. Honest, clear about ad practices.`,
+          'advertising-cookies': `Generate content about advertising cookies on ${websiteContext.websiteName}. Explain their purpose (delivering relevant ads), services used (like Google AdSense), how targeting works, third-party ad networks, user control and opt-out options, and ${websiteContext.country} advertising regulations. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 300-400 words. Return ONLY the HTML content.`,
           
-          'control-cookies': `Write detailed instructions on how users can control cookies (400-500 words).
-
-Include:
-- Browser settings (Chrome, Firefox, Safari, Edge)
-- How to disable/delete cookies
-- Impact on ${websiteContext.websiteName} functionality
-- Mobile device controls (iOS, Android)
-- Third-party opt-out tools
-- Do Not Track settings
-- Cookie consent management
-
-HTML: <p>, <ul><li>, <strong>, <a href> for helpful links. ${websiteContext.primaryLanguage}. Step-by-step, empowering.`,
+          'control-cookies': `Generate detailed instructions on controlling cookies. Cover browser settings (Chrome, Firefox, Safari, Edge), how to disable/delete cookies, impact on ${websiteContext.websiteName} functionality, mobile device controls (iOS, Android), third-party opt-out tools, Do Not Track settings, and cookie consent management. Use HTML paragraphs (<p>), lists (<ul><li>), bold (<strong>), and links (<a href>). Write in ${websiteContext.primaryLanguage}. 400-500 words. Return ONLY the HTML content.`,
           
-          'third-party-cookies': `Write about third-party cookies on ${websiteContext.websiteName} (300-400 words).
-
-Detail:
-- What third-party cookies are
-- Specific services: Google Analytics, AdSense, social media
-- What data they collect
-- Their privacy policies (link to them)
-- User control over third-party cookies
-- ${websiteContext.country} regulations on third-party tracking
-
-HTML: <p>, <ul><li>, <strong>, <a href>. ${websiteContext.primaryLanguage}. Transparent, specific.`,
+          'third-party-cookies': `Generate content about third-party cookies on ${websiteContext.websiteName}. Explain what third-party cookies are, specific services (Google Analytics, AdSense, social media), what data they collect, their privacy policies, user control options, and ${websiteContext.country} regulations on third-party tracking. Use HTML paragraphs (<p>), lists (<ul><li>), bold (<strong>), and links (<a href>). Write in ${websiteContext.primaryLanguage}. 300-400 words. Return ONLY the HTML content.`,
           
-          'updates': `Write about updates to ${websiteContext.websiteName}'s Cookie Policy (200-300 words).
-
-Include:
-- Right to update policy
-- How users will be notified
-- Effective date of changes
-- Importance of reviewing updates
-- Historical version availability (if applicable)
-- ${websiteContext.country} legal requirements for updates
-
-HTML: <p>, <strong>. ${websiteContext.primaryLanguage}. Clear, responsible.`,
+          'updates': `Generate content about updates to ${websiteContext.websiteName}'s Cookie Policy. Address the right to update the policy, how users will be notified, effective date of changes, importance of reviewing updates, historical version availability, and ${websiteContext.country} legal requirements. Use HTML paragraphs (<p>) and bold (<strong>). Write in ${websiteContext.primaryLanguage}. 200-300 words. Return ONLY the HTML content.`,
           
-          'contact': `Write contact section for Cookie Policy questions (200-300 words).
-
-Include:
-- Invitation to contact with questions
-- How to reach ${websiteContext.ownerName} or privacy team
-- Response timeframe
-- Alternative contact methods
-- Data protection officer info (if applicable)
-- ${websiteContext.country} data protection authority contact
-
-HTML: <p>, <strong>, <a href> for mailto links. ${websiteContext.primaryLanguage}. Welcoming, accessible.`
+          'contact': `Generate a contact section for Cookie Policy questions. Explain how users can reach out with questions, how to contact ${websiteContext.ownerName} or the privacy team, response timeframe, alternative contact methods, data protection officer info if applicable, and ${websiteContext.country} data protection authority contact. Use HTML paragraphs (<p>), bold (<strong>), and mailto links (<a href>). Write in ${websiteContext.primaryLanguage}. Welcoming tone. 200-300 words. Return ONLY the HTML content.`
         };
 
-        prompt = sectionPrompts[sectionId] || `Write comprehensive content about ${section?.title} for ${websiteContext.websiteName}'s Cookie Policy (300-500 words). Use HTML: <p>, <ul><li>, <strong>. Language: ${websiteContext.primaryLanguage}. Professional, legally appropriate, user-friendly tone.`;
+        prompt = sectionPrompts[sectionId] || `Generate comprehensive Cookie Policy content about ${section?.title} for ${websiteContext.websiteName}. Use HTML paragraphs (<p>), lists (<ul><li>), and bold (<strong>). Write in ${websiteContext.primaryLanguage}. Professional, user-friendly tone. 300-500 words. Return ONLY the HTML content, no explanations.`;
         maxLength = 6000;
       } else {
         prompt = `Generate content for ${fieldName} in the Cookie Policy.`;

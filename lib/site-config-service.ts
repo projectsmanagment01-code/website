@@ -186,11 +186,20 @@ export async function getSocialLinks(): Promise<SocialLink[]> {
   const jsonPath = path.join(CONFIG_DIR, 'home.json');
   if (fs.existsSync(jsonPath)) {
     const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-    return data.socialMediaLinks || [];
+    if (data.socialMediaLinks && data.socialMediaLinks.length > 0) {
+      return data.socialMediaLinks;
+    }
   }
 
-  // Default fallback
-  return [];
+  // Default fallback with empty social links template
+  return [
+    { platform: "Facebook", url: "", enabled: false, icon: "facebook" },
+    { platform: "Instagram", url: "", enabled: false, icon: "instagram" },
+    { platform: "YouTube", url: "", enabled: false, icon: "youtube" },
+    { platform: "Twitter/X", url: "", enabled: false, icon: "twitter" },
+    { platform: "Pinterest", url: "", enabled: false, icon: "pinterest" },
+    { platform: "Email", url: "", enabled: false, icon: "email" },
+  ];
 }
 
 /**

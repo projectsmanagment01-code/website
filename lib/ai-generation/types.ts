@@ -18,4 +18,4 @@ export interface AIGenerationResult {
   provider?: AIProvider;
 }
 
-export type AIProvider = 'openai' | 'gemini';
+export type AIProvider = 'openai' | 'gemini' | 'ollama';

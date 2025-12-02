@@ -17,13 +17,15 @@ import {
 } from "lucide-react";
 import { refreshAfterChange } from "@/lib/revalidation-utils";
 import { adminFetch } from '@/lib/admin-fetch';
+import { OLLAMA_CLOUD_MODELS } from '@/lib/ollama';
 
 interface AISettings {
   enabled: boolean;
-  provider: "openai" | "gemini";
+  provider: "openai" | "gemini" | "ollama";
   apiKeys: {
     openai: string;
     gemini: string;
+    ollama: string;
   };
   model: string;
   temperature: number;
@@ -47,6 +49,7 @@ export default function AIPlugin() {
     apiKeys: {
       openai: "",
       gemini: "",
+      ollama: "",
     },
     model: "gemini-2.5-flash",
     temperature: 0.7,
@@ -87,6 +90,14 @@ export default function AIPlugin() {
       model: "gemini-2.5-flash",
       icon: "💎",
       supportsVision: true
+    },
+    {
+      id: "ollama" as const,
+      name: "Ollama Cloud",
+      model: "gpt-oss:120b-cloud",
+      icon: "🦙",
+      supportsVision: false,
+      cloudModels: OLLAMA_CLOUD_MODELS
     },
   ];
 
@@ -358,21 +369,6 @@ export default function AIPlugin() {
                 </div>
               </div>
 
-              <div>
-                <div className="mb-3">
-                  <span className="text-sm font-medium text-gray-700">Selected Model:</span>
-                  <div className="mt-1 p-2 bg-gray-50 rounded-lg border">
-                    <span className="font-mono text-sm text-gray-800">{currentProvider?.model}</span>
-                    {currentProvider?.supportsVision && (
-                      <span className="ml-2 text-xs text-green-600 flex items-center gap-1">
-                        <span>👁️</span>
-                        <span>Vision Supported</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
               <div className="space-y-4">
                 <h4 className="font-semibold text-gray-800 flex items-center gap-2">
                   <Key className="w-4 h-4" />
@@ -452,6 +448,66 @@ export default function AIPlugin() {
                         Google AI Studio
                       </a>
                     </p>
+                  </div>
+                )}
+
+                {settings.provider === "ollama" && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Ollama Cloud API Key
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showApiKey ? "text" : "password"}
+                          value={settings.apiKeys.ollama}
+                          onChange={(e) => setSettings(prev => ({ 
+                            ...prev, 
+                            apiKeys: { ...prev.apiKeys, ollama: e.target.value }
+                          }))}
+                          placeholder="olk_..."
+                          className="w-full px-3 py-2 pr-20 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowApiKey(!showApiKey)}
+                          className="absolute right-2 top-2 px-2 py-1 text-xs text-gray-500 hover:text-gray-700"
+                        >
+                          {showApiKey ? "Hide" : "Show"}
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Get your API key from{" "}
+                        <a 
+                          href="https://ollama.com/settings/keys" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          ollama.com/settings/keys
+                        </a>
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Cloud Model
+                      </label>
+                      <select
+                        value={settings.model}
+                        onChange={(e) => setSettings(prev => ({ ...prev, model: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      >
+                        {OLLAMA_CLOUD_MODELS.map((model) => (
+                          <option key={model.id} value={model.id}>
+                            {model.name} - {model.description}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Cloud models run on Ollama's servers with datacenter-grade GPUs
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

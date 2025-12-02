@@ -1,19 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
 import { verifyAdminToken } from "@/lib/auth";
+import { testOllamaChat } from "@/lib/ollama";
 
 interface TestRequest {
-  provider: "openai" | "gemini";
+  provider: "openai" | "gemini" | "ollama";
   apiKey: string;
   model: string;
 }
 
 // Get API keys from environment variables
-function getAPIKey(provider: "openai" | "gemini"): string {
+function getAPIKey(provider: "openai" | "gemini" | "ollama"): string {
   if (provider === "openai") {
     return process.env.OPENAI_API_KEY || '';
   } else if (provider === "gemini") {
     return process.env.GEMINI_API_KEY || '';
+  } else if (provider === "ollama") {
+    return process.env.OLLAMA_API_KEY || '';
   }
   return '';
 }
@@ -114,6 +117,9 @@ export async function POST(request: NextRequest) {
         testResponse = await testOpenAI(apiKey, model);
       } else if (provider === "gemini") {
         testResponse = await testGemini(apiKey, model);
+      } else if (provider === "ollama") {
+        const ollamaEndpoint = "https://ollama.com"; // Ollama Cloud endpoint
+        testResponse = await testOllamaChat(ollamaEndpoint, apiKey, model);
       } else {
         return jsonResponseNoCache({ success: false, error: "Unsupported AI provider" },
           { status: 400 });
