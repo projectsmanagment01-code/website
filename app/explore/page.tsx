@@ -213,7 +213,7 @@ export default async function Page({
 }: {
   searchParams: { page?: string };
 }) {
-  const currentPage = searchParams.page ? parseInt(searchParams.page) : 1;
+  const currentPage = Math.max(1, searchParams.page ? parseInt(searchParams.page) : 1);
   const pageSize = 9; // Show 9 recipes per page
 
   const { recipes: paginatedRecipes, pagination } = await getRecipesPaginated(

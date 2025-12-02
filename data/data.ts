@@ -317,7 +317,9 @@ async function getRecipesPaginated(
   return await fetchWithFallback(
     async () => {
       const prisma = await getPrisma();
-      const skip = (page - 1) * limit;
+      // Ensure page is at least 1 to prevent negative skip
+      const validPage = Math.max(1, page);
+      const skip = (validPage - 1) * limit;
 
       const [recipes, totalCount] = await Promise.all([
         prisma.recipe.findMany({
@@ -346,7 +348,7 @@ async function getRecipesPaginated(
       return {
         recipes: recipesWithAuthors as unknown as Recipe[],
         pagination: {
-          page,
+          page: validPage,
           limit,
           total: totalCount,
           totalPages: Math.ceil(totalCount / limit),
