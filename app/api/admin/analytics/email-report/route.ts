@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 import { sendEmail } from '@/lib/email';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Allow up to 60 seconds for execution (if platform supports it)
+
 export async function POST(request: NextRequest) {
   try {
     // Check authentication

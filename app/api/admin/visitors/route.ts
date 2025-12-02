@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { executeWithRetry } from '@/lib/db-utils';
 
+export const dynamic = 'force-dynamic';
+
 // Helper functions for analytics
 function getSourceType(referrer: string, currentHost: string): string {
   if (!referrer) return 'direct';
