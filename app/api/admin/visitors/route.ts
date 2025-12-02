@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { executeWithRetry } from '@/lib/db-utils';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Helper functions for analytics
 function getSourceType(referrer: string, currentHost: string): string {

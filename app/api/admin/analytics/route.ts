@@ -3,6 +3,9 @@ import prisma from '@/lib/prisma';
 import { executeWithRetry } from '@/lib/db-utils';
 import { checkHybridAuthOrRespond } from '@/lib/auth-standard';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // GET - Analytics data
 export async function GET(request: NextRequest) {
   try {

@@ -59,13 +59,13 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
       user,
       pass,
     },
-    // Add timeouts to prevent hanging
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 5000,    // 5 seconds
-    socketTimeout: 10000,     // 10 seconds
-    // Enable debug logging
-    debug: true,
-    logger: true, 
+    // No timeouts - let it take as long as it needs
+    connectionTimeout: 0,
+    greetingTimeout: 0,
+    socketTimeout: 0,
+    // Disable debug logging for production
+    debug: false,
+    logger: false, 
   });
 
   try {

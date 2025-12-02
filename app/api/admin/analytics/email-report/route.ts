@@ -21,18 +21,24 @@ export async function POST(request: NextRequest) {
     // Generate HTML Report
     const html = generateEmailTemplate(analytics);
 
-    // Send Email
-    const result = await sendEmail({
+    // Send email in background without awaiting (fire and forget)
+    // This prevents timeout issues
+    sendEmail({
       to: email,
       subject: `Analytics Report - ${new Date().toLocaleDateString()}`,
       html,
+    }).then((result) => {
+      if (result.success) {
+        console.log('Email report sent successfully to:', email);
+      } else {
+        console.error('Failed to send email report:', result.error);
+      }
+    }).catch((err) => {
+      console.error('Email sending error:', err);
     });
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
+    // Return immediately
+    return NextResponse.json({ success: true, message: 'Email is being sent in the background' });
   } catch (error) {
     console.error('Error sending email report:', error);
     return NextResponse.json(

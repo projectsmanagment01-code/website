@@ -46,7 +46,7 @@ export default function EmailReports({ analytics, onNavigate }: EmailReportsProp
       }
 
       setSent(true);
-      setTimeout(() => setSent(false), 3000);
+      setTimeout(() => setSent(false), 5000);
     } catch (err) {
       console.error('Failed to send test email:', err);
       setError(err instanceof Error ? err.message : 'Failed to send email');
