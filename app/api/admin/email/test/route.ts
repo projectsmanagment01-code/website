@@ -32,7 +32,9 @@ export async function POST(request: NextRequest) {
     };
 
     console.log('Testing email with settings:', debugInfo);
+    console.log('Attempting to send email...');
 
+    const startTime = Date.now();
     const result = await sendEmail({
       to: email,
       subject: 'Test Email from Recipe CMS',
@@ -48,16 +50,20 @@ export async function POST(request: NextRequest) {
         </div>
       `,
     });
+    const duration = Date.now() - startTime;
+    console.log(`Email send attempt finished in ${duration}ms. Success: ${result.success}`);
 
     if (!result.success) {
+      console.error('Email send failed with error:', result.error);
       return NextResponse.json({ 
         success: false, 
         error: result.error,
-        debug: debugInfo
+        debug: debugInfo,
+        duration
       }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, duration });
   } catch (error) {
     console.error('Error sending test email:', error);
     return NextResponse.json({ 
