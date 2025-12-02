@@ -21,24 +21,31 @@ export async function POST(request: NextRequest) {
     // Generate HTML Report
     const html = generateEmailTemplate(analytics);
 
-    // Send email in background without awaiting (fire and forget)
-    // This prevents timeout issues
-    sendEmail({
+    console.log('[EMAIL REPORT] Attempting to send email to:', email);
+    console.log('[EMAIL REPORT] Email size:', html.length, 'characters');
+
+    // Send Email with timeout protection
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Email sending timeout after 30 seconds')), 30000)
+    );
+
+    const emailPromise = sendEmail({
       to: email,
       subject: `Analytics Report - ${new Date().toLocaleDateString()}`,
       html,
-    }).then((result) => {
-      if (result.success) {
-        console.log('Email report sent successfully to:', email);
-      } else {
-        console.error('Failed to send email report:', result.error);
-      }
-    }).catch((err) => {
-      console.error('Email sending error:', err);
     });
 
-    // Return immediately
-    return NextResponse.json({ success: true, message: 'Email is being sent in the background' });
+    const result = await Promise.race([emailPromise, timeoutPromise]) as any;
+
+    console.log('[EMAIL REPORT] Send result:', result);
+
+    if (!result.success) {
+      console.error('[EMAIL REPORT] Failed:', result.error);
+      return NextResponse.json({ error: result.error || 'Failed to send email' }, { status: 500 });
+    }
+
+    console.log('[EMAIL REPORT] Success! Message ID:', result.messageId);
+    return NextResponse.json({ success: true, messageId: result.messageId });
   } catch (error) {
     console.error('Error sending email report:', error);
     return NextResponse.json(

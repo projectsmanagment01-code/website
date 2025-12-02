@@ -21,13 +21,20 @@ export async function GET(request: NextRequest) {
 
     const geoData = await geoResponse.json();
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       country: geoData.country_name || 'Unknown',
       city: geoData.city || 'Unknown',
       countryCode: geoData.country_code || 'XX',
       latitude: geoData.latitude || 0,
       longitude: geoData.longitude || 0,
     });
+
+    // Prevent any caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
   } catch (error) {
     console.error('Geolocation error:', error);
     return NextResponse.json({ country: 'Unknown', city: 'Unknown' });

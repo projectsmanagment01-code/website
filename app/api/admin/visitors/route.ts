@@ -61,6 +61,8 @@ export async function POST(request: NextRequest) {
     // Get IP from headers
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0] : request.headers.get('x-real-ip') || 'unknown';
+    
+    console.log('[VISITOR TRACK] New visitor:', { ip, country, city, latitude, longitude, page });
     const host = request.headers.get('host') || '';
 
     // Parse analytics data
@@ -248,12 +250,19 @@ export async function GET(request: NextRequest) {
 
     const visitorLocations = Array.from(locationMap.values());
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       totalVisitors,
       visitorsByCountry,
       dailyVisitors,
       visitorLocations,
     });
+
+    // Prevent any caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+
+    return response;
   } catch (error) {
     console.error('Error fetching visitor stats:', error);
     return NextResponse.json(
