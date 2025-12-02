@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { siteConfig } from "@/config/site";
-import prisma from "@/lib/prisma";
-import { executeWithRetry } from "@/lib/db-utils";
+import { getCategories, getRecipes } from "@/data/data";
 import { logger } from "@/lib/logger";
 
 export async function GET(request: Request) {
@@ -90,18 +89,11 @@ export async function GET(request: Request) {
       },
     ];
 
-    // Fetch dynamic categories from database
+    // Fetch dynamic categories
     let categories: Array<{ slug: string }> = [];
     try {
-      categories = await executeWithRetry(
-        () =>
-          prisma.category.findMany({
-            select: { slug: true },
-            orderBy: { name: "asc" },
-          }),
-        3,
-        1000
-      );
+      const fetchedCategories = await getCategories();
+      categories = fetchedCategories.map(c => ({ slug: c.slug }));
       logger.info(`Fetched ${categories.length} categories for sitemap`);
     } catch (error) {
       logger.error("Failed to fetch categories for sitemap", { error });
@@ -116,37 +108,34 @@ export async function GET(request: Request) {
       lastmod: undefined,
     }));
 
-    // Fetch all recipes from database
-    let recipes: Array<{ slug: string; updatedAt: Date | null; createdAt: Date }> = [];
+    // Fetch all recipes
+    let recipes: Array<{ slug: string; updatedAt: Date | string | null; createdAt: Date | string | undefined }> = [];
     try {
-      recipes = await executeWithRetry(
-        () =>
-          prisma.recipe.findMany({
-            select: {
-              slug: true,
-              updatedAt: true,
-              createdAt: true,
-            },
-            orderBy: { createdAt: "desc" },
-          }),
-        3,
-        1000
-      );
+      const fetchedRecipes = await getRecipes();
+      recipes = fetchedRecipes.map(r => ({ 
+        slug: r.slug, 
+        updatedAt: r.updatedAt || null, 
+        createdAt: r.createdAt 
+      }));
       logger.info(`Fetched ${recipes.length} recipes for sitemap`);
     } catch (error) {
       logger.error("Failed to fetch recipes for sitemap", { error });
       // Continue with empty recipes array
     }
 
+    // Helper to format date
+    const formatDate = (date: Date | string | null | undefined) => {
+      if (!date) return undefined;
+      if (typeof date === 'string') return date.split('T')[0];
+      return date.toISOString().split('T')[0];
+    };
+
     // Dynamic recipe pages
     const recipePages = recipes.map((recipe) => ({
       url: `/recipes/${recipe.slug}`,
       priority: "1.0",
       changefreq: "monthly",
-      lastmod:
-        recipe.updatedAt?.toISOString().split("T")[0] ||
-        recipe.createdAt?.toISOString().split("T")[0] ||
-        new Date().toISOString().split("T")[0],
+      lastmod: formatDate(recipe.updatedAt) || formatDate(recipe.createdAt) || new Date().toISOString().split("T")[0],
     }));
 
     // Combine all pages
@@ -177,7 +166,7 @@ ${allPages
       },
     });
   } catch (error) {
-    logger.error("Fatal error generating sitemap", { error });
+    logger.error("Fatal error generating sitemap", { error: error instanceof Error ? error.message : String(error) });
     
     // Return minimal sitemap with just static pages on error
     const minimalSitemap = `<?xml version="1.0" encoding="UTF-8"?>

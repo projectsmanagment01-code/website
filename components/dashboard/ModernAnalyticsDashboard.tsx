@@ -247,8 +247,13 @@ const formatDuration = (seconds: number) => {
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 const WorldMap = ({ locations }: { locations: Array<{ latitude: number; longitude: number; country: string; city: string }> }) => {
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; content: React.ReactNode } | null>(null);
+
   return (
-    <div className="relative w-full rounded-lg overflow-hidden bg-slate-50 border border-slate-200 h-[400px]">
+    <div 
+      className="relative w-full rounded-lg overflow-hidden bg-slate-50 border border-slate-200 h-[400px]"
+      onMouseLeave={() => setTooltip(null)}
+    >
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
@@ -276,15 +281,52 @@ const WorldMap = ({ locations }: { locations: Array<{ latitude: number; longitud
           }
         </Geographies>
         {locations.map((loc, index) => (
-          <Marker key={index} coordinates={[loc.longitude, loc.latitude]}>
+          <Marker 
+            key={index} 
+            coordinates={[loc.longitude, loc.latitude]}
+            onMouseEnter={(e) => {
+              const container = e.currentTarget.closest('.relative');
+              if (container) {
+                 const rect = container.getBoundingClientRect();
+                 // Calculate position relative to the container
+                 // We use the event client coordinates minus the container's top/left
+                 setTooltip({
+                   x: e.clientX - rect.left,
+                   y: e.clientY - rect.top,
+                   content: (
+                     <div className="flex flex-col gap-0.5">
+                       <span className="font-bold text-sm">{loc.city !== 'Unknown' ? loc.city : 'Unknown City'}, {loc.country}</span>
+                       <span className="text-[10px] text-slate-300">Lat: {loc.latitude.toFixed(2)}, Long: {loc.longitude.toFixed(2)}</span>
+                     </div>
+                   )
+                 });
+              }
+            }}
+            onMouseLeave={() => {
+              setTooltip(null);
+            }}
+            style={{
+              default: { outline: "none", cursor: "pointer" },
+              hover: { outline: "none", cursor: "pointer" },
+              pressed: { outline: "none", cursor: "pointer" },
+            }}
+          >
             <g>
               <circle r={4} fill="#ef4444" stroke="#FFF" strokeWidth={2} />
               <circle r={8} fill="#ef4444" opacity={0.3} className="animate-ping" />
             </g>
-            <title>{loc.city}, {loc.country}</title>
           </Marker>
         ))}
       </ComposableMap>
+      {tooltip && (
+        <div 
+          className="absolute z-50 bg-slate-900/95 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg shadow-xl pointer-events-none transform -translate-x-1/2 -translate-y-full mt-[-12px] border border-slate-700 min-w-[120px] text-center"
+          style={{ left: tooltip.x, top: tooltip.y }}
+        >
+          {tooltip.content}
+          <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-slate-900/95"></div>
+        </div>
+      )}
     </div>
   );
 };
@@ -350,8 +392,8 @@ export default function ModernAnalyticsDashboard({ onNavigate }: ModernAnalytics
     fetchAnalytics();
     fetchVisitors();
     
-    // Refresh visitor data every 30 seconds
-    const interval = setInterval(fetchVisitors, 30000);
+    // Refresh visitor data every 5 seconds for live updates
+    const interval = setInterval(fetchVisitors, 5000);
     return () => clearInterval(interval);
   }, [timeRange]);
 
@@ -362,7 +404,7 @@ export default function ModernAnalyticsDashboard({ onNavigate }: ModernAnalytics
   const fetchActivity = async (page: number) => {
     setLoadingActivity(true);
     try {
-      const response = await fetch(`/api/admin/analytics/activity?page=${page}&limit=10`);
+      const response = await fetch(`/api/admin/analytics/activity?page=${page}&limit=10&t=${Date.now()}`, { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setActivityData(data.activities);
@@ -377,7 +419,7 @@ export default function ModernAnalyticsDashboard({ onNavigate }: ModernAnalytics
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch(`/api/admin/analytics?range=${timeRange}`);
+      const response = await fetch(`/api/admin/analytics?range=${timeRange}&t=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Failed to fetch analytics');
       const data = await response.json();
       setAnalytics(data);
@@ -394,7 +436,13 @@ export default function ModernAnalyticsDashboard({ onNavigate }: ModernAnalytics
 
   const fetchVisitors = async () => {
     try {
-      const response = await fetch(`/api/admin/visitors?range=${timeRange}`);
+      const response = await fetch(`/api/admin/visitors?range=${timeRange}&t=${Date.now()}`, { 
+        cache: 'no-store',
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setVisitors(data);

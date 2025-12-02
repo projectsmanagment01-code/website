@@ -45,7 +45,10 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
 
   if (!host || !user || !pass) {
     console.warn('SMTP settings not configured. Email not sent.');
-    return { success: false, error: 'SMTP settings not configured' };
+    return { 
+      success: false, 
+      error: 'SMTP settings not configured. Please check your Email Settings in the Integrations page.' 
+    };
   }
 
   const transporter = nodemailer.createTransport({
@@ -70,6 +73,9 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('Error sending email:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error sending email' 
+    };
   }
 }

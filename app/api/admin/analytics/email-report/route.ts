@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error sending email report:', error);
     return NextResponse.json(
-      { error: 'Failed to send email report' },
+      { error: error instanceof Error ? error.message : 'Failed to send email report' },
       { status: 500 }
     );
   }

@@ -224,7 +224,11 @@ async function fetchWithFallback<T>(
 
     return (await response.json()) as T;
   } catch (error) {
-    console.error("❌ API fetch failed:", error);
+    // Only log if it's not a connection refused error (common during build)
+    const isConnectionRefused = error instanceof TypeError && error.message === 'fetch failed';
+    if (!isConnectionRefused) {
+      console.error("❌ API fetch failed:", error);
+    }
     throw new Error("Failed to fetch data from API");
   }
 }
@@ -287,7 +291,9 @@ async function getRecipes(page?: number, limit?: number): Promise<Recipe[]> {
     // Resolve authors for all recipes
     return await resolveRecipeAuthors(recipes);
   } catch (error) {
-    console.error("❌ Error in getRecipes:", error);
+    if (error instanceof Error && error.message !== "Failed to fetch data from API") {
+      console.error("❌ Error in getRecipes:", error);
+    }
     // Return empty array during build to prevent build failures
     return [];
   }
@@ -769,7 +775,9 @@ async function getCategories(): Promise<Category[]> {
       }
     );
   } catch (error) {
-    console.error("❌ Failed to fetch categories:", error);
+    if (error instanceof Error && error.message !== "Failed to fetch data from API") {
+      console.error("❌ Failed to fetch categories:", error);
+    }
     return [];
   }
 }
