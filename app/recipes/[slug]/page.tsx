@@ -10,6 +10,7 @@ import ViewTracker from "@/components/ViewTracker";
 import BackToTop from "@/components/BackToTop";
 import Recipe from "@/outils/types";
 import SidebarWrapper from "@/components/main/SidebarWrapper";
+import RecipeSchema from "@/components/RecipeSchema";
 
 export default async function RecipePage({
   params,
@@ -34,6 +35,9 @@ export default async function RecipePage({
 
   return (
     <>
+      {/* Schema.org structured data for Google */}
+      <RecipeSchema recipe={recipe} />
+      
       <div className="container-wide section-md">
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8" data-sidebar-container>
           {/* Main Content */}

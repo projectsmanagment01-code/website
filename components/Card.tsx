@@ -241,7 +241,7 @@ export const Card: React.FC<{
         </h3>
         <div className="bg-white rounded-lg p-6 shadow-sm border-2" style={{ borderColor: '#7FAD8A' }}>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Array.isArray(recipe?.mustKnowTips) && recipe.mustKnowTips.map((tool: string, index: number) => (
+            {Array.isArray(recipe?.tools) && recipe.tools.map((tool: string, index: number) => (
               <li
                 key={index}
                 className="flex items-center space-x-4 rounded-lg p-4 shadow-sm"
@@ -262,6 +262,132 @@ export const Card: React.FC<{
           </ul>
         </div>
       </div>
+
+      {/* Must-Know Tips */}
+      {Array.isArray(recipe?.mustKnowTips) && recipe.mustKnowTips.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <Star className="h-6 w-6 mr-3" style={{ color: '#3F7D58' }} />
+            Must-Know Tips
+          </h3>
+          <div className="bg-white border-2 rounded-lg p-6 shadow-sm" style={{ 
+            borderColor: '#3F7D58',
+            background: 'linear-gradient(135deg, #F5F9F6 0%, #E8F5EA 100%)'
+          }}>
+            <ul className="space-y-4">
+              {recipe.mustKnowTips.map((tip: string, index: number) => (
+                <li
+                  key={index}
+                  className="flex items-start space-x-4"
+                >
+                  <span className="text-xl font-bold flex-shrink-0" style={{ color: '#3F7D58' }}>💡</span>
+                  <span className="text-gray-800 leading-relaxed text-lg font-medium">
+                    {hasHtmlTags(tip) ? (
+                      <span dangerouslySetInnerHTML={renderSafeHtml(tip)} />
+                    ) : (
+                      tip
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Professional Secrets */}
+      {Array.isArray(recipe?.professionalSecrets) && recipe.professionalSecrets.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <ChefHat className="h-6 w-6 mr-3" style={{ color: '#3F7D58' }} />
+            Professional Secrets
+          </h3>
+          <div className="bg-white border-2 rounded-lg p-6 shadow-sm" style={{ 
+            borderColor: '#FFB347',
+            background: 'linear-gradient(135deg, #FFF8F0 0%, #FFF0E0 100%)'
+          }}>
+            <ul className="space-y-4">
+              {recipe.professionalSecrets.map((secret: string, index: number) => (
+                <li
+                  key={index}
+                  className="flex items-start space-x-4"
+                >
+                  <span className="text-xl font-bold flex-shrink-0" style={{ color: '#E67E22' }}>🔥</span>
+                  <span className="text-gray-800 leading-relaxed text-lg font-medium">
+                    {hasHtmlTags(secret) ? (
+                      <span dangerouslySetInnerHTML={renderSafeHtml(secret)} />
+                    ) : (
+                      secret
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Serving Suggestion */}
+      {recipe?.serving && (
+        <div className="mb-8">
+          <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <Utensils className="h-6 w-6 mr-3" style={{ color: '#3F7D58' }} />
+            Serving Suggestion
+          </h3>
+          <div className="bg-white rounded-lg p-6 shadow-sm border-2" style={{ borderColor: '#7FAD8A' }}>
+            <p className="text-gray-800 text-lg leading-relaxed">
+              {hasHtmlTags(recipe.serving) ? (
+                <span dangerouslySetInnerHTML={renderSafeHtml(recipe.serving)} />
+              ) : (
+                recipe.serving
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Storage Instructions */}
+      {recipe?.storage && (
+        <div className="mb-8">
+          <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <Info className="h-6 w-6 mr-3" style={{ color: '#3F7D58' }} />
+            Storage Instructions
+          </h3>
+          <div className="bg-white rounded-lg p-6 shadow-sm border-2" style={{ borderColor: '#7FAD8A' }}>
+            <p className="text-gray-800 text-lg leading-relaxed">
+              {hasHtmlTags(recipe.storage) ? (
+                <span dangerouslySetInnerHTML={renderSafeHtml(recipe.storage)} />
+              ) : (
+                recipe.storage
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Allergy Information */}
+      {recipe?.allergyInfo && (
+        <div className="mb-8">
+          <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 shadow-sm">
+            <h3 className="text-xl font-bold text-amber-800 mb-3 flex items-center">
+              <Info className="h-5 w-5 mr-2" />
+              ⚠️ Allergy Information
+            </h3>
+            <p className="text-amber-900 text-base leading-relaxed">
+              {recipe.allergyInfo}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Nutrition Disclaimer */}
+      {recipe?.nutritionDisclaimer && (
+        <div className="mb-4">
+          <p className="text-gray-500 text-sm italic text-center">
+            {recipe.nutritionDisclaimer}
+          </p>
+        </div>
+      )}
     </section>
   );
 };

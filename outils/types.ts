@@ -76,6 +76,26 @@ export interface EssentialIngredientGuideItem {
   note: string;
 }
 
+// Nutrition information for SEO schema (all fields optional)
+export interface NutritionInfo {
+  calories?: string;          // e.g., "350 kcal"
+  fatContent?: string;        // e.g., "12 g"
+  saturatedFatContent?: string;
+  carbohydrateContent?: string;
+  sugarContent?: string;
+  fiberContent?: string;
+  proteinContent?: string;
+  sodiumContent?: string;
+  cholesterolContent?: string;
+  servingSize?: string;       // e.g., "1 serving"
+}
+
+// Aggregate rating for SEO schema (optional)
+export interface AggregateRating {
+  ratingValue: number;        // e.g., 4.7
+  reviewCount: number;        // e.g., 125
+}
+
 // Instruction item
 export interface Instruction {
   step: string;
@@ -249,6 +269,14 @@ export interface Recipe {
   tools: string[];
   allergyInfo: string;
   nutritionDisclaimer: string;
+
+  // SEO Enhancement Fields (all optional)
+  videoUrl?: string;              // YouTube video URL for recipe
+  videoDuration?: string;         // ISO 8601 duration e.g., "PT5M30S"
+  nutrition?: NutritionInfo;      // Nutrition data for rich snippets
+  aggregateRating?: number;       // Average rating (1-5)
+  reviewCount?: number;           // Number of reviews
+  keywords?: string[];            // Additional SEO keywords
 
   // New fields for enhanced admin management
   status?: 'draft' | 'published';

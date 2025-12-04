@@ -8,6 +8,7 @@ import { PinterestPinButton } from "./PinterestPinButton";
 import { getWebsiteName } from "@/lib/site-name-helper";
 import { SafeImage } from "./SafeImage";
 import RecipeBottomSubscription from "./RecipeBottomSubscription";
+import RecipeVideo from "./RecipeVideo";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -111,6 +112,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </p>
         )}
       </div>
+
+      {/* Recipe Video (YouTube embed if available) */}
+      <RecipeVideo videoUrl={(recipe as any).videoUrl} title={recipe.title} />
 
       {/* Why You'll Love This */}
       <TipCard

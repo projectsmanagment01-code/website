@@ -1,0 +1,223 @@
+{
+  "id": "auto-generated",
+  "slug": "recipe-slug-here",
+  "title": "Your Recipe Title Here",
+  "category": "CATEGORY_NAME",
+  "categoryId": "category-id-from-database",
+  "authorId": "author-id-from-database",
+
+  "img": "/path-to-card-image.jpg",
+  "heroImage": "/path-to-hero-image.jpg",
+  "featureImage": "/path-to-feature-image.jpg",
+  "preparationImage": "/path-to-preparation-image.jpg",
+  "cookingImage": "/path-to-cooking-image.jpg",
+  "finalPresentationImage": "/path-to-final-image.jpg",
+  "images": [
+    "/image1.jpg",
+    "/image2.jpg",
+    "/image3.jpg",
+    "/image4.jpg"
+  ],
+
+  "description": "Short description for recipe cards (1-2 sentences)",
+  "shortDescription": "Brief summary for sidebar related recipes",
+  "intro": "Brief introduction paragraph that appears at the top",
+  "story": "The full story about this recipe - personal narrative, background, why you love it. Can be multiple paragraphs with HTML formatting.",
+  "testimonial": "What people say about this recipe - a personal quote or feedback in italic style",
+
+  "whyYouLove": {
+    "type": "Card",
+    "title": "Why You'll Love It",
+    "items": [
+      "**Reason 1** - Description of why it's great",
+      "**Reason 2** - Another great feature",
+      "**Reason 3** - More benefits",
+      "**Reason 4** - Additional appeal"
+    ]
+  },
+
+  "essIngredientGuide": [
+    {
+      "ingredient": "Main ingredient name",
+      "note": "Tips about this ingredient and why it's important"
+    },
+    {
+      "ingredient": "Second key ingredient",
+      "note": "Selection and preparation tips"
+    },
+    {
+      "ingredient": "Third key ingredient",
+      "note": "Why this matters for the recipe"
+    }
+  ],
+
+  "completeProcess": [
+    {
+      "title": "Preparation",
+      "description": "Detailed description of the preparation step..."
+    },
+    {
+      "title": "Cooking",
+      "description": "Main cooking process description..."
+    },
+    {
+      "title": "Assembly",
+      "description": "How to put everything together..."
+    },
+    {
+      "type": "Card",
+      "title": "Pro Tips",
+      "items": [
+        "Important tip for this stage",
+        "Another crucial point",
+        "Don't forget this step"
+      ],
+      "after": "Additional context after the tips card"
+    }
+  ],
+
+  "sections": [
+    {
+      "title": "Section Title",
+      "content": "Section content with detailed information. Can include HTML formatting.",
+      "img": 1
+    },
+    {
+      "type": "card",
+      "title": "You Must Know",
+      "items": [
+        "Critical point 1",
+        "Critical point 2",
+        "Critical point 3"
+      ],
+      "after": "Closing paragraph after the card"
+    }
+  ],
+
+  "questions": {
+    "title": "Frequently Asked Questions",
+    "items": [
+      {
+        "question": "First common question about the recipe?",
+        "answer": "Detailed answer to help readers understand..."
+      },
+      {
+        "question": "Second question?",
+        "answer": "Another helpful answer..."
+      },
+      {
+        "question": "Third question?",
+        "answer": "More useful information..."
+      }
+    ]
+  },
+
+  "timing": {
+    "prepTime": "15 Minutes",
+    "cookTime": "25 Minutes",
+    "totalTime": "40 Minutes"
+  },
+
+  "recipeInfo": {
+    "difficulty": "Easy",
+    "cuisine": "American",
+    "servings": "4 Servings",
+    "dietary": "None"
+  },
+
+  "ingredients": [
+    {
+      "section": "Main Ingredients",
+      "items": [
+        "1 lb chicken breast, diced",
+        "2 cups broccoli florets",
+        "1 tbsp olive oil"
+      ]
+    },
+    {
+      "section": "For the Sauce",
+      "items": [
+        "3 tbsp soy sauce",
+        "2 tbsp honey",
+        "1 tbsp sesame oil"
+      ]
+    }
+  ],
+
+  "instructions": [
+    {
+      "step": "Step 01",
+      "instruction": "First step - detailed cooking instruction here..."
+    },
+    {
+      "step": "Step 02",
+      "instruction": "Second step - next part of the process..."
+    },
+    {
+      "step": "Step 03",
+      "instruction": "Third step - continue with cooking..."
+    },
+    {
+      "step": "Step 04",
+      "instruction": "Fourth step - finishing touches..."
+    }
+  ],
+
+  "notes": [
+    "Important cooking tip or storage note",
+    "Another helpful note for best results",
+    "Pro tip for variations or substitutions"
+  ],
+
+  "tools": [
+    "Large skillet or wok",
+    "Cutting board",
+    "Sharp knife",
+    "Mixing bowls",
+    "Whisk",
+    "Measuring cups and spoons"
+  ],
+
+  "mustKnowTips": [
+    "**Don't overcrowd the pan** - Cook in batches for proper browning",
+    "**Let meat rest** - Allows juices to redistribute",
+    "**Taste as you go** - Adjust seasoning to your preference"
+  ],
+
+  "professionalSecrets": [
+    "**Room temperature ingredients** - Ensures even cooking",
+    "**High heat for searing** - Creates the perfect crust",
+    "**Deglaze the pan** - Captures all the flavor"
+  ],
+
+  "serving": "Best served hot over steamed rice or with crusty bread. Garnish with fresh herbs before serving.",
+
+  "storage": "Store in an airtight container in the refrigerator for up to 3 days. Reheat gently in a pan or microwave. Not recommended for freezing.",
+
+  "allergyInfo": "Contains soy and sesame. May contain traces of nuts. Please check all ingredient labels for specific allergens.",
+
+  "nutritionDisclaimer": "Nutritional information is approximate and may vary based on ingredients used. Consult a healthcare professional for dietary advice.",
+
+  "videoUrl": "",
+  "videoDuration": "",
+
+  "nutrition": {
+    "calories": "",
+    "fatContent": "",
+    "saturatedFatContent": "",
+    "carbohydrateContent": "",
+    "sugarContent": "",
+    "fiberContent": "",
+    "proteinContent": "",
+    "sodiumContent": "",
+    "cholesterolContent": "",
+    "servingSize": "1 serving"
+  },
+
+  "aggregateRating": null,
+  "reviewCount": null,
+  "keywords": [],
+
+  "status": "published",
+  "updatedDate": "2025-12-04T00:00:00.000Z"
+}
