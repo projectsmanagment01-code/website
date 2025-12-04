@@ -1,7 +1,6 @@
 import { PrismaClient, Media } from '@prisma/client';
 import { AppError } from '../middleware/error-handler';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../lib/prisma';
 
 export interface CreateMediaInput {
   filename: string;

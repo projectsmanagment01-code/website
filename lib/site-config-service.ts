@@ -5,11 +5,9 @@
  * Provides fallback to JSON files during migration period.
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import * as fs from 'fs';
 import * as path from 'path';
-
-const prisma = new PrismaClient();
 
 const CONFIG_DIR = path.join(process.cwd(), 'data', 'config');
 

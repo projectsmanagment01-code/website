@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
-
-const prisma = new PrismaClient();
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';

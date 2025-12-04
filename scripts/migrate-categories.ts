@@ -15,11 +15,9 @@
  *   yarn tsx scripts/migrate-categories.ts            # Execute migration
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import * as fs from 'fs';
 import * as path from 'path';
-
-const prisma = new PrismaClient();
 
 // ============================================================================
 // Configuration

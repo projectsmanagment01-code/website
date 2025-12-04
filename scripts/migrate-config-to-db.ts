@@ -7,11 +7,9 @@
  * Run with: npx tsx scripts/migrate-config-to-db.ts
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import * as fs from 'fs';
 import * as path from 'path';
-
-const prisma = new PrismaClient();
 
 interface HeroConfig {
   heroTitle: string;

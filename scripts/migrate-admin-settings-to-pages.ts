@@ -7,9 +7,7 @@
  * Run with: npx tsx scripts/migrate-admin-settings-to-pages.ts
  */
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 async function migrateFromAdminSettings() {
   console.log('🚀 Migrating page content from AdminSettings to PageContent table...\n');

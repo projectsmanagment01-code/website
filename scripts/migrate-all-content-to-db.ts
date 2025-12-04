@@ -15,11 +15,9 @@
  * Run with: npx tsx scripts/migrate-all-content-to-db.ts
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import * as fs from 'fs';
 import * as path from 'path';
-
-const prisma = new PrismaClient();
 
 const CONFIG_DIR = path.join(process.cwd(), 'data', 'config');
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'content');

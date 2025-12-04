@@ -6,9 +6,8 @@
  */
 
 import { AISeOEngine } from '@/lib/ai-seo/seo-engine';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
-const prisma = new PrismaClient();
 const seoEngine = new AISeOEngine();
 
 interface RecipeData {

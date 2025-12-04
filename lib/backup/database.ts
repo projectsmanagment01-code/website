@@ -1,7 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import fs from 'fs-extra';
 import path from 'path';
 import { BackupError } from './types';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Database backup and restore service
@@ -10,7 +11,7 @@ export class DatabaseBackupService {
   private prisma: PrismaClient;
 
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = prisma;
   }
 
   /**

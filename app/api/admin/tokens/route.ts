@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jsonResponseNoCache, errorResponseNoCache } from '@/lib/api-response-helpers';
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { checkHybridAuthOrRespond } from "@/lib/auth-standard";
 import crypto from "crypto";
-
-const prisma = new PrismaClient();
 
 // Generate secure API token
 function generateApiToken(): string {
