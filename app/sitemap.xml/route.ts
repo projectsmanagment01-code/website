@@ -3,6 +3,9 @@ import { siteConfig } from "@/config/site";
 import { getCategories, getRecipes } from "@/data/data";
 import { logger } from "@/lib/logger";
 
+// Cache sitemap for 24 hours (86400 seconds)
+export const revalidate = 86400;
+
 export async function GET(request: Request) {
   try {
     // Get dynamic domain from request headers
