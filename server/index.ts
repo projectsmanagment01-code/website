@@ -3,7 +3,6 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
 import mediaRoutes from './routes/media';
 import { errorHandler, logErrors, clientErrorHandler } from './middleware/error-handler';
 import { requestLogger } from './middleware/logger';
