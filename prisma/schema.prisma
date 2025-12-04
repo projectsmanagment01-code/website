@@ -62,6 +62,14 @@ model Recipe {
   authorId            String?
   status              String    @default("published")
   
+  // SEO Enhancement Fields
+  videoUrl            String?   // YouTube video URL for recipe
+  videoDuration       String?   // ISO 8601 duration e.g., "PT5M30S"
+  nutrition           Json?     // Nutrition data for rich snippets
+  aggregateRating     Float?    // Average rating (1-5)
+  reviewCount         Int?      // Number of reviews
+  keywords            String[]  @default([]) // Additional SEO keywords
+  
   // Relations
   authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])
   categoryRef         Category? @relation("CategoryRecipes", fields: [categoryId], references: [id], onDelete: SetNull)
