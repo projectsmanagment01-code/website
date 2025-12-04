@@ -2,11 +2,10 @@
  * Test script to verify that the backup system now includes categories
  */
 
-const { PrismaClient } = require('@prisma/client');
+import { prisma } from '../lib/prisma';
+import { DatabaseBackupService } from '../lib/backup/database';
 
 async function testBackupIncludesCategories() {
-  const prisma = new PrismaClient();
-  
   try {
     console.log('🧪 Testing backup system with categories...');
     
@@ -30,7 +29,6 @@ async function testBackupIncludesCategories() {
     }
     
     // Import and test the database backup service
-    const { DatabaseBackupService } = require('../lib/backup/database.ts');
     const databaseService = new DatabaseBackupService();
     
     console.log('🔄 Testing database export...');
@@ -57,7 +55,7 @@ async function testBackupIncludesCategories() {
   } catch (error) {
     console.error('❌ Test failed:', error);
   } finally {
-    await prisma.$disconnect();
+    // Singleton handles disconnection
   }
 }
 

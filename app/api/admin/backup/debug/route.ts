@@ -45,12 +45,11 @@ export async function GET(request: NextRequest) {
     // Check database connection
     let databaseStatus: any = 'unknown';
     try {
-      const { PrismaClient } = require('@prisma/client');
-      const prisma = new PrismaClient();
-      await prisma.$connect();
+      const { prisma } = await import('@/lib/prisma');
+      // await prisma.$connect(); // Singleton handles connection
       const recipeCount = await prisma.recipe.count();
       const authorCount = await prisma.author.count();
-      await prisma.$disconnect();
+      // await prisma.$disconnect(); // Don't disconnect singleton
       
       databaseStatus = {
         connected: true,

@@ -3,16 +3,15 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
 import mediaRoutes from './routes/media';
 import { errorHandler, logErrors, clientErrorHandler } from './middleware/error-handler';
 import { requestLogger } from './middleware/logger';
+import { prisma } from '../lib/prisma';
 
 // Import global error handlers
 import '../app/error-handlers';
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.MEDIA_SERVER_PORT || 3001;
 
 // Security middleware

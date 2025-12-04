@@ -202,10 +202,10 @@ export const databaseService = `
  * Database service for SEO enhancements
  */
 
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { SEOEnhancement, MetadataSuggestion, ImageSEOSuggestion, InternalLinkSuggestion } from './seo-engine';
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient(); // Removed to use singleton
 
 export class SEODatabaseService {
   

@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { unstable_cache, revalidateTag } from "next/cache";
-
-const prisma = new PrismaClient();
 
 export interface AboutPageSection {
   id: string;
