@@ -18,7 +18,7 @@ model Recipe {
   description         String
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  allergyInfo         String
+  allergyInfo         String?   // Made optional
   author              Json
   categoryHref        String?   // DEPRECATED: Will be removed after migration
   categoryLink        String    // DEPRECATED: Will be removed after migration
@@ -36,21 +36,21 @@ model Recipe {
   preparationImage    String?
   finalPresentationImage String?
   ingredientGuide     Json?
-  intro               String
+  intro               String?   // Made optional
   mustKnowTips        String[]
   notes               String[]
-  nutritionDisclaimer String
+  nutritionDisclaimer String?   // Made optional
   professionalSecrets String[]
   questions           Json?
   recipeInfo          Json?
   relatedRecipes      Json?
   sections            Json?
-  serving             String
+  serving             String?   // Made optional
   shortDescription    String
   slug                String    @unique
-  storage             String
-  story               String
-  testimonial         String
+  storage             String?   // Made optional
+  story               String?   // Made optional
+  testimonial         String?   // Made optional
   timing              Json?
   tools               String[]
   updatedDate         String
@@ -69,6 +69,28 @@ model Recipe {
   aggregateRating     Float?    // Average rating (1-5)
   reviewCount         Int?      // Number of reviews
   keywords            String[]  @default([]) // Additional SEO keywords
+  
+  // Advanced Content Fields (SEO & UX Boosters)
+  tasteProfile        Json?     // sweet, salty, spicy, sour, umami, overall
+  textureProfile      Json?     // outside, inside, bite, overall
+  recipeOrigin        String?   // Cultural/historical background
+  variations          Json?     // Array of {title, description}
+  substitutions       Json?     // Array of {ingredient, substitute, note}
+  dietaryAdaptations  Json?     // Array of {diet, howToAdapt}
+  pairings            String[]  @default([]) // Drink, side, dessert pairings
+  shoppingList        String[]  @default([]) // Simplified ingredient list
+  makeAhead           String?   // Prep-ahead instructions
+  leftovers           String?   // Reheat/reuse instructions
+  equipmentNotes      String[]  @default([]) // Notes about equipment
+  ingredientPrep      String[]  @default([]) // Small prep steps
+  temperatureNotes    Json?     // stovetopHeatLevel, ovenTemperature, safeInternalTemp
+  timeline            Json?     // Array of {time, action}
+  commonMistakes      String[]  @default([]) // SEO boost - what to avoid
+  flavorBoosters      String[]  @default([]) // Chef tips for extra flavor
+  specialNotes        String[]  @default([]) // Uncommon details
+  difficultyReasoning String?   // Why easy/medium/hard
+  servingSuggestions  String[]  @default([]) // Structured serving ideas
+  seasonality         String?   // Best season to enjoy
   
   // Relations
   authorRef           Author?   @relation("AuthorRecipes", fields: [authorId], references: [id])

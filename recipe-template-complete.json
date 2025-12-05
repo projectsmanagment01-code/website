@@ -1,8 +1,6 @@
 {
-  "id": "auto-generated",
   "slug": "recipe-slug-here",
   "title": "Your Recipe Title Here",
-  "category": "CATEGORY_NAME",
   "categoryId": "category-id-from-database",
   "authorId": "author-id-from-database",
 
@@ -217,6 +215,125 @@
   "aggregateRating": null,
   "reviewCount": null,
   "keywords": [],
+
+  "tasteProfile": {
+    "sweet": "",
+    "salty": "",
+    "spicy": "",
+    "sour": "",
+    "umami": "",
+    "overall": "Short summary of the flavor direction"
+  },
+
+  "textureProfile": {
+    "outside": "",
+    "inside": "",
+    "bite": "",
+    "overall": ""
+  },
+
+  "recipeOrigin": "Where the recipe comes from and its cultural or personal background.",
+
+  "variations": [
+    {
+      "title": "Variation Name",
+      "description": "How to make it and what changes"
+    }
+  ],
+
+  "substitutions": [
+    {
+      "ingredient": "Original ingredient",
+      "substitute": "Alternative ingredient",
+      "note": "Any notes about the substitution"
+    }
+  ],
+
+  "dietaryAdaptations": [
+    {
+      "diet": "Gluten-Free",
+      "howToAdapt": "What to change and why"
+    },
+    {
+      "diet": "Keto",
+      "howToAdapt": "What to change and why"
+    }
+  ],
+
+  "pairings": [
+    "Drink pairing recommendation",
+    "Side dish pairing",
+    "Dessert pairing"
+  ],
+
+  "shoppingList": [
+    "Chicken breast",
+    "Soy sauce",
+    "Broccoli",
+    "Honey"
+  ],
+
+  "makeAhead": "Instructions for preparing ahead and storing the components.",
+
+  "leftovers": "How to reheat, reuse, or repurpose leftovers.",
+
+  "equipmentNotes": [
+    "Non-stick skillet prevents burning",
+    "Cast iron gives better sear"
+  ],
+
+  "ingredientPrep": [
+    "Slice chicken into even cubes for fast cooking",
+    "Pat broccoli dry to avoid steaming"
+  ],
+
+  "temperatureNotes": {
+    "stovetopHeatLevel": "Medium-high",
+    "ovenTemperature": "400°F / 200°C",
+    "safeInternalTemp": "165°F / 74°C for chicken"
+  },
+
+  "timeline": [
+    {
+      "time": "0–5 min",
+      "action": "Prep chicken and broccoli"
+    },
+    {
+      "time": "5–15 min",
+      "action": "Cook chicken"
+    },
+    {
+      "time": "15–20 min",
+      "action": "Add broccoli and sauce, finish cooking"
+    }
+  ],
+
+  "commonMistakes": [
+    "Pan too crowded causing steaming instead of searing",
+    "Overcooking broccoli until mushy",
+    "Adding sauce too early"
+  ],
+
+  "flavorBoosters": [
+    "Add chili flakes for heat",
+    "Finish with butter for shine",
+    "Squeeze lemon for brightness"
+  ],
+
+  "specialNotes": [
+    "Low-sodium soy sauce preferred",
+    "Use raw honey for deeper flavor"
+  ],
+
+  "difficultyReasoning": "Explanation of difficulty level and skills required.",
+
+  "servingSuggestions": [
+    "Serve over jasmine rice",
+    "Goes well with roasted vegetables",
+    "Top with sesame seeds and green onions"
+  ],
+
+  "seasonality": "Best season to enjoy this recipe (summer, winter, etc.)",
 
   "status": "published",
   "updatedDate": "2025-12-04T00:00:00.000Z"

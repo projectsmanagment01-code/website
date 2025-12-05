@@ -262,12 +262,48 @@ export async function POST(request: NextRequest) {
       console.log("✅ Author validation passed:", authorExists.name);
     }
 
-    // Prepare recipe data for database
+    // Generate UUID for recipe ID if not provided
+    const generateUUID = () => {
+      return 'xxxxxxxx-xxxx-xxxx-xxxx-xxxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    };
+
+    // Generate slug from title if not provided
+    const generatedSlug = recipe.slug || recipe.title?.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')  // Remove special characters
+      .replace(/\s+/g, '-')           // Replace spaces with hyphens
+      .replace(/-+/g, '-')            // Replace multiple hyphens with single
+      .trim();
+
+    // Fetch category info from categoryId if provided
+    let categoryData = null;
+    if (recipe.categoryId) {
+      console.log("🔍 Fetching category data from categoryId:", recipe.categoryId);
+      categoryData = await prisma.category.findUnique({
+        where: { id: recipe.categoryId }
+      });
+      if (categoryData) {
+        console.log("✅ Category found:", categoryData.name);
+      } else {
+        console.warn("⚠️ Category not found for ID:", recipe.categoryId);
+      }
+    }
+
+    // Prepare recipe data for database with auto-generated fields
     const recipeData = {
       ...recipe,
+      id: recipe.id || generateUUID(), // Use provided ID or generate UUID
       authorId: finalAuthorId, // Use processed/validated authorId
-      slug: recipe.slug || recipe.title?.toLowerCase().replace(/\s+/g, "-"),
+      slug: generatedSlug,
       updatedDate: recipe.updatedDate || new Date().toISOString(),
+      // Auto-generate category fields from categoryId lookup
+      category: recipe.category || categoryData?.name || '',
+      categoryLink: recipe.categoryLink || (categoryData ? `/categories/${categoryData.slug}` : ''),
+      featuredText: recipe.featuredText || recipe.shortDescription || recipe.description || '',
+      href: recipe.href || `/recipes/${generatedSlug}`,
     };
 
     // Ensure author field exists - if we have authorId, create embedded author data
