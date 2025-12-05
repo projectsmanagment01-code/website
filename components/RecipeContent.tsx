@@ -334,35 +334,6 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </>
       )}
 
-      {/* 3. Mixing/Cooking Image - After Best Season to Make */}
-      {mixingImage && (
-        <div className="my-8">
-          <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
-            <PinterestPinButton 
-              imageUrl={mixingImage}
-              description={`${recipe.title} - Cooking process`}
-              altText={`${recipe.title} - cooking process`}
-            />
-            <SafeImage
-              src={mixingImage}
-              alt={`${recipe.title} - cooking process`}
-              width={1200}
-              height={800}
-              style={{
-                width: "100%",
-                height: "auto",
-              }}
-              loading="lazy"
-              quality={75}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
-            />
-          </div>
-          <div className="text-center mt-3 text-gray-600 text-sm">
-            Cooking {recipe.title} | {websiteName}
-          </div>
-        </div>
-      )}
-
       {/* Taste & Texture Profile - TipCard Style */}
       {((recipe as any).tasteProfile || (recipe as any).textureProfile) && (
         <div className="container border-2 border-solid rounded-lg shadow-sm" style={{ borderColor: '#3F7D58' }}>
@@ -401,6 +372,35 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Mixing/Cooking Image - After Taste & Texture Profile */}
+      {mixingImage && (
+        <div className="my-8">
+          <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
+            <PinterestPinButton 
+              imageUrl={mixingImage}
+              description={`${recipe.title} - Cooking process`}
+              altText={`${recipe.title} - cooking process`}
+            />
+            <SafeImage
+              src={mixingImage}
+              alt={`${recipe.title} - cooking process`}
+              width={1200}
+              height={800}
+              style={{
+                width: "100%",
+                height: "auto",
+              }}
+              loading="lazy"
+              quality={75}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
+            />
+          </div>
+          <div className="text-center mt-3 text-gray-600 text-sm">
+            Cooking {recipe.title} | {websiteName}
           </div>
         </div>
       )}
@@ -507,6 +507,35 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             ))}
           </div>
         </>
+      )}
+
+      {/* 3. Final Presentation Image - After Ingredient Prep Guide */}
+      {finalImage && (
+        <div className="my-8">
+          <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
+            <PinterestPinButton 
+              imageUrl={finalImage}
+              description={`${recipe.title} - Final presentation`}
+              altText={`${recipe.title} - final presentation`}
+            />
+            <SafeImage
+              src={finalImage}
+              alt={`${recipe.title} - final presentation`}
+              width={1200}
+              height={800}
+              style={{
+                width: "100%",
+                height: "auto",
+              }}
+              loading="lazy"
+              quality={75}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
+            />
+          </div>
+          <div className="text-center mt-3 text-gray-600 text-sm">
+            {recipe.title} - Final Presentation | {websiteName}
+          </div>
+        </div>
       )}
 
       {/* Temperature Notes - Plain Text */}
@@ -678,35 +707,6 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
       ) : null}
 
       {/* === END NEW CONTENT FIELDS SECTION === */}
-
-      {/* 4. Final Presentation Image - Just before recipe card */}
-      {finalImage && (
-        <div className="my-8">
-          <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
-            <PinterestPinButton 
-              imageUrl={finalImage}
-              description={`${recipe.title} - Final presentation`}
-              altText={`${recipe.title} - final presentation`}
-            />
-            <SafeImage
-              src={finalImage}
-              alt={`${recipe.title} - final presentation`}
-              width={1200}
-              height={800}
-              style={{
-                width: "100%",
-                height: "auto",
-              }}
-              loading="lazy"
-              quality={75}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
-            />
-          </div>
-          <div className="text-center mt-3 text-gray-600 text-sm">
-            {recipe.title} - Final Presentation | {websiteName}
-          </div>
-        </div>
-      )}
 
       <Card recipe={recipe} />
 
