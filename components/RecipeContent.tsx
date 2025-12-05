@@ -171,35 +171,6 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
       {/* Complete Cooking Process */}
       <CompleteCookingProcess completeProcess={recipe.completeProcess} />
 
-      {/* 3. Mixing/Cooking Image - After cooking process */}
-      {mixingImage && (
-        <div className="my-8">
-          <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
-            <PinterestPinButton 
-              imageUrl={mixingImage}
-              description={`${recipe.title} - Cooking process`}
-              altText={`${recipe.title} - cooking process`}
-            />
-            <SafeImage
-              src={mixingImage}
-              alt={`${recipe.title} - cooking process`}
-              width={1200}
-              height={800}
-              style={{
-                width: "100%",
-                height: "auto",
-              }}
-              loading="lazy"
-              quality={75}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
-            />
-          </div>
-          <div className="text-center mt-3 text-gray-600 text-sm">
-            Cooking {recipe.title} | {websiteName}
-          </div>
-        </div>
-      )}
-
       {/* Sections with optimized images */}
       {Array.isArray(recipe.sections) && recipe.sections.map((item: any, index: number) => {
         
@@ -361,6 +332,35 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             )}
           </div>
         </>
+      )}
+
+      {/* 3. Mixing/Cooking Image - After Best Season to Make */}
+      {mixingImage && (
+        <div className="my-8">
+          <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
+            <PinterestPinButton 
+              imageUrl={mixingImage}
+              description={`${recipe.title} - Cooking process`}
+              altText={`${recipe.title} - cooking process`}
+            />
+            <SafeImage
+              src={mixingImage}
+              alt={`${recipe.title} - cooking process`}
+              width={1200}
+              height={800}
+              style={{
+                width: "100%",
+                height: "auto",
+              }}
+              loading="lazy"
+              quality={75}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 65vw, 1200px"
+            />
+          </div>
+          <div className="text-center mt-3 text-gray-600 text-sm">
+            Cooking {recipe.title} | {websiteName}
+          </div>
+        </div>
       )}
 
       {/* Taste & Texture Profile - TipCard Style */}

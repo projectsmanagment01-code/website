@@ -303,8 +303,8 @@ export const Card: React.FC<{
             Professional Secrets
           </h3>
           <div className="bg-white border-2 rounded-lg p-6 shadow-sm" style={{ 
-            borderColor: '#FFB347',
-            background: 'linear-gradient(135deg, #FFF8F0 0%, #FFF0E0 100%)'
+            borderColor: '#3F7D58',
+            background: 'linear-gradient(135deg, #F5F9F6 0%, #E8F5EA 100%)'
           }}>
             <ul className="space-y-4">
               {recipe.professionalSecrets.map((secret: string, index: number) => (
@@ -312,7 +312,7 @@ export const Card: React.FC<{
                   key={index}
                   className="flex items-start space-x-4"
                 >
-                  <span className="text-xl font-bold flex-shrink-0" style={{ color: '#E67E22' }}>🔥</span>
+                  <span className="text-xl font-bold flex-shrink-0" style={{ color: '#3F7D58' }}>🔥</span>
                   <span className="text-gray-800 leading-relaxed text-lg font-medium">
                     {hasHtmlTags(secret) ? (
                       <span dangerouslySetInnerHTML={renderSafeHtml(secret)} />
@@ -368,13 +368,20 @@ export const Card: React.FC<{
       {/* Allergy Information */}
       {recipe?.allergyInfo && (
         <div className="mb-8">
-          <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-amber-800 mb-3 flex items-center">
-              <Info className="h-5 w-5 mr-2" />
-              ⚠️ Allergy Information
-            </h3>
-            <p className="text-amber-900 text-base leading-relaxed">
-              {recipe.allergyInfo}
+          <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
+            <Info className="h-6 w-6 mr-3" style={{ color: '#3F7D58' }} />
+            Allergy Information
+          </h3>
+          <div className="bg-white border-2 rounded-lg p-6 shadow-sm" style={{ 
+            borderColor: '#3F7D58',
+            background: 'linear-gradient(135deg, #F5F9F6 0%, #E8F5EA 100%)'
+          }}>
+            <p className="text-gray-800 text-lg leading-relaxed">
+              {hasHtmlTags(recipe.allergyInfo) ? (
+                <span dangerouslySetInnerHTML={renderSafeHtml(recipe.allergyInfo)} />
+              ) : (
+                recipe.allergyInfo
+              )}
             </p>
           </div>
         </div>
