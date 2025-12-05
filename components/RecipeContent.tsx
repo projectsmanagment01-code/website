@@ -176,7 +176,14 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
       {/* Sections with optimized images */}
       {Array.isArray(recipe.sections) && recipe.sections.map((item: any, index: number) => {
-        
+        // Get the section image and check if it's a duplicate of already-shown images
+        const sectionImg = item.img !== undefined ? (recipe.images?.[item.img] || recipe.images?.[1]) : null;
+        const isSectionImgDuplicate = sectionImg && (
+          sectionImg === featureImage || 
+          sectionImg === ingredientImage || 
+          sectionImg === mixingImage || 
+          sectionImg === finalImage
+        );
 
         return (
           <div key={index}>
@@ -218,16 +225,16 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               </>
             )}
 
-            {item.img !== undefined && (
+            {item.img !== undefined && !isSectionImgDuplicate && sectionImg && (
               <div className="my-8">
                 <div className="relative w-full rounded-lg overflow-hidden shadow-xl bg-gray-100">
                   <PinterestPinButton 
-                    imageUrl={recipe.images[item.img] || recipe.images[1]}
+                    imageUrl={sectionImg}
                     description={`${recipe.title} - ${item.title}`}
                     altText={`${recipe.title} - ${item.title}`}
                   />
                   <SafeImage
-                    src={recipe.images[item.img] || recipe.images[1]}
+                    src={sectionImg}
                     alt={`${recipe.title} - ${item.title}`}
                     width={700}
                     height={500}
