@@ -54,17 +54,20 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
   
   // Only show subsequent images if:
   // 1. Recipe has named fields (new system), OR
-  // 2. The image is different from featureImage (old system - prevent duplicates)
+  // 2. The image is different from previous images (prevent duplicates)
   const ingredientImage = hasNamedImages 
-    ? (isValidImage(recipe.preparationImage) ? recipe.preparationImage : isValidImage(recipe.images?.[1]) ? recipe.images[1] : null)
+    ? (isValidImage(recipe.preparationImage) && recipe.preparationImage !== featureImage ? recipe.preparationImage 
+      : isValidImage(recipe.images?.[1]) && recipe.images[1] !== featureImage ? recipe.images[1] : null)
     : (isValidImage(recipe.images?.[1]) && recipe.images[1] !== featureImage ? recipe.images[1] : null);
     
   const mixingImage = hasNamedImages 
-    ? (isValidImage(recipe.cookingImage) ? recipe.cookingImage : isValidImage(recipe.images?.[2]) ? recipe.images[2] : null)
+    ? (isValidImage(recipe.cookingImage) && recipe.cookingImage !== featureImage && recipe.cookingImage !== ingredientImage ? recipe.cookingImage 
+      : isValidImage(recipe.images?.[2]) && recipe.images[2] !== featureImage && recipe.images[2] !== ingredientImage ? recipe.images[2] : null)
     : (isValidImage(recipe.images?.[2]) && recipe.images[2] !== featureImage && recipe.images[2] !== ingredientImage ? recipe.images[2] : null);
     
   const finalImage = hasNamedImages 
-    ? (isValidImage(recipe.finalPresentationImage) ? recipe.finalPresentationImage : isValidImage(recipe.images?.[3]) ? recipe.images[3] : null)
+    ? (isValidImage(recipe.finalPresentationImage) && recipe.finalPresentationImage !== featureImage && recipe.finalPresentationImage !== ingredientImage && recipe.finalPresentationImage !== mixingImage ? recipe.finalPresentationImage 
+      : isValidImage(recipe.images?.[3]) && recipe.images[3] !== featureImage && recipe.images[3] !== ingredientImage && recipe.images[3] !== mixingImage ? recipe.images[3] : null)
     : (isValidImage(recipe.images?.[3]) && recipe.images[3] !== featureImage && recipe.images[3] !== ingredientImage && recipe.images[3] !== mixingImage ? recipe.images[3] : null);
 
   return (
