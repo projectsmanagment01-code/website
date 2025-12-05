@@ -313,6 +313,330 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       </div>
 
+      {/* === NEW CONTENT FIELDS SECTION === */}
+      
+      {/* Recipe Origin */}
+      {(recipe as any).recipeOrigin && (
+        <div className="my-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-l-4 border-amber-500">
+          <h2 className="text-2xl font-bold text-amber-800 mb-3 flex items-center">
+            <span className="mr-2">🌍</span> Recipe Origin & History
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-amber-900">
+            {hasHtmlTags((recipe as any).recipeOrigin) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).recipeOrigin)} />
+            ) : (
+              <p>{(recipe as any).recipeOrigin}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Taste Profile */}
+      {(recipe as any).tasteProfile && (
+        <div className="my-8 p-6 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border-l-4 border-pink-500">
+          <h2 className="text-2xl font-bold text-pink-800 mb-3 flex items-center">
+            <span className="mr-2">👅</span> Taste Profile
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-pink-900">
+            {hasHtmlTags((recipe as any).tasteProfile) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).tasteProfile)} />
+            ) : (
+              <p>{(recipe as any).tasteProfile}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Texture Profile */}
+      {(recipe as any).textureProfile && (
+        <div className="my-8 p-6 bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg border-l-4 border-violet-500">
+          <h2 className="text-2xl font-bold text-violet-800 mb-3 flex items-center">
+            <span className="mr-2">✨</span> Texture Profile
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-violet-900">
+            {hasHtmlTags((recipe as any).textureProfile) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile)} />
+            ) : (
+              <p>{(recipe as any).textureProfile}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Difficulty Reasoning */}
+      {(recipe as any).difficultyReasoning && (
+        <div className="my-8 p-6 bg-gradient-to-r from-slate-50 to-gray-100 rounded-lg border-l-4 border-slate-500">
+          <h2 className="text-2xl font-bold text-slate-800 mb-3 flex items-center">
+            <span className="mr-2">📊</span> Skill Level Explained
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-slate-700">
+            {hasHtmlTags((recipe as any).difficultyReasoning) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).difficultyReasoning)} />
+            ) : (
+              <p>{(recipe as any).difficultyReasoning}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Seasonality */}
+      {(recipe as any).seasonality && (
+        <div className="my-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-l-4 border-green-500">
+          <h2 className="text-2xl font-bold text-green-800 mb-3 flex items-center">
+            <span className="mr-2">🍂</span> Best Season to Make
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-green-900">
+            {hasHtmlTags((recipe as any).seasonality) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).seasonality)} />
+            ) : (
+              <p>{(recipe as any).seasonality}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Timeline */}
+      {(recipe as any).timeline && (
+        <div className="my-8 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border-l-4 border-blue-500">
+          <h2 className="text-2xl font-bold text-blue-800 mb-3 flex items-center">
+            <span className="mr-2">⏱️</span> Cooking Timeline
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-blue-900">
+            {hasHtmlTags((recipe as any).timeline) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).timeline)} />
+            ) : (
+              <p>{(recipe as any).timeline}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Shopping List */}
+      {(recipe as any).shoppingList && (
+        <div className="my-8 p-6 bg-gradient-to-r from-lime-50 to-green-50 rounded-lg border-l-4 border-lime-600">
+          <h2 className="text-2xl font-bold text-lime-800 mb-3 flex items-center">
+            <span className="mr-2">🛒</span> Shopping List
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-lime-900">
+            {hasHtmlTags((recipe as any).shoppingList) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).shoppingList)} />
+            ) : (
+              <p>{(recipe as any).shoppingList}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Equipment Notes */}
+      {(recipe as any).equipmentNotes && (
+        <div className="my-8 p-6 bg-gradient-to-r from-stone-50 to-neutral-100 rounded-lg border-l-4 border-stone-500">
+          <h2 className="text-2xl font-bold text-stone-800 mb-3 flex items-center">
+            <span className="mr-2">🍳</span> Equipment You'll Need
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-stone-700">
+            {hasHtmlTags((recipe as any).equipmentNotes) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).equipmentNotes)} />
+            ) : (
+              <p>{(recipe as any).equipmentNotes}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Ingredient Prep */}
+      {(recipe as any).ingredientPrep && (
+        <div className="my-8 p-6 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border-l-4 border-yellow-500">
+          <h2 className="text-2xl font-bold text-yellow-800 mb-3 flex items-center">
+            <span className="mr-2">🥕</span> Ingredient Prep Guide
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-yellow-900">
+            {hasHtmlTags((recipe as any).ingredientPrep) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).ingredientPrep)} />
+            ) : (
+              <p>{(recipe as any).ingredientPrep}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Temperature Notes */}
+      {(recipe as any).temperatureNotes && (
+        <div className="my-8 p-6 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border-l-4 border-red-500">
+          <h2 className="text-2xl font-bold text-red-800 mb-3 flex items-center">
+            <span className="mr-2">🌡️</span> Temperature Guide
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-red-900">
+            {hasHtmlTags((recipe as any).temperatureNotes) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).temperatureNotes)} />
+            ) : (
+              <p>{(recipe as any).temperatureNotes}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Common Mistakes */}
+      {(recipe as any).commonMistakes && (
+        <div className="my-8 p-6 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg border-l-4 border-rose-600">
+          <h2 className="text-2xl font-bold text-rose-800 mb-3 flex items-center">
+            <span className="mr-2">⚠️</span> Common Mistakes to Avoid
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-rose-900">
+            {hasHtmlTags((recipe as any).commonMistakes) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).commonMistakes)} />
+            ) : (
+              <p>{(recipe as any).commonMistakes}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Flavor Boosters */}
+      {(recipe as any).flavorBoosters && (
+        <div className="my-8 p-6 bg-gradient-to-r from-fuchsia-50 to-purple-50 rounded-lg border-l-4 border-fuchsia-500">
+          <h2 className="text-2xl font-bold text-fuchsia-800 mb-3 flex items-center">
+            <span className="mr-2">🔥</span> Flavor Boosters & Upgrades
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-fuchsia-900">
+            {hasHtmlTags((recipe as any).flavorBoosters) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).flavorBoosters)} />
+            ) : (
+              <p>{(recipe as any).flavorBoosters}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Variations */}
+      {(recipe as any).variations && (
+        <div className="my-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border-l-4 border-indigo-500">
+          <h2 className="text-2xl font-bold text-indigo-800 mb-3 flex items-center">
+            <span className="mr-2">🔄</span> Recipe Variations
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-indigo-900">
+            {hasHtmlTags((recipe as any).variations) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).variations)} />
+            ) : (
+              <p>{(recipe as any).variations}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Substitutions */}
+      {(recipe as any).substitutions && (
+        <div className="my-8 p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg border-l-4 border-teal-500">
+          <h2 className="text-2xl font-bold text-teal-800 mb-3 flex items-center">
+            <span className="mr-2">🔃</span> Ingredient Substitutions
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-teal-900">
+            {hasHtmlTags((recipe as any).substitutions) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).substitutions)} />
+            ) : (
+              <p>{(recipe as any).substitutions}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Dietary Adaptations */}
+      {(recipe as any).dietaryAdaptations && (
+        <div className="my-8 p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border-l-4 border-emerald-600">
+          <h2 className="text-2xl font-bold text-emerald-800 mb-3 flex items-center">
+            <span className="mr-2">🥗</span> Dietary Adaptations
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-emerald-900">
+            {hasHtmlTags((recipe as any).dietaryAdaptations) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).dietaryAdaptations)} />
+            ) : (
+              <p>{(recipe as any).dietaryAdaptations}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Pairings */}
+      {(recipe as any).pairings && (
+        <div className="my-8 p-6 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg border-l-4 border-purple-500">
+          <h2 className="text-2xl font-bold text-purple-800 mb-3 flex items-center">
+            <span className="mr-2">🍷</span> Perfect Pairings
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-purple-900">
+            {hasHtmlTags((recipe as any).pairings) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).pairings)} />
+            ) : (
+              <p>{(recipe as any).pairings}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Serving Suggestions */}
+      {(recipe as any).servingSuggestions && (
+        <div className="my-8 p-6 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg border-l-4 border-orange-500">
+          <h2 className="text-2xl font-bold text-orange-800 mb-3 flex items-center">
+            <span className="mr-2">🍽️</span> Serving Suggestions
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-orange-900">
+            {hasHtmlTags((recipe as any).servingSuggestions) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).servingSuggestions)} />
+            ) : (
+              <p>{(recipe as any).servingSuggestions}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Make Ahead */}
+      {(recipe as any).makeAhead && (
+        <div className="my-8 p-6 bg-gradient-to-r from-sky-50 to-blue-50 rounded-lg border-l-4 border-sky-500">
+          <h2 className="text-2xl font-bold text-sky-800 mb-3 flex items-center">
+            <span className="mr-2">📅</span> Make Ahead Tips
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-sky-900">
+            {hasHtmlTags((recipe as any).makeAhead) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).makeAhead)} />
+            ) : (
+              <p>{(recipe as any).makeAhead}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Leftovers */}
+      {(recipe as any).leftovers && (
+        <div className="my-8 p-6 bg-gradient-to-r from-cyan-50 to-teal-50 rounded-lg border-l-4 border-cyan-600">
+          <h2 className="text-2xl font-bold text-cyan-800 mb-3 flex items-center">
+            <span className="mr-2">🥡</span> Leftover Ideas
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-cyan-900">
+            {hasHtmlTags((recipe as any).leftovers) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).leftovers)} />
+            ) : (
+              <p>{(recipe as any).leftovers}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Special Notes */}
+      {(recipe as any).specialNotes && (
+        <div className="my-8 p-6 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border-l-4 border-amber-600">
+          <h2 className="text-2xl font-bold text-amber-800 mb-3 flex items-center">
+            <span className="mr-2">📝</span> Chef's Special Notes
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.1rem] text-amber-900">
+            {hasHtmlTags((recipe as any).specialNotes) ? (
+              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).specialNotes)} />
+            ) : (
+              <p>{(recipe as any).specialNotes}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* === END NEW CONTENT FIELDS SECTION === */}
+
       {/* 4. Final Presentation Image - Just before recipe card */}
       {finalImage && (
         <div className="my-8">
