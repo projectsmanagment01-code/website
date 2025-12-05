@@ -315,370 +315,367 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
       {/* === NEW CONTENT FIELDS SECTION === */}
       
-      {/* Recipe Origin */}
+      {/* Recipe Origin - Plain Text */}
       {(recipe as any).recipeOrigin && (
-        <div className="my-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-l-4 border-amber-500">
-          <h2 className="text-2xl font-bold text-amber-800 mb-3 flex items-center">
-            <span className="mr-2">🌍</span> Recipe Origin & History
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Recipe Origin & History
           </h2>
-          <div className="prose prose-lg max-w-none text-[1.1rem] text-amber-900">
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
             {hasHtmlTags((recipe as any).recipeOrigin) ? (
-              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).recipeOrigin)} />
+              <div className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).recipeOrigin)} />
             ) : (
-              <p>{(recipe as any).recipeOrigin}</p>
+              <p className="text-black leading-relaxed">{(recipe as any).recipeOrigin}</p>
             )}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Taste Profile - Object with sweet, salty, spicy, etc. */}
-      {(recipe as any).tasteProfile && typeof (recipe as any).tasteProfile === 'object' && (
-        <div className="my-8 p-6 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border-l-4 border-pink-500">
-          <h2 className="text-2xl font-bold text-pink-800 mb-3 flex items-center">
-            <span className="mr-2">👅</span> Taste Profile
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
-            {(recipe as any).tasteProfile.sweet && (
-              <div className="bg-white/50 rounded p-2 text-center">
-                <span className="block text-sm text-pink-600">Sweet</span>
-                <span className="font-semibold text-pink-800">{(recipe as any).tasteProfile.sweet}</span>
-              </div>
-            )}
-            {(recipe as any).tasteProfile.salty && (
-              <div className="bg-white/50 rounded p-2 text-center">
-                <span className="block text-sm text-pink-600">Salty</span>
-                <span className="font-semibold text-pink-800">{(recipe as any).tasteProfile.salty}</span>
-              </div>
-            )}
-            {(recipe as any).tasteProfile.spicy && (
-              <div className="bg-white/50 rounded p-2 text-center">
-                <span className="block text-sm text-pink-600">Spicy</span>
-                <span className="font-semibold text-pink-800">{(recipe as any).tasteProfile.spicy}</span>
-              </div>
-            )}
-            {(recipe as any).tasteProfile.sour && (
-              <div className="bg-white/50 rounded p-2 text-center">
-                <span className="block text-sm text-pink-600">Sour</span>
-                <span className="font-semibold text-pink-800">{(recipe as any).tasteProfile.sour}</span>
-              </div>
-            )}
-            {(recipe as any).tasteProfile.umami && (
-              <div className="bg-white/50 rounded p-2 text-center">
-                <span className="block text-sm text-pink-600">Umami</span>
-                <span className="font-semibold text-pink-800">{(recipe as any).tasteProfile.umami}</span>
-              </div>
-            )}
-          </div>
-          {(recipe as any).tasteProfile.overall && (
-            <p className="text-pink-900 text-[1.1rem] italic">{(recipe as any).tasteProfile.overall}</p>
-          )}
-        </div>
-      )}
-
-      {/* Texture Profile - Object */}
-      {(recipe as any).textureProfile && typeof (recipe as any).textureProfile === 'object' && (
-        <div className="my-8 p-6 bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg border-l-4 border-violet-500">
-          <h2 className="text-2xl font-bold text-violet-800 mb-3 flex items-center">
-            <span className="mr-2">✨</span> Texture Profile
-          </h2>
-          <div className="space-y-2 mb-4">
-            {(recipe as any).textureProfile.outside && (
-              <p className="text-violet-900"><strong>Outside:</strong> {(recipe as any).textureProfile.outside}</p>
-            )}
-            {(recipe as any).textureProfile.inside && (
-              <p className="text-violet-900"><strong>Inside:</strong> {(recipe as any).textureProfile.inside}</p>
-            )}
-            {(recipe as any).textureProfile.bite && (
-              <p className="text-violet-900"><strong>Bite:</strong> {(recipe as any).textureProfile.bite}</p>
-            )}
-          </div>
-          {(recipe as any).textureProfile.overall && (
-            <p className="text-violet-900 text-[1.1rem] italic">{(recipe as any).textureProfile.overall}</p>
-          )}
-        </div>
-      )}
-
-      {/* Difficulty Reasoning - String */}
+      {/* Difficulty Reasoning - Plain Text */}
       {(recipe as any).difficultyReasoning && typeof (recipe as any).difficultyReasoning === 'string' && (
-        <div className="my-8 p-6 bg-gradient-to-r from-slate-50 to-gray-100 rounded-lg border-l-4 border-slate-500">
-          <h2 className="text-2xl font-bold text-slate-800 mb-3 flex items-center">
-            <span className="mr-2">📊</span> Skill Level Explained
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Skill Level Explained
           </h2>
-          <div className="prose prose-lg max-w-none text-[1.1rem] text-slate-700">
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
             {hasHtmlTags((recipe as any).difficultyReasoning) ? (
-              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).difficultyReasoning)} />
+              <div className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).difficultyReasoning)} />
             ) : (
-              <p>{(recipe as any).difficultyReasoning}</p>
+              <p className="text-black leading-relaxed">{(recipe as any).difficultyReasoning}</p>
             )}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Seasonality - String */}
+      {/* Seasonality - Plain Text */}
       {(recipe as any).seasonality && typeof (recipe as any).seasonality === 'string' && (
-        <div className="my-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-l-4 border-green-500">
-          <h2 className="text-2xl font-bold text-green-800 mb-3 flex items-center">
-            <span className="mr-2">🍂</span> Best Season to Make
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Best Season to Make
           </h2>
-          <div className="prose prose-lg max-w-none text-[1.1rem] text-green-900">
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
             {hasHtmlTags((recipe as any).seasonality) ? (
-              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).seasonality)} />
+              <div className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).seasonality)} />
             ) : (
-              <p>{(recipe as any).seasonality}</p>
+              <p className="text-black leading-relaxed">{(recipe as any).seasonality}</p>
             )}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Timeline - Array of {time, action} */}
-      {Array.isArray((recipe as any).timeline) && (recipe as any).timeline.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border-l-4 border-blue-500">
-          <h2 className="text-2xl font-bold text-blue-800 mb-3 flex items-center">
-            <span className="mr-2">⏱️</span> Cooking Timeline
-          </h2>
-          <div className="space-y-3">
-            {(recipe as any).timeline.map((item: any, index: number) => (
-              <div key={index} className="flex items-start gap-3 bg-white/50 rounded p-3">
-                <span className="bg-blue-500 text-white px-2 py-1 rounded text-sm font-bold whitespace-nowrap">{item.time}</span>
-                <span className="text-blue-900">{item.action}</span>
+      {/* Taste & Texture Profile - TipCard Style */}
+      {((recipe as any).tasteProfile || (recipe as any).textureProfile) && (
+        <div className="container border-2 border-solid rounded-lg shadow-sm" style={{ borderColor: '#3F7D58' }}>
+          <div className="p-6 border border-dashed" style={{ background: 'linear-gradient(135deg, #E8F5EA 0%, #F5F9F6 100%)', borderColor: '#7FAD8A' }}>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3F7D58 0%, #2D5A42 100%)' }}>
+                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
               </div>
-            ))}
+              <h2 className="text-2xl font-bold" style={{ color: '#2D5A42' }}>Taste & Texture Profile</h2>
+            </div>
+            <div className="px-2 space-y-4">
+              {(recipe as any).tasteProfile && typeof (recipe as any).tasteProfile === 'object' && (
+                <div>
+                  <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Taste:</strong></p>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {(recipe as any).tasteProfile.sweet && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Sweet: {(recipe as any).tasteProfile.sweet}</span>}
+                    {(recipe as any).tasteProfile.salty && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Salty: {(recipe as any).tasteProfile.salty}</span>}
+                    {(recipe as any).tasteProfile.spicy && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Spicy: {(recipe as any).tasteProfile.spicy}</span>}
+                    {(recipe as any).tasteProfile.sour && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Sour: {(recipe as any).tasteProfile.sour}</span>}
+                    {(recipe as any).tasteProfile.umami && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Umami: {(recipe as any).tasteProfile.umami}</span>}
+                  </div>
+                  {(recipe as any).tasteProfile.overall && <p className="text-gray-700 italic">{(recipe as any).tasteProfile.overall}</p>}
+                </div>
+              )}
+              {(recipe as any).textureProfile && typeof (recipe as any).textureProfile === 'object' && (
+                <div>
+                  <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Texture:</strong></p>
+                  <ul className="space-y-1">
+                    {(recipe as any).textureProfile.outside && <li className="text-gray-800">Outside: {(recipe as any).textureProfile.outside}</li>}
+                    {(recipe as any).textureProfile.inside && <li className="text-gray-800">Inside: {(recipe as any).textureProfile.inside}</li>}
+                    {(recipe as any).textureProfile.bite && <li className="text-gray-800">Bite: {(recipe as any).textureProfile.bite}</li>}
+                  </ul>
+                  {(recipe as any).textureProfile.overall && <p className="text-gray-700 italic mt-2">{(recipe as any).textureProfile.overall}</p>}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Shopping List - Array of strings */}
-      {Array.isArray((recipe as any).shoppingList) && (recipe as any).shoppingList.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-lime-50 to-green-50 rounded-lg border-l-4 border-lime-600">
-          <h2 className="text-2xl font-bold text-lime-800 mb-3 flex items-center">
-            <span className="mr-2">🛒</span> Shopping List
+      {/* Make Ahead - Plain Text */}
+      {(recipe as any).makeAhead && typeof (recipe as any).makeAhead === 'string' && (
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Make Ahead Tips
           </h2>
-          <ul className="space-y-2">
-            {(recipe as any).shoppingList.map((item: string, index: number) => (
-              <li key={index} className="flex items-center gap-2 text-lime-900">
-                <span className="text-lime-600">☐</span> {item}
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
+            {hasHtmlTags((recipe as any).makeAhead) ? (
+              <div className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).makeAhead)} />
+            ) : (
+              <p className="text-black leading-relaxed">{(recipe as any).makeAhead}</p>
+            )}
+          </div>
+        </>
       )}
 
-      {/* Equipment Notes - Array of strings */}
-      {Array.isArray((recipe as any).equipmentNotes) && (recipe as any).equipmentNotes.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-stone-50 to-neutral-100 rounded-lg border-l-4 border-stone-500">
-          <h2 className="text-2xl font-bold text-stone-800 mb-3 flex items-center">
-            <span className="mr-2">🍳</span> Equipment You'll Need
+      {/* Leftovers - Plain Text */}
+      {(recipe as any).leftovers && typeof (recipe as any).leftovers === 'string' && (
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Leftover Ideas
           </h2>
-          <ul className="space-y-2">
-            {(recipe as any).equipmentNotes.map((item: string, index: number) => (
-              <li key={index} className="flex items-start gap-2 text-stone-700">
-                <span className="text-stone-500 mt-1">•</span> {item}
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
+            {hasHtmlTags((recipe as any).leftovers) ? (
+              <div className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).leftovers)} />
+            ) : (
+              <p className="text-black leading-relaxed">{(recipe as any).leftovers}</p>
+            )}
+          </div>
+        </>
       )}
 
-      {/* Ingredient Prep - Array of strings */}
+      {/* Timeline - Plain Text with formatting */}
+      {Array.isArray((recipe as any).timeline) && (recipe as any).timeline.length > 0 && (
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Cooking Timeline
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
+            {(recipe as any).timeline.map((item: any, index: number) => (
+              <p key={index} className="text-black leading-relaxed"><strong>{item.time}:</strong> {item.action}</p>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Equipment & Shopping - TipCard Style */}
+      {(Array.isArray((recipe as any).equipmentNotes) && (recipe as any).equipmentNotes.length > 0) || (Array.isArray((recipe as any).shoppingList) && (recipe as any).shoppingList.length > 0) ? (
+        <div className="container border-2 border-solid rounded-lg shadow-sm" style={{ borderColor: '#3F7D58' }}>
+          <div className="p-6 border border-dashed" style={{ background: 'linear-gradient(135deg, #E8F5EA 0%, #F5F9F6 100%)', borderColor: '#7FAD8A' }}>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3F7D58 0%, #2D5A42 100%)' }}>
+                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold" style={{ color: '#2D5A42' }}>Equipment & Shopping</h2>
+            </div>
+            <div className="px-2 space-y-4">
+              {Array.isArray((recipe as any).equipmentNotes) && (recipe as any).equipmentNotes.length > 0 && (
+                <div>
+                  <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Equipment You'll Need:</strong></p>
+                  <ul className="w-full space-y-2">
+                    {(recipe as any).equipmentNotes.map((item: string, index: number) => (
+                      <li key={index} className="flex items-start space-x-3">
+                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {Array.isArray((recipe as any).shoppingList) && (recipe as any).shoppingList.length > 0 && (
+                <div>
+                  <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Shopping List:</strong></p>
+                  <ul className="w-full space-y-2">
+                    {(recipe as any).shoppingList.map((item: string, index: number) => (
+                      <li key={index} className="flex items-start space-x-3">
+                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Ingredient Prep - Plain Text */}
       {Array.isArray((recipe as any).ingredientPrep) && (recipe as any).ingredientPrep.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border-l-4 border-yellow-500">
-          <h2 className="text-2xl font-bold text-yellow-800 mb-3 flex items-center">
-            <span className="mr-2">🥕</span> Ingredient Prep Guide
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Ingredient Prep Guide
           </h2>
-          <ul className="space-y-2">
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).ingredientPrep.map((item: string, index: number) => (
-              <li key={index} className="flex items-start gap-2 text-yellow-900">
-                <span className="text-yellow-600 mt-1">•</span> {item}
-              </li>
+              <p key={index} className="text-black leading-relaxed">{item}</p>
             ))}
-          </ul>
-        </div>
+          </div>
+        </>
       )}
 
-      {/* Temperature Notes - Object */}
+      {/* Temperature Notes - Plain Text */}
       {(recipe as any).temperatureNotes && typeof (recipe as any).temperatureNotes === 'object' && (
-        <div className="my-8 p-6 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border-l-4 border-red-500">
-          <h2 className="text-2xl font-bold text-red-800 mb-3 flex items-center">
-            <span className="mr-2">🌡️</span> Temperature Guide
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Temperature Guide
           </h2>
-          <div className="space-y-2">
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).temperatureNotes.stovetopHeatLevel && (
-              <p className="text-red-900"><strong>Stovetop:</strong> {(recipe as any).temperatureNotes.stovetopHeatLevel}</p>
+              <p className="text-black leading-relaxed"><strong>Stovetop:</strong> {(recipe as any).temperatureNotes.stovetopHeatLevel}</p>
             )}
             {(recipe as any).temperatureNotes.ovenTemperature && (recipe as any).temperatureNotes.ovenTemperature !== "Not required" && (
-              <p className="text-red-900"><strong>Oven:</strong> {(recipe as any).temperatureNotes.ovenTemperature}</p>
+              <p className="text-black leading-relaxed"><strong>Oven:</strong> {(recipe as any).temperatureNotes.ovenTemperature}</p>
             )}
             {(recipe as any).temperatureNotes.safeInternalTemp && (
-              <p className="text-red-900"><strong>Safe Internal Temp:</strong> {(recipe as any).temperatureNotes.safeInternalTemp}</p>
+              <p className="text-black leading-relaxed"><strong>Safe Internal Temp:</strong> {(recipe as any).temperatureNotes.safeInternalTemp}</p>
             )}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Common Mistakes - Array of strings */}
-      {Array.isArray((recipe as any).commonMistakes) && (recipe as any).commonMistakes.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-rose-50 to-pink-50 rounded-lg border-l-4 border-rose-600">
-          <h2 className="text-2xl font-bold text-rose-800 mb-3 flex items-center">
-            <span className="mr-2">⚠️</span> Common Mistakes to Avoid
-          </h2>
-          <ul className="space-y-2">
-            {(recipe as any).commonMistakes.map((item: string, index: number) => (
-              <li key={index} className="flex items-start gap-2 text-rose-900">
-                <span className="text-rose-600 mt-1">✗</span> {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Flavor Boosters - Array of strings */}
-      {Array.isArray((recipe as any).flavorBoosters) && (recipe as any).flavorBoosters.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-fuchsia-50 to-purple-50 rounded-lg border-l-4 border-fuchsia-500">
-          <h2 className="text-2xl font-bold text-fuchsia-800 mb-3 flex items-center">
-            <span className="mr-2">🔥</span> Flavor Boosters & Upgrades
-          </h2>
-          <ul className="space-y-2">
-            {(recipe as any).flavorBoosters.map((item: string, index: number) => (
-              <li key={index} className="flex items-start gap-2 text-fuchsia-900">
-                <span className="text-fuchsia-600 mt-1">★</span> {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Variations - Array of {title, description} */}
-      {Array.isArray((recipe as any).variations) && (recipe as any).variations.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border-l-4 border-indigo-500">
-          <h2 className="text-2xl font-bold text-indigo-800 mb-3 flex items-center">
-            <span className="mr-2">🔄</span> Recipe Variations
-          </h2>
-          <div className="space-y-4">
-            {(recipe as any).variations.map((item: any, index: number) => (
-              <div key={index} className="bg-white/50 rounded p-3">
-                <h3 className="font-bold text-indigo-800">{item.title}</h3>
-                <p className="text-indigo-900">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Substitutions - Array of {ingredient, substitute, note} */}
-      {Array.isArray((recipe as any).substitutions) && (recipe as any).substitutions.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg border-l-4 border-teal-500">
-          <h2 className="text-2xl font-bold text-teal-800 mb-3 flex items-center">
-            <span className="mr-2">🔃</span> Ingredient Substitutions
-          </h2>
-          <div className="space-y-3">
-            {(recipe as any).substitutions.map((item: any, index: number) => (
-              <div key={index} className="bg-white/50 rounded p-3">
-                <p className="text-teal-900">
-                  <strong>{item.ingredient}</strong> → {item.substitute}
-                </p>
-                {item.note && <p className="text-teal-700 text-sm mt-1 italic">{item.note}</p>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Dietary Adaptations - Array of {diet, howToAdapt} */}
-      {Array.isArray((recipe as any).dietaryAdaptations) && (recipe as any).dietaryAdaptations.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-lg border-l-4 border-emerald-600">
-          <h2 className="text-2xl font-bold text-emerald-800 mb-3 flex items-center">
-            <span className="mr-2">🥗</span> Dietary Adaptations
-          </h2>
-          <div className="space-y-3">
-            {(recipe as any).dietaryAdaptations.map((item: any, index: number) => (
-              <div key={index} className="bg-white/50 rounded p-3">
-                <h3 className="font-bold text-emerald-800">{item.diet}</h3>
-                <p className="text-emerald-900">{item.howToAdapt}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Pairings - Array of strings */}
+      {/* Pairings - Plain Text */}
       {Array.isArray((recipe as any).pairings) && (recipe as any).pairings.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg border-l-4 border-purple-500">
-          <h2 className="text-2xl font-bold text-purple-800 mb-3 flex items-center">
-            <span className="mr-2">🍷</span> Perfect Pairings
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Perfect Pairings
           </h2>
-          <ul className="space-y-2">
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).pairings.map((item: string, index: number) => (
-              <li key={index} className="flex items-start gap-2 text-purple-900">
-                <span className="text-purple-600 mt-1">•</span> {item}
-              </li>
+              <p key={index} className="text-black leading-relaxed">{item}</p>
             ))}
-          </ul>
-        </div>
+          </div>
+        </>
       )}
 
-      {/* Serving Suggestions - Array of strings */}
+      {/* Common Mistakes & Flavor Boosters - TipCard Style */}
+      {(Array.isArray((recipe as any).commonMistakes) && (recipe as any).commonMistakes.length > 0) || (Array.isArray((recipe as any).flavorBoosters) && (recipe as any).flavorBoosters.length > 0) ? (
+        <div className="container border-2 border-solid rounded-lg shadow-sm" style={{ borderColor: '#3F7D58' }}>
+          <div className="p-6 border border-dashed" style={{ background: 'linear-gradient(135deg, #E8F5EA 0%, #F5F9F6 100%)', borderColor: '#7FAD8A' }}>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3F7D58 0%, #2D5A42 100%)' }}>
+                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold" style={{ color: '#2D5A42' }}>Pro Tips & Mistakes to Avoid</h2>
+            </div>
+            <div className="px-2 space-y-4">
+              {Array.isArray((recipe as any).commonMistakes) && (recipe as any).commonMistakes.length > 0 && (
+                <div>
+                  <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Common Mistakes to Avoid:</strong></p>
+                  <ul className="w-full space-y-2">
+                    {(recipe as any).commonMistakes.map((item: string, index: number) => (
+                      <li key={index} className="flex items-start space-x-3">
+                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {Array.isArray((recipe as any).flavorBoosters) && (recipe as any).flavorBoosters.length > 0 && (
+                <div>
+                  <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Flavor Boosters:</strong></p>
+                  <ul className="w-full space-y-2">
+                    {(recipe as any).flavorBoosters.map((item: string, index: number) => (
+                      <li key={index} className="flex items-start space-x-3">
+                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Serving Suggestions - Plain Text */}
       {Array.isArray((recipe as any).servingSuggestions) && (recipe as any).servingSuggestions.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg border-l-4 border-orange-500">
-          <h2 className="text-2xl font-bold text-orange-800 mb-3 flex items-center">
-            <span className="mr-2">🍽️</span> Serving Suggestions
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Serving Suggestions
           </h2>
-          <ul className="space-y-2">
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).servingSuggestions.map((item: string, index: number) => (
-              <li key={index} className="flex items-start gap-2 text-orange-900">
-                <span className="text-orange-600 mt-1">•</span> {item}
-              </li>
+              <p key={index} className="text-black leading-relaxed">{item}</p>
             ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Make Ahead - String */}
-      {(recipe as any).makeAhead && typeof (recipe as any).makeAhead === 'string' && (
-        <div className="my-8 p-6 bg-gradient-to-r from-sky-50 to-blue-50 rounded-lg border-l-4 border-sky-500">
-          <h2 className="text-2xl font-bold text-sky-800 mb-3 flex items-center">
-            <span className="mr-2">📅</span> Make Ahead Tips
-          </h2>
-          <div className="prose prose-lg max-w-none text-[1.1rem] text-sky-900">
-            {hasHtmlTags((recipe as any).makeAhead) ? (
-              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).makeAhead)} />
-            ) : (
-              <p>{(recipe as any).makeAhead}</p>
-            )}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Leftovers - String */}
-      {(recipe as any).leftovers && typeof (recipe as any).leftovers === 'string' && (
-        <div className="my-8 p-6 bg-gradient-to-r from-cyan-50 to-teal-50 rounded-lg border-l-4 border-cyan-600">
-          <h2 className="text-2xl font-bold text-cyan-800 mb-3 flex items-center">
-            <span className="mr-2">🥡</span> Leftover Ideas
-          </h2>
-          <div className="prose prose-lg max-w-none text-[1.1rem] text-cyan-900">
-            {hasHtmlTags((recipe as any).leftovers) ? (
-              <div dangerouslySetInnerHTML={renderSafeHtml((recipe as any).leftovers)} />
-            ) : (
-              <p>{(recipe as any).leftovers}</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Special Notes - Array of strings */}
+      {/* Special Notes - Plain Text */}
       {Array.isArray((recipe as any).specialNotes) && (recipe as any).specialNotes.length > 0 && (
-        <div className="my-8 p-6 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border-l-4 border-amber-600">
-          <h2 className="text-2xl font-bold text-amber-800 mb-3 flex items-center">
-            <span className="mr-2">📝</span> Chef's Special Notes
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Chef's Special Notes
           </h2>
-          <ul className="space-y-2">
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).specialNotes.map((item: string, index: number) => (
-              <li key={index} className="flex items-start gap-2 text-amber-900">
-                <span className="text-amber-600 mt-1">•</span> {item}
-              </li>
+              <p key={index} className="text-black leading-relaxed">{item}</p>
             ))}
-          </ul>
-        </div>
+          </div>
+        </>
       )}
+
+      {/* Variations - Plain Text */}
+      {Array.isArray((recipe as any).variations) && (recipe as any).variations.length > 0 && (
+        <>
+          <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
+            Recipe Variations
+          </h2>
+          <div className="prose prose-lg max-w-none text-[1.2rem]">
+            {(recipe as any).variations.map((item: any, index: number) => (
+              <p key={index} className="text-black leading-relaxed"><strong>{item.title}:</strong> {item.description}</p>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Substitutions & Dietary - TipCard Style */}
+      {(Array.isArray((recipe as any).substitutions) && (recipe as any).substitutions.length > 0) || (Array.isArray((recipe as any).dietaryAdaptations) && (recipe as any).dietaryAdaptations.length > 0) ? (
+        <div className="container border-2 border-solid rounded-lg shadow-sm" style={{ borderColor: '#3F7D58' }}>
+          <div className="p-6 border border-dashed" style={{ background: 'linear-gradient(135deg, #E8F5EA 0%, #F5F9F6 100%)', borderColor: '#7FAD8A' }}>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3F7D58 0%, #2D5A42 100%)' }}>
+                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold" style={{ color: '#2D5A42' }}>Substitutions & Dietary Adaptations</h2>
+            </div>
+            <div className="px-2 space-y-4">
+              {Array.isArray((recipe as any).substitutions) && (recipe as any).substitutions.length > 0 && (
+                <div>
+                  <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Ingredient Substitutions:</strong></p>
+                  <ul className="w-full space-y-2">
+                    {(recipe as any).substitutions.map((item: any, index: number) => (
+                      <li key={index} className="flex items-start space-x-3">
+                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
+                          <strong>{item.ingredient}</strong> → {item.substitute}{item.note && <span className="italic text-gray-600"> ({item.note})</span>}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {Array.isArray((recipe as any).dietaryAdaptations) && (recipe as any).dietaryAdaptations.length > 0 && (
+                <div>
+                  <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Dietary Adaptations:</strong></p>
+                  <ul className="w-full space-y-2">
+                    {(recipe as any).dietaryAdaptations.map((item: any, index: number) => (
+                      <li key={index} className="flex items-start space-x-3">
+                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
+                          <strong>{item.diet}:</strong> {item.howToAdapt}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* === END NEW CONTENT FIELDS SECTION === */}
 
