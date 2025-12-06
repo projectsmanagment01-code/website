@@ -273,17 +273,20 @@ export function RecipeHero({ recipe }: { recipe?: Recipe }) {
           .
         </p>
 
-        <p className="text-[19.2px] text-gray-700 leading-relaxed">
-          {hasHtmlTags(recipe?.shortDescription || "") ? (
-            <span
-              dangerouslySetInnerHTML={renderSafeHtml(
-                recipe?.shortDescription || ""
-              )}
-            />
-          ) : (
-            recipe?.shortDescription
-          )}
-        </p>
+        {/* Only show shortDescription if it's different from featuredText */}
+        {recipe?.shortDescription && recipe?.shortDescription !== recipe?.featuredText && (
+          <p className="text-[19.2px] text-gray-700 leading-relaxed">
+            {hasHtmlTags(recipe?.shortDescription || "") ? (
+              <span
+                dangerouslySetInnerHTML={renderSafeHtml(
+                  recipe?.shortDescription || ""
+                )}
+              />
+            ) : (
+              recipe?.shortDescription
+            )}
+          </p>
+        )}
       </div>
 
       {/* Date and Author Info Section */}

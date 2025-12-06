@@ -1,0 +1,376 @@
+[
+  {
+    "id": "2322ccbe-154e-d0c5-ab27-caa7-9517-f44ffb229e8f",
+    "title": "Easy Garlic Broccoli Stir Fry with Chickpeas",
+    "category": "bread",
+    "categoryId": "cmirj9ze30002o62vecwro0mi",
+    "description": "Quick, healthy vegetarian stir fry ready in 20 minutes.",
+    "createdAt": "2025-12-05T19:10:51.279Z",
+    "updatedAt": "2025-12-05T19:10:51.279Z",
+    "allergyInfo": "Naturally free of dairy, eggs, nuts, and gluten (if you use tamari). Always check labels on soy sauce and sesame oil for potential cross-contamination with wheat or allergens. Chickpeas are legumes, so avoid if you have a specific legume allergy; cubed chicken-style tofu or seitan can substitute.",
+    "author": {
+      "bio": "dqmkdmlqmsldk",
+      "link": "/authors/amelia",
+      "name": "Amelia",
+      "avatar": "/uploads/authors/pouriya-kafaei-r7tamy6ua74-unsplash.webp"
+    },
+    "categoryHref": null,
+    "categoryLink": "/categories/bread",
+    "completeProcess": [
+      {
+        "title": "Preparation",
+        "description": "I set my skillet on the burner before I even unpack the groceries—there’s something hopeful about an empty pan waiting to be useful. While it quietly preheats, I chop the broccoli into flirty little trees and rinse the chickpeas until they gleam. Garlic gets minced on my most battered cutting board, the one scarred with the ghost dinners of ten years. By the time the oil shimmers like a secret, everything is lined up in small glass bowls, and I feel like a calm conductor about to wave her baton."
+      },
+      {
+        "title": "Cooking",
+        "description": "First, the broccoli hits the pan and yelps—just for a second—then settles into a steady sizzle. I let it rest undisturbed so the edges char into smoky freckles; movement too early equals steamed sadness. Chickpeas tumble in next, rolling through the hot oil like beach stones, picking up bronze shoulders. Garlic follows off-heat so it stays sweet, then a quick waterfall of soy and sesame swirls everything into glossy unity. The whole dance takes maybe six minutes, but it feels like slow motion poetry."
+      },
+      {
+        "title": "Assembly",
+        "description": "I pile the vegetables high over whatever starch I have—sometimes yesterday’s rice splashed with water and revived, sometimes quinoa that tastes like earth itself. A final drizzle of oil, a scatter of sesame seeds if I’m feeling ornamental, and the skillet goes straight to the table because we’re informal here. We eat with soup spoons so we can scoop every last shard of garlic, every chickpea that escaped, every memory that clings to the steam."
+      },
+      {
+        "type": "Card",
+        "after": "Taste at the very end. Salt, soy, even a squeeze of lemon can wake the whole pan up, like turning on lights after dusk.",
+        "items": [
+          "Dry broccoli = better char. Shake it in a towel like you’re cheering at a game.",
+          "Chickpeas love space. If they’re crowded they steam and turn mealy; two batches are better than one sad layer.",
+          "Add a teaspoon of honey if your soy sauce feels too sharp—it rounds the edges without announcing sweetness."
+        ],
+        "title": "Pro Tips"
+      }
+    ],
+    "essIngredientGuide": [
+      {
+        "note": "Look for tight, dusty-green florets—no yellowing petals, please. I slice the stems too; peeled and thin they’re sweet and tender, and it feels righteous to use the whole plant.",
+        "ingredient": "Broccoli"
+      },
+      {
+        "note": "Canned are perfect, but rinse them like you mean it. Shake the colander until no more bubbles appear—getting rid of that starchy liquid lets them fry, not stew.",
+        "ingredient": "Chickpeas"
+      },
+      {
+        "note": "Fresh cloves, smashed then minced, because pre-chopped jars taste like faded ambition. Three plump ones give that throaty warmth; four if you’re dating someone who appreciates kissing through a shared veil of garlic.",
+        "ingredient": "Garlic"
+      }
+    ],
+    "faq": null,
+    "featuredText": "A speedy weeknight hug in a bowl—garlic-kissed broccoli and buttery chickpeas sizzle together for the easiest, coziest meat-free supper.",
+    "heroImage": "https://treasurebarrel.com/uploads/recipes/garlic-broccoli-stir-fry-with-chickpeas-gooey1764961641872-1341.webp",
+    "href": "/recipes/easy-garlic-broccoli-stir-fry-with-chickpeas",
+    "imageAlt": null,
+    "images": [
+      "https://treasurebarrel.com/uploads/recipes/garlic-broccoli-stir-fry-with-chickpeas-gooey1764961641872-1341.webp",
+      "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_essence_1764961676897_5746.webp",
+      "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_feast_1764961653585_7497.webp",
+      "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_blend_1764961665868_7967.webp"
+    ],
+    "img": "https://treasurebarrel.com/uploads/recipes/garlic-broccoli-stir-fry-with-chickpeas-gooey1764961641872-1341.webp",
+    "featureImage": "https://treasurebarrel.com/uploads/recipes/garlic-broccoli-stir-fry-with-chickpeas-gooey1764961641872-1341.webp",
+    "cookingImage": "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_feast_1764961653585_7497.webp",
+    "preparationImage": "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_essence_1764961676897_5746.webp",
+    "finalPresentationImage": "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_blend_1764961665868_7967.webp",
+    "ingredientGuide": null,
+    "intro": "I still remember the first night I made this stir fry: the kitchen window fogged, the smell of warm garlic drifting through the house like an old lullaby, and my daughter dancing barefoot to whatever song the radio offered. I was tired, honestly—one of those Wednesdays that feel like tiny pebbles in your shoes—but the fridge handed me a head of broccoli and a can of chickpeas, and something about that humble pairing felt like hope. Within minutes the pan hissed, the broccoli turned emerald, and the chickpeas rolled around like little golden marbles soaking up every shimmer of oil and soy. We ate straight from the skillet, perched on stools, steam curling around our faces, and I thought, “this is enough,” you know? Just plants, heat, and a quiet table. I’ve cooked it a hundred times since—sometimes with a splash of sesame oil when I’m feeling fancy, sometimes plain when life feels too loud—and it never fails to remind me that dinner doesn’t have to be elaborate to be healing. So here it is, my weeknight love letter: garlicky, green, and gentle on the soul.",
+    "mustKnowTips": [
+      "**Dry equals crisp** — Water is the enemy of browning; pat everything like you’re towel-drying a wet dog.",
+      "**Hot, then medium** — Start high for char, drop to medium when garlic joins so it doesn’t burn and turn bitter.",
+      "**Taste the pan** — If the glaze tastes flat, add a quick splash of vinegar; acid is the magic lipstick of savory dishes."
+    ],
+    "notes": [
+      "For extra protein, toss in a handful of edamame or cubed tofu during the last minute of cooking.",
+      "Leftovers reheat beautifully, but the broccoli softens—embrace it, or transform everything into a next-day fried rice.",
+      "If you love sauce, double the soy mixture and simmer it with a teaspoon of cornstarch slurry for a glossy gravy that clings like velvet."
+    ],
+    "nutritionDisclaimer": "Nutrition calculations are estimates based on standard product labels and databases. Actual values may vary depending on brand, produce size, and exact measurements. Consult a registered dietitian for precise dietary guidance, especially if managing medical conditions.",
+    "professionalSecrets": [
+      "**Layered heat** — Add red-pepper flakes to oil first, then again at the end; you get a front and back note of spice that blooms rather than bludgeons.",
+      "**Cold rice vinegar finish** — A teaspoon drizzled off-heat brightens all the salty, nutty flavors without announcing itself as “vinegary.”",
+      "**Rest before rice** — Let the stir fry sit ninety seconds after cooking; the sauce thickens slightly and clings rather than sliding off into the abyss of your bowl."
+    ],
+    "questions": {
+      "items": [
+        {
+          "answer": "Absolutely, but let it thaw and pat it bone-dry first. Frozen holds more water, and water is the enemy of that beautiful char we’re chasing. I spread it on a towel and blast it with a hair-dryer (cool setting) when I’m impatient—yes, really—and it works like a charm.",
+          "question": "Can I use frozen broccoli?"
+        },
+        {
+          "answer": "Your pan might be too cool or too crowded. Heat until a drop of water skitters like a dancer, then add oil. Give the chickpeas room to breathe; if they’re shoulder-to-shoulder they sweat instead of sear. And resist the urge to flip them constantly—let them form a bronze crust before you stir.",
+          "question": "My chickpeas always stick—help?"
+        },
+        {
+          "answer": "It can be! Swap the soy sauce for tamari or coconut aminos. Tamari tastes closest—rich and dark—while coconut aminos are slightly sweeter; you might want to dial back any honey if you go that route. Double-check your sesame oil label too; some brands are processed in facilities with wheat.",
+          "question": "Is this gluten-free?"
+        },
+        {
+          "answer": "I like to add a pinch of red-pepper flakes right after the garlic, so the heat blooms in the oil. A teaspoon of gochujang stirred in at the end gives a slow, smoky burn. Or keep it simple: finish with a zig-zag of sriracha across each bowl—pretty and punchy.",
+          "question": "How do I make it spicier?"
+        },
+        {
+          "answer": "Chop your veggies and rinse the chickpeas up to three days early; store them in glass containers with paper towels to wick moisture. Whisk the sauce in a jar and keep it in the door of the fridge. When hunger strikes, dinner cooks in six minutes flat, which feels like kitchen wizardry on a frantic night.",
+          "question": "Can I prep this ahead?"
+        }
+      ],
+      "title": "Frequently Asked Questions"
+    },
+    "recipeInfo": {
+      "cuisine": "Asian-Inspired",
+      "dietary": "Vegan",
+      "servings": "3–4 Servings",
+      "difficulty": "Easy"
+    },
+    "relatedRecipes": null,
+    "sections": [
+      {
+        "img": 1,
+        "title": "The Sound of Weeknight Peace",
+        "content": "There’s a specific hush that falls when broccoli meets hot metal—a soft hiss that sounds like the world lowering its voice. I wait for that moment every time; it tells me dinner is officially underway and whatever chaos the day dragged in can stay outside the kitchen. My dog recognizes it too; she pads in and sits, hopeful for a rogue chickpea that might roll off the counter. We listen together to the pops, the sizzles, the occasional garlic bubble, and I swear it’s as soothing as rainfall on a tin roof."
+      },
+      {
+        "type": "card",
+        "after": "Remember, stir fry is improvisation dressed as dinner. No broccoli? Use green beans. Out of chickpeas? Try cannellini. The method is the melody; the vegetables are just the harmony you choose tonight.",
+        "items": [
+          "Hot pan, cold oil: let the skillet heat first, then pour the oil; it prevents sticking and gives broccoli that gorgeous leopard print.",
+          "Don’t salt early—salt draws out water and you want the veggies to sear, not sweat. Save it for the final splash of soy.",
+          "If your garlic ever smells bitter, it’s angry (too hot). Slide the pan off the burner for thirty seconds; garlic forgives quickly."
+        ],
+        "title": "You Must Know"
+      }
+    ],
+    "serving": "Scoop over steaming jasmine rice, fluffy <a href=\"https://treasurebarrel.com/recipes/easy-spaghetti-squash-recipe-a-healthy-dinner-idea\" style=\"color: #f57c00;\">spaghetti squash</a>, or nutty brown quinoa. Garnish with extra green onions, a shower of sesame seeds, and maybe a lime wedge for sunny brightness. Serve family-style straight from the skillet—let everyone dig in, chopsticks clacking, conversation flowing like the fragrant steam.",
+    "shortDescription": "A speedy weeknight hug in a bowl—garlic-kissed broccoli and buttery chickpeas sizzle together for the easiest, coziest meat-free supper.",
+    "slug": "easy-garlic-broccoli-stir-fry-with-chickpeas",
+    "storage": "Cool leftovers completely, then transfer to an airtight glass container; they’ll keep up to four days in the fridge. Reheat gently in a skillet with a splash of water to loosen the glaze—microwaves work but soften the broccoli further. I actually love the next-day texture folded into a wrap with hummus and crunchy lettuce, almost like a warm salad on the go.",
+    "story": "When my mother moved out of her big house into a tiny apartment, she left me her old wok—the one with the dented lid and the handle that stays forever loose no matter how many times I tighten the screw. I carried it home on the bus, cradling it like a fragile memory, and the first thing I cooked was this stir fry. The broccoli florets reminded me of the miniature trees she used to call them when I was five, coaxing me to eat “leaves for giants,” and the chickpeas felt like the beads we threaded together on rainy Sundays. I stirred, and the garlic hit the hot metal, and suddenly I was seven again, standing on a stool beside her, breathing in the same sharp perfume. That night I understood how recipes can be time machines—how a sizzle can carry you across decades, how a single mouthful can taste like forgiveness, like safety, like “I’m still here.” Now every time the broccoli turns that impossible shade of green, I swear I hear her humming through the steam, telling me to add a pinch more soy, to keep the heat brave, to sit down and eat while it’s hot. I do. I always do.",
+    "testimonial": "I sent this recipe to my best friend after she texted me a crying emoji about her monstrous commute and the fact that her fridge held nothing but a limp broccoli crown and a can of beans. Two nights later she wrote back: “I stood over the skillet and felt like I could breathe again. The chickpeas popped, the garlic smelled like someone taking care of me, and for the first time in weeks I didn’t eat cereal for dinner.” She now keeps a sticky note on her kettle that says simply, “You deserve hot food,” and every time I think about it my throat gets tight in the sweetest way.",
+    "timing": {
+      "cookTime": "10 Minutes",
+      "prepTime": "10 Minutes",
+      "totalTime": "20 Minutes"
+    },
+    "tools": [
+      "12-inch skillet or wok—non-stick is forgiving, cast iron gives heroic char.",
+      "Sturdy wooden spoon or metal spatula for enthusiastic flipping.",
+      "Small whisk or fork for emulsifying the sauce.",
+      "Clean kitchen towel for drying chickpeas—paper towels work but feel wasteful on busy weeks.",
+      "Sharp chef’s knife for swift broccoli dissection.",
+      "Glass jar with lid if you prep the sauce ahead; shake instead of whisk."
+    ],
+    "updatedDate": "2025-12-05T19:10:51.264Z",
+    "whyYouLove": {
+      "type": "Card",
+      "items": [
+        "**One-pan wonder** — Everything tumbles together in a single skillet, which means fewer dishes and more time to curl up on the couch with your bowl and maybe a second helping.",
+        "**Pantry heroes** — Broccoli and a can of chickpeas, that’s literally it. No fancy errands, no “oops I forgot the specialty paste,” just honest staples that wait patiently for you.",
+        "**Twenty-minute magic** — By the time the rice cooker clicks (or your take-out appetite threatens mutiny), dinner is glossy, fragrant, and ready to meet your fork.",
+        "**Gentle on everything** — Budget, digestion, planet, and mood. It’s the culinary equivalent of a deep breath: nourishing, kind, and quietly proud of itself."
+      ],
+      "title": "Why You'll Love It"
+    },
+    "ingredients": [
+      {
+        "items": [
+          "1 large head broccoli (about 1 lb), florets and peeled stems",
+          "1 can (15 oz) chickpeas, drained and rinsed",
+          "3 cloves garlic, minced",
+          "1 small carrot, thinly sliced (optional, for color)"
+        ],
+        "section": "Vegetables & Legumes"
+      },
+      {
+        "items": [
+          "2 tbsp low-sodium soy sauce",
+          "1 tbsp toasted sesame oil",
+          "1 tsp maple syrup or honey",
+          "1 tsp rice vinegar",
+          "Pinch red-pepper flakes (optional)"
+        ],
+        "section": "Sauce & Seasonings"
+      },
+      {
+        "items": [
+          "1 tsp avocado or neutral oil",
+          "1 tsp sesame seeds",
+          "Sliced green onions"
+        ],
+        "section": "To Finish"
+      }
+    ],
+    "instructions": [
+      {
+        "step": "Step 01",
+        "instruction": "Place a large, dry skillet or wok over medium-high heat. Let it get hot—honestly, wait until you can feel the warmth when you hover your palm a few inches above. While the pan heats, spread your rinsed chickpeas on a clean towel and roll them around; we want them as dry as possible so they’ll sizzle instead of stew."
+      },
+      {
+        "step": "Step 02",
+        "instruction": "When the pan is ready, pour in the avocado oil and swirl to coat. Add broccoli in a single layer; resist stirring for a full minute so the bottoms toast into golden freckles. Give a quick toss, then let them sit again—patience equals char, and char equals flavor that tastes like you tried way harder than you did."
+      },
+      {
+        "step": "Step 03",
+        "instruction": "Scoot the broccoli to the edges, making a little clearing in the center. Tumble in the chickpeas; again, single layer, no crowding. Let them fry undisturbed for about two minutes until they develop bronze shoulders. Stir everything together, add the garlic and red-pepper flakes, and cook just thirty seconds—long enough for the perfume to slap you awake but short enough to keep the garlic sweet."
+      },
+      {
+        "step": "Step 04",
+        "instruction": "Whisk together soy sauce, sesame oil, maple syrup, and rice vinegar in a small bowl. Pour it over the vegetables; it will hiss and bubble like it’s telling secrets. Stir quickly to glaze every floret and chickpea, then remove from heat. Sprinkle sesame seeds and green onions, taste for salt (add a splash more soy if you like), and serve hot over rice, noodles, or straight from the skillet while standing at the counter."
+      }
+    ],
+    "lastViewedAt": null,
+    "views": 0,
+    "authorId": "cmirjbpvm0003o62vc9j07t6b",
+    "status": "published",
+    "videoUrl": "",
+    "videoDuration": "",
+    "nutrition": {
+      "calories": "285",
+      "fatContent": "10g",
+      "servingSize": "1/3 of recipe",
+      "fiberContent": "11g",
+      "sugarContent": "6g",
+      "sodiumContent": "420mg",
+      "proteinContent": "13g",
+      "cholesterolContent": "0mg",
+      "carbohydrateContent": "38g",
+      "saturatedFatContent": "1.2g"
+    },
+    "aggregateRating": 4.9,
+    "reviewCount": 87,
+    "keywords": [
+      "garlic broccoli stir fry",
+      "chickpea stir fry",
+      "vegan weeknight dinner",
+      "20 minute vegetarian meal",
+      "healthy broccoli recipe"
+    ],
+    "tasteProfile": {
+      "sour": "Low",
+      "salty": "Medium",
+      "spicy": "Low to Medium",
+      "sweet": "Low",
+      "umami": "High",
+      "overall": "Savoriness from soy and sesame, mellow garlic warmth, gentle sweetness balancing the heat."
+    },
+    "textureProfile": {
+      "bite": "Varied—snappy stems, soft florets, juicy legumes",
+      "inside": "Tender-crisp broccoli, creamy chickpeas",
+      "outside": "Charred, glossy glaze",
+      "overall": "Contrast of seared edges and pillowy centers, lightly sauced without sogginess."
+    },
+    "recipeOrigin": "Inspired by classic Chinese stir-fry technique—high heat, minimal oil, quick movement—adapted to everyday Western home kitchens with pantry staples. The addition of chickpeas nods to Middle-Eastern and Indian cuisines where the legume is beloved, creating a multicultural mash-up that feels both familiar and fresh.",
+    "variations": [
+      {
+        "title": "Lemon-Ginger Zing",
+        "description": "Add 1 tsp freshly grated ginger with the garlic and finish with a shower of lemon zest; it tastes like sunshine in January."
+      },
+      {
+        "title": "Peanut-Coconut Comfort",
+        "description": "Stir in 1 tbsp peanut butter and 2 tbsp light coconut milk for a creamy, satay-style sauce that clings like velvet."
+      }
+    ],
+    "substitutions": [
+      {
+        "note": "Adjust timing—green beans need an extra minute; Brussels sprouts shave thin so they char quickly.",
+        "ingredient": "Broccoli",
+        "substitute": "Green beans, cauliflower florets, or thinly sliced Brussels sprouts"
+      },
+      {
+        "note": "Pat tofu dry and sear separately first for golden edges, then combine at the end to prevent breakage.",
+        "ingredient": "Chickpeas",
+        "substitute": "Cannellini beans, butter beans, or cubed extra-firm tofu"
+      }
+    ],
+    "dietaryAdaptations": [
+      {
+        "diet": "Gluten-Free",
+        "howToAdapt": "Use certified gluten-free tamari or coconut aminos; check sesame oil facility statements."
+      },
+      {
+        "diet": "Low-Sodium",
+        "howToAdapt": "Swap soy sauce for low-sodium tamari and rinse chickpeas extra thoroughly; add a squeeze of citrus to compensate for lost brightness."
+      },
+      {
+        "diet": "Grain-Free",
+        "howToAdapt": "Serve over cauliflower rice, sautéed cabbage, or simply enjoy as a warm salad—no other changes needed."
+      }
+    ],
+    "pairings": [
+      "Chilled cucumber-mint water or a dry Riesling to echo the sweet-salty glaze",
+      "Fluffy jasmine rice or nutty farro to soak up every last shimmer of sauce",
+      "Side of quick-pickled carrots or a crisp Asian slaw for acidic crunch contrast"
+    ],
+    "shoppingList": [
+      "1 large head broccoli",
+      "1 can chickpeas",
+      "Fresh garlic bulb",
+      "Low-sodium soy sauce or tamari",
+      "Toasted sesame oil",
+      "Maple syrup or honey",
+      "Rice vinegar"
+    ],
+    "makeAhead": "Wash and chop broccoli, rinse chickpeas, and whisk the sauce up to three days ahead; store separately in airtight containers. At dinner, simply heat the skillet and toss everything together—dinner in six minutes flat. You can also pre-cook a batch of rice or quinoa and reheat with a damp paper towel in the microwave.",
+    "leftovers": "Transform into a cold salad by adding shredded carrots and a splash of lime, or mash with a fork and spread inside a wrap with avocado. Stir into scrambled eggs for a protein-packed breakfast, or bake into frittata muffins for grab-and-go snacks. The flavors deepen overnight, so some argue leftovers taste even better.",
+    "equipmentNotes": [
+      "A well-seasoned carbon-steel wok delivers restaurant-level char, but any wide skillet works—just avoid overcrowding.",
+      "Use a splatter screen if you’re searing aggressively; soy sauce can spit when it hits hot oil.",
+      "Glass prep bowls let you see ingredient order and prevent the dreaded “did I add the garlic yet?” scramble."
+    ],
+    "ingredientPrep": [
+      "Cut broccoli into similar-sized florets so they cook evenly—bite-size is polite but go bigger if you like a meatier chew.",
+      "Peel broccoli stems with a vegetable peeler, then slice into coins; they’re sweet and tender and reduce waste beautifully.",
+      "Rinse chickpeas until the water runs clear and no more foam appears; excess starch causes sticking and muddy flavors."
+    ],
+    "temperatureNotes": {
+      "ovenTemperature": "Not required",
+      "safeInternalTemp": "Vegetables should be bright and tender-crisp; no specific internal temperature needed",
+      "stovetopHeatLevel": "High for initial sear, medium after garlic joins"
+    },
+    "timeline": [
+      {
+        "time": "0-3 min",
+        "action": "Heat skillet, pat chickpeas dry, mince garlic, whisk sauce"
+      },
+      {
+        "time": "3-6 min",
+        "action": "Sear broccoli undisturbed, then toss once for even char"
+      },
+      {
+        "time": "6-8 min",
+        "action": "Add chickpeas, let them bronze, then stir in garlic & chili"
+      },
+      {
+        "time": "8-9 min",
+        "action": "Pour sauce, toss to glaze, remove from heat"
+      },
+      {
+        "time": "9-10 min",
+        "action": "Sprinkle sesame seeds & onions, serve immediately over rice"
+      }
+    ],
+    "commonMistakes": [
+      "Stirring too often—let the veggies sit so they caramelize instead of steaming",
+      "Adding garlic too early—it burns in seconds and turns acrid; wait until the final minute",
+      "Using a small skillet—crowding traps steam and prevents the coveted char",
+      "Forgetting to taste at the end—salt balance can vary wildly between soy sauce brands",
+      "Skipping the dry step—wet chickpeas spit oil and refuse to brown"
+    ],
+    "flavorBoosters": [
+      "Finish with a squeeze of fresh lime for brightness",
+      "Toast sesame seeds in a dry pan until fragrant before sprinkling",
+      "Add a teaspoon of white miso to the sauce for extra umami depth",
+      "Drizzle chili crisp oil tableside for customizable heat and crunch",
+      "Stir in a handful of Thai basil leaves off-heat for aromatic lift"
+    ],
+    "specialNotes": [
+      "Recipe doubles beautifully—use a wider pan, not deeper, to maintain sear",
+      "Frozen rice pouches steam in 3 minutes, making this a true 20-minute meal",
+      "Kids love the mild version; simply omit chili flakes and let them drizzle sweet-sour sauce at the table"
+    ],
+    "difficultyReasoning": "Only basic knife skills and one-pan tossing required. No finicky emulsions or long simmering; success relies on heat management and timing, both of which are forgiving if you taste as you go.",
+    "servingSuggestions": [
+      "Pile over hot cooked rice and top with a runny-yolk fried egg for richness",
+      "Serve alongside chilled soba noodles dressed with sesame and scallions",
+      "Spoon into lettuce cups with shredded purple cabbage for a handheld lunch",
+      "Pair with a simple miso soup starter for a cozy, complete Asian-inspired meal"
+    ],
+    "seasonality": "Ideal year-round since broccoli and canned chickpeas are always available, but especially comforting in cooler months when you crave hot, fast nourishment. In summer, serve over cold noodles for a refreshing twist."
+  }
+]
