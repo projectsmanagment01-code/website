@@ -455,7 +455,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).timeline.map((item: any, index: number) => (
-              <p key={index} className="text-black leading-relaxed"><strong>{item.time}:</strong> {item.action}</p>
+              <p key={index} className="text-black leading-relaxed">
+                <strong>{hasHtmlTags(item.time) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.time)} /> : item.time}:</strong>{' '}
+                {hasHtmlTags(item.action) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.action)} /> : item.action}
+              </p>
             ))}
           </div>
         </>
@@ -481,7 +484,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                     {(recipe as any).equipmentNotes.map((item: string, index: number) => (
                       <li key={index} className="flex items-start space-x-3">
                         <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{item}</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</span>
                       </li>
                     ))}
                   </ul>
@@ -494,7 +497,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                     {(recipe as any).shoppingList.map((item: string, index: number) => (
                       <li key={index} className="flex items-start space-x-3">
                         <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{item}</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</span>
                       </li>
                     ))}
                   </ul>
@@ -513,7 +516,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).ingredientPrep.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed">{item}</p>
+              <p key={index} className="text-black leading-relaxed">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</p>
             ))}
           </div>
         </>
@@ -576,7 +579,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).pairings.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed">{item}</p>
+              <p key={index} className="text-black leading-relaxed">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</p>
             ))}
           </div>
         </>
@@ -602,7 +605,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                     {(recipe as any).commonMistakes.map((item: string, index: number) => (
                       <li key={index} className="flex items-start space-x-3">
                         <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{item}</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</span>
                       </li>
                     ))}
                   </ul>
@@ -615,7 +618,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                     {(recipe as any).flavorBoosters.map((item: string, index: number) => (
                       <li key={index} className="flex items-start space-x-3">
                         <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{item}</span>
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</span>
                       </li>
                     ))}
                   </ul>
@@ -634,7 +637,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).servingSuggestions.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed">{item}</p>
+              <p key={index} className="text-black leading-relaxed">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</p>
             ))}
           </div>
         </>
@@ -648,7 +651,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).specialNotes.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed">{item}</p>
+              <p key={index} className="text-black leading-relaxed">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</p>
             ))}
           </div>
         </>
@@ -662,7 +665,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).variations.map((item: any, index: number) => (
-              <p key={index} className="text-black leading-relaxed"><strong>{item.title}:</strong> {item.description}</p>
+              <p key={index} className="text-black leading-relaxed">
+                <strong>{hasHtmlTags(item.title) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.title)} /> : item.title}:</strong>{' '}
+                {hasHtmlTags(item.description) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.description)} /> : item.description}
+              </p>
             ))}
           </div>
         </>
@@ -689,7 +695,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                       <li key={index} className="flex items-start space-x-3">
                         <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
                         <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
-                          <strong>{item.ingredient}</strong> → {item.substitute}{item.note && <span className="italic text-gray-600"> ({item.note})</span>}
+                          <strong>{hasHtmlTags(item.ingredient) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.ingredient)} /> : item.ingredient}</strong> → {hasHtmlTags(item.substitute) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.substitute)} /> : item.substitute}{item.note && <span className="italic text-gray-600"> ({hasHtmlTags(item.note) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.note)} /> : item.note})</span>}
                         </span>
                       </li>
                     ))}
@@ -704,7 +710,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                       <li key={index} className="flex items-start space-x-3">
                         <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
                         <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
-                          <strong>{item.diet}:</strong> {item.howToAdapt}
+                          <strong>{hasHtmlTags(item.diet) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.diet)} /> : item.diet}:</strong> {hasHtmlTags(item.howToAdapt) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.howToAdapt)} /> : item.howToAdapt}
                         </span>
                       </li>
                     ))}
