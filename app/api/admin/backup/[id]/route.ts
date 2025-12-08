@@ -77,7 +77,7 @@ export async function POST(
         details: error instanceof BackupError && error.originalError ? 
           error.originalError.message : undefined
       },
-      { status: statusCode });
+      statusCode);
   }
 }
 

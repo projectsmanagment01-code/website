@@ -263,7 +263,7 @@ export class DatabaseBackupService {
         media: data.media?.length || 0,
       });
 
-      // Start transaction for atomic restoration
+      // Start transaction for atomic restoration with extended timeout for large backups
       await this.prisma.$transaction(async (tx: any) => {
         if (options.cleanExisting) {
           console.log('🗑️ Cleaning existing data...');
@@ -616,6 +616,9 @@ export class DatabaseBackupService {
         }
 
         console.log('✅ Database restoration completed successfully');
+      }, {
+        maxWait: 60000, // 60 seconds - maximum time to wait for transaction to start
+        timeout: 300000, // 5 minutes - maximum time for transaction to complete
       });
 
     } catch (error) {
