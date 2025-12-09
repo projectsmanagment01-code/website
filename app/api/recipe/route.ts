@@ -200,6 +200,57 @@ export async function POST(request: NextRequest) {
       hasAuthorId: !!recipe.authorId
     });
 
+    // ============================================
+    // SANITIZE AND FIX COMMON JSON ISSUES
+    // ============================================
+    
+    // Helper to sanitize string values - removes problematic characters
+    const sanitizeString = (value: unknown): string | null => {
+      if (value === null || value === undefined) return null;
+      if (typeof value !== 'string') return String(value);
+      
+      // Remove repeated special characters that might be AI artifacts
+      let cleaned = value
+        .replace(/~{5,}/g, '') // Remove long sequences of tildes
+        .replace(/={5,}/g, '') // Remove long sequences of equals
+        .replace(/-{10,}/g, '---') // Reduce long dashes
+        .replace(/_{5,}/g, '___') // Reduce long underscores
+        .trim();
+      
+      return cleaned || null;
+    };
+
+    // Helper to recursively sanitize an object
+    const sanitizeObject = (obj: unknown): unknown => {
+      if (obj === null || obj === undefined) return obj;
+      
+      if (Array.isArray(obj)) {
+        return obj.map(item => sanitizeObject(item)).filter(item => item !== null && item !== '');
+      }
+      
+      if (typeof obj === 'string') {
+        return sanitizeString(obj);
+      }
+      
+      if (typeof obj === 'object') {
+        const sanitized: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+          const sanitizedValue = sanitizeObject(value);
+          // Skip null/undefined/empty values
+          if (sanitizedValue !== null && sanitizedValue !== undefined && sanitizedValue !== '') {
+            sanitized[key] = sanitizedValue;
+          }
+        }
+        return sanitized;
+      }
+      
+      return obj;
+    };
+
+    // Sanitize the entire recipe object
+    recipe = sanitizeObject(recipe) as typeof recipe;
+    console.log("🧹 Recipe sanitized");
+
     // Validate required fields
     const requiredFields = ['title'];
     const missingFields = requiredFields.filter(field => !recipe[field]);
@@ -379,6 +430,158 @@ export async function POST(request: NextRequest) {
       recipeData.slug = finalSlug;
     }
 
+    // ============================================
+    // COMPREHENSIVE FIELD TYPE VALIDATION & CONVERSION
+    // ============================================
+
+    // 1. String[] fields - convert object arrays to string arrays
+    const stringArrayFields = [
+      'tools', 'notes', 'mustKnowTips', 'professionalSecrets', 'keywords',
+      'pairings', 'shoppingList', 'equipmentNotes', 'ingredientPrep',
+      'commonMistakes', 'flavorBoosters', 'specialNotes', 'servingSuggestions',
+      'images' // images is also String[]
+    ];
+
+    // Helper to convert object array to string array
+    const convertObjectArrayToStrings = (arr: unknown[]): string[] => {
+      return arr.map((item) => {
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object' && item !== null) {
+          const obj = item as Record<string, unknown>;
+          // Try various common field names
+          const name = obj.tool || obj.name || obj.title || obj.item || obj.tip || obj.secret || '';
+          const desc = obj.description || obj.note || obj.text || obj.content || '';
+          const nameStr = String(name);
+          const descStr = String(desc);
+          // If we found a name, format properly
+          if (nameStr) {
+            return descStr ? `${nameStr}: ${descStr}` : nameStr;
+          }
+          // If only description exists, return that
+          if (descStr) return descStr;
+          // Fallback: stringify the whole object
+          return JSON.stringify(item);
+        }
+        return String(item);
+      }).filter(s => s && s.trim() !== '' && s !== '{}'); // Remove empty strings
+    };
+
+    for (const field of stringArrayFields) {
+      // Ensure field is an array
+      if (recipeData[field] === null || recipeData[field] === undefined) {
+        recipeData[field] = [];
+      } else if (Array.isArray(recipeData[field])) {
+        // Convert object arrays to string arrays if needed
+        if (recipeData[field].length > 0 && typeof recipeData[field][0] === 'object') {
+          console.log(`🔄 Converting ${field} from objects to strings...`);
+          recipeData[field] = convertObjectArrayToStrings(recipeData[field]);
+        }
+        // Ensure all items are strings
+        recipeData[field] = recipeData[field].map((item: unknown) => 
+          typeof item === 'string' ? item : String(item)
+        );
+      } else if (typeof recipeData[field] === 'string') {
+        // Single string -> array with one item
+        recipeData[field] = [recipeData[field]];
+      }
+    }
+
+    // 2. Numeric fields - ensure correct types
+    // aggregateRating: Float?
+    if (recipeData.aggregateRating !== null && recipeData.aggregateRating !== undefined) {
+      const rating = parseFloat(String(recipeData.aggregateRating));
+      recipeData.aggregateRating = isNaN(rating) ? null : rating;
+    }
+    
+    // reviewCount: Int?
+    if (recipeData.reviewCount !== null && recipeData.reviewCount !== undefined) {
+      const count = parseInt(String(recipeData.reviewCount), 10);
+      recipeData.reviewCount = isNaN(count) ? null : count;
+    }
+
+    // views: Int (default 0)
+    if (recipeData.views !== null && recipeData.views !== undefined) {
+      const views = parseInt(String(recipeData.views), 10);
+      recipeData.views = isNaN(views) ? 0 : views;
+    }
+
+    // 3. String fields that might come as empty objects or arrays
+    const stringFields = [
+      'title', 'category', 'description', 'allergyInfo', 'categoryLink',
+      'featuredText', 'heroImage', 'href', 'imageAlt', 'img', 'featureImage',
+      'cookingImage', 'preparationImage', 'finalPresentationImage', 'intro',
+      'nutritionDisclaimer', 'serving', 'shortDescription', 'slug', 'storage',
+      'story', 'testimonial', 'updatedDate', 'videoUrl', 'videoDuration',
+      'recipeOrigin', 'makeAhead', 'leftovers', 'difficultyReasoning', 'seasonality',
+      'status', 'authorId', 'categoryId'
+    ];
+
+    for (const field of stringFields) {
+      if (recipeData[field] !== null && recipeData[field] !== undefined) {
+        if (typeof recipeData[field] === 'object') {
+          // Object in string field - convert to JSON string or extract value
+          console.warn(`⚠️ Field ${field} is object, converting to string`);
+          recipeData[field] = JSON.stringify(recipeData[field]);
+        } else if (typeof recipeData[field] !== 'string') {
+          recipeData[field] = String(recipeData[field]);
+        }
+      }
+    }
+
+    // 4. Json fields - ensure they're proper objects (not strings)
+    const jsonFields = [
+      'author', 'completeProcess', 'essIngredientGuide', 'faq', 'ingredientGuide',
+      'questions', 'recipeInfo', 'relatedRecipes', 'sections', 'timing',
+      'whyYouLove', 'ingredients', 'instructions', 'nutrition', 'tasteProfile',
+      'textureProfile', 'variations', 'substitutions', 'dietaryAdaptations',
+      'temperatureNotes', 'timeline'
+    ];
+
+    for (const field of jsonFields) {
+      if (recipeData[field] !== null && recipeData[field] !== undefined) {
+        // If it's a string, try to parse it as JSON
+        if (typeof recipeData[field] === 'string') {
+          try {
+            recipeData[field] = JSON.parse(recipeData[field]);
+            console.log(`🔄 Parsed ${field} from JSON string`);
+          } catch {
+            // If parsing fails, wrap in an object
+            console.warn(`⚠️ Field ${field} is invalid JSON string, wrapping`);
+            recipeData[field] = { value: recipeData[field] };
+          }
+        }
+      }
+    }
+
+    // 5. Remove any fields that aren't in the schema to prevent Prisma errors
+    const validRecipeFields = new Set([
+      'id', 'title', 'category', 'categoryId', 'description', 'allergyInfo', 'author',
+      'categoryHref', 'categoryLink', 'completeProcess', 'essIngredientGuide', 'faq',
+      'featuredText', 'heroImage', 'href', 'imageAlt', 'images', 'img', 'featureImage',
+      'cookingImage', 'preparationImage', 'finalPresentationImage', 'ingredientGuide',
+      'intro', 'mustKnowTips', 'notes', 'nutritionDisclaimer', 'professionalSecrets',
+      'questions', 'recipeInfo', 'relatedRecipes', 'sections', 'serving', 'shortDescription',
+      'slug', 'storage', 'story', 'testimonial', 'timing', 'tools', 'updatedDate',
+      'whyYouLove', 'ingredients', 'instructions', 'views', 'authorId', 'status',
+      'videoUrl', 'videoDuration', 'nutrition', 'aggregateRating', 'reviewCount',
+      'keywords', 'tasteProfile', 'textureProfile', 'recipeOrigin', 'variations',
+      'substitutions', 'dietaryAdaptations', 'pairings', 'shoppingList', 'makeAhead',
+      'leftovers', 'equipmentNotes', 'ingredientPrep', 'temperatureNotes', 'timeline',
+      'commonMistakes', 'flavorBoosters', 'specialNotes', 'difficultyReasoning',
+      'servingSuggestions', 'seasonality'
+    ]);
+
+    // Remove unknown fields
+    const originalKeys = Object.keys(recipeData);
+    for (const key of originalKeys) {
+      if (!validRecipeFields.has(key)) {
+        console.warn(`⚠️ Removing unknown field: ${key}`);
+        delete recipeData[key];
+      }
+    }
+
+    console.log("✅ Field validation complete. Final data keys:", Object.keys(recipeData).length);
+
     // Create the recipe using processed data with unique slug
     const createdRecipe = await prisma.recipe.create({
       data: recipeData,
@@ -448,7 +651,32 @@ export async function POST(request: NextRequest) {
       console.error("Stack Trace:", error.stack);
     }
     
-    // Prisma-specific errors
+    // Handle PrismaClientValidationError (type mismatch errors)
+    if (error instanceof Error && error.constructor.name === 'PrismaClientValidationError') {
+      console.error("🔴 Prisma Validation Error - Type Mismatch Detected");
+      
+      // Extract the problematic field from error message
+      const fieldMatch = errorMessage.match(/Argument `(\w+)`/);
+      const expectedMatch = errorMessage.match(/Expected (\w+)/);
+      const providedMatch = errorMessage.match(/provided (\w+)/);
+      
+      const problemField = fieldMatch ? fieldMatch[1] : 'unknown';
+      const expectedType = expectedMatch ? expectedMatch[1] : 'unknown';
+      const providedType = providedMatch ? providedMatch[1] : 'unknown';
+      
+      return NextResponse.json(
+        {
+          error: "Failed to create recipe",
+          type: "PrismaClientValidationError",
+          details: `Field "${problemField}" has wrong type. Expected ${expectedType}, got ${providedType}.`,
+          hint: `The field "${problemField}" is receiving data in the wrong format. This should be auto-fixed, but if you see this error, please report it.`,
+          rawError: errorMessage.substring(0, 500) // First 500 chars
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Prisma-specific errors (database errors)
     if (error && typeof error === 'object' && 'code' in error) {
       const prismaError = error as any;
       console.error("Prisma Error Code:", prismaError.code);
@@ -579,6 +807,92 @@ export async function PUT(request: NextRequest) {
     // Remove fields that don't exist in schema or are relationship fields
     const { categoryId, authorId, seoScore, ...recipeData } = recipe;
     
+    // ============================================
+    // COMPREHENSIVE FIELD TYPE VALIDATION & CONVERSION (PUT)
+    // ============================================
+
+    // 1. String[] fields - convert object arrays to string arrays
+    const stringArrayFields = [
+      'tools', 'notes', 'mustKnowTips', 'professionalSecrets', 'keywords',
+      'pairings', 'shoppingList', 'equipmentNotes', 'ingredientPrep',
+      'commonMistakes', 'flavorBoosters', 'specialNotes', 'servingSuggestions',
+      'images'
+    ];
+
+    // Helper to convert object array to string array
+    const convertObjectArrayToStrings = (arr: unknown[]): string[] => {
+      return arr.map((item) => {
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object' && item !== null) {
+          const obj = item as Record<string, unknown>;
+          const name = obj.tool || obj.name || obj.title || obj.item || obj.tip || obj.secret || '';
+          const desc = obj.description || obj.note || obj.text || obj.content || '';
+          const nameStr = String(name);
+          const descStr = String(desc);
+          if (nameStr) return descStr ? `${nameStr}: ${descStr}` : nameStr;
+          if (descStr) return descStr;
+          return JSON.stringify(item);
+        }
+        return String(item);
+      }).filter(s => s && s.trim() !== '' && s !== '{}');
+    };
+
+    for (const field of stringArrayFields) {
+      if (recipeData[field] === null || recipeData[field] === undefined) {
+        continue; // Don't set default for update - might not want to change
+      } else if (Array.isArray(recipeData[field])) {
+        if (recipeData[field].length > 0 && typeof recipeData[field][0] === 'object') {
+          console.log(`🔄 [PUT] Converting ${field} from objects to strings...`);
+          recipeData[field] = convertObjectArrayToStrings(recipeData[field]);
+        }
+        recipeData[field] = recipeData[field].map((item: unknown) => 
+          typeof item === 'string' ? item : String(item)
+        );
+      } else if (typeof recipeData[field] === 'string') {
+        recipeData[field] = [recipeData[field]];
+      }
+    }
+
+    // 2. Numeric fields
+    if (recipeData.aggregateRating !== null && recipeData.aggregateRating !== undefined) {
+      const rating = parseFloat(String(recipeData.aggregateRating));
+      recipeData.aggregateRating = isNaN(rating) ? null : rating;
+    }
+    if (recipeData.reviewCount !== null && recipeData.reviewCount !== undefined) {
+      const count = parseInt(String(recipeData.reviewCount), 10);
+      recipeData.reviewCount = isNaN(count) ? null : count;
+    }
+    if (recipeData.views !== null && recipeData.views !== undefined) {
+      const views = parseInt(String(recipeData.views), 10);
+      recipeData.views = isNaN(views) ? 0 : views;
+    }
+
+    // 3. Remove any fields that aren't in the schema
+    const validRecipeFields = new Set([
+      'id', 'title', 'category', 'categoryId', 'description', 'allergyInfo', 'author',
+      'categoryHref', 'categoryLink', 'completeProcess', 'essIngredientGuide', 'faq',
+      'featuredText', 'heroImage', 'href', 'imageAlt', 'images', 'img', 'featureImage',
+      'cookingImage', 'preparationImage', 'finalPresentationImage', 'ingredientGuide',
+      'intro', 'mustKnowTips', 'notes', 'nutritionDisclaimer', 'professionalSecrets',
+      'questions', 'recipeInfo', 'relatedRecipes', 'sections', 'serving', 'shortDescription',
+      'slug', 'storage', 'story', 'testimonial', 'timing', 'tools', 'updatedDate',
+      'whyYouLove', 'ingredients', 'instructions', 'views', 'authorId', 'status',
+      'videoUrl', 'videoDuration', 'nutrition', 'aggregateRating', 'reviewCount',
+      'keywords', 'tasteProfile', 'textureProfile', 'recipeOrigin', 'variations',
+      'substitutions', 'dietaryAdaptations', 'pairings', 'shoppingList', 'makeAhead',
+      'leftovers', 'equipmentNotes', 'ingredientPrep', 'temperatureNotes', 'timeline',
+      'commonMistakes', 'flavorBoosters', 'specialNotes', 'difficultyReasoning',
+      'servingSuggestions', 'seasonality'
+    ]);
+
+    const originalKeys = Object.keys(recipeData);
+    for (const key of originalKeys) {
+      if (!validRecipeFields.has(key)) {
+        console.warn(`⚠️ [PUT] Removing unknown field: ${key}`);
+        delete recipeData[key];
+      }
+    }
+
     // Build update data object
     const updateData: any = {
       ...recipeData,
