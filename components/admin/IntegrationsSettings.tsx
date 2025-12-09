@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Puzzle, Save, Loader2, Mail, Code, FileText } from "lucide-react";
+import { Puzzle, Save, Loader2, Mail, Code, FileText, Plus, Trash2, ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { adminFetch } from '@/lib/admin-fetch';
 
 interface EmailSettings {
@@ -15,12 +15,22 @@ interface EmailSettings {
   from?: string;
 }
 
+interface CodeBlock {
+  id: string;
+  name: string;
+  code: string;
+  enabled: boolean;
+}
+
 interface IntegrationsConfig {
   googleTagManagerId: string;
   emailSettings?: EmailSettings;
   headerCode: string;
   bodyCode: string;
   footerCode: string;
+  headerCodeBlocks?: CodeBlock[];
+  bodyCodeBlocks?: CodeBlock[];
+  footerCodeBlocks?: CodeBlock[];
   adsTxt: string;
   robotsTxt: string;
 }
@@ -41,12 +51,16 @@ export default function IntegrationsSettings() {
     headerCode: "",
     bodyCode: "",
     footerCode: "",
+    headerCodeBlocks: [],
+    bodyCodeBlocks: [],
+    footerCodeBlocks: [],
     adsTxt: "",
     robotsTxt: ""
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [expandedBlocks, setExpandedBlocks] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchSettings();
@@ -57,6 +71,21 @@ export default function IntegrationsSettings() {
       const response = await adminFetch("/api/admin/integrations");
       if (response.ok) {
         const data = await response.json();
+        
+        // Migrate old single code fields to blocks if needed
+        const migrateToBlocks = (oldCode: string, blocks: CodeBlock[] | undefined): CodeBlock[] => {
+          if (blocks && blocks.length > 0) return blocks;
+          if (oldCode && oldCode.trim()) {
+            return [{
+              id: `block-${Date.now()}`,
+              name: 'Legacy Code',
+              code: oldCode,
+              enabled: true
+            }];
+          }
+          return [];
+        };
+        
         setConfig({ 
           googleTagManagerId: data.googleTagManagerId || "",
           emailSettings: data.emailSettings || {
@@ -72,6 +101,9 @@ export default function IntegrationsSettings() {
           headerCode: data.headerCode || "",
           bodyCode: data.bodyCode || "",
           footerCode: data.footerCode || "",
+          headerCodeBlocks: migrateToBlocks(data.headerCode, data.headerCodeBlocks),
+          bodyCodeBlocks: migrateToBlocks(data.bodyCode, data.bodyCodeBlocks),
+          footerCodeBlocks: migrateToBlocks(data.footerCode, data.footerCodeBlocks),
           adsTxt: data.adsTxt || "",
           robotsTxt: data.robotsTxt || ""
         });
@@ -89,12 +121,28 @@ export default function IntegrationsSettings() {
     setMessage(null);
 
     try {
+      // Combine enabled blocks into single code strings for backward compatibility
+      const combineBlocks = (blocks: CodeBlock[] | undefined): string => {
+        if (!blocks || blocks.length === 0) return '';
+        return blocks
+          .filter(b => b.enabled && b.code.trim())
+          .map(b => `<!-- ${b.name} -->\n${b.code}`)
+          .join('\n\n');
+      };
+      
+      const saveData = {
+        ...config,
+        headerCode: combineBlocks(config.headerCodeBlocks),
+        bodyCode: combineBlocks(config.bodyCodeBlocks),
+        footerCode: combineBlocks(config.footerCodeBlocks),
+      };
+      
       const response = await adminFetch("/api/admin/integrations", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(config),
+        body: JSON.stringify(saveData),
       });
 
       if (response.ok) {
@@ -118,6 +166,173 @@ export default function IntegrationsSettings() {
         [key]: value
       }
     }));
+  };
+
+  // Code block management functions
+  const addCodeBlock = (section: 'headerCodeBlocks' | 'bodyCodeBlocks' | 'footerCodeBlocks') => {
+    const newBlock: CodeBlock = {
+      id: `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: 'New Code Block',
+      code: '',
+      enabled: true
+    };
+    setConfig(prev => ({
+      ...prev,
+      [section]: [...(prev[section] || []), newBlock]
+    }));
+    // Auto-expand the new block
+    setExpandedBlocks(prev => ({ ...prev, [newBlock.id]: true }));
+  };
+
+  const removeCodeBlock = (section: 'headerCodeBlocks' | 'bodyCodeBlocks' | 'footerCodeBlocks', blockId: string) => {
+    setConfig(prev => ({
+      ...prev,
+      [section]: (prev[section] || []).filter(b => b.id !== blockId)
+    }));
+  };
+
+  const updateCodeBlock = (
+    section: 'headerCodeBlocks' | 'bodyCodeBlocks' | 'footerCodeBlocks',
+    blockId: string,
+    updates: Partial<CodeBlock>
+  ) => {
+    setConfig(prev => ({
+      ...prev,
+      [section]: (prev[section] || []).map(b => 
+        b.id === blockId ? { ...b, ...updates } : b
+      )
+    }));
+  };
+
+  const toggleBlockExpanded = (blockId: string) => {
+    setExpandedBlocks(prev => ({ ...prev, [blockId]: !prev[blockId] }));
+  };
+
+  // Render a code block section with multiple blocks
+  const renderCodeBlockSection = (
+    title: string,
+    description: string,
+    section: 'headerCodeBlocks' | 'bodyCodeBlocks' | 'footerCodeBlocks',
+    placeholder: string,
+    bgColor: string
+  ) => {
+    const blocks = config[section] || [];
+    
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              {title}
+            </label>
+            <p className="text-xs text-gray-500">
+              {description}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => addCodeBlock(section)}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Block
+          </button>
+        </div>
+        
+        {blocks.length === 0 ? (
+          <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
+            <Code className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-500">No code blocks yet</p>
+            <button
+              type="button"
+              onClick={() => addCodeBlock(section)}
+              className="mt-2 text-sm text-orange-600 hover:text-orange-700"
+            >
+              + Add your first code block
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {blocks.map((block, index) => (
+              <div
+                key={block.id}
+                className={`border rounded-lg overflow-hidden transition-all ${
+                  block.enabled ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 opacity-60'
+                }`}
+              >
+                {/* Block Header */}
+                <div 
+                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer ${bgColor}`}
+                  onClick={() => toggleBlockExpanded(block.id)}
+                >
+                  <GripVertical className="w-4 h-4 text-gray-400" />
+                  <span className="text-xs font-medium text-gray-500 bg-white/50 px-2 py-0.5 rounded">
+                    #{index + 1}
+                  </span>
+                  <input
+                    type="text"
+                    value={block.name}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => updateCodeBlock(section, block.id, { name: e.target.value })}
+                    className="flex-1 bg-transparent font-medium text-gray-800 border-none focus:outline-none focus:ring-0 text-sm"
+                    placeholder="Block name..."
+                  />
+                  <div className="flex items-center gap-2">
+                    <label 
+                      className="flex items-center gap-1.5 cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={block.enabled}
+                        onChange={(e) => updateCodeBlock(section, block.id, { enabled: e.target.checked })}
+                        className="w-4 h-4 text-orange-500 rounded focus:ring-orange-500"
+                      />
+                      <span className="text-xs text-gray-600">Active</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete this code block?')) {
+                          removeCodeBlock(section, block.id);
+                        }
+                      }}
+                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    {expandedBlocks[block.id] ? (
+                      <ChevronUp className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+                </div>
+                
+                {/* Block Content */}
+                {expandedBlocks[block.id] && (
+                  <div className="p-3 border-t border-gray-200">
+                    <textarea
+                      value={block.code}
+                      onChange={(e) => updateCodeBlock(section, block.id, { code: e.target.value })}
+                      placeholder={placeholder}
+                      className="w-full h-40 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors font-mono text-sm bg-gray-50"
+                    />
+                    {block.code && (
+                      <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                        <span>{block.code.length} characters</span>
+                        <span>{block.code.split('\n').length} lines</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   if (loading) {
@@ -294,58 +509,44 @@ export default function IntegrationsSettings() {
         {/* Custom Code Injection */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <Code className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">Custom Code Injection</h3>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Custom Code Injection</h3>
+                <p className="text-sm text-gray-500">Add multiple code snippets organized in separate blocks</p>
+              </div>
             </div>
             
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Header Code (HTML)
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Code to be injected into the &lt;head&gt; section. Useful for verification tags, custom meta tags, etc.
-                </p>
-                <textarea
-                  value={config.headerCode}
-                  onChange={(e) => setConfig({ ...config, headerCode: e.target.value })}
-                  placeholder="<meta name='verification' content='...' />"
-                  className="w-full h-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors font-mono text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Body Code (HTML)
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Code to be injected at the beginning of the &lt;body&gt; section.
-                </p>
-                <textarea
-                  value={config.bodyCode}
-                  onChange={(e) => setConfig({ ...config, bodyCode: e.target.value })}
-                  placeholder="<!-- Custom body code -->"
-                  className="w-full h-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors font-mono text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Footer Code (HTML)
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Code to be injected before the closing &lt;/body&gt; tag. Useful for tracking scripts.
-                </p>
-                <textarea
-                  value={config.footerCode}
-                  onChange={(e) => setConfig({ ...config, footerCode: e.target.value })}
-                  placeholder="<script>...</script>"
-                  className="w-full h-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors font-mono text-sm"
-                />
-              </div>
+            <div className="space-y-8">
+              {renderCodeBlockSection(
+                'Header Code Blocks',
+                'Code injected into the <head> section. Useful for meta tags, verification codes, analytics.',
+                'headerCodeBlocks',
+                '<meta name="verification" content="..." />\n<script>...</script>',
+                'bg-blue-50'
+              )}
+              
+              <hr className="border-gray-200" />
+              
+              {renderCodeBlockSection(
+                'Body Code Blocks',
+                'Code injected at the beginning of the <body> section.',
+                'bodyCodeBlocks',
+                '<!-- Custom body code -->',
+                'bg-green-50'
+              )}
+              
+              <hr className="border-gray-200" />
+              
+              {renderCodeBlockSection(
+                'Footer Code Blocks',
+                'Code injected before the closing </body> tag. Ideal for tracking scripts.',
+                'footerCodeBlocks',
+                '<script src="..." async></script>',
+                'bg-amber-50'
+              )}
             </div>
           </div>
         </div>

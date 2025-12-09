@@ -160,6 +160,19 @@ export function renderSafeHtml(htmlContent: string): { __html: string } {
     }
   );
 
+  // Make internal links bold by wrapping the link text with <strong>
+  // Match <a> tags with internal URLs (ardeloprints.com or relative paths)
+  sanitized = sanitized.replace(
+    /<a\s+([^>]*href=["'](?:https?:\/\/(?:www\.)?ardeloprints\.com[^"']*|\/[^"']*)[^>]*)>([^<]*)<\/a>/gi,
+    (match, attributes, linkText) => {
+      // Check if the link text is already wrapped in <strong> or <b>
+      if (linkText.includes('<strong>') || linkText.includes('<b>')) {
+        return match;
+      }
+      return `<a ${attributes}><strong>${linkText}</strong></a>`;
+    }
+  );
+
   return { __html: sanitized };
 }
 
