@@ -6,7 +6,7 @@ export default function EssentialIngredients({
   essIngredientGuide: any;
 }) {
   return (
-    <div className="rounded-lg p-6 shadow-sm border-2" style={{ 
+    <div className="rounded-lg p-4 shadow-sm border-2" style={{ 
       borderColor: '#3F7D58',
       background: 'linear-gradient(135deg, #E8F5EA 0%, #D4E6D7 100%)'
     }}>
@@ -21,8 +21,7 @@ export default function EssentialIngredients({
                           leading-[1.2]
                           font-bold
                           text-[2rem]
-                          m-4
-                          ml-0
+                          mb-3
 
                         "
         style={{ color: '#2D5A42' }}
@@ -31,12 +30,12 @@ export default function EssentialIngredients({
         Essential Ingredient Guide
       </h2>
 
-      <div className="px-6 pt-2 rounded-lg">
-        <ul>
+      <div className="pt-1 rounded-lg">
+        <ul className="list-none">
           {essIngredientGuide.map((item: any, index: any) => (
             <li
               key={index}
-              className="mb-4 text-[19.2px] leading-relaxed list-disc marker:text-xl text-gray-800 marker:text-center p-3 rounded-lg bg-white shadow-sm"
+              className="mb-3 text-[19.2px] leading-relaxed text-gray-800 p-2 px-3 rounded-lg bg-white shadow-sm"
             >
               <span>
                 {hasHtmlTags(item.ingredient) ? (
