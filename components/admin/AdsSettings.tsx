@@ -40,27 +40,78 @@ import { adminFetch } from "@/lib/admin-fetch";
 import { Ad, AdPlacement, AdType, PLACEMENT_LABELS, AD_TYPE_LABELS } from "@/types/ads";
 
 const PLACEMENTS: AdPlacement[] = [
+  // Recipe Page - Hero Area
   'before-hero',
   'after-hero',
+  // Recipe Page - Content Sections
+  'before-content',
   'in-content',
+  'in-content-2',
+  'in-content-3',
+  'after-story',
   'after-ingredients',
   'after-instructions',
+  'after-tips',
+  'after-essential-ingredients',
+  'after-taste-profile',
+  'after-timeline',
+  'after-equipment',
+  'after-temperature',
+  'after-pairings',
+  'after-pro-tips',
+  'after-serving-suggestions',
+  'after-special-notes',
+  'after-variations',
+  'before-recipe-card',
+  // Sidebar
   'sidebar-top',
+  'sidebar-middle',
   'sidebar-sticky',
+  // Footer & Between
   'footer',
-  'between-recipes'
+  'between-recipes',
+  // Home Page
+  'home-hero',
+  'home-after-featured',
+  'home-mid-content',
+  'home-before-categories',
+  'home-after-categories',
+  'home-before-footer'
 ];
 
 const PLACEMENT_DESCRIPTIONS: Record<AdPlacement, string> = {
   'before-hero': 'Top of recipe page, before hero image',
   'after-hero': 'Below hero image, above content',
+  'before-content': 'Before main content starts',
   'in-content': 'Auto-inserted between recipe sections',
+  'in-content-2': 'Second in-content slot',
+  'in-content-3': 'Third in-content slot',
+  'after-story': 'After the recipe story section',
   'after-ingredients': 'Below ingredients list',
   'after-instructions': 'Below cooking instructions',
+  'after-tips': 'After "Why You\'ll Love This" tips',
+  'after-essential-ingredients': 'After essential ingredient guide',
+  'after-taste-profile': 'After taste/texture profile card',
+  'after-timeline': 'After cooking timeline',
+  'after-equipment': 'After equipment & shopping card',
+  'after-temperature': 'After temperature guide',
+  'after-pairings': 'After perfect pairings section',
+  'after-pro-tips': 'After pro tips & mistakes card',
+  'after-serving-suggestions': 'After serving suggestions',
+  'after-special-notes': 'After chef\'s special notes',
+  'after-variations': 'After recipe variations',
+  'before-recipe-card': 'Before the recipe card at bottom',
   'sidebar-top': 'Top of sidebar on recipe pages',
+  'sidebar-middle': 'Middle position in sidebar',
   'sidebar-sticky': 'Sticky ad that follows scroll in sidebar',
   'footer': 'At the bottom of pages',
-  'between-recipes': 'In recipe card grids'
+  'between-recipes': 'In recipe card grids',
+  'home-hero': 'Home page: after hero section',
+  'home-after-featured': 'Home page: after featured/latest recipes',
+  'home-mid-content': 'Home page: middle of content area',
+  'home-before-categories': 'Home page: before categories section',
+  'home-after-categories': 'Home page: after categories section',
+  'home-before-footer': 'Home page: before footer/subscription'
 };
 
 const AD_TYPES: AdType[] = ['adsense', 'custom', 'affiliate', 'house'];
