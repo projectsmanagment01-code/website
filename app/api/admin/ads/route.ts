@@ -19,15 +19,43 @@ export const fetchCache = 'force-no-store';
 
 // Valid placement options
 const VALID_PLACEMENTS = [
+  // Recipe Page - Hero Area
   'before-hero',
   'after-hero',
+  // Recipe Page - Content Sections
+  'before-content',
   'in-content',
+  'in-content-2',
+  'in-content-3',
+  'after-story',
   'after-ingredients',
   'after-instructions',
+  'after-tips',
+  'after-essential-ingredients',
+  'after-taste-profile',
+  'after-timeline',
+  'after-equipment',
+  'after-temperature',
+  'after-pairings',
+  'after-pro-tips',
+  'after-serving-suggestions',
+  'after-special-notes',
+  'after-variations',
+  'before-recipe-card',
+  // Sidebar
   'sidebar-top',
+  'sidebar-middle',
   'sidebar-sticky',
+  // Footer & Between Content
   'footer',
-  'between-recipes'
+  'between-recipes',
+  // Home Page
+  'home-hero',
+  'home-after-featured',
+  'home-mid-content',
+  'home-before-categories',
+  'home-after-categories',
+  'home-before-footer'
 ] as const;
 
 // Valid ad types
