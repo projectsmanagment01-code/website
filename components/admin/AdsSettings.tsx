@@ -34,7 +34,10 @@ import {
   Clock,
   Code,
   Image as ImageIcon,
-  LayoutGrid
+  LayoutGrid,
+  CheckSquare,
+  Square,
+  MinusSquare
 } from "lucide-react";
 import { adminFetch } from "@/lib/admin-fetch";
 import { Ad, AdPlacement, AdType, PLACEMENT_LABELS, AD_TYPE_LABELS } from "@/types/ads";
@@ -196,6 +199,19 @@ export default function AdsSettings() {
   // View state
   const [viewMode, setViewMode] = useState<'placement' | 'list'>('list');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete' | 'edit' | null>(null);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [showBulkEditModal, setShowBulkEditModal] = useState(false);
+  const [bulkEditData, setBulkEditData] = useState({
+    placement: '',
+    isActive: '',
+    targetPages: [] as string[],
+    startDate: '',
+    endDate: ''
+  });
 
   // Fetch ads
   const fetchAds = useCallback(async () => {
@@ -331,6 +347,164 @@ export default function AdsSettings() {
       }
     } catch (error) {
       console.error('Failed to toggle ad status:', error);
+    }
+  };
+
+  // Bulk selection handlers
+  const toggleSelectAd = (id: string) => {
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === ads.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(ads.map(ad => ad.id)));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  // Bulk delete
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    
+    if (!confirm(`Are you sure you want to delete ${selectedIds.size} ad(s)? This cannot be undone.`)) return;
+
+    setBulkProcessing(true);
+    setMessage(null);
+
+    try {
+      const results = await Promise.all(
+        Array.from(selectedIds).map(id =>
+          adminFetch(`/api/admin/ads/${id}`, { method: 'DELETE' })
+        )
+      );
+
+      const failed = results.filter(r => !r.ok).length;
+      const success = results.length - failed;
+
+      if (failed > 0) {
+        setMessage({ type: "error", text: `Deleted ${success} ads, ${failed} failed` });
+      } else {
+        setMessage({ type: "success", text: `Successfully deleted ${success} ad(s)` });
+      }
+
+      setSelectedIds(new Set());
+      fetchAds();
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to delete ads" });
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  // Bulk activate/deactivate
+  const handleBulkToggleActive = async (activate: boolean) => {
+    if (selectedIds.size === 0) return;
+
+    setBulkProcessing(true);
+    setMessage(null);
+
+    try {
+      const results = await Promise.all(
+        Array.from(selectedIds).map(id =>
+          adminFetch(`/api/admin/ads/${id}`, {
+            method: 'PATCH',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isActive: activate })
+          })
+        )
+      );
+
+      const failed = results.filter(r => !r.ok).length;
+      const success = results.length - failed;
+
+      if (failed > 0) {
+        setMessage({ type: "error", text: `Updated ${success} ads, ${failed} failed` });
+      } else {
+        setMessage({ type: "success", text: `Successfully ${activate ? 'activated' : 'deactivated'} ${success} ad(s)` });
+      }
+
+      setSelectedIds(new Set());
+      fetchAds();
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to update ads" });
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  // Bulk edit submit
+  const handleBulkEditSubmit = async () => {
+    if (selectedIds.size === 0) return;
+
+    setBulkProcessing(true);
+    setMessage(null);
+
+    try {
+      // Build update data - only include fields that have values
+      const updateData: Record<string, any> = {};
+      
+      if (bulkEditData.placement) {
+        updateData.placement = bulkEditData.placement;
+      }
+      if (bulkEditData.isActive !== '') {
+        updateData.isActive = bulkEditData.isActive === 'true';
+      }
+      if (bulkEditData.targetPages.length > 0) {
+        updateData.targetPages = bulkEditData.targetPages;
+      }
+      if (bulkEditData.startDate) {
+        updateData.startDate = new Date(bulkEditData.startDate).toISOString();
+      }
+      if (bulkEditData.endDate) {
+        updateData.endDate = new Date(bulkEditData.endDate).toISOString();
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        setMessage({ type: "error", text: "No changes specified" });
+        setBulkProcessing(false);
+        return;
+      }
+
+      const results = await Promise.all(
+        Array.from(selectedIds).map(id =>
+          adminFetch(`/api/admin/ads/${id}`, {
+            method: 'PUT',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updateData)
+          })
+        )
+      );
+
+      const failed = results.filter(r => !r.ok).length;
+      const success = results.length - failed;
+
+      if (failed > 0) {
+        setMessage({ type: "error", text: `Updated ${success} ads, ${failed} failed` });
+      } else {
+        setMessage({ type: "success", text: `Successfully updated ${success} ad(s)` });
+      }
+
+      setSelectedIds(new Set());
+      setShowBulkEditModal(false);
+      setBulkEditData({ placement: '', isActive: '', targetPages: [], startDate: '', endDate: '' });
+      fetchAds();
+    } catch (error) {
+      setMessage({ type: "error", text: "Failed to update ads" });
+    } finally {
+      setBulkProcessing(false);
     }
   };
 
@@ -578,6 +752,67 @@ export default function AdsSettings() {
           </div>
         </div>
 
+        {/* Bulk Action Bar */}
+        {selectedIds.size > 0 && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <CheckSquare className="w-5 h-5 text-blue-600" />
+              <span className="font-medium text-blue-900">{selectedIds.size} selected</span>
+            </div>
+            
+            <div className="flex-1" />
+            
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => handleBulkToggleActive(true)}
+                disabled={bulkProcessing}
+                className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Eye className="w-4 h-4" />
+                Activate
+              </button>
+              <button
+                onClick={() => handleBulkToggleActive(false)}
+                disabled={bulkProcessing}
+                className="px-3 py-1.5 text-sm bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <EyeOff className="w-4 h-4" />
+                Deactivate
+              </button>
+              <button
+                onClick={() => {
+                  setBulkEditData({ placement: '', isActive: '', targetPages: [], startDate: '', endDate: '' });
+                  setShowBulkEditModal(true);
+                }}
+                disabled={bulkProcessing}
+                className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Edit2 className="w-4 h-4" />
+                Edit
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={bulkProcessing}
+                className="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+              <button
+                onClick={clearSelection}
+                disabled={bulkProcessing}
+                className="px-3 py-1.5 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+            
+            {bulkProcessing && (
+              <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+            )}
+          </div>
+        )}
+
         {/* Ads List */}
         {ads.length === 0 ? (
           <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
@@ -603,6 +838,21 @@ export default function AdsSettings() {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
+                  <th className="w-12 px-4 py-3">
+                    <button
+                      onClick={toggleSelectAll}
+                      className="flex items-center justify-center text-gray-500 hover:text-gray-700"
+                      title={selectedIds.size === ads.length ? "Deselect all" : "Select all"}
+                    >
+                      {selectedIds.size === 0 ? (
+                        <Square className="w-5 h-5" />
+                      ) : selectedIds.size === ads.length ? (
+                        <CheckSquare className="w-5 h-5 text-blue-600" />
+                      ) : (
+                        <MinusSquare className="w-5 h-5 text-blue-600" />
+                      )}
+                    </button>
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Ad Name</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                   <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Placement</th>
@@ -612,7 +862,19 @@ export default function AdsSettings() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {ads.map(ad => (
-                  <tr key={ad.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={ad.id} className={`hover:bg-gray-50 transition-colors ${selectedIds.has(ad.id) ? 'bg-blue-50' : ''}`}>
+                    <td className="px-4 py-4">
+                      <button
+                        onClick={() => toggleSelectAd(ad.id)}
+                        className="flex items-center justify-center text-gray-500 hover:text-gray-700"
+                      >
+                        {selectedIds.has(ad.id) ? (
+                          <CheckSquare className="w-5 h-5 text-blue-600" />
+                        ) : (
+                          <Square className="w-5 h-5" />
+                        )}
+                      </button>
+                    </td>
                     <td className="px-4 py-4">
                       <div className="font-medium text-gray-900">{ad.name}</div>
                       {ad.description && (
@@ -1241,6 +1503,145 @@ export default function AdsSettings() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Edit Modal */}
+      {showBulkEditModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={() => setShowBulkEditModal(false)} />
+          
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <div className="relative bg-white rounded-xl shadow-2xl max-w-lg w-full">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Bulk Edit</h3>
+                  <p className="text-sm text-gray-500">{selectedIds.size} ad(s) selected</p>
+                </div>
+                <button
+                  onClick={() => setShowBulkEditModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="px-6 py-4 space-y-4">
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> Only fields with values will be updated. Leave fields empty to keep existing values.
+                  </p>
+                </div>
+
+                {/* Placement */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Change Placement</label>
+                  <select
+                    value={bulkEditData.placement}
+                    onChange={(e) => setBulkEditData({ ...bulkEditData, placement: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">-- Keep existing --</option>
+                    {PLACEMENTS.map(p => (
+                      <option key={p} value={p}>{PLACEMENT_LABELS[p]}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Change Status</label>
+                  <select
+                    value={bulkEditData.isActive}
+                    onChange={(e) => setBulkEditData({ ...bulkEditData, isActive: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">-- Keep existing --</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+
+                {/* Target Pages */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Set Target Pages</label>
+                  <div className="flex flex-wrap gap-2">
+                    {PAGE_TYPES.map(pageType => (
+                      <label key={pageType} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200">
+                        <input
+                          type="checkbox"
+                          checked={bulkEditData.targetPages.includes(pageType)}
+                          onChange={(e) => {
+                            setBulkEditData(prev => ({
+                              ...prev,
+                              targetPages: e.target.checked
+                                ? [...prev.targetPages, pageType]
+                                : prev.targetPages.filter(p => p !== pageType)
+                            }));
+                          }}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-sm capitalize">{pageType}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Leave all unchecked to keep existing target pages</p>
+                </div>
+
+                {/* Scheduling */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Start Date</label>
+                    <input
+                      type="date"
+                      value={bulkEditData.startDate}
+                      onChange={(e) => setBulkEditData({ ...bulkEditData, startDate: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">End Date</label>
+                    <input
+                      type="date"
+                      value={bulkEditData.endDate}
+                      onChange={(e) => setBulkEditData({ ...bulkEditData, endDate: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkEditModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleBulkEditSubmit}
+                  disabled={bulkProcessing}
+                  className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                  {bulkProcessing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      Update {selectedIds.size} Ad(s)
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
