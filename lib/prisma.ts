@@ -5,22 +5,21 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined 
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+// Create a single Prisma instance with connection pooling limits
+const createPrismaClient = () => {
+  return new PrismaClient({
     log:
       process.env.NODE_ENV === "development"
         ? ["query", "error", "warn"]
         : ["error"],
-    // Connection pool configuration
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
-    },
   });
+};
 
-if (process.env.NODE_ENV !== "production") {
+// ALWAYS use singleton - both in dev and prod/build
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+
+// Cache the instance globally to prevent multiple connections during build
+if (!globalForPrisma.prisma) {
   globalForPrisma.prisma = prisma;
 }
 
@@ -36,12 +35,17 @@ export async function testConnection() {
   }
 }
 
-// Graceful shutdown for production
-if (process.env.NODE_ENV === "production") {
-  process.on("beforeExit", async () => {
-    await prisma.$disconnect();
-    console.log("🗄️ Database disconnected");
-  });
+// Graceful shutdown
+const cleanup = async () => {
+  await prisma.$disconnect();
+  console.log("🗄️ Database disconnected");
+};
+
+// Handle various shutdown signals
+if (typeof process !== 'undefined') {
+  process.on("beforeExit", cleanup);
+  process.on("SIGINT", cleanup);
+  process.on("SIGTERM", cleanup);
 }
 
 export default prisma;

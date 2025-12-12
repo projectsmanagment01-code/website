@@ -111,16 +111,54 @@ export function getFullUrl(path: string = ""): string {
 }
 
 /**
+ * Decode HTML entities back to their actual characters
+ * Converts &lt; to <, &gt; to >, &amp; to &, etc.
+ */
+export function decodeHtmlEntities(text: string): string {
+  if (!text || typeof text !== "string") {
+    return "";
+  }
+  
+  const entities: Record<string, string> = {
+    '&lt;': '<',
+    '&gt;': '>',
+    '&amp;': '&',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&apos;': "'",
+    '&nbsp;': ' ',
+  };
+  
+  let decoded = text;
+  for (const [entity, char] of Object.entries(entities)) {
+    decoded = decoded.replace(new RegExp(entity, 'g'), char);
+  }
+  
+  // Also handle numeric entities like &#60; &#62;
+  decoded = decoded.replace(/&#(\d+);/g, (_, num) => String.fromCharCode(parseInt(num, 10)));
+  decoded = decoded.replace(/&#x([a-fA-F0-9]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+  
+  return decoded;
+}
+
+/**
  * Safe HTML renderer that sanitizes and processes HTML content
  * Handles internal links and basic HTML elements
+ * Also decodes HTML entities before processing
  */
 export function renderSafeHtml(htmlContent: string): { __html: string } {
   if (!htmlContent || typeof htmlContent !== "string") {
     return { __html: "" };
   }
 
+  // First, decode HTML entities if content has escaped HTML
+  let content = htmlContent;
+  if (/&lt;|&gt;|&amp;|&quot;|&#/.test(content)) {
+    content = decodeHtmlEntities(content);
+  }
+
   // Basic HTML sanitization - remove dangerous tags and attributes
-  let sanitized = htmlContent
+  let sanitized = content
     // Remove script tags and their content
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
     // Remove style tags
@@ -177,13 +215,14 @@ export function renderSafeHtml(htmlContent: string): { __html: string } {
 }
 
 /**
- * Check if content contains HTML tags
+ * Check if content contains HTML tags (including escaped HTML entities)
  */
 export function hasHtmlTags(content: string): boolean {
   if (!content || typeof content !== "string") {
     return false;
   }
-  return /<[^>]+>/.test(content);
+  // Check for actual HTML tags or escaped HTML entities
+  return /<[^>]+>/.test(content) || /&lt;[^&]*&gt;/.test(content);
 }
 
 /**

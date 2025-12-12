@@ -17,6 +17,7 @@ import {
   Presentation,
   Mail,
   Puzzle,
+  Megaphone,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -61,6 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "backup", label: "Backup & Restore", icon: Archive },
     { id: "seo-reports", label: "AI SEO Reports", icon: Sparkles },
     { id: "google-search", label: "Google Search", icon: Bot },
+    { id: "ads", label: "Ad Management", icon: Megaphone },
     { id: "plugins", label: "Plugins", icon: Bot },
     { id: "api-tokens", label: "API Tokens", icon: Key },
     { id: "integrations", label: "Integrations", icon: Puzzle },

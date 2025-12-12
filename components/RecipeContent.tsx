@@ -9,6 +9,29 @@ import { getWebsiteName } from "@/lib/site-name-helper";
 import { SafeImage } from "./SafeImage";
 import RecipeBottomSubscription from "./RecipeBottomSubscription";
 import RecipeVideo from "./RecipeVideo";
+import { 
+  AdBeforeHero,
+  AdAfterHero, 
+  AdBeforeContent,
+  AdInContent, 
+  AdInContent2,
+  AdInContent3,
+  AdAfterStory,
+  AdAfterIngredients, 
+  AdAfterInstructions,
+  AdAfterTips,
+  AdAfterEssentialIngredients,
+  AdAfterTasteProfile,
+  AdAfterTimeline,
+  AdAfterEquipment,
+  AdAfterTemperature,
+  AdAfterPairings,
+  AdAfterProTips,
+  AdAfterServingSuggestions,
+  AdAfterSpecialNotes,
+  AdAfterVariations,
+  AdBeforeRecipeCard
+} from "./ads/RecipeAds";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -72,6 +95,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
   return (
     <div className="space-y-8 mt-2 text-md max-w-none">
+      {/* Ad Placement: Before Hero */}
+      <AdBeforeHero category={recipe.category} />
+
       {/* 1. Feature/Hero Image - Top of page */}
       {featureImage && (
         <div>
@@ -102,6 +128,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       )}
 
+      {/* Ad Placement: After Hero */}
+      <AdAfterHero category={recipe.category} />
+
       {/* Story */}
       <div className="prose prose-lg max-w-none">
         {hasHtmlTags(recipe.story) ? (
@@ -116,6 +145,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         )}
       </div>
 
+      {/* Ad Placement: After Story */}
+      <AdAfterStory category={recipe.category} />
+
       {/* Recipe Video (YouTube embed if available) */}
       <RecipeVideo videoUrl={(recipe as any).videoUrl} title={recipe.title} />
 
@@ -124,6 +156,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         title={recipe.whyYouLove?.title}
         items={recipe.whyYouLove?.items}
       />
+
+      {/* Ad Placement: After Tips */}
+      <AdAfterTips category={recipe.category} />
 
       {/* Testimonial */}
       <div className="prose prose-lg max-w-none text-[1.2rem]">
@@ -141,6 +176,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
       {/* Essential Ingredient Guide */}
       <EssentialIngredients essIngredientGuide={recipe.essIngredientGuide} />
+
+      {/* Ad Placement: After Essential Ingredients */}
+      <AdAfterEssentialIngredients category={recipe.category} />
 
       {/* 2. Ingredient/Preparation Image - After ingredient guide */}
       {ingredientImage && (
@@ -170,6 +208,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </div>
         </div>
       )}
+
+      {/* Ad Placement: After Ingredients - Now after image for better spacing */}
+      <AdAfterIngredients category={recipe.category} />
 
       {/* Complete Cooking Process */}
       <CompleteCookingProcess completeProcess={recipe.completeProcess} />
@@ -367,24 +408,27 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                     {(recipe as any).tasteProfile.sour && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Sour: {(recipe as any).tasteProfile.sour}</span>}
                     {(recipe as any).tasteProfile.umami && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Umami: {(recipe as any).tasteProfile.umami}</span>}
                   </div>
-                  {(recipe as any).tasteProfile.overall && <p className="text-gray-700 italic">{(recipe as any).tasteProfile.overall}</p>}
+                  {(recipe as any).tasteProfile.overall && <p className="text-gray-700 italic" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).tasteProfile.overall)} />}
                 </div>
               )}
               {(recipe as any).textureProfile && typeof (recipe as any).textureProfile === 'object' && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Texture:</strong></p>
                   <ul className="space-y-1">
-                    {(recipe as any).textureProfile.outside && <li className="text-gray-800">Outside: {(recipe as any).textureProfile.outside}</li>}
-                    {(recipe as any).textureProfile.inside && <li className="text-gray-800">Inside: {(recipe as any).textureProfile.inside}</li>}
-                    {(recipe as any).textureProfile.bite && <li className="text-gray-800">Bite: {(recipe as any).textureProfile.bite}</li>}
+                    {(recipe as any).textureProfile.outside && <li className="text-gray-800">Outside: <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile.outside)} /></li>}
+                    {(recipe as any).textureProfile.inside && <li className="text-gray-800">Inside: <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile.inside)} /></li>}
+                    {(recipe as any).textureProfile.bite && <li className="text-gray-800">Bite: <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile.bite)} /></li>}
                   </ul>
-                  {(recipe as any).textureProfile.overall && <p className="text-gray-700 italic mt-2">{(recipe as any).textureProfile.overall}</p>}
+                  {(recipe as any).textureProfile.overall && <p className="text-gray-700 italic mt-2" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile.overall)} />}
                 </div>
               )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Ad Placement: After Taste Profile */}
+      <AdAfterTasteProfile category={recipe.category} />
 
       {/* 3. Mixing/Cooking Image - After Taste & Texture Profile */}
       {mixingImage && (
@@ -447,7 +491,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </>
       )}
 
-      {/* Timeline - Plain Text with formatting */}
+      {/* Timeline - Supports HTML */}
       {Array.isArray((recipe as any).timeline) && (recipe as any).timeline.length > 0 && (
         <>
           <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
@@ -456,13 +500,16 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).timeline.map((item: any, index: number) => (
               <p key={index} className="text-black leading-relaxed">
-                <strong>{hasHtmlTags(item.time) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.time)} /> : item.time}:</strong>{' '}
-                {hasHtmlTags(item.action) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.action)} /> : item.action}
+                <strong>{item.time}:</strong>{' '}
+                <span dangerouslySetInnerHTML={renderSafeHtml(item.action)} />
               </p>
             ))}
           </div>
         </>
       )}
+
+      {/* Ad Placement: After Timeline */}
+      <AdAfterTimeline category={recipe.category} />
 
       {/* Equipment & Shopping - TipCard Style */}
       {(Array.isArray((recipe as any).equipmentNotes) && (recipe as any).equipmentNotes.length > 0) || (Array.isArray((recipe as any).shoppingList) && (recipe as any).shoppingList.length > 0) ? (
@@ -480,11 +527,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).equipmentNotes) && (recipe as any).equipmentNotes.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Equipment You'll Need:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).equipmentNotes.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</span>
+                      <li key={index} className="flex items-start">
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
                       </li>
                     ))}
                   </ul>
@@ -493,11 +539,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).shoppingList) && (recipe as any).shoppingList.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Shopping List:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).shoppingList.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</span>
+                      <li key={index} className="flex items-start">
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
                       </li>
                     ))}
                   </ul>
@@ -508,7 +553,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       ) : null}
 
-      {/* Ingredient Prep - Plain Text */}
+      {/* Ingredient Prep - Supports HTML */}
       {Array.isArray((recipe as any).ingredientPrep) && (recipe as any).ingredientPrep.length > 0 && (
         <>
           <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
@@ -516,11 +561,14 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).ingredientPrep.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</p>
+              <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml(item)} />
             ))}
           </div>
         </>
       )}
+
+      {/* Ad Placement: After Equipment - Moved after Ingredient Prep for spacing */}
+      <AdAfterEquipment category={recipe.category} />
 
       {/* 3. Final Presentation Image - After Ingredient Prep Guide */}
       {finalImage && (
@@ -551,7 +599,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       )}
 
-      {/* Temperature Notes - Plain Text */}
+      {/* Temperature Notes - Supports HTML */}
       {(recipe as any).temperatureNotes && typeof (recipe as any).temperatureNotes === 'object' && (
         <>
           <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
@@ -559,19 +607,22 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).temperatureNotes.stovetopHeatLevel && (
-              <p className="text-black leading-relaxed"><strong>Stovetop:</strong> {(recipe as any).temperatureNotes.stovetopHeatLevel}</p>
+              <p className="text-black leading-relaxed"><strong>Stovetop:</strong> <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).temperatureNotes.stovetopHeatLevel)} /></p>
             )}
             {(recipe as any).temperatureNotes.ovenTemperature && (recipe as any).temperatureNotes.ovenTemperature !== "Not required" && (
-              <p className="text-black leading-relaxed"><strong>Oven:</strong> {(recipe as any).temperatureNotes.ovenTemperature}</p>
+              <p className="text-black leading-relaxed"><strong>Oven:</strong> <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).temperatureNotes.ovenTemperature)} /></p>
             )}
             {(recipe as any).temperatureNotes.safeInternalTemp && (
-              <p className="text-black leading-relaxed"><strong>Safe Internal Temp:</strong> {(recipe as any).temperatureNotes.safeInternalTemp}</p>
+              <p className="text-black leading-relaxed"><strong>Safe Internal Temp:</strong> <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).temperatureNotes.safeInternalTemp)} /></p>
             )}
           </div>
         </>
       )}
 
-      {/* Pairings - Plain Text */}
+      {/* Ad Placement: After Temperature */}
+      <AdAfterTemperature category={recipe.category} />
+
+      {/* Pairings - Supports HTML */}
       {Array.isArray((recipe as any).pairings) && (recipe as any).pairings.length > 0 && (
         <>
           <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
@@ -579,11 +630,14 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).pairings.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</p>
+              <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml(item)} />
             ))}
           </div>
         </>
       )}
+
+      {/* Ad Placement: After Pairings */}
+      <AdAfterPairings category={recipe.category} />
 
       {/* Common Mistakes & Flavor Boosters - TipCard Style */}
       {(Array.isArray((recipe as any).commonMistakes) && (recipe as any).commonMistakes.length > 0) || (Array.isArray((recipe as any).flavorBoosters) && (recipe as any).flavorBoosters.length > 0) ? (
@@ -601,11 +655,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).commonMistakes) && (recipe as any).commonMistakes.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Common Mistakes to Avoid:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).commonMistakes.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</span>
+                      <li key={index} className="flex items-start">
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
                       </li>
                     ))}
                   </ul>
@@ -614,11 +667,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).flavorBoosters) && (recipe as any).flavorBoosters.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Flavor Boosters:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).flavorBoosters.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</span>
+                      <li key={index} className="flex items-start">
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
                       </li>
                     ))}
                   </ul>
@@ -629,7 +681,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       ) : null}
 
-      {/* Serving Suggestions - Plain Text */}
+      {/* Ad Placement: After Pro Tips */}
+      <AdAfterProTips category={recipe.category} />
+
+      {/* Serving Suggestions - Supports HTML */}
       {Array.isArray((recipe as any).servingSuggestions) && (recipe as any).servingSuggestions.length > 0 && (
         <>
           <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
@@ -637,13 +692,17 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).servingSuggestions.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</p>
+              <p 
+                key={index} 
+                className="text-black leading-relaxed"
+                dangerouslySetInnerHTML={renderSafeHtml(item)}
+              />
             ))}
           </div>
         </>
       )}
 
-      {/* Special Notes - Plain Text */}
+      {/* Special Notes - Supports HTML */}
       {Array.isArray((recipe as any).specialNotes) && (recipe as any).specialNotes.length > 0 && (
         <>
           <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
@@ -651,13 +710,20 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).specialNotes.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed">{hasHtmlTags(item) ? <span dangerouslySetInnerHTML={renderSafeHtml(item)} /> : item}</p>
+              <p 
+                key={index} 
+                className="text-black leading-relaxed"
+                dangerouslySetInnerHTML={renderSafeHtml(item)}
+              />
             ))}
           </div>
         </>
       )}
 
-      {/* Variations - Plain Text */}
+      {/* Ad Placement: After Serving Suggestions - Moved here for better spacing */}
+      <AdAfterServingSuggestions category={recipe.category} />
+
+      {/* Variations - Supports HTML */}
       {Array.isArray((recipe as any).variations) && (recipe as any).variations.length > 0 && (
         <>
           <h2 className="relative flex items-center before:content-[''] before:rounded-2xl before:w-[0.7rem] before:min-w-[0.7rem] before:me-[0.7rem] before:bg-[var(--mo-article-any)] before:self-stretch text-[calc(var(--mo-font-size)*1.5)] leading-[1.2] font-bold text-[2rem] m-4 ml-0">
@@ -666,13 +732,16 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).variations.map((item: any, index: number) => (
               <p key={index} className="text-black leading-relaxed">
-                <strong>{hasHtmlTags(item.title) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.title)} /> : item.title}:</strong>{' '}
-                {hasHtmlTags(item.description) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.description)} /> : item.description}
+                <strong>{item.title}:</strong>{' '}
+                <span dangerouslySetInnerHTML={renderSafeHtml(item.description)} />
               </p>
             ))}
           </div>
         </>
       )}
+
+      {/* Ad Placement: After Special Notes - Moved here before Substitutions */}
+      <AdAfterSpecialNotes category={recipe.category} />
 
       {/* Substitutions & Dietary - TipCard Style */}
       {(Array.isArray((recipe as any).substitutions) && (recipe as any).substitutions.length > 0) || (Array.isArray((recipe as any).dietaryAdaptations) && (recipe as any).dietaryAdaptations.length > 0) ? (
@@ -690,12 +759,11 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).substitutions) && (recipe as any).substitutions.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Ingredient Substitutions:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).substitutions.map((item: any, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                      <li key={index} className="flex items-start">
                         <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
-                          <strong>{hasHtmlTags(item.ingredient) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.ingredient)} /> : item.ingredient}</strong> → {hasHtmlTags(item.substitute) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.substitute)} /> : item.substitute}{item.note && <span className="italic text-gray-600"> ({hasHtmlTags(item.note) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.note)} /> : item.note})</span>}
+                          <strong>{item.ingredient}</strong> → <span dangerouslySetInnerHTML={renderSafeHtml(item.substitute)} />{item.note && <span className="italic text-gray-600"> ({item.note})</span>}
                         </span>
                       </li>
                     ))}
@@ -705,12 +773,11 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).dietaryAdaptations) && (recipe as any).dietaryAdaptations.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Dietary Adaptations:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).dietaryAdaptations.map((item: any, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                      <li key={index} className="flex items-start">
                         <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
-                          <strong>{hasHtmlTags(item.diet) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.diet)} /> : item.diet}:</strong> {hasHtmlTags(item.howToAdapt) ? <span dangerouslySetInnerHTML={renderSafeHtml(item.howToAdapt)} /> : item.howToAdapt}
+                          <strong>{item.diet}:</strong> <span dangerouslySetInnerHTML={renderSafeHtml(item.howToAdapt)} />
                         </span>
                       </li>
                     ))}
@@ -722,9 +789,18 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       ) : null}
 
+      {/* Ad Placement: After Variations (after Substitutions card) */}
+      <AdAfterVariations category={recipe.category} />
+
       {/* === END NEW CONTENT FIELDS SECTION === */}
 
+      {/* Ad Placement: After Instructions - Before Recipe Card with spacing */}
+      <AdAfterInstructions category={recipe.category} />
+
       <Card recipe={recipe} />
+
+      {/* Ad Placement: Before Recipe Card - Now AFTER Recipe Card for spacing */}
+      <AdBeforeRecipeCard category={recipe.category} />
 
       {/* Subscription Form */}
       <RecipeBottomSubscription />

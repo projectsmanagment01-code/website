@@ -275,19 +275,65 @@ model Media {
   @@map("media")
 }
 
-// Ad Management System
+// Ad Management System - Full-featured ad placement
 model Ad {
   id          String    @id @default(cuid())
-  title       String
-  description String?
-  placement   String    // header, sidebar, footer, inline
-  active      Boolean   @default(true)
-  adCode      String    @db.Text
+  name        String    // Internal name for identification
+  description String?   // Admin notes
+  
+  // Ad Type & Provider
+  adType      String    @default("adsense") // adsense, custom, affiliate, house
+  provider    String?   // google, amazon, custom
+  
+  // AdSense/GPT specific fields
+  slotId      String?   // AdSense slot ID (e.g., "1234567890")
+  publisherId String?   // AdSense publisher ID (e.g., "ca-pub-XXXXXXXX")
+  adFormat    String?   @default("auto") // auto, horizontal, vertical, rectangle
+  
+  // Placement Configuration
+  placement   String    // before-hero, after-hero, in-content, after-ingredients, after-instructions, sidebar-top, sidebar-sticky, footer, between-recipes
+  position    Int       @default(0) // Order within same placement
+  
+  // Size Configuration
+  sizes       String[]  @default([]) // ["728x90", "300x250", "responsive"]
+  responsive  Boolean   @default(true) // Use responsive sizing
+  minWidth    Int?      // Minimum viewport width to show ad
+  maxWidth    Int?      // Maximum viewport width to show ad
+  
+  // Targeting
+  targetPages String[]  @default([]) // Empty = all pages, ["recipe", "category", "home"]
+  targetCategories String[] @default([]) // Empty = all categories
+  excludePages String[] @default([]) // Pages to exclude
+  
+  // Content (for custom/affiliate ads)
+  adCode      String?   @db.Text // Custom HTML/JS code
+  imageUrl    String?   // For image-based ads
+  linkUrl     String?   // Click destination
+  altText     String?   // Image alt text
+  
+  // Performance & Control
+  isActive    Boolean   @default(true)
+  priority    Int       @default(0) // Higher = more important
+  lazyLoad    Boolean   @default(true) // Use Intersection Observer
+  lazyOffset  String?   @default("200px") // Load when within X of viewport
+  
+  // Scheduling
+  startDate   DateTime? // Start showing ad
+  endDate     DateTime? // Stop showing ad
+  
+  // Stats (optional tracking)
+  impressions Int       @default(0)
+  clicks      Int       @default(0)
+  
+  // Audit
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  expiresAt   DateTime?
+  createdBy   String?   // Admin who created
 
   @@map("ads")
+  @@index([placement])
+  @@index([isActive])
+  @@index([adType])
 }
 
 // Internal Link Suggestions for SEO
