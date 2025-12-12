@@ -16,7 +16,6 @@ interface AdInserterProps {
   pageType?: PageType;
   category?: string;
   className?: string;
-  maxAds?: number; // Maximum number of ads to show in this slot
   showLabel?: boolean; // Show "Advertisement" label
   labelPosition?: 'top' | 'bottom'; // Position of the label
 }
@@ -31,7 +30,6 @@ export default function AdInserter({
   pageType = 'recipe',
   category,
   className = '',
-  maxAds = 1,
   showLabel = true,
   labelPosition = 'top'
 }: AdInserterProps) {
@@ -66,7 +64,7 @@ export default function AdInserter({
       setError(err instanceof Error ? err.message : 'Unknown error');
       setLoading(false);
     }
-  }, [placement, pageType, category, maxAds]);
+  }, [placement, pageType, category]);
 
   // Filter ads based on placement and targeting
   const filterAndSetAds = useCallback((allAds: Ad[]) => {
@@ -103,18 +101,11 @@ export default function AdInserter({
         
         return true;
       })
-      // Sort by priority (higher first), then by position
-      .sort((a, b) => {
-        if (b.priority !== a.priority) {
-          return b.priority - a.priority;
-        }
-        return a.position - b.position;
-      })
-      // Limit to maxAds
-      .slice(0, maxAds);
+      // Sort by position only
+      .sort((a, b) => a.position - b.position);
 
     setAds(filtered);
-  }, [placement, pageType, category, maxAds]);
+  }, [placement, pageType, category]);
 
   // Fetch ads on mount
   useEffect(() => {
