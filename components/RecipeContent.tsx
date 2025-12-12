@@ -374,18 +374,18 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                     {(recipe as any).tasteProfile.sour && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Sour: {(recipe as any).tasteProfile.sour}</span>}
                     {(recipe as any).tasteProfile.umami && <span className="bg-white/70 px-3 py-1 rounded-full text-sm">Umami: {(recipe as any).tasteProfile.umami}</span>}
                   </div>
-                  {(recipe as any).tasteProfile.overall && <p className="text-gray-700 italic" dangerouslySetInnerHTML={{ __html: (recipe as any).tasteProfile.overall }} />}
+                  {(recipe as any).tasteProfile.overall && <p className="text-gray-700 italic" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).tasteProfile.overall)} />}
                 </div>
               )}
               {(recipe as any).textureProfile && typeof (recipe as any).textureProfile === 'object' && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Texture:</strong></p>
                   <ul className="space-y-1">
-                    {(recipe as any).textureProfile.outside && <li className="text-gray-800">Outside: <span dangerouslySetInnerHTML={{ __html: (recipe as any).textureProfile.outside }} /></li>}
-                    {(recipe as any).textureProfile.inside && <li className="text-gray-800">Inside: <span dangerouslySetInnerHTML={{ __html: (recipe as any).textureProfile.inside }} /></li>}
-                    {(recipe as any).textureProfile.bite && <li className="text-gray-800">Bite: <span dangerouslySetInnerHTML={{ __html: (recipe as any).textureProfile.bite }} /></li>}
+                    {(recipe as any).textureProfile.outside && <li className="text-gray-800">Outside: <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile.outside)} /></li>}
+                    {(recipe as any).textureProfile.inside && <li className="text-gray-800">Inside: <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile.inside)} /></li>}
+                    {(recipe as any).textureProfile.bite && <li className="text-gray-800">Bite: <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile.bite)} /></li>}
                   </ul>
-                  {(recipe as any).textureProfile.overall && <p className="text-gray-700 italic mt-2" dangerouslySetInnerHTML={{ __html: (recipe as any).textureProfile.overall }} />}
+                  {(recipe as any).textureProfile.overall && <p className="text-gray-700 italic mt-2" dangerouslySetInnerHTML={renderSafeHtml((recipe as any).textureProfile.overall)} />}
                 </div>
               )}
             </div>
@@ -464,7 +464,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             {(recipe as any).timeline.map((item: any, index: number) => (
               <p key={index} className="text-black leading-relaxed">
                 <strong>{item.time}:</strong>{' '}
-                <span dangerouslySetInnerHTML={{ __html: item.action }} />
+                <span dangerouslySetInnerHTML={renderSafeHtml(item.action)} />
               </p>
             ))}
           </div>
@@ -487,11 +487,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).equipmentNotes) && (recipe as any).equipmentNotes.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Equipment You'll Need:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).equipmentNotes.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={{ __html: item }} />
+                      <li key={index} className="flex items-start">
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
                       </li>
                     ))}
                   </ul>
@@ -500,11 +499,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).shoppingList) && (recipe as any).shoppingList.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Shopping List:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).shoppingList.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={{ __html: item }} />
+                      <li key={index} className="flex items-start">
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
                       </li>
                     ))}
                   </ul>
@@ -523,7 +521,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).ingredientPrep.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={{ __html: item }} />
+              <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml(item)} />
             ))}
           </div>
         </>
@@ -566,13 +564,13 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).temperatureNotes.stovetopHeatLevel && (
-              <p className="text-black leading-relaxed"><strong>Stovetop:</strong> <span dangerouslySetInnerHTML={{ __html: (recipe as any).temperatureNotes.stovetopHeatLevel }} /></p>
+              <p className="text-black leading-relaxed"><strong>Stovetop:</strong> <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).temperatureNotes.stovetopHeatLevel)} /></p>
             )}
             {(recipe as any).temperatureNotes.ovenTemperature && (recipe as any).temperatureNotes.ovenTemperature !== "Not required" && (
-              <p className="text-black leading-relaxed"><strong>Oven:</strong> <span dangerouslySetInnerHTML={{ __html: (recipe as any).temperatureNotes.ovenTemperature }} /></p>
+              <p className="text-black leading-relaxed"><strong>Oven:</strong> <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).temperatureNotes.ovenTemperature)} /></p>
             )}
             {(recipe as any).temperatureNotes.safeInternalTemp && (
-              <p className="text-black leading-relaxed"><strong>Safe Internal Temp:</strong> <span dangerouslySetInnerHTML={{ __html: (recipe as any).temperatureNotes.safeInternalTemp }} /></p>
+              <p className="text-black leading-relaxed"><strong>Safe Internal Temp:</strong> <span dangerouslySetInnerHTML={renderSafeHtml((recipe as any).temperatureNotes.safeInternalTemp)} /></p>
             )}
           </div>
         </>
@@ -586,7 +584,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
             {(recipe as any).pairings.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={{ __html: item }} />
+              <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml(item)} />
             ))}
           </div>
         </>
@@ -608,11 +606,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).commonMistakes) && (recipe as any).commonMistakes.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Common Mistakes to Avoid:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).commonMistakes.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={{ __html: item }} />
+                      <li key={index} className="flex items-start">
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
                       </li>
                     ))}
                   </ul>
@@ -621,11 +618,10 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).flavorBoosters) && (recipe as any).flavorBoosters.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Flavor Boosters:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).flavorBoosters.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={{ __html: item }} />
+                      <li key={index} className="flex items-start">
+                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
                       </li>
                     ))}
                   </ul>
@@ -647,7 +643,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               <p 
                 key={index} 
                 className="text-black leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: item }}
+                dangerouslySetInnerHTML={renderSafeHtml(item)}
               />
             ))}
           </div>
@@ -665,7 +661,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               <p 
                 key={index} 
                 className="text-black leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: item }}
+                dangerouslySetInnerHTML={renderSafeHtml(item)}
               />
             ))}
           </div>
@@ -682,7 +678,7 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             {(recipe as any).variations.map((item: any, index: number) => (
               <p key={index} className="text-black leading-relaxed">
                 <strong>{item.title}:</strong>{' '}
-                <span dangerouslySetInnerHTML={{ __html: item.description }} />
+                <span dangerouslySetInnerHTML={renderSafeHtml(item.description)} />
               </p>
             ))}
           </div>
@@ -705,12 +701,11 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).substitutions) && (recipe as any).substitutions.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Ingredient Substitutions:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).substitutions.map((item: any, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                      <li key={index} className="flex items-start">
                         <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
-                          <strong>{item.ingredient}</strong> → <span dangerouslySetInnerHTML={{ __html: item.substitute }} />{item.note && <span className="italic text-gray-600"> ({item.note})</span>}
+                          <strong>{item.ingredient}</strong> → <span dangerouslySetInnerHTML={renderSafeHtml(item.substitute)} />{item.note && <span className="italic text-gray-600"> ({item.note})</span>}
                         </span>
                       </li>
                     ))}
@@ -720,12 +715,11 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
               {Array.isArray((recipe as any).dietaryAdaptations) && (recipe as any).dietaryAdaptations.length > 0 && (
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Dietary Adaptations:</strong></p>
-                  <ul className="w-full space-y-2">
+                  <ul className="w-full space-y-2 list-none">
                     {(recipe as any).dietaryAdaptations.map((item: any, index: number) => (
-                      <li key={index} className="flex items-start space-x-3">
-                        <span className="text-lg font-bold mt-1" style={{ color: '#2D5A42' }}>•</span>
+                      <li key={index} className="flex items-start">
                         <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
-                          <strong>{item.diet}:</strong> <span dangerouslySetInnerHTML={{ __html: item.howToAdapt }} />
+                          <strong>{item.diet}:</strong> <span dangerouslySetInnerHTML={renderSafeHtml(item.howToAdapt)} />
                         </span>
                       </li>
                     ))}
