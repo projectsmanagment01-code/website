@@ -180,9 +180,6 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
       {/* Ad Placement: After Essential Ingredients */}
       <AdAfterEssentialIngredients category={recipe.category} />
 
-      {/* Ad Placement: After Ingredients */}
-      <AdAfterIngredients category={recipe.category} />
-
       {/* 2. Ingredient/Preparation Image - After ingredient guide */}
       {ingredientImage && (
         <div className="my-8">
@@ -211,6 +208,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </div>
         </div>
       )}
+
+      {/* Ad Placement: After Ingredients - Now after image for better spacing */}
+      <AdAfterIngredients category={recipe.category} />
 
       {/* Complete Cooking Process */}
       <CompleteCookingProcess completeProcess={recipe.completeProcess} />
@@ -553,9 +553,6 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       ) : null}
 
-      {/* Ad Placement: After Equipment */}
-      <AdAfterEquipment category={recipe.category} />
-
       {/* Ingredient Prep - Supports HTML */}
       {Array.isArray((recipe as any).ingredientPrep) && (recipe as any).ingredientPrep.length > 0 && (
         <>
@@ -569,6 +566,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </div>
         </>
       )}
+
+      {/* Ad Placement: After Equipment - Moved after Ingredient Prep for spacing */}
+      <AdAfterEquipment category={recipe.category} />
 
       {/* 3. Final Presentation Image - After Ingredient Prep Guide */}
       {finalImage && (
@@ -702,9 +702,6 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </>
       )}
 
-      {/* Ad Placement: After Serving Suggestions */}
-      <AdAfterServingSuggestions category={recipe.category} />
-
       {/* Special Notes - Supports HTML */}
       {Array.isArray((recipe as any).specialNotes) && (recipe as any).specialNotes.length > 0 && (
         <>
@@ -723,8 +720,8 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </>
       )}
 
-      {/* Ad Placement: After Special Notes */}
-      <AdAfterSpecialNotes category={recipe.category} />
+      {/* Ad Placement: After Serving Suggestions - Moved here for better spacing */}
+      <AdAfterServingSuggestions category={recipe.category} />
 
       {/* Variations - Supports HTML */}
       {Array.isArray((recipe as any).variations) && (recipe as any).variations.length > 0 && (
@@ -742,6 +739,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </div>
         </>
       )}
+
+      {/* Ad Placement: After Special Notes - Moved here before Substitutions */}
+      <AdAfterSpecialNotes category={recipe.category} />
 
       {/* Substitutions & Dietary - TipCard Style */}
       {(Array.isArray((recipe as any).substitutions) && (recipe as any).substitutions.length > 0) || (Array.isArray((recipe as any).dietaryAdaptations) && (recipe as any).dietaryAdaptations.length > 0) ? (
@@ -789,18 +789,18 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       ) : null}
 
-      {/* === END NEW CONTENT FIELDS SECTION === */}
-
-      {/* Ad Placement: After Variations */}
+      {/* Ad Placement: After Variations (after Substitutions card) */}
       <AdAfterVariations category={recipe.category} />
 
-      {/* Ad Placement: After Instructions/Before Recipe Card */}
+      {/* === END NEW CONTENT FIELDS SECTION === */}
+
+      {/* Ad Placement: After Instructions - Before Recipe Card with spacing */}
       <AdAfterInstructions category={recipe.category} />
 
-      {/* Ad Placement: Before Recipe Card */}
-      <AdBeforeRecipeCard category={recipe.category} />
-
       <Card recipe={recipe} />
+
+      {/* Ad Placement: Before Recipe Card - Now AFTER Recipe Card for spacing */}
+      <AdBeforeRecipeCard category={recipe.category} />
 
       {/* Subscription Form */}
       <RecipeBottomSubscription />
