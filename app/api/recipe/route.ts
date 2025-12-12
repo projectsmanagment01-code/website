@@ -251,6 +251,28 @@ export async function POST(request: NextRequest) {
     recipe = sanitizeObject(recipe) as typeof recipe;
     console.log("🧹 Recipe sanitized");
 
+    // ============================================
+    // SPECIAL HANDLING FOR TOOLS FIELD
+    // ============================================
+    if (recipe.tools && Array.isArray(recipe.tools) && recipe.tools.length > 0 && typeof recipe.tools[0] === 'object') {
+      console.log("🔧 Converting tools from objects to strings...");
+      recipe.tools = recipe.tools.map((toolObj: any) => {
+        if (typeof toolObj === 'object' && toolObj !== null) {
+          const tool = toolObj.tool || toolObj.name || '';
+          const description = toolObj.description || toolObj.note || '';
+          if (tool && description) {
+            return `${tool}: ${description}`;
+          } else if (tool) {
+            return tool;
+          } else if (description) {
+            return description;
+          }
+        }
+        return String(toolObj);
+      }).filter((s: string) => s && s.trim() !== '');
+      console.log("✅ Tools converted:", recipe.tools);
+    }
+
     // Validate required fields
     const requiredFields = ['title'];
     const missingFields = requiredFields.filter(field => !recipe[field]);
