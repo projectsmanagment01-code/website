@@ -5,6 +5,14 @@ import LatestRecipesSectionPaginated from "@/components/main/LatestRecipesSectio
 import TrendingSection from "@/components/main/TrendingSection";
 import SubscriptionSection from "@/components/main/SubscriptionSection";
 import BackToTop from "@/components/BackToTop";
+import { 
+  AdHomeHero, 
+  AdHomeAfterFeatured, 
+  AdHomeMidContent, 
+  AdHomeBeforeCategories, 
+  AdHomeAfterCategories, 
+  AdHomeBeforeFooter 
+} from "@/components/ads/HomeAds";
 
 // Function to get home content for metadata
 async function getHomeContent() {
@@ -64,15 +72,37 @@ export default function HomePage() {
         <HeroSection />
       </section>
 
+      {/* Ad Placement: After Hero */}
+      <div className="container-wide">
+        <AdHomeHero />
+      </div>
+
       {/* Main Content - Wide width with reasonable max-width */}
       <main className="container-wide section-md">
+        {/* Ad Placement: Before Categories */}
+        <AdHomeBeforeCategories />
+
         <CategoriesSection />
+
+        {/* Ad Placement: After Categories */}
+        <AdHomeAfterCategories />
+
         <div className="section-sm">
           <LatestRecipesSectionPaginated recipesPerPage={8} />
         </div>
+
+        {/* Ad Placement: After Featured/Latest Recipes */}
+        <AdHomeAfterFeatured />
+
+        {/* Ad Placement: Mid Content */}
+        <AdHomeMidContent />
+
         <div className="section-sm">
           <TrendingSection limit={8} />
         </div>
+
+        {/* Ad Placement: Before Footer */}
+        <AdHomeBeforeFooter />
       </main>
 
       {/* Subscription Section */}

@@ -9,7 +9,29 @@ import { getWebsiteName } from "@/lib/site-name-helper";
 import { SafeImage } from "./SafeImage";
 import RecipeBottomSubscription from "./RecipeBottomSubscription";
 import RecipeVideo from "./RecipeVideo";
-import { AdAfterHero, AdInContent, AdAfterIngredients, AdAfterInstructions } from "./ads/RecipeAds";
+import { 
+  AdBeforeHero,
+  AdAfterHero, 
+  AdBeforeContent,
+  AdInContent, 
+  AdInContent2,
+  AdInContent3,
+  AdAfterStory,
+  AdAfterIngredients, 
+  AdAfterInstructions,
+  AdAfterTips,
+  AdAfterEssentialIngredients,
+  AdAfterTasteProfile,
+  AdAfterTimeline,
+  AdAfterEquipment,
+  AdAfterTemperature,
+  AdAfterPairings,
+  AdAfterProTips,
+  AdAfterServingSuggestions,
+  AdAfterSpecialNotes,
+  AdAfterVariations,
+  AdBeforeRecipeCard
+} from "./ads/RecipeAds";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -73,6 +95,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
   return (
     <div className="space-y-8 mt-2 text-md max-w-none">
+      {/* Ad Placement: Before Hero */}
+      <AdBeforeHero category={recipe.category} />
+
       {/* 1. Feature/Hero Image - Top of page */}
       {featureImage && (
         <div>
@@ -120,6 +145,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         )}
       </div>
 
+      {/* Ad Placement: After Story */}
+      <AdAfterStory category={recipe.category} />
+
       {/* Recipe Video (YouTube embed if available) */}
       <RecipeVideo videoUrl={(recipe as any).videoUrl} title={recipe.title} />
 
@@ -128,6 +156,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         title={recipe.whyYouLove?.title}
         items={recipe.whyYouLove?.items}
       />
+
+      {/* Ad Placement: After Tips */}
+      <AdAfterTips category={recipe.category} />
 
       {/* Testimonial */}
       <div className="prose prose-lg max-w-none text-[1.2rem]">
@@ -145,6 +176,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
       {/* Essential Ingredient Guide */}
       <EssentialIngredients essIngredientGuide={recipe.essIngredientGuide} />
+
+      {/* Ad Placement: After Essential Ingredients */}
+      <AdAfterEssentialIngredients category={recipe.category} />
 
       {/* Ad Placement: After Ingredients */}
       <AdAfterIngredients category={recipe.category} />
@@ -393,6 +427,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       )}
 
+      {/* Ad Placement: After Taste Profile */}
+      <AdAfterTasteProfile category={recipe.category} />
+
       {/* 3. Mixing/Cooking Image - After Taste & Texture Profile */}
       {mixingImage && (
         <div className="my-8">
@@ -471,6 +508,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </>
       )}
 
+      {/* Ad Placement: After Timeline */}
+      <AdAfterTimeline category={recipe.category} />
+
       {/* Equipment & Shopping - TipCard Style */}
       {(Array.isArray((recipe as any).equipmentNotes) && (recipe as any).equipmentNotes.length > 0) || (Array.isArray((recipe as any).shoppingList) && (recipe as any).shoppingList.length > 0) ? (
         <div className="container border-2 border-solid rounded-lg shadow-sm" style={{ borderColor: '#3F7D58' }}>
@@ -512,6 +552,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </div>
         </div>
       ) : null}
+
+      {/* Ad Placement: After Equipment */}
+      <AdAfterEquipment category={recipe.category} />
 
       {/* Ingredient Prep - Supports HTML */}
       {Array.isArray((recipe as any).ingredientPrep) && (recipe as any).ingredientPrep.length > 0 && (
@@ -576,6 +619,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </>
       )}
 
+      {/* Ad Placement: After Temperature */}
+      <AdAfterTemperature category={recipe.category} />
+
       {/* Pairings - Supports HTML */}
       {Array.isArray((recipe as any).pairings) && (recipe as any).pairings.length > 0 && (
         <>
@@ -589,6 +635,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </div>
         </>
       )}
+
+      {/* Ad Placement: After Pairings */}
+      <AdAfterPairings category={recipe.category} />
 
       {/* Common Mistakes & Flavor Boosters - TipCard Style */}
       {(Array.isArray((recipe as any).commonMistakes) && (recipe as any).commonMistakes.length > 0) || (Array.isArray((recipe as any).flavorBoosters) && (recipe as any).flavorBoosters.length > 0) ? (
@@ -632,6 +681,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       ) : null}
 
+      {/* Ad Placement: After Pro Tips */}
+      <AdAfterProTips category={recipe.category} />
+
       {/* Serving Suggestions - Supports HTML */}
       {Array.isArray((recipe as any).servingSuggestions) && (recipe as any).servingSuggestions.length > 0 && (
         <>
@@ -650,6 +702,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </>
       )}
 
+      {/* Ad Placement: After Serving Suggestions */}
+      <AdAfterServingSuggestions category={recipe.category} />
+
       {/* Special Notes - Supports HTML */}
       {Array.isArray((recipe as any).specialNotes) && (recipe as any).specialNotes.length > 0 && (
         <>
@@ -667,6 +722,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
           </div>
         </>
       )}
+
+      {/* Ad Placement: After Special Notes */}
+      <AdAfterSpecialNotes category={recipe.category} />
 
       {/* Variations - Supports HTML */}
       {Array.isArray((recipe as any).variations) && (recipe as any).variations.length > 0 && (
@@ -733,8 +791,14 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
       {/* === END NEW CONTENT FIELDS SECTION === */}
 
+      {/* Ad Placement: After Variations */}
+      <AdAfterVariations category={recipe.category} />
+
       {/* Ad Placement: After Instructions/Before Recipe Card */}
       <AdAfterInstructions category={recipe.category} />
+
+      {/* Ad Placement: Before Recipe Card */}
+      <AdBeforeRecipeCard category={recipe.category} />
 
       <Card recipe={recipe} />
 
