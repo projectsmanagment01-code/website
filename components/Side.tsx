@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getAuthorById } from '@/lib/author-integration';
 import { getAuthorImageUrl } from '@/lib/author-image';
 import SidebarSubscription from './SidebarSubscription';
+import { AdSidebarTop, AdSidebarSticky } from './ads/RecipeAds';
 
 async function AuthorCard({ recipe }: { recipe: any }) {
   let authorData = null;
@@ -115,6 +116,9 @@ export default function Side({ recipe, relatedRecipes = [] }: any) {
 
   return (
     <div className="relative text-black">
+      {/* Sidebar Top Ad */}
+      <AdSidebarTop category={recipe?.category} />
+
       {/* Author Card Section */}
       <div className="mb-8">
         <AuthorCard recipe={recipe} />
@@ -124,6 +128,9 @@ export default function Side({ recipe, relatedRecipes = [] }: any) {
       <div className="mb-8">
         <SidebarSubscription />
       </div>
+
+      {/* Sticky Sidebar Ad */}
+      <AdSidebarSticky category={recipe?.category} />
 
       <div className="bg-white">
         {/* Header - Larger and more prominent */}

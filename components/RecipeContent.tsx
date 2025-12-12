@@ -9,6 +9,7 @@ import { getWebsiteName } from "@/lib/site-name-helper";
 import { SafeImage } from "./SafeImage";
 import RecipeBottomSubscription from "./RecipeBottomSubscription";
 import RecipeVideo from "./RecipeVideo";
+import { AdAfterHero, AdInContent, AdAfterIngredients, AdAfterInstructions } from "./ads/RecipeAds";
 
 interface RecipeContentProps {
   recipe: Recipe;
@@ -102,6 +103,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
         </div>
       )}
 
+      {/* Ad Placement: After Hero */}
+      <AdAfterHero category={recipe.category} />
+
       {/* Story */}
       <div className="prose prose-lg max-w-none">
         {hasHtmlTags(recipe.story) ? (
@@ -141,6 +145,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
 
       {/* Essential Ingredient Guide */}
       <EssentialIngredients essIngredientGuide={recipe.essIngredientGuide} />
+
+      {/* Ad Placement: After Ingredients */}
+      <AdAfterIngredients category={recipe.category} />
 
       {/* 2. Ingredient/Preparation Image - After ingredient guide */}
       {ingredientImage && (
@@ -717,6 +724,9 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
       ) : null}
 
       {/* === END NEW CONTENT FIELDS SECTION === */}
+
+      {/* Ad Placement: After Instructions/Before Recipe Card */}
+      <AdAfterInstructions category={recipe.category} />
 
       <Card recipe={recipe} />
 

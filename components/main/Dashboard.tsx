@@ -27,6 +27,7 @@ import BackupManager from "@/components/admin/BackupManager";
 import SEOReportsView from "@/components/admin/SEOReportsView";
 import GoogleSearchSettings from "@/components/admin/GoogleSearchSettings";
 import IntegrationsSettings from "@/components/admin/IntegrationsSettings";
+import AdsSettings from "@/components/admin/AdsSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import HeroSlidesManager from "@/components/admin/HeroSlidesManager";
 import SubscribersPage from "@/app/admin/subscribers/page";
@@ -136,6 +137,8 @@ function AdminDashboardContent() {
         );
       case "google-search":
         return <GoogleSearchSettings />;
+      case "ads":
+        return <AdsSettings />;
       case "integrations":
         return <IntegrationsSettings />;
       case "plugins":
