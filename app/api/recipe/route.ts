@@ -252,25 +252,51 @@ export async function POST(request: NextRequest) {
     console.log("🧹 Recipe sanitized");
 
     // ============================================
-    // SPECIAL HANDLING FOR TOOLS FIELD
+    // SPECIAL HANDLING FOR TOOLS FIELD (SUPPORTS BOTH FORMATS)
+    // Format 1: ["Stand Mixer", "Cake Pans"] - array of strings
+    // Format 2: [{tool: "Stand Mixer", description: "..."}, ...] - array of objects
     // ============================================
-    if (recipe.tools && Array.isArray(recipe.tools) && recipe.tools.length > 0 && typeof recipe.tools[0] === 'object') {
-      console.log("🔧 Converting tools from objects to strings...");
-      recipe.tools = recipe.tools.map((toolObj: any) => {
-        if (typeof toolObj === 'object' && toolObj !== null) {
-          const tool = toolObj.tool || toolObj.name || '';
-          const description = toolObj.description || toolObj.note || '';
-          if (tool && description) {
-            return `${tool}: ${description}`;
-          } else if (tool) {
-            return tool;
-          } else if (description) {
-            return description;
+    if (recipe.tools) {
+      if (Array.isArray(recipe.tools)) {
+        console.log("🔧 Processing tools field. Type: array, Length:", recipe.tools.length);
+        recipe.tools = recipe.tools.map((toolItem: any) => {
+          // If already a string, keep it
+          if (typeof toolItem === 'string') {
+            return toolItem.trim();
           }
-        }
-        return String(toolObj);
-      }).filter((s: string) => s && s.trim() !== '');
-      console.log("✅ Tools converted:", recipe.tools);
+          // If it's an object, extract tool name and description
+          if (typeof toolItem === 'object' && toolItem !== null) {
+            const tool = toolItem.tool || toolItem.name || toolItem.title || '';
+            const description = toolItem.description || toolItem.note || toolItem.text || '';
+            const toolStr = String(tool).trim();
+            const descStr = String(description).trim();
+            
+            if (toolStr && descStr) {
+              return `${toolStr}: ${descStr}`;
+            } else if (toolStr) {
+              return toolStr;
+            } else if (descStr) {
+              return descStr;
+            }
+            // Fallback: stringify entire object (skip if empty)
+            const jsonStr = JSON.stringify(toolItem);
+            return jsonStr !== '{}' ? jsonStr : '';
+          }
+          // Fallback for other types
+          return String(toolItem);
+        }).filter((s: string) => s && s.trim() !== '' && s !== '{}');
+        console.log("✅ Tools converted to strings:", recipe.tools.length, "items");
+      } else if (typeof recipe.tools === 'string') {
+        // Single string -> wrap in array
+        console.log("🔧 Converting single tool string to array");
+        recipe.tools = [recipe.tools];
+      } else {
+        // Invalid type -> empty array
+        console.warn("⚠️ Tools field has invalid type:", typeof recipe.tools, "- resetting to empty array");
+        recipe.tools = [];
+      }
+    } else {
+      recipe.tools = [];
     }
 
     // Validate required fields
