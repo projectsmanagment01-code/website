@@ -113,6 +113,7 @@ model Author {
   createdAt  DateTime            @default(now())
   updatedAt  DateTime            @updatedAt
   recipes    Recipe[]            @relation("AuthorRecipes")
+  articles   Article[]           @relation("AuthorArticles")
 
   @@map("authors")
 }
@@ -133,7 +134,8 @@ model Category {
   metaDescription String?  @db.Text
   
   // Relations
-  recipes     Recipe[] @relation("CategoryRecipes")
+  recipes     Recipe[]   @relation("CategoryRecipes")
+  articles    Article[]  @relation("CategoryArticles")
   
   // Timestamps
   createdAt   DateTime @default(now())
@@ -143,6 +145,64 @@ model Category {
   @@index([isActive])
   @@index([order])
   @@map("categories")
+}
+
+// Article System - Flexible HTML-based content for viral articles/blog posts
+model Article {
+  id                  String    @id @default(cuid())
+  
+  // Core Content
+  title               String    @db.Text              // Article title
+  slug                String    @unique               // URL-friendly slug
+  content             String    @db.Text              // FREE HTML content (H1, H2, images, quotes, etc.)
+  excerpt             String?   @db.Text              // Short preview/summary
+  
+  // Media
+  featuredImage       String?                         // Hero/featured image URL
+  featuredImageAlt    String?                         // Alt text for featured image
+  
+  // Classification
+  categoryId          String?                         // Foreign key to Category
+  tags                String[]  @default([])          // Topic tags for filtering/SEO
+  
+  // Author
+  authorId            String?                         // Foreign key to Author
+  
+  // SEO Fields
+  metaTitle           String?   @db.Text              // Custom meta title (defaults to title)
+  metaDescription     String?   @db.Text              // Meta description for search engines
+  focusKeyword        String?                         // Primary SEO keyword
+  canonicalUrl        String?                         // Canonical URL if needed
+  
+  // Social Sharing (Open Graph / Twitter)
+  ogImage             String?                         // Open Graph image (1200x630)
+  ogTitle             String?   @db.Text              // Social share title
+  ogDescription       String?   @db.Text              // Social share description
+  
+  // Stats & Engagement
+  readingTime         Int?                            // Estimated minutes (auto-calculated)
+  views               Int       @default(0)           // View counter
+  
+  // Publishing Control
+  status              String    @default("draft")     // draft, published, archived
+  publishedAt         DateTime?                       // Publication date/time
+  isFeatured          Boolean   @default(false)       // Featured article flag
+  
+  // Timestamps
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  // Relations
+  authorRef           Author?   @relation("AuthorArticles", fields: [authorId], references: [id])
+  categoryRef         Category? @relation("CategoryArticles", fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([isFeatured])
+  @@map("articles")
 }
 
 model NavigationItem {

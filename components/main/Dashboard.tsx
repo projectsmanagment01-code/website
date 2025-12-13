@@ -30,6 +30,8 @@ import IntegrationsSettings from "@/components/admin/IntegrationsSettings";
 import AdsSettings from "@/components/admin/AdsSettings";
 import CategoryManager from "@/components/admin/CategoryManager";
 import HeroSlidesManager from "@/components/admin/HeroSlidesManager";
+import HomepageLayoutManager from "@/components/admin/HomepageLayoutManager";
+import ArticlesManager from "@/components/admin/ArticlesManager";
 import SubscribersPage from "@/app/admin/subscribers/page";
 import { Recipe } from "@/outils/types";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
@@ -77,10 +79,14 @@ function AdminDashboardContent() {
         );
       case "categories":
         return <CategoryManager />;
+      case "articles":
+        return <ArticlesManager />;
       case "authors":
         return <AuthorManagement />;
       case "hero-slides":
         return <HeroSlidesManager />;
+      case "homepage-layout":
+        return <HomepageLayoutManager />;
       case "subscribers":
         return <SubscribersPage />;
       case "media":

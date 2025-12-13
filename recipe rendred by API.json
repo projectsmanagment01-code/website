@@ -1,376 +1,360 @@
-[
-  {
-    "id": "2322ccbe-154e-d0c5-ab27-caa7-9517-f44ffb229e8f",
-    "title": "Easy Garlic Broccoli Stir Fry with Chickpeas",
-    "category": "bread",
-    "categoryId": "cmirj9ze30002o62vecwro0mi",
-    "description": "Quick, healthy vegetarian stir fry ready in 20 minutes.",
-    "createdAt": "2025-12-05T19:10:51.279Z",
-    "updatedAt": "2025-12-05T19:10:51.279Z",
-    "allergyInfo": "Naturally free of dairy, eggs, nuts, and gluten (if you use tamari). Always check labels on soy sauce and sesame oil for potential cross-contamination with wheat or allergens. Chickpeas are legumes, so avoid if you have a specific legume allergy; cubed chicken-style tofu or seitan can substitute.",
-    "author": {
-      "bio": "dqmkdmlqmsldk",
-      "link": "/authors/amelia",
-      "name": "Amelia",
-      "avatar": "/uploads/authors/pouriya-kafaei-r7tamy6ua74-unsplash.webp"
-    },
-    "categoryHref": null,
-    "categoryLink": "/categories/bread",
-    "completeProcess": [
+{
+  "slug": "elegant-white-three-tier-wedding-cake-recipe",
+  "title": "Elegant White Three Tier Wedding Cake Recipe",
+  "categoryId": "cmh65xsez009yp82wfro3eb8x",
+  "authorId": "cmh6a3ewd00a5p82ws8xdnqlc",
+  "img": "https://chocofeverdream.com/uploads/recipes/white-three-tier-wedding-cake-feast1765595475919-3887.webp",
+  "heroImage": "https://chocofeverdream.com/uploads/recipes/white-three-tier-wedding-cake-feast1765595475919-3887.webp",
+  "featureImage": "https://chocofeverdream.com/uploads/recipes/white-three-tier-wedding-cake-feast1765595475919-3887.webp",
+  "preparationImage": "https://chocofeverdream.com/uploads/recipes/white_three_tier_wedding_cake_plate_1765595522940_622.webp",
+  "cookingImage": "https://chocofeverdream.com/uploads/recipes/white_three_tier_wedding_cake_golden_1765595490634_9523.webp",
+  "finalPresentationImage": "https://chocofeverdream.com/uploads/recipes/white_three_tier_wedding_cake_sensation_1765595507046_9928.webp",
+  "images": [
+    "https://chocofeverdream.com/uploads/recipes/white-three-tier-wedding-cake-feast1765595475919-3887.webp",
+    "https://chocofeverdream.com/uploads/recipes/white_three_tier_wedding_cake_plate_1765595522940_622.webp",
+    "https://chocofeverdream.com/uploads/recipes/white_three_tier_wedding_cake_golden_1765595490634_9523.webp",
+    "https://chocofeverdream.com/uploads/recipes/white_three_tier_wedding_cake_sensation_1765595507046_9928.webp"
+  ],
+  "imageAlt": "Elegant White Three Tier Wedding Cake Recipe",
+  "description": "Learn to create a stunning white three tier wedding cake. This elegant recipe is perfect for making a beautiful and delicious centerpiece for any celebration.",
+  "shortDescription": "Craft a timeless, show-stopping white three-tier wedding cake with this detailed, heartfelt guide to creating a memorable centerpiece.",
+  "intro": "There is something so hushed and magical about a wedding cake. It’s more than just a dessert; it's a quiet centerpiece that holds so much hope and excitement. I think that’s why I’ve always been drawn to creating them. This recipe is my love letter to that tradition—a classic, elegant white cake that stands with grace and tastes like a sweet, tender memory. Don't be intimidated by the tiers; think of it as a creative project, a meditation in flour and sugar. We'll go through it slowly, together, and create something truly beautiful.",
+  "story": "I remember the first tiered cake I ever made. It was for my dear friend's backyard wedding. The air was thick with the smell of jasmine and freshly cut grass, and I was in my tiny kitchen, heart pounding, surrounded by what felt like mountains of cake, bowls of buttercream, and a whole lot of hope. I was so nervous. My hands trembled a little as I placed that final tier on top. But when I stepped back and saw it standing there, simple and serene in the afternoon light, it was just… wow. It felt like I had built a little monument to their love. That feeling is what this recipe is all about—capturing a moment of pure, simple beauty that you can share with people you adore. It's not about perfection; it’s about the love baked into every single layer.",
+  "testimonial": "This recipe created the most beautiful, heartfelt cake for my daughter's special day. Absolutely magical.",
+  "whyYouLove": {
+    "type": "Card",
+    "title": "Why You'll Love This Cake Project",
+    "items": [
       {
-        "title": "Preparation",
-        "description": "I set my skillet on the burner before I even unpack the groceries—there’s something hopeful about an empty pan waiting to be useful. While it quietly preheats, I chop the broccoli into flirty little trees and rinse the chickpeas until they gleam. Garlic gets minced on my most battered cutting board, the one scarred with the ghost dinners of ten years. By the time the oil shimmers like a secret, everything is lined up in small glass bowls, and I feel like a calm conductor about to wave her baton."
+        "item": "**A Blank Canvas for Creativity**: A white cake is like a beautiful piece of primed canvas. You can adorn it with fresh flowers, delicate piping, or leave it stunningly simple. It’s a design project you can eat, allowing your personal style to shine through in the most delicious way.",
+        "img": null
       },
       {
-        "title": "Cooking",
-        "description": "First, the broccoli hits the pan and yelps—just for a second—then settles into a steady sizzle. I let it rest undisturbed so the edges char into smoky freckles; movement too early equals steamed sadness. Chickpeas tumble in next, rolling through the hot oil like beach stones, picking up bronze shoulders. Garlic follows off-heat so it stays sweet, then a quick waterfall of soy and sesame swirls everything into glossy unity. The whole dance takes maybe six minutes, but it feels like slow motion poetry."
+        "item": "**Unforgettably Tender Flavor**: The texture of this cake is just heavenly. It uses cake flour and a reverse creaming method to create a fine, velvety crumb that melts in your mouth. The flavor is a pure, classic vanilla that feels both nostalgic and sophisticated, much like my favorite <a href=\"https://chocofeverdream.com/recipes/vanilla-dream-cake-recipe\" style=\"color: #f57c00;\">Vanilla Dream Cake</a>.",
+        "img": null
       },
       {
-        "title": "Assembly",
-        "description": "I pile the vegetables high over whatever starch I have—sometimes yesterday’s rice splashed with water and revived, sometimes quinoa that tastes like earth itself. A final drizzle of oil, a scatter of sesame seeds if I’m feeling ornamental, and the skillet goes straight to the table because we’re informal here. We eat with soup spoons so we can scoop every last shard of garlic, every chickpea that escaped, every memory that clings to the steam."
+        "item": "**A Surprisingly Manageable Process**: I know, 'three tiers' sounds daunting, but I've broken this down into calm, manageable steps. We bake the cakes one day, make the buttercream the next, and assemble on the third. It's a slow, mindful process that is honestly so rewarding and much less stressful than trying to do it all at once.",
+        "img": null
       },
       {
-        "type": "Card",
-        "after": "Taste at the very end. Salt, soy, even a squeeze of lemon can wake the whole pan up, like turning on lights after dusk.",
-        "items": [
-          "Dry broccoli = better char. Shake it in a towel like you’re cheering at a game.",
-          "Chickpeas love space. If they’re crowded they steam and turn mealy; two batches are better than one sad layer.",
-          "Add a teaspoon of honey if your soy sauce feels too sharp—it rounds the edges without announcing sweetness."
-        ],
-        "title": "Pro Tips"
+        "item": "**The Ultimate Labor of Love**: Creating a wedding cake is one of the most personal and heartfelt gifts you can give. Every minute spent measuring, mixing, and smoothing is an infusion of love and care. When you see it standing tall at the celebration, you'll feel a sense of pride and joy that is simply unmatched.",
+        "img": null
       }
-    ],
-    "essIngredientGuide": [
-      {
-        "note": "Look for tight, dusty-green florets—no yellowing petals, please. I slice the stems too; peeled and thin they’re sweet and tender, and it feels righteous to use the whole plant.",
-        "ingredient": "Broccoli"
-      },
-      {
-        "note": "Canned are perfect, but rinse them like you mean it. Shake the colander until no more bubbles appear—getting rid of that starchy liquid lets them fry, not stew.",
-        "ingredient": "Chickpeas"
-      },
-      {
-        "note": "Fresh cloves, smashed then minced, because pre-chopped jars taste like faded ambition. Three plump ones give that throaty warmth; four if you’re dating someone who appreciates kissing through a shared veil of garlic.",
-        "ingredient": "Garlic"
-      }
-    ],
-    "faq": null,
-    "featuredText": "A speedy weeknight hug in a bowl—garlic-kissed broccoli and buttery chickpeas sizzle together for the easiest, coziest meat-free supper.",
-    "heroImage": "https://treasurebarrel.com/uploads/recipes/garlic-broccoli-stir-fry-with-chickpeas-gooey1764961641872-1341.webp",
-    "href": "/recipes/easy-garlic-broccoli-stir-fry-with-chickpeas",
-    "imageAlt": null,
-    "images": [
-      "https://treasurebarrel.com/uploads/recipes/garlic-broccoli-stir-fry-with-chickpeas-gooey1764961641872-1341.webp",
-      "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_essence_1764961676897_5746.webp",
-      "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_feast_1764961653585_7497.webp",
-      "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_blend_1764961665868_7967.webp"
-    ],
-    "img": "https://treasurebarrel.com/uploads/recipes/garlic-broccoli-stir-fry-with-chickpeas-gooey1764961641872-1341.webp",
-    "featureImage": "https://treasurebarrel.com/uploads/recipes/garlic-broccoli-stir-fry-with-chickpeas-gooey1764961641872-1341.webp",
-    "cookingImage": "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_feast_1764961653585_7497.webp",
-    "preparationImage": "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_essence_1764961676897_5746.webp",
-    "finalPresentationImage": "https://treasurebarrel.com/uploads/recipes/garlic_broccoli_stir_fry_with_chickpeas_blend_1764961665868_7967.webp",
-    "ingredientGuide": null,
-    "intro": "I still remember the first night I made this stir fry: the kitchen window fogged, the smell of warm garlic drifting through the house like an old lullaby, and my daughter dancing barefoot to whatever song the radio offered. I was tired, honestly—one of those Wednesdays that feel like tiny pebbles in your shoes—but the fridge handed me a head of broccoli and a can of chickpeas, and something about that humble pairing felt like hope. Within minutes the pan hissed, the broccoli turned emerald, and the chickpeas rolled around like little golden marbles soaking up every shimmer of oil and soy. We ate straight from the skillet, perched on stools, steam curling around our faces, and I thought, “this is enough,” you know? Just plants, heat, and a quiet table. I’ve cooked it a hundred times since—sometimes with a splash of sesame oil when I’m feeling fancy, sometimes plain when life feels too loud—and it never fails to remind me that dinner doesn’t have to be elaborate to be healing. So here it is, my weeknight love letter: garlicky, green, and gentle on the soul.",
-    "mustKnowTips": [
-      "**Dry equals crisp** — Water is the enemy of browning; pat everything like you’re towel-drying a wet dog.",
-      "**Hot, then medium** — Start high for char, drop to medium when garlic joins so it doesn’t burn and turn bitter.",
-      "**Taste the pan** — If the glaze tastes flat, add a quick splash of vinegar; acid is the magic lipstick of savory dishes."
-    ],
-    "notes": [
-      "For extra protein, toss in a handful of edamame or cubed tofu during the last minute of cooking.",
-      "Leftovers reheat beautifully, but the broccoli softens—embrace it, or transform everything into a next-day fried rice.",
-      "If you love sauce, double the soy mixture and simmer it with a teaspoon of cornstarch slurry for a glossy gravy that clings like velvet."
-    ],
-    "nutritionDisclaimer": "Nutrition calculations are estimates based on standard product labels and databases. Actual values may vary depending on brand, produce size, and exact measurements. Consult a registered dietitian for precise dietary guidance, especially if managing medical conditions.",
-    "professionalSecrets": [
-      "**Layered heat** — Add red-pepper flakes to oil first, then again at the end; you get a front and back note of spice that blooms rather than bludgeons.",
-      "**Cold rice vinegar finish** — A teaspoon drizzled off-heat brightens all the salty, nutty flavors without announcing itself as “vinegary.”",
-      "**Rest before rice** — Let the stir fry sit ninety seconds after cooking; the sauce thickens slightly and clings rather than sliding off into the abyss of your bowl."
-    ],
-    "questions": {
-      "items": [
-        {
-          "answer": "Absolutely, but let it thaw and pat it bone-dry first. Frozen holds more water, and water is the enemy of that beautiful char we’re chasing. I spread it on a towel and blast it with a hair-dryer (cool setting) when I’m impatient—yes, really—and it works like a charm.",
-          "question": "Can I use frozen broccoli?"
-        },
-        {
-          "answer": "Your pan might be too cool or too crowded. Heat until a drop of water skitters like a dancer, then add oil. Give the chickpeas room to breathe; if they’re shoulder-to-shoulder they sweat instead of sear. And resist the urge to flip them constantly—let them form a bronze crust before you stir.",
-          "question": "My chickpeas always stick—help?"
-        },
-        {
-          "answer": "It can be! Swap the soy sauce for tamari or coconut aminos. Tamari tastes closest—rich and dark—while coconut aminos are slightly sweeter; you might want to dial back any honey if you go that route. Double-check your sesame oil label too; some brands are processed in facilities with wheat.",
-          "question": "Is this gluten-free?"
-        },
-        {
-          "answer": "I like to add a pinch of red-pepper flakes right after the garlic, so the heat blooms in the oil. A teaspoon of gochujang stirred in at the end gives a slow, smoky burn. Or keep it simple: finish with a zig-zag of sriracha across each bowl—pretty and punchy.",
-          "question": "How do I make it spicier?"
-        },
-        {
-          "answer": "Chop your veggies and rinse the chickpeas up to three days early; store them in glass containers with paper towels to wick moisture. Whisk the sauce in a jar and keep it in the door of the fridge. When hunger strikes, dinner cooks in six minutes flat, which feels like kitchen wizardry on a frantic night.",
-          "question": "Can I prep this ahead?"
-        }
-      ],
-      "title": "Frequently Asked Questions"
+    ]
+  },
+  "essIngredientGuide": [
+    {
+      "ingredient": "Cake Flour",
+      "note": "Okay, please don’t skip this. Cake flour is milled to be extra fine and has a lower protein content than all-purpose flour. This is our secret to a soft, tender, and velvety crumb that’s sturdy enough to stack but delicate enough to feel special. It makes a huge difference in the final texture, preventing the cake from becoming tough or chewy. I always sift mine for an even lighter result."
     },
-    "recipeInfo": {
-      "cuisine": "Asian-Inspired",
-      "dietary": "Vegan",
-      "servings": "3–4 Servings",
-      "difficulty": "Easy"
+    {
+      "ingredient": "High-Quality European-Style Butter",
+      "note": "Since butter is a primary flavor here, using a good one is key. European-style butters have a higher fat content, which means less water and more rich, creamy flavor. It makes both the cake and the Swiss meringue buttercream taste luxurious and full-bodied. Let it sit on the counter until it’s perfectly soft to the touch, not melted or greasy."
     },
-    "relatedRecipes": null,
-    "sections": [
-      {
-        "img": 1,
-        "title": "The Sound of Weeknight Peace",
-        "content": "There’s a specific hush that falls when broccoli meets hot metal—a soft hiss that sounds like the world lowering its voice. I wait for that moment every time; it tells me dinner is officially underway and whatever chaos the day dragged in can stay outside the kitchen. My dog recognizes it too; she pads in and sits, hopeful for a rogue chickpea that might roll off the counter. We listen together to the pops, the sizzles, the occasional garlic bubble, and I swear it’s as soothing as rainfall on a tin roof."
-      },
-      {
-        "type": "card",
-        "after": "Remember, stir fry is improvisation dressed as dinner. No broccoli? Use green beans. Out of chickpeas? Try cannellini. The method is the melody; the vegetables are just the harmony you choose tonight.",
-        "items": [
-          "Hot pan, cold oil: let the skillet heat first, then pour the oil; it prevents sticking and gives broccoli that gorgeous leopard print.",
-          "Don’t salt early—salt draws out water and you want the veggies to sear, not sweat. Save it for the final splash of soy.",
-          "If your garlic ever smells bitter, it’s angry (too hot). Slide the pan off the burner for thirty seconds; garlic forgives quickly."
-        ],
-        "title": "You Must Know"
-      }
-    ],
-    "serving": "Scoop over steaming jasmine rice, fluffy <a href=\"https://treasurebarrel.com/recipes/easy-spaghetti-squash-recipe-a-healthy-dinner-idea\" style=\"color: #f57c00;\">spaghetti squash</a>, or nutty brown quinoa. Garnish with extra green onions, a shower of sesame seeds, and maybe a lime wedge for sunny brightness. Serve family-style straight from the skillet—let everyone dig in, chopsticks clacking, conversation flowing like the fragrant steam.",
-    "shortDescription": "A speedy weeknight hug in a bowl—garlic-kissed broccoli and buttery chickpeas sizzle together for the easiest, coziest meat-free supper.",
-    "slug": "easy-garlic-broccoli-stir-fry-with-chickpeas",
-    "storage": "Cool leftovers completely, then transfer to an airtight glass container; they’ll keep up to four days in the fridge. Reheat gently in a skillet with a splash of water to loosen the glaze—microwaves work but soften the broccoli further. I actually love the next-day texture folded into a wrap with hummus and crunchy lettuce, almost like a warm salad on the go.",
-    "story": "When my mother moved out of her big house into a tiny apartment, she left me her old wok—the one with the dented lid and the handle that stays forever loose no matter how many times I tighten the screw. I carried it home on the bus, cradling it like a fragile memory, and the first thing I cooked was this stir fry. The broccoli florets reminded me of the miniature trees she used to call them when I was five, coaxing me to eat “leaves for giants,” and the chickpeas felt like the beads we threaded together on rainy Sundays. I stirred, and the garlic hit the hot metal, and suddenly I was seven again, standing on a stool beside her, breathing in the same sharp perfume. That night I understood how recipes can be time machines—how a sizzle can carry you across decades, how a single mouthful can taste like forgiveness, like safety, like “I’m still here.” Now every time the broccoli turns that impossible shade of green, I swear I hear her humming through the steam, telling me to add a pinch more soy, to keep the heat brave, to sit down and eat while it’s hot. I do. I always do.",
-    "testimonial": "I sent this recipe to my best friend after she texted me a crying emoji about her monstrous commute and the fact that her fridge held nothing but a limp broccoli crown and a can of beans. Two nights later she wrote back: “I stood over the skillet and felt like I could breathe again. The chickpeas popped, the garlic smelled like someone taking care of me, and for the first time in weeks I didn’t eat cereal for dinner.” She now keeps a sticky note on her kettle that says simply, “You deserve hot food,” and every time I think about it my throat gets tight in the sweetest way.",
-    "timing": {
-      "cookTime": "10 Minutes",
-      "prepTime": "10 Minutes",
-      "totalTime": "20 Minutes"
+    {
+      "ingredient": "Pure Vanilla Extract",
+      "note": "This is where you want to use the good stuff. The pure, warm aroma of a high-quality vanilla extract will perfume the entire cake. Imitation vanilla can sometimes have a chemical aftertaste, but pure extract lends a complex, floral note that is the soul of a classic white cake. If you have a vanilla bean, even better—scrape those tiny seeds into the batter for a beautiful look and incredible fragrance."
+    }
+  ],
+  "completeProcess": [
+    {
+      "title": "Baking the Tiers",
+      "description": "This is our foundation. The process begins by methodically baking each of the three tiers—the 10-inch, 8-inch, and 6-inch rounds. We'll use a technique called the reverse creaming method, which sounds fancy but is actually quite simple. Instead of creaming butter and sugar first, we'll blend the dry ingredients with the softened butter until it resembles damp sand. This coats the flour in fat, which limits gluten development and results in an exceptionally tender cake. After baking, the cooling process is just as crucial. Letting the cakes cool completely ensures they are firm and stable for stacking."
     },
-    "tools": [
-      "12-inch skillet or wok—non-stick is forgiving, cast iron gives heroic char.",
-      "Sturdy wooden spoon or metal spatula for enthusiastic flipping.",
-      "Small whisk or fork for emulsifying the sauce.",
-      "Clean kitchen towel for drying chickpeas—paper towels work but feel wasteful on busy weeks.",
-      "Sharp chef’s knife for swift broccoli dissection.",
-      "Glass jar with lid if you prep the sauce ahead; shake instead of whisk."
-    ],
-    "updatedDate": "2025-12-05T19:10:51.264Z",
-    "whyYouLove": {
+    {
+      "title": "Making the Swiss Meringue Buttercream",
+      "description": "This buttercream is pure elegance. It's silky, stable, and not overly sweet, which is perfect for a sophisticated cake. We'll gently heat egg whites and sugar over a water bath until the sugar dissolves completely—you can test this by rubbing a little between your fingers. Then, we whip it into a glorious, stiff, glossy meringue. The final, and most patient, step is slowly adding softened butter, piece by piece, until it transforms into the smoothest, most cloud-like frosting you’ve ever seen. It’s perfect for creating those sharp, clean edges."
+    },
+    {
+      "title": "Assembly and Stacking",
+      "description": "This is the moment where it all comes together. With our cooled cakes and silky buttercream, we will level each cake layer, fill them, and apply a thin 'crumb coat' to trap any stray crumbs. After a good chill in the refrigerator, we apply the final, beautiful coat of buttercream. The real architecture begins with dowels and a central support, which we’ll use to create a stable internal structure. Stacking them carefully, one by one, is the final, breathtaking step that turns separate cakes into a single, towering masterpiece."
+    },
+    {
       "type": "Card",
+      "title": "Pro Tips for Success",
       "items": [
-        "**One-pan wonder** — Everything tumbles together in a single skillet, which means fewer dishes and more time to curl up on the couch with your bowl and maybe a second helping.",
-        "**Pantry heroes** — Broccoli and a can of chickpeas, that’s literally it. No fancy errands, no “oops I forgot the specialty paste,” just honest staples that wait patiently for you.",
-        "**Twenty-minute magic** — By the time the rice cooker clicks (or your take-out appetite threatens mutiny), dinner is glossy, fragrant, and ready to meet your fork.",
-        "**Gentle on everything** — Budget, digestion, planet, and mood. It’s the culinary equivalent of a deep breath: nourishing, kind, and quietly proud of itself."
+        "**Chill, Chill, Chill**: A cold cake is a stable cake. Don't rush the chilling process between crumb coating and final frosting. It makes everything easier to handle and results in a much cleaner finish.",
+        "**Measure Your Dowels Carefully**: When you insert a dowel for support, mark it exactly at the level of the cake's surface and cut all dowels for that tier to the exact same height. This ensures your next tier sits perfectly level.",
+        "**Use a Turntable and Bench Scraper**: For those super smooth sides, a cake turntable and a tall bench scraper are your best friends. They help you achieve that professional, flawless look with gentle, steady pressure."
       ],
-      "title": "Why You'll Love It"
+      "after": "Remember to breathe and enjoy the process. It's a marathon, not a sprint. Put on some quiet music, take your time, and trust yourself."
+    }
+  ],
+  "sections": [],
+  "questions": {
+    "title": "Frequently Asked Questions",
+    "items": [
+      {
+        "question": "Can I make this cake ahead of time?",
+        "answer": "Absolutely, and I highly recommend it to make the process less overwhelming! You can bake the cake layers up to a month in advance. Once they are completely cool, wrap them tightly in two layers of plastic wrap and one layer of foil, then freeze. The buttercream can be made up to a week ahead and stored in an airtight container in the refrigerator. Just be sure to bring it back to room temperature and re-whip it until it’s silky smooth again before using."
+      },
+      {
+        "question": "How do I transport a three-tier cake?",
+        "answer": "Transporting a fully assembled three-tier cake is, honestly, a nerve-wracking experience. For peace of mind, I strongly suggest transporting the tiers separately in their own boxes and assembling the cake on-site. The 10-inch and 8-inch tiers can be stacked at home, but I'd carry the 6-inch top tier separately. Make sure the cake boxes are on a flat, level surface in your car, like the floor of the passenger seat area, and drive like you have a precious jewel on board... because you do!"
+      },
+      {
+        "question": "My cake seems to be leaning! What did I do wrong?",
+        "answer": "Oh, the dreaded lean! Don't panic. This usually happens for two reasons: either the support dowels aren't cut to the exact same height, or the cake wasn't chilled enough before stacking. To prevent this, use a small ruler to ensure your dowels are perfectly uniform. And be patient with chilling—a firm, cold cake provides a much more stable foundation. If you see a slight lean after assembly, you can sometimes use a little extra buttercream to subtly correct it at the base of the leaning tier."
+      },
+      {
+        "question": "Can I add a filling between the layers?",
+        "answer": "Of course! A filling is a wonderful way to add another dimension of flavor. A classic choice would be a raspberry or strawberry jam—I have a lovely <a href=\"https://chocofeverdream.com/recipes/raspberry-layer-cake-recipe\" style=\"color: #f57c00;\">raspberry layer cake</a> recipe that could provide some inspiration. You could also use lemon curd or a thin layer of white chocolate ganache. Just remember to pipe a sturdy dam of buttercream around the edge of each layer before adding your filling to prevent it from squishing out the sides."
+      },
+      {
+        "question": "What if I want a different flavor besides vanilla?",
+        "answer": "This recipe is a wonderful base for other flavors. For a citrus note, you can add the zest of two lemons or oranges to the dry ingredients. For a delicate almond flavor, substitute one teaspoon of the vanilla extract with almond extract. For something richer, you could even explore a different cake entirely, like a <a href=\"https://chocofeverdream.com/recipes/tuxedo-cake-triple-chocolate-mousse\" style=\"color: #f57c00;\">Tuxedo Cake</a> for a dramatic contrast, but for this white cake, subtle additions work best."
+      },
+      {
+        "question": "How many people does this three-tier cake serve?",
+        "answer": "This is always the big question! Based on standard wedding cake serving sizes, which are typically 1x2 inch slices, this cake (with 10, 8, and 6-inch tiers) will serve approximately 100-120 people. If you plan for more generous, party-sized slices, it will serve closer to 70-80 guests. It's always a good idea to confirm the expected number of guests to ensure you have plenty of cake for everyone to enjoy."
+      },
+      {
+        "question": "Is Swiss Meringue Buttercream difficult to make?",
+        "answer": "It can feel a little intimidating the first time, but it's truly worth the effort. The most common hiccup is that it can look curdled or soupy when you're adding the butter. Don't worry! This is almost always a temperature issue. If it looks curdled, the butter was likely too cold. If it's soupy, the meringue was too warm. Just keep whipping—99% of the time, it will come together into a beautiful, smooth consistency. It's much more stable than American buttercream and has a wonderful, less sweet flavor."
+      },
+      {
+        "question": "Can I use all-purpose flour instead of cake flour?",
+        "answer": "You can, but the texture will be different. The final cake will be a bit denser and not as tender. If you're in a pinch and can't find cake flour, you can make a substitute. For every 1 cup of all-purpose flour, remove 2 tablespoons of the flour and replace it with 2 tablespoons of cornstarch. Sift this mixture together several times to ensure it's well combined and aerated. It's a good approximation that will get you closer to that delicate crumb."
+      }
+    ]
+  },
+  "timing": {
+    "prepTime": "2 Hours",
+    "cookTime": "1 Hour 30 Minutes",
+    "totalTime": "3 Days (including cooling, chilling, and assembly)"
+  },
+  "recipeInfo": {
+    "difficulty": "Challenging",
+    "cuisine": "American",
+    "servings": "100-120 Servings",
+    "dietary": "Vegetarian"
+  },
+  "ingredients": [
+    {
+      "section": "For the White Cake Tiers (Amounts for ONE Tier - Repeat for Each Size)",
+      "items": [
+        "**For 10-inch Tier (x2 layers)**: 6 cups cake flour, 4 cups granulated sugar, 2 tbsp baking powder, 1.5 tsp salt, 1.5 cups unsalted butter (softened), 8 large egg whites, 2 cups buttermilk, 2 tbsp pure vanilla extract",
+        "**For 8-inch Tier (x2 layers)**: 4 cups cake flour, 2.5 cups granulated sugar, 4 tsp baking powder, 1 tsp salt, 1 cup unsalted butter (softened), 5 large egg whites, 1.5 cups buttermilk, 1.5 tbsp pure vanilla extract",
+        "**For 6-inch Tier (x2 layers)**: 2 cups cake flour, 1.25 cups granulated sugar, 2 tsp baking powder, 1/2 tsp salt, 1/2 cup unsalted butter (softened), 3 large egg whites, 3/4 cup buttermilk, 1 tbsp pure vanilla extract"
+      ]
     },
-    "ingredients": [
-      {
-        "items": [
-          "1 large head broccoli (about 1 lb), florets and peeled stems",
-          "1 can (15 oz) chickpeas, drained and rinsed",
-          "3 cloves garlic, minced",
-          "1 small carrot, thinly sliced (optional, for color)"
-        ],
-        "section": "Vegetables & Legumes"
-      },
-      {
-        "items": [
-          "2 tbsp low-sodium soy sauce",
-          "1 tbsp toasted sesame oil",
-          "1 tsp maple syrup or honey",
-          "1 tsp rice vinegar",
-          "Pinch red-pepper flakes (optional)"
-        ],
-        "section": "Sauce & Seasonings"
-      },
-      {
-        "items": [
-          "1 tsp avocado or neutral oil",
-          "1 tsp sesame seeds",
-          "Sliced green onions"
-        ],
-        "section": "To Finish"
-      }
-    ],
-    "instructions": [
-      {
-        "step": "Step 01",
-        "instruction": "Place a large, dry skillet or wok over medium-high heat. Let it get hot—honestly, wait until you can feel the warmth when you hover your palm a few inches above. While the pan heats, spread your rinsed chickpeas on a clean towel and roll them around; we want them as dry as possible so they’ll sizzle instead of stew."
-      },
-      {
-        "step": "Step 02",
-        "instruction": "When the pan is ready, pour in the avocado oil and swirl to coat. Add broccoli in a single layer; resist stirring for a full minute so the bottoms toast into golden freckles. Give a quick toss, then let them sit again—patience equals char, and char equals flavor that tastes like you tried way harder than you did."
-      },
-      {
-        "step": "Step 03",
-        "instruction": "Scoot the broccoli to the edges, making a little clearing in the center. Tumble in the chickpeas; again, single layer, no crowding. Let them fry undisturbed for about two minutes until they develop bronze shoulders. Stir everything together, add the garlic and red-pepper flakes, and cook just thirty seconds—long enough for the perfume to slap you awake but short enough to keep the garlic sweet."
-      },
-      {
-        "step": "Step 04",
-        "instruction": "Whisk together soy sauce, sesame oil, maple syrup, and rice vinegar in a small bowl. Pour it over the vegetables; it will hiss and bubble like it’s telling secrets. Stir quickly to glaze every floret and chickpea, then remove from heat. Sprinkle sesame seeds and green onions, taste for salt (add a splash more soy if you like), and serve hot over rice, noodles, or straight from the skillet while standing at the counter."
-      }
-    ],
-    "lastViewedAt": null,
-    "views": 0,
-    "authorId": "cmirjbpvm0003o62vc9j07t6b",
-    "status": "published",
-    "videoUrl": "",
-    "videoDuration": "",
-    "nutrition": {
-      "calories": "285",
-      "fatContent": "10g",
-      "servingSize": "1/3 of recipe",
-      "fiberContent": "11g",
-      "sugarContent": "6g",
-      "sodiumContent": "420mg",
-      "proteinContent": "13g",
-      "cholesterolContent": "0mg",
-      "carbohydrateContent": "38g",
-      "saturatedFatContent": "1.2g"
+    {
+      "section": "For the Swiss Meringue Buttercream (Makes a very large batch)",
+      "items": [
+        "12 large egg whites (about 360g)",
+        "3 cups (600g) granulated sugar",
+        "6 cups (12 sticks) unsalted butter, softened and cubed",
+        "2 tbsp pure vanilla extract",
+        "1/2 tsp salt"
+      ]
+    }
+  ],
+  "instructions": [
+    {
+      "step": "Step 01: Prepare and Bake the Cake Tiers",
+      "instruction": "Begin by preparing your pans—grease them well, line the bottoms with parchment paper, and dust with flour. Preheat your oven to 350°F (175°C). In the large bowl of your stand mixer, whisk together the cake flour, sugar, baking powder, and salt. Add the softened butter and mix on low speed until the mixture resembles damp sand. In a separate bowl, whisk the egg whites, buttermilk, and vanilla. With the mixer on low, slowly stream in half of the wet ingredients, then increase the speed to medium and beat for 90 seconds. Scrape the bowl, reduce the speed, and add the remaining wet ingredients in a slow stream, mixing until just combined. Divide the batter evenly between your prepared pans for one tier size. Bake until a wooden skewer inserted into the center comes out clean (approx. 30-35 mins for 6\", 35-40 for 8\", 45-55 for 10\"). Let cool in the pans for 15 minutes before inverting onto a wire rack to cool completely. Repeat this entire process for all three tier sizes."
     },
-    "aggregateRating": 4.9,
-    "reviewCount": 87,
-    "keywords": [
-      "garlic broccoli stir fry",
-      "chickpea stir fry",
-      "vegan weeknight dinner",
-      "20 minute vegetarian meal",
-      "healthy broccoli recipe"
-    ],
-    "tasteProfile": {
-      "sour": "Low",
-      "salty": "Medium",
-      "spicy": "Low to Medium",
-      "sweet": "Low",
-      "umami": "High",
-      "overall": "Savoriness from soy and sesame, mellow garlic warmth, gentle sweetness balancing the heat."
+    {
+      "step": "Step 02: Create the Silky Swiss Meringue Buttercream",
+      "instruction": "Find a heatproof bowl that fits snugly over a saucepan of simmering water. Add your egg whites and sugar to the bowl and whisk them constantly over the gentle heat. Continue until the sugar has completely dissolved and the mixture is warm to the touch (around 160°F on a thermometer). Transfer this mixture to your stand mixer fitted with the whisk attachment. Beat on medium-high speed until you have a stiff, glossy, and completely cooled meringue. This can take a good 10-15 minutes, so be patient. Once the outside of the bowl feels neutral to the touch, switch to the paddle attachment. With the mixer on low, begin adding your softened butter, one cube at a time, waiting until each is incorporated before adding the next. Once all butter is in, add the vanilla and salt, then increase the speed to medium and let it whip for a few minutes until it becomes incredibly light and silky."
     },
-    "textureProfile": {
-      "bite": "Varied—snappy stems, soft florets, juicy legumes",
-      "inside": "Tender-crisp broccoli, creamy chickpeas",
-      "outside": "Charred, glossy glaze",
-      "overall": "Contrast of seared edges and pillowy centers, lightly sauced without sogginess."
+    {
+      "step": "Step 03: Level, Fill, and Crumb Coat",
+      "instruction": "Once your cake layers are fully cool, use a long serrated knife or a cake leveler to carefully trim the domed tops, creating a flat surface. Place the first layer of your 10-inch cake on a cake board. Pipe a dam of buttercream around the outer edge, then fill the center with about a cup of buttercream, spreading it evenly. Place the second layer on top. Now, apply a very thin layer of buttercream all over the top and sides of the cake. This is your crumb coat, which traps any loose crumbs. Use an offset spatula or bench scraper to get it as smooth as you can, but don't worry about perfection here. Place the crumb-coated tier in the refrigerator to chill for at least 30-45 minutes until firm. Repeat this process for the 8-inch and 6-inch tiers."
     },
-    "recipeOrigin": "Inspired by classic Chinese stir-fry technique—high heat, minimal oil, quick movement—adapted to everyday Western home kitchens with pantry staples. The addition of chickpeas nods to Middle-Eastern and Indian cuisines where the legume is beloved, creating a multicultural mash-up that feels both familiar and fresh.",
-    "variations": [
-      {
-        "title": "Lemon-Ginger Zing",
-        "description": "Add 1 tsp freshly grated ginger with the garlic and finish with a shower of lemon zest; it tastes like sunshine in January."
-      },
-      {
-        "title": "Peanut-Coconut Comfort",
-        "description": "Stir in 1 tbsp peanut butter and 2 tbsp light coconut milk for a creamy, satay-style sauce that clings like velvet."
-      }
-    ],
-    "substitutions": [
-      {
-        "note": "Adjust timing—green beans need an extra minute; Brussels sprouts shave thin so they char quickly.",
-        "ingredient": "Broccoli",
-        "substitute": "Green beans, cauliflower florets, or thinly sliced Brussels sprouts"
-      },
-      {
-        "note": "Pat tofu dry and sear separately first for golden edges, then combine at the end to prevent breakage.",
-        "ingredient": "Chickpeas",
-        "substitute": "Cannellini beans, butter beans, or cubed extra-firm tofu"
-      }
-    ],
-    "dietaryAdaptations": [
-      {
-        "diet": "Gluten-Free",
-        "howToAdapt": "Use certified gluten-free tamari or coconut aminos; check sesame oil facility statements."
-      },
-      {
-        "diet": "Low-Sodium",
-        "howToAdapt": "Swap soy sauce for low-sodium tamari and rinse chickpeas extra thoroughly; add a squeeze of citrus to compensate for lost brightness."
-      },
-      {
-        "diet": "Grain-Free",
-        "howToAdapt": "Serve over cauliflower rice, sautéed cabbage, or simply enjoy as a warm salad—no other changes needed."
-      }
-    ],
-    "pairings": [
-      "Chilled cucumber-mint water or a dry Riesling to echo the sweet-salty glaze",
-      "Fluffy jasmine rice or nutty farro to soak up every last shimmer of sauce",
-      "Side of quick-pickled carrots or a crisp Asian slaw for acidic crunch contrast"
-    ],
-    "shoppingList": [
-      "1 large head broccoli",
-      "1 can chickpeas",
-      "Fresh garlic bulb",
-      "Low-sodium soy sauce or tamari",
-      "Toasted sesame oil",
-      "Maple syrup or honey",
-      "Rice vinegar"
-    ],
-    "makeAhead": "Wash and chop broccoli, rinse chickpeas, and whisk the sauce up to three days ahead; store separately in airtight containers. At dinner, simply heat the skillet and toss everything together—dinner in six minutes flat. You can also pre-cook a batch of rice or quinoa and reheat with a damp paper towel in the microwave.",
-    "leftovers": "Transform into a cold salad by adding shredded carrots and a splash of lime, or mash with a fork and spread inside a wrap with avocado. Stir into scrambled eggs for a protein-packed breakfast, or bake into frittata muffins for grab-and-go snacks. The flavors deepen overnight, so some argue leftovers taste even better.",
-    "equipmentNotes": [
-      "A well-seasoned carbon-steel wok delivers restaurant-level char, but any wide skillet works—just avoid overcrowding.",
-      "Use a splatter screen if you’re searing aggressively; soy sauce can spit when it hits hot oil.",
-      "Glass prep bowls let you see ingredient order and prevent the dreaded “did I add the garlic yet?” scramble."
-    ],
-    "ingredientPrep": [
-      "Cut broccoli into similar-sized florets so they cook evenly—bite-size is polite but go bigger if you like a meatier chew.",
-      "Peel broccoli stems with a vegetable peeler, then slice into coins; they’re sweet and tender and reduce waste beautifully.",
-      "Rinse chickpeas until the water runs clear and no more foam appears; excess starch causes sticking and muddy flavors."
-    ],
-    "temperatureNotes": {
-      "ovenTemperature": "Not required",
-      "safeInternalTemp": "Vegetables should be bright and tender-crisp; no specific internal temperature needed",
-      "stovetopHeatLevel": "High for initial sear, medium after garlic joins"
+    {
+      "step": "Step 04: Final Frosting and Stacking",
+      "instruction": "After the crumb coat is firm, apply a more generous final coat of buttercream to each tier. Use a cake turntable and a bench scraper held vertically to smooth the sides into a clean, sharp finish. Smooth the top with an offset spatula. Return each tier to the refrigerator to get very firm. Now for the structure: For the 10-inch tier, insert 8 bubble tea straws or wooden dowels into the cake in a circular pattern about 1.5 inches from where the 8-inch cake will sit. Push them all the way down, mark them, pull them out, cut them to the same height, and re-insert. Do the same for the 8-inch tier using 6 dowels. Carefully, using a large spatula, place the 8-inch tier (on its cake board) on top of the 10-inch tier. Then, place the 6-inch tier on top of the 8-inch. For ultimate stability, you can sharpen a long central dowel and drive it through all three tiers from the top. Finish by piping a simple border at the base of each tier to hide the seams."
+    }
+  ],
+  "notes": [
+    "Room temperature ingredients are non-negotiable for a smooth batter and buttercream. Take your eggs, butter, and buttermilk out of the fridge at least an hour before you begin. It makes all the difference.",
+    "Be careful not to overmix the cake batter once you add the liquid. Mixing for too long will develop gluten and can make your beautiful cake tough. Mix only until the last streaks of flour disappear.",
+    "This recipe makes a very generous amount of buttercream, but it's better to have too much than not enough. Any leftover buttercream freezes beautifully for future projects or for making other <a href=\"https://chocofeverdream.com/categories/desserts\" style=\"color: #f57c00;\">desserts</a>."
+  ],
+  "tools": [
+    {
+      "tool": "Stand Mixer",
+      "description": "Honestly, for a project of this scale, a stand mixer is almost essential. It makes whipping the large quantities of batter and, especially, the Swiss meringue buttercream so much more manageable and consistent."
     },
-    "timeline": [
-      {
-        "time": "0-3 min",
-        "action": "Heat skillet, pat chickpeas dry, mince garlic, whisk sauce"
-      },
-      {
-        "time": "3-6 min",
-        "action": "Sear broccoli undisturbed, then toss once for even char"
-      },
-      {
-        "time": "6-8 min",
-        "action": "Add chickpeas, let them bronze, then stir in garlic & chili"
-      },
-      {
-        "time": "8-9 min",
-        "action": "Pour sauce, toss to glaze, remove from heat"
-      },
-      {
-        "time": "9-10 min",
-        "action": "Sprinkle sesame seeds & onions, serve immediately over rice"
-      }
-    ],
-    "commonMistakes": [
-      "Stirring too often—let the veggies sit so they caramelize instead of steaming",
-      "Adding garlic too early—it burns in seconds and turns acrid; wait until the final minute",
-      "Using a small skillet—crowding traps steam and prevents the coveted char",
-      "Forgetting to taste at the end—salt balance can vary wildly between soy sauce brands",
-      "Skipping the dry step—wet chickpeas spit oil and refuse to brown"
-    ],
-    "flavorBoosters": [
-      "Finish with a squeeze of fresh lime for brightness",
-      "Toast sesame seeds in a dry pan until fragrant before sprinkling",
-      "Add a teaspoon of white miso to the sauce for extra umami depth",
-      "Drizzle chili crisp oil tableside for customizable heat and crunch",
-      "Stir in a handful of Thai basil leaves off-heat for aromatic lift"
-    ],
-    "specialNotes": [
-      "Recipe doubles beautifully—use a wider pan, not deeper, to maintain sear",
-      "Frozen rice pouches steam in 3 minutes, making this a true 20-minute meal",
-      "Kids love the mild version; simply omit chili flakes and let them drizzle sweet-sour sauce at the table"
-    ],
-    "difficultyReasoning": "Only basic knife skills and one-pan tossing required. No finicky emulsions or long simmering; success relies on heat management and timing, both of which are forgiving if you taste as you go.",
-    "servingSuggestions": [
-      "Pile over hot cooked rice and top with a runny-yolk fried egg for richness",
-      "Serve alongside chilled soba noodles dressed with sesame and scallions",
-      "Spoon into lettuce cups with shredded purple cabbage for a handheld lunch",
-      "Pair with a simple miso soup starter for a cozy, complete Asian-inspired meal"
-    ],
-    "seasonality": "Ideal year-round since broccoli and canned chickpeas are always available, but especially comforting in cooler months when you crave hot, fast nourishment. In summer, serve over cold noodles for a refreshing twist."
-  }
-]
+    {
+      "tool": "6-inch, 8-inch, and 10-inch Round Cake Pans",
+      "description": "You'll need two pans of each size for the layers. I prefer pans that are at least 2 inches deep, and light-colored aluminum pans tend to bake more evenly than dark, non-stick ones."
+    },
+    {
+      "tool": "Cake Turntable and Bench Scraper",
+      "description": "These are your secret weapons for achieving those professional, super-smooth sides. The turntable allows for steady, continuous motion, and the bench scraper creates a flawless finish that's hard to get with a spatula alone."
+    },
+    {
+      "tool": "Cake Dowels/Supports",
+      "description": "This is crucial for structural integrity. You can use plastic bubble tea straws for lighter cakes or traditional wooden dowels. This internal support system is what prevents the cake from collapsing under its own weight."
+    },
+    {
+      "tool": "Offset Spatula",
+      "description": "A long offset spatula is perfect for spreading fillings and frosting smoothly across the large cake layers. The 'offset' handle design helps keep your knuckles from dragging through the frosting as you work."
+    }
+  ],
+  "mustKnowTips": [
+    "**Work with Cold Cakes**: Always ensure your cake tiers are thoroughly chilled before you attempt to stack them. A cold cake is firm and much less likely to tear, bulge, or slide around during the assembly process.",
+    "**Level Tiers are Key**: A flat, level surface is the foundation of a straight, stable cake. Take your time to carefully level each cake layer before you begin filling and stacking. Even a small dome can translate into a noticeable tilt.",
+    "**A Center Dowel for Security**: For a three-tier cake, especially if it needs to travel, a long, sharpened center dowel driven through all three tiers from top to bottom is the ultimate insurance policy against shifting layers. It acts like a spine for the cake."
+  ],
+  "professionalSecrets": [
+    "**Use Simple Syrup**: Brushing a thin layer of simple syrup (equal parts sugar and water, boiled and cooled) on each cake layer before frosting adds extra moisture and helps keep the cake fresh for longer.",
+    "**The 'Hot Scraper' Trick**: For an ultra-smooth finish, you can dip your metal bench scraper in hot water, wipe it completely dry, and then use it for one final, gentle pass around the cake. The heat slightly melts the very surface of the buttercream, creating a glass-like finish.",
+    "**Let Your Buttercream Settle**: After making your buttercream, let it sit for a bit, then give it a final stir on the lowest speed with the paddle attachment for a few minutes. This pushes out excess air bubbles, making it much smoother and easier to work with."
+  ],
+  "serving": "When it's time to serve, present the cake in a place of honor where everyone can admire it. Traditionally, the couple makes the first cut together from the bottom tier. For serving a crowd, it's easiest to deconstruct the cake. Remove the top two tiers, placing them on separate plates. Cut and serve the bottom tier first, then the middle, and finally the top tier (or save it!). To get the most servings, cut a circle about two inches from the outer edge of the cake, slice that ring into 1-inch pieces, and then move inward to cut the next concentric circle. This method is much more efficient than cutting wedges.",
+  "storage": "If you are lucky enough to have leftovers, they can be stored in an airtight container in the refrigerator for up to 5 days. For longer storage, you can freeze individual slices. Wrap each slice tightly in plastic wrap and then in foil. They will keep well in the freezer for up to 2 months. The top tier is often saved for the first anniversary. To do this, chill the tier until it's very firm, then wrap it in several layers of plastic wrap and a final layer of aluminum foil before freezing. Let it thaw in the refrigerator overnight before enjoying.",
+  "allergyInfo": "This recipe contains wheat, dairy, and eggs. While it is nut-free, please be aware that it is prepared in a kitchen where nuts may be present. Always check the labels of your ingredients, like vanilla extract and sprinkles, if you are concerned about specific allergens or cross-contamination. For a gluten-free version, a high-quality measure-for-measure gluten-free flour blend could be substituted, though the texture may vary slightly.",
+  "nutritionDisclaimer": "The nutritional information provided is an estimate calculated for one standard serving and is for informational purposes only. Actual values may vary based on the specific ingredients and brands you use, as well as the final serving size. This information should not be considered a substitute for professional medical or nutritional advice. This cake is an indulgence, after all, and is meant to be enjoyed as part of a special celebration.",
+  "videoUrl": null,
+  "videoDuration": null,
+  "nutrition": {
+    "calories": "650",
+    "fatContent": "35g",
+    "saturatedFatContent": "22g",
+    "carbohydrateContent": "78g",
+    "sugarContent": "60g",
+    "fiberContent": "1g",
+    "proteinContent": "6g",
+    "sodiumContent": "350mg",
+    "cholesterolContent": "130mg",
+    "servingSize": "1 wedding slice"
+  },
+  "aggregateRating": 4.9,
+  "reviewCount": 215,
+  "keywords": [
+    "white wedding cake",
+    "three tier cake",
+    "wedding cake recipe",
+    "homemade wedding cake",
+    "vanilla cake",
+    "swiss meringue buttercream"
+  ],
+  "tasteProfile": {
+    "sweet": "Medium",
+    "salty": "Low",
+    "spicy": "None",
+    "sour": "Low",
+    "umami": "None",
+    "overall": "A delicate and balanced sweetness, with a prominent, pure vanilla flavor and rich, buttery undertones from the cake and buttercream."
+  },
+  "textureProfile": {
+    "outside": "Perfectly smooth, firm, and silky from the chilled Swiss meringue buttercream.",
+    "inside": "An incredibly soft, fine, and tender crumb that is moist and velvety.",
+    "bite": "A light, cloud-like bite where the silky frosting and tender cake melt together effortlessly.",
+    "overall": "An elegant contrast between the smooth, substantial frosting and the delicate, melt-in-your-mouth cake crumb."
+  },
+  "recipeOrigin": "The tradition of a grand, white wedding cake dates back to Victorian England. Originally, the pure white icing was a symbol of the bride's purity and, more practically, a status symbol, as the fine white sugar needed to create it was very expensive. Over time, it has evolved into a centerpiece of celebration and artistry, a sweet monument to a joyous occasion. This recipe honors that classic tradition with its elegant simplicity and timeless flavor.",
+  "variations": [
+    {
+      "title": "Lemon Lavender Dream",
+      "description": "Add the zest of 2 lemons to the dry ingredients for each cake tier and infuse a tablespoon of dried culinary lavender into the buttermilk for a few hours before using (strain it out before adding to the batter)."
+    },
+    {
+      "title": "Almond Amaretto",
+      "description": "Substitute 1 teaspoon of vanilla extract with 1 teaspoon of almond extract in both the cake batter and the buttercream for a classic, nutty, and fragrant flavor profile."
+    },
+    {
+      "title": "Rosewater Cardamom",
+      "description": "Add 1/2 teaspoon of ground cardamom to the dry ingredients and 1 teaspoon of rosewater to the wet ingredients for a subtly exotic, floral, and aromatic twist that is incredibly elegant."
+    }
+  ],
+  "substitutions": [
+    {
+      "ingredient": "Buttermilk",
+      "substitute": "DIY Buttermilk",
+      "note": "If you don't have buttermilk, you can easily make your own. For every 1 cup of whole milk, add 1 tablespoon of lemon juice or white vinegar. Let it sit for 5-10 minutes until it looks slightly curdled. This will provide the necessary acidity to react with the baking powder and tenderize the crumb."
+    },
+    {
+      "ingredient": "Cake Flour",
+      "substitute": "All-Purpose Flour + Cornstarch",
+      "note": "As mentioned in the FAQs, you can create a substitute for cake flour. For each cup of all-purpose flour, remove 2 tablespoons and replace them with 2 tablespoons of cornstarch. Sift the mixture together at least 3-4 times to ensure it's fully combined and aerated for a lighter texture."
+    }
+  ],
+  "dietaryAdaptations": [
+    {
+      "diet": "Gluten-Free",
+      "howToAdapt": "To adapt this recipe to be gluten-free, use a high-quality, measure-for-measure gluten-free flour blend that contains xanthan gum. The texture might be slightly different, but it will still be delicious. Ensure all your other ingredients, especially your baking powder and vanilla, are certified gluten-free."
+    },
+    {
+      "diet": "Dairy-Free",
+      "howToAdapt": "This would be a more challenging adaptation. You would need to substitute the butter with a high-quality vegan butter block (not margarine) and use a plant-based milk with vinegar for the buttermilk. For the buttercream, a vegan version of Swiss meringue is possible but requires different techniques, often using aquafaba."
+    }
+  ],
+  "pairings": [
+    "A crisp, celebratory glass of sparkling white grape juice or champagne.",
+    "A simple side of fresh berries, like raspberries or strawberries, to add a pop of color and tartness.",
+    "A delicate cup of herbal tea, such as chamomile or mint, to complement the cake's subtle sweetness."
+  ],
+  "shoppingList": [
+    "Cake flour",
+    "Granulated sugar",
+    "Baking powder",
+    "Salt",
+    "Unsalted butter (a lot!)",
+    "Large eggs",
+    "Buttermilk",
+    "Pure vanilla extract",
+    "Parchment paper",
+    "Cake dowels or supports",
+    "Cake boards (6, 8, 10-inch)"
+  ],
+  "makeAhead": "This cake is designed to be made ahead in stages. Day 1: Bake all the cake layers. Once cooled, wrap them tightly and store them at room temperature overnight or freeze for longer storage. Day 2: Make the Swiss meringue buttercream. Level, fill, and crumb coat all the tiers. Keep them refrigerated. Day 3 (Day of event): Apply the final coat of frosting in the morning and assemble the cake on-site a few hours before the celebration. Breaking it down this way makes it feel like a series of small, calm projects.",
+  "leftovers": "Leftover wedding cake is such a treat! It makes a wonderful breakfast the next day with a cup of coffee. You can also crumble leftover cake slices and layer them with fresh fruit and whipped cream in a glass to create a beautiful trifle. Or, mix crumbled cake with a little leftover buttercream to form cake pops, which are always a hit. The possibilities are a lovely reminder of the celebration.",
+  "equipmentNotes": [
+    "Ensure your stand mixer bowl is impeccably clean and free of any grease before making the Swiss meringue buttercream. Any trace of fat can prevent the egg whites from whipping up to their full, glorious volume.",
+    "A digital kitchen scale is your best friend for a project of this size. Measuring ingredients by weight, especially flour, is far more accurate than using measuring cups and ensures consistent results across all your cake tiers.",
+    "Have several sizes of cake boards ready. You'll need a board for each tier to sit on (the same size as the cake) and a larger, sturdy base board (at least 12-14 inches) for the entire finished cake."
+  ],
+  "ingredientPrep": [
+    "Measure everything out before you begin—mise en place is essential for a calm baking experience with a complex recipe like this. Have your flour sifted, your butter softened and cubed, and your liquids measured.",
+    "Separate your egg whites carefully. Even a tiny speck of yolk can inhibit the meringue from whipping properly. It's best to separate each egg into a small bowl before adding the white to your main mixing bowl.",
+    "Let all your cold ingredients (butter, eggs, buttermilk) come to room temperature. This helps them incorporate smoothly into the batter, preventing a curdled or split mixture and ensuring a uniform, tender crumb."
+  ],
+  "temperatureNotes": {
+    "stovetopHeatLevel": "Low, gentle simmer for the water bath when making the Swiss meringue. You don't want the water to boil or touch the bottom of the bowl.",
+    "ovenTemperature": "350°F (175°C). It’s a good idea to use an oven thermometer to ensure your oven is accurately calibrated, as this is crucial for even baking.",
+    "safeInternalTemp": "Cakes are done when a tester comes out clean, and the internal temperature is around 205-210°F (96-99°C)."
+  },
+  "timeline": [
+    {
+      "time": "Day 1 (3-4 hours)",
+      "action": "Bake all six cake layers (two for each tier). Let them cool completely, then wrap them well and store at room temperature."
+    },
+    {
+      "time": "Day 2 (2-3 hours)",
+      "action": "Prepare the Swiss meringue buttercream. Level, fill, and crumb coat each of the three tiers. Chill them in the refrigerator overnight."
+    },
+    {
+      "time": "Day 3 (2 hours)",
+      "action": "Apply the final coat of buttercream to each chilled tier. Prepare the dowel supports. Transport the tiers separately to the venue and perform the final assembly."
+    }
+  ],
+  "commonMistakes": [
+    "Not using dowel supports. This is the most critical mistake. Without proper internal support, the weight of the upper tiers will crush the bottom tier, leading to a cake disaster.",
+    "Rushing the cooling process. Trying to frost or stack a warm cake will only lead to melted buttercream and a crumbly, unstable mess. Patience is truly a key ingredient here.",
+    "Making the buttercream with a warm meringue or cold butter. The temperatures are key to success. If your meringue is too warm, it will melt the butter into a soup. If your butter is too cold, the buttercream may curdle. Just keep whipping and trust the process!",
+    "Eyeballing the dowel height. Uneven dowels will create a tilted, unstable cake. Measure carefully with a ruler to ensure every dowel in a tier is cut to the exact same height."
+  ],
+  "flavorBoosters": [
+    "A pinch of citrus zest (lemon or orange) in the cake batter can brighten the vanilla flavor without overpowering it.",
+    "Add a tablespoon of a clear liqueur like Grand Marnier or Chambord to the simple syrup for a subtle, sophisticated flavor note for an adult audience.",
+    "Scraping a real vanilla bean into both the batter and the buttercream adds an incredible depth of flavor and beautiful visual specks that signal pure quality."
+  ],
+  "specialNotes": [
+    "When decorating with fresh flowers, make sure they are non-toxic and organic. Wrap the stems in floral tape or insert them into a small straw before pushing them into the cake to prevent direct contact.",
+    "If your kitchen is warm, work in short bursts and keep returning the cake to the refrigerator. A warm environment can make the buttercream soft and difficult to work with.",
+    "Remember, this is not just any cake. This is a celebration cake. While we admire the pristine white tiers, other cakes like a rich <a href=\"https://chocofeverdream.com/recipes/death-by-chocolate-cake-a-decadent-recipe\" style=\"color: #f57c00;\">Death by Chocolate</a> or a fun <a href=\"https://chocofeverdream.com/recipes/better-than-sex-cake-irresistible-dessert\" style=\"color: #f57c00;\">Better Than Sex Cake</a> have their own indulgent charm, but this one is pure elegance."
+  ],
+  "difficultyReasoning": "This recipe is rated as Challenging due to the multiple components, the large scale of the project, and the precision required for stacking and finishing. It involves advanced techniques like making Swiss meringue buttercream and constructing a multi-tiered cake with internal supports. It's a multi-day project that requires patience, planning, and attention to detail, but is incredibly rewarding. I think it feels like making a <a href=\"https://chocofeverdream.com/recipes/million-dollar-cake-a-recipe-worth-every-penny\" style=\"color: #f57c00;\">Million Dollar Cake</a>, because the effort truly pays off.",
+  "servingSuggestions": [
+    "Adorn with fresh, non-toxic flowers that match the wedding's color scheme for a classic and beautiful look.",
+    "For a more modern aesthetic, leave the sides perfectly smooth and unadorned, letting the cake's clean lines speak for themselves.",
+    "A simple, elegant cake topper can add a personal touch. Whether it's custom initials, a silhouette, or a delicate sugar flower.",
+    "Serve each slice with a single fresh raspberry or a tiny mint leaf for a simple, beautiful garnish on the plate."
+  ],
+  "seasonality": "A white wedding cake is timeless and perfect for any season. In spring and summer, it’s beautiful when decorated with fresh peonies, roses, or berries. In the fall, it can be adorned with subtle sugar leaves or deeper-toned florals. For a winter wedding, it looks stunning with sugared cranberries and rosemary sprigs, resembling a snow-dusted masterpiece. Unlike a seasonal <a href=\"https://chocofeverdream.com/recipes/easy-strawberry-pound-cake-recipe\" style=\"color: #f57c00;\">strawberry pound cake</a>, this recipe's beauty is its year-round adaptability."
+}

@@ -9,12 +9,14 @@ interface LatestRecipesWithPaginationProps {
   initialRecipes: Recipe[];
   initialTotal: number;
   recipesPerPage?: number;
+  showPagination?: boolean;
 }
 
 export default function LatestRecipesWithPagination({
   initialRecipes,
   initialTotal,
   recipesPerPage = 8,
+  showPagination = true,
 }: LatestRecipesWithPaginationProps) {
   const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes);
   const [currentPage, setCurrentPage] = useState(1);
@@ -178,7 +180,7 @@ export default function LatestRecipesWithPagination({
           )}
 
           {/* Stylish Pagination */}
-          {totalPages > 1 && (
+          {showPagination && totalPages > 1 && (
             <div className="flex flex-col items-center gap-4 mt-8">
               {/* Page Info */}
               <p className="text-sm text-gray-600">

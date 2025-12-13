@@ -1,0 +1,232 @@
+Core Principles
+Reduce cognitive load – Information should be scannable and logically grouped.
+
+One thing well – The dashboard should have a clear primary purpose.
+
+Progressive complexity – Start simple, reveal advanced features contextually.
+
+Consistency – Use a strict grid, consistent spacing, and a unified design system.
+
+1. Sidebar Design (The Spine)
+Structure (Top to Bottom):
+Top Section:
+
+Blog logo or name (optional).
+
+Profile management: User avatar + dropdown arrow (clickable).
+
+Primary Navigation:
+
+Each item: Icon + short title.
+
+Group links by relevance (e.g., Content, Analytics, Community).
+
+Include an active state indicator (e.g., subtle background or accent bar).
+
+Support nested dropdowns if categories expand.
+
+Bottom Section:
+
+Less frequently used links (Settings, Help Center).
+
+Optional: Highlight feature announcements or notifications here.
+
+Features:
+Make sidebar collapsible (icons only when collapsed).
+
+Support badges/chips for notifications (e.g., pending comments).
+
+Keep it clean; use the empty space wisely (optional: mini notification feed).
+
+2. Main Dashboard Layout
+Grid & Structure:
+Use a strict grid system (e.g., 2 columns × 2 rows for homepage).
+
+Maximize screen space but maintain breathing room.
+
+The main section reflects what’s most important to the user.
+
+Top Bar (Above Main Grid):
+Reserved for page-level actions and simple navigation.
+
+Example:
+
+A dropdown for view filters (e.g., "All Recipes", "Drafts").
+
+A prominent "Create New Recipe" button.
+
+Homepage Content Priority (For Recipe Blog):
+Quick Overview Stats (total recipes, published, drafts).
+
+Recent Activity (latest comments, pending reviews).
+
+Top-Performing Recipes (by views or engagement).
+
+System Alerts (e.g., plugin updates, SEO suggestions).
+
+3. Data Display Components
+A. Lists & Tables (Most Common)
+Use for: Recipes, Comments, Categories, Users.
+
+Three separation methods (choose one):
+
+Whitespace
+
+Dividers/lines
+
+Alternating row colors
+
+Essential functionalities:
+
+Search bar
+
+Filtering (by status, date, category)
+
+Sorting (clickable headers)
+
+Bulk actions (checkbox selection reveals contextual toolbar)
+
+Include empty states with helpful guidance.
+
+B. Cards
+Use for: Stats, Charts, Notifications.
+
+Spacing: Ample margins, avoid cramped content.
+
+Styling:
+
+Light mode: subtle background color.
+
+Dark mode: subtle borders/outlines.
+
+Keep cards simple and focused (one key metric per card).
+
+C. Charts & Graphs
+Rule: Always label axes, include grid lines, add a brief summary title.
+
+Types for recipe blog:
+
+Line chart: Traffic over time.
+
+Bar chart: Recipe performance (add recipe thumbnail/icons for recognition).
+
+Pie chart: Category distribution.
+
+Interactivity:
+
+Hover: highlight data point, show exact values.
+
+Click: drill down into details.
+
+Include a date range selector for time-based charts.
+
+D. User Inputs
+Use in: Modals, Settings pages, Filters.
+
+Keep forms logical, use clear labels, and group related fields.
+
+For complex settings, consider tabs within modals to organize.
+
+4. Interaction Patterns
+A. Modals vs. Popovers vs. New Pages
+Popover: Simple, non-blocking (e.g., display settings). User can click away.
+
+Modal: Complex but contextual (e.g., "Create Recipe"). Blocking – requires action (Save/Cancel) to dismiss.
+
+New Page: Large, permanent context (e.g., editing a recipe). Always include a back button or breadcrumb.
+
+B. Toast Notifications
+Use for: Success messages, warnings, errors.
+
+Should be non-intrusive but visible.
+
+Auto-dismiss after a few seconds (except for critical errors).
+
+C. Optimistic UI
+Assume success for actions like delete, publish, save.
+
+Update the UI immediately before server confirmation (e.g., recipe disappears from list right when "Delete" is clicked).
+
+Prevents awkward pauses and feels snappy.
+
+5. Key Pages & Flows for Recipe CMS
+A. Recipe Management Page
+Table columns: Thumbnail, Title, Status (Draft/Published), Category, Views, Last Modified, Actions (Edit, Delete, Preview).
+
+Filters: By status, category, author, date.
+
+Empty state: "No recipes yet – click 'Create New Recipe' to get started!"
+
+B. Comments Moderation
+List with: User, Comment snippet, Recipe, Date, Actions (Approve, Delete, Reply).
+
+Bulk actions for mass approval/deletion.
+
+C. Analytics Dashboard
+Cards: Total views, Avg. time on page, Top recipes, Traffic sources.
+
+Charts: Visitors over time, Recipe popularity (bar chart with icons).
+
+D. Settings Page
+Use tabs for organization: General, SEO, Email, Integrations.
+
+Each tab contains a mix of user inputs and cards.
+
+6. Visual & UX Guidelines
+Typography: Use smaller, scannable font sizes compared to marketing sites. Maintain a clear hierarchy.
+
+Spacing: Consistent padding/margins; dashboard spacing is tighter than landing pages but not cramped.
+
+Icons: Recognizeable, consistent style.
+
+Dark/Light mode: Support both; adjust card styles accordingly (backgrounds for light, borders for dark).
+
+Animation: Subtle and functional (e.g., chart hover effects, smooth modal transitions). Avoid decorative animations.
+
+7. Inspiration & Testing
+Review real admin panels (e.g., WordPress, Contentful) for patterns.
+
+Test with empty states, error states, and loaded states.
+
+Ensure responsiveness (sidebar collapses on mobile, grid stacks).
+
+Deliverables
+A Figma/design file with:
+
+Sidebar (collapsed/expanded)
+
+Dashboard homepage layout
+
+Recipe list table with filters
+
+Modal for creating/editing recipe
+
+Analytics charts
+
+Settings page example
+
+Empty, error, and loading states
+
+Interactive prototype demonstrating:
+
+Sidebar navigation
+
+Creating a recipe (modal)
+
+Bulk actions in table
+
+Chart interactivity
+
+Toast notifications
+
+Design system covering:
+
+Color palette (primary, success, warning, error)
+
+Typography scale
+
+Spacing scale (8px base)
+
+Component library (buttons, inputs, cards, tables)
+
+Final Note: The dashboard should feel like a tool, not a toy. Every element should serve a clear purpose. Prioritize the recipe creator’s workflow: quick access to drafting, easy management, and clear insights into performance.

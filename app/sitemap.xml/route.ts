@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { siteConfig } from "@/config/site";
 import { getCategories, getRecipes } from "@/data/data";
+import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
 // Cache sitemap for 24 hours (86400 seconds)
@@ -58,6 +59,12 @@ export async function GET(request: Request) {
         url: "/categories",
         priority: "0.5",
         changefreq: "weekly",
+        lastmod: undefined,
+      },
+      {
+        url: "/articles",
+        priority: "0.9",
+        changefreq: "daily",
         lastmod: undefined,
       },
       {
@@ -141,8 +148,33 @@ export async function GET(request: Request) {
       lastmod: formatDate(recipe.updatedAt) || formatDate(recipe.createdAt) || new Date().toISOString().split("T")[0],
     }));
 
+    // Fetch all articles
+    let articles: Array<{ slug: string; updatedAt: Date | string | null; publishedAt: Date | string | null }> = [];
+    try {
+      const fetchedArticles = await prisma.article.findMany({
+        where: { status: 'published' },
+        select: { slug: true, updatedAt: true, publishedAt: true },
+      });
+      articles = fetchedArticles.map(a => ({
+        slug: a.slug,
+        updatedAt: a.updatedAt,
+        publishedAt: a.publishedAt,
+      }));
+      logger.info(`Fetched ${articles.length} articles for sitemap`);
+    } catch (error) {
+      logger.error("Failed to fetch articles for sitemap", { error });
+    }
+
+    // Dynamic article pages
+    const articlePages = articles.map((article) => ({
+      url: `/articles/${article.slug}`,
+      priority: "0.9",
+      changefreq: "monthly",
+      lastmod: formatDate(article.updatedAt) || formatDate(article.publishedAt) || new Date().toISOString().split("T")[0],
+    }));
+
     // Combine all pages
-    const allPages = [...staticPages, ...categoryPages, ...recipePages];
+    const allPages = [...staticPages, ...categoryPages, ...recipePages, ...articlePages];
 
     logger.info(`Generated sitemap with ${allPages.length} URLs`);
 

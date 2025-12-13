@@ -5,6 +5,7 @@ import Recipe from '@/outils/types';
 interface LatestRecipesSectionProps {
   className?: string;
   recipesPerPage?: number;
+  showPagination?: boolean;
 }
 
 async function fetchInitialRecipes(limit: number = 8) {
@@ -36,6 +37,7 @@ async function fetchInitialRecipes(limit: number = 8) {
 export default async function LatestRecipesSection({
   className,
   recipesPerPage = 8,
+  showPagination = true,
 }: LatestRecipesSectionProps) {
   const { recipes, total } = await fetchInitialRecipes(recipesPerPage);
 
@@ -49,6 +51,7 @@ export default async function LatestRecipesSection({
       initialRecipes={recipes}
       initialTotal={total}
       recipesPerPage={recipesPerPage}
+      showPagination={showPagination}
     />
   );
 }

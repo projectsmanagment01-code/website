@@ -18,6 +18,7 @@ import {
   Mail,
   Puzzle,
   Megaphone,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -53,9 +54,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "recipes", label: "All Recipes", icon: FileText },
+    { id: "articles", label: "Articles", icon: FileText },
     { id: "categories", label: "Categories", icon: Tags },
     { id: "authors", label: "Authors", icon: Users },
     { id: "hero-slides", label: "Hero Slides", icon: Presentation },
+    { id: "homepage-layout", label: "Homepage Layout", icon: LayoutDashboard },
     { id: "subscribers", label: "Subscribers", icon: Mail },
     { id: "media", label: "Media Library", icon: Image },
     { id: "content", label: "Content Management", icon: Edit },

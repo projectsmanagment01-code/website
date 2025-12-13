@@ -49,6 +49,14 @@ export const navigationItems: NavigationItem[] = [
     iconClassName: "box-border shrink-0 h-[19.2px] w-[19.2px]",
     label: "Contact",
   },
+  {
+    id: "articles",
+    href: "/articles",
+    title: "Articles & Guides",
+    iconSrc: "book",
+    iconClassName: "box-border shrink-0 h-[19.2px] w-[19.2px]",
+    label: "Articles",
+  },
 ] as const;
 
 export const mobileNavigationItems: NavigationItem[] = [
@@ -99,6 +107,14 @@ export const mobileNavigationItems: NavigationItem[] = [
     iconSrc: "contact",
     iconClassName: "box-border shrink-0 h-[19.2px] w-[19.2px]",
     label: "Contact",
+  },
+  {
+    id: "articles",
+    href: "/articles",
+    title: "Articles & Guides",
+    iconSrc: "book",
+    iconClassName: "box-border shrink-0 h-[19.2px] w-[19.2px]",
+    label: "Articles",
   },
   {
     id: "search",
