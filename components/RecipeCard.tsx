@@ -1,4 +1,5 @@
 import { Clock, Users, ChefHat, Utensils, Globe, Heart } from "lucide-react";
+import { getItemText } from "@/lib/utils";
 
 interface Recipe {
   title: string;
@@ -105,14 +106,17 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       <div>
         <h3 className="text-lg font-bold text-gray-900 mb-4">Notes</h3>
         <div className="space-y-2">
-          {recipe.notes.map((note, index) => (
-            <div key={index} className="flex items-start space-x-2">
-              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-bold min-w-[20px] text-center">
-                {index + 1}
-              </span>
-              <span className="text-sm text-gray-700">{note}</span>
-            </div>
-          ))}
+          {recipe.notes.map((note, index) => {
+            const noteText = getItemText(note);
+            return (
+              <div key={index} className="flex items-start space-x-2">
+                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-bold min-w-[20px] text-center">
+                  {index + 1}
+                </span>
+                <span className="text-sm text-gray-700">{noteText}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -122,12 +126,15 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
           Tools You'll Need
         </h3>
         <ul className="space-y-1 text-sm text-gray-700">
-          {recipe.tools.map((tool, index) => (
-            <li key={index} className="flex items-center space-x-2">
-              <span className="text-green-600">•</span>
-              <span>{tool}</span>
-            </li>
-          ))}
+          {recipe.tools.map((tool, index) => {
+            const toolText = getItemText(tool);
+            return (
+              <li key={index} className="flex items-center space-x-2">
+                <span className="text-green-600">•</span>
+                <span>{toolText}</span>
+              </li>
+            );
+          })}
         </ul>
       </div>
 

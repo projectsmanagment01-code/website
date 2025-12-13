@@ -7,6 +7,40 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Universal helper to extract text from string or object
+ * Handles JSON data that can be either:
+ * - String: "My text content"
+ * - Object: {item: "text"}, {text: "..."}, {content: "..."}, {description: "..."}, etc.
+ * 
+ * This is crucial for rendering recipe content that may come from APIs
+ * in either string or object format.
+ * 
+ * @param item - The item to extract text from (string or object)
+ * @returns The extracted text string
+ */
+export function getItemText(item: any): string {
+  if (typeof item === 'string') return item;
+  if (typeof item === 'object' && item !== null) {
+    // Try various common field names in order of priority
+    return item.item || 
+           item.text || 
+           item.content || 
+           item.description || 
+           item.title || 
+           item.note || 
+           item.tip || 
+           item.secret || 
+           item.tool || 
+           item.ingredient || 
+           item.instruction || 
+           item.step ||
+           item.name ||
+           JSON.stringify(item);
+  }
+  return String(item);
+}
+
+/**
  * Get the proper author image URL following the new author system approach
  * Priority: author.avatar (external URL) > author.img (local file) > placeholder
  * 

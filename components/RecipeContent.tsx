@@ -3,7 +3,7 @@ import { TipCard } from "./TipCard";
 import EssentialIngredients from "./EssentialIngerdients";
 import CompleteCookingProcess from "./CompleteProcess";
 import { Card } from "./Card";
-import { renderSafeHtml, hasHtmlTags } from "@/lib/utils";
+import { renderSafeHtml, hasHtmlTags, getItemText } from "@/lib/utils";
 import { PinterestPinButton } from "./PinterestPinButton";
 import { getWebsiteName } from "@/lib/site-name-helper";
 import { SafeImage } from "./SafeImage";
@@ -528,11 +528,14 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Equipment You'll Need:</strong></p>
                   <ul className="w-full space-y-2 list-none">
-                    {(recipe as any).equipmentNotes.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
-                      </li>
-                    ))}
+                    {(recipe as any).equipmentNotes.map((item: any, index: number) => {
+                      const itemText = getItemText(item);
+                      return (
+                        <li key={index} className="flex items-start">
+                          <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(itemText)} />
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
@@ -540,11 +543,14 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Shopping List:</strong></p>
                   <ul className="w-full space-y-2 list-none">
-                    {(recipe as any).shoppingList.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
-                      </li>
-                    ))}
+                    {(recipe as any).shoppingList.map((item: any, index: number) => {
+                      const itemText = getItemText(item);
+                      return (
+                        <li key={index} className="flex items-start">
+                          <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(itemText)} />
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
@@ -560,9 +566,12 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             Ingredient Prep Guide
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
-            {(recipe as any).ingredientPrep.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml(item)} />
-            ))}
+            {(recipe as any).ingredientPrep.map((item: any, index: number) => {
+              const itemText = getItemText(item);
+              return (
+                <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml(itemText)} />
+              );
+            })}
           </div>
         </>
       )}
@@ -629,9 +638,12 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             Perfect Pairings
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
-            {(recipe as any).pairings.map((item: string, index: number) => (
-              <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml(item)} />
-            ))}
+            {(recipe as any).pairings.map((item: any, index: number) => {
+              const itemText = getItemText(item);
+              return (
+                <p key={index} className="text-black leading-relaxed" dangerouslySetInnerHTML={renderSafeHtml(itemText)} />
+              );
+            })}
           </div>
         </>
       )}
@@ -656,11 +668,14 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Common Mistakes to Avoid:</strong></p>
                   <ul className="w-full space-y-2 list-none">
-                    {(recipe as any).commonMistakes.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
-                      </li>
-                    ))}
+                    {(recipe as any).commonMistakes.map((item: any, index: number) => {
+                      const itemText = getItemText(item);
+                      return (
+                        <li key={index} className="flex items-start">
+                          <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(itemText)} />
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
@@ -668,11 +683,14 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
                 <div>
                   <p className="text-gray-800 text-lg leading-relaxed font-medium mb-2"><strong>Flavor Boosters:</strong></p>
                   <ul className="w-full space-y-2 list-none">
-                    {(recipe as any).flavorBoosters.map((item: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(item)} />
-                      </li>
-                    ))}
+                    {(recipe as any).flavorBoosters.map((item: any, index: number) => {
+                      const itemText = getItemText(item);
+                      return (
+                        <li key={index} className="flex items-start">
+                          <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1" dangerouslySetInnerHTML={renderSafeHtml(itemText)} />
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
@@ -691,13 +709,16 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             Serving Suggestions
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
-            {(recipe as any).servingSuggestions.map((item: string, index: number) => (
-              <p 
-                key={index} 
-                className="text-black leading-relaxed"
-                dangerouslySetInnerHTML={renderSafeHtml(item)}
-              />
-            ))}
+            {(recipe as any).servingSuggestions.map((item: any, index: number) => {
+              const itemText = getItemText(item);
+              return (
+                <p 
+                  key={index} 
+                  className="text-black leading-relaxed"
+                  dangerouslySetInnerHTML={renderSafeHtml(itemText)}
+                />
+              );
+            })}
           </div>
         </>
       )}
@@ -709,13 +730,16 @@ export async function RecipeContent({ recipe }: RecipeContentProps) {
             Chef's Special Notes
           </h2>
           <div className="prose prose-lg max-w-none text-[1.2rem]">
-            {(recipe as any).specialNotes.map((item: string, index: number) => (
-              <p 
-                key={index} 
-                className="text-black leading-relaxed"
-                dangerouslySetInnerHTML={renderSafeHtml(item)}
-              />
-            ))}
+            {(recipe as any).specialNotes.map((item: any, index: number) => {
+              const itemText = getItemText(item);
+              return (
+                <p 
+                  key={index} 
+                  className="text-black leading-relaxed"
+                  dangerouslySetInnerHTML={renderSafeHtml(itemText)}
+                />
+              );
+            })}
           </div>
         </>
       )}

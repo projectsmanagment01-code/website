@@ -13,7 +13,7 @@ import Image from "next/image";
 import NextLink from "next/link";
 import IngredientsList from "./Ingredients";
 import Instruction from "./Instruction";
-import { hasHtmlTags, renderSafeHtml } from "@/lib/utils";
+import { hasHtmlTags, renderSafeHtml, getItemText } from "@/lib/utils";
 
 import { Recipe } from "@/outils/types";
 
@@ -207,28 +207,31 @@ export const Card: React.FC<{
           background: 'linear-gradient(135deg, #F5F9F6 0%, #E8F5EA 100%)'
         }}>
           <ul className="space-y-6">
-            {Array.isArray(recipe.notes) && recipe.notes.map((note: string, index: number) => (
-              <li
-                key={index}
-                className="flex items-start space-x-4"
-              >
-                <span 
-                  className="text-white text-base font-bold px-3 py-2 rounded-full min-w-[36px] text-center transition-colors duration-200 hover:opacity-80 active:opacity-90 flex-shrink-0"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #3F7D58 0%, #2D5A42 100%)'
-                  }}
+            {Array.isArray(recipe.notes) && recipe.notes.map((note: any, index: number) => {
+              const noteText = getItemText(note);
+              return (
+                <li
+                  key={index}
+                  className="flex items-start space-x-4"
                 >
-                  {index + 1}
-                </span>
-                <span className="text-gray-800 leading-relaxed text-lg font-medium">
-                  {hasHtmlTags(note) ? (
-                    <span dangerouslySetInnerHTML={renderSafeHtml(note)} />
-                  ) : (
-                    note
-                  )}
-                </span>
-              </li>
-            ))}
+                  <span 
+                    className="text-white text-base font-bold px-3 py-2 rounded-full min-w-[36px] text-center transition-colors duration-200 hover:opacity-80 active:opacity-90 flex-shrink-0"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #3F7D58 0%, #2D5A42 100%)'
+                    }}
+                  >
+                    {index + 1}
+                  </span>
+                  <span className="text-gray-800 leading-relaxed text-lg font-medium">
+                    {hasHtmlTags(noteText) ? (
+                      <span dangerouslySetInnerHTML={renderSafeHtml(noteText)} />
+                    ) : (
+                      noteText
+                    )}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
@@ -241,24 +244,27 @@ export const Card: React.FC<{
         </h3>
         <div className="bg-white rounded-lg p-6 shadow-sm border-2" style={{ borderColor: '#7FAD8A' }}>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Array.isArray(recipe?.tools) && recipe.tools.map((tool: string, index: number) => (
-              <li
-                key={index}
-                className="flex items-center space-x-4 rounded-lg p-4 shadow-sm"
-                style={{ 
-                  background: 'linear-gradient(135deg, #E8F5EA 0%, #D4E6D7 100%)'
-                }}
-              >
-                <span className="text-xl font-bold" style={{ color: '#2D5A42' }}>•</span>
-                <span className="text-gray-800 text-lg font-medium leading-relaxed">
-                  {hasHtmlTags(tool) ? (
-                    <span dangerouslySetInnerHTML={renderSafeHtml(tool)} />
-                  ) : (
-                    tool
-                  )}
-                </span>
-              </li>
-            ))}
+            {Array.isArray(recipe?.tools) && recipe.tools.map((tool: any, index: number) => {
+              const toolText = getItemText(tool);
+              return (
+                <li
+                  key={index}
+                  className="flex items-center space-x-4 rounded-lg p-4 shadow-sm"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #E8F5EA 0%, #D4E6D7 100%)'
+                  }}
+                >
+                  <span className="text-xl font-bold" style={{ color: '#2D5A42' }}>•</span>
+                  <span className="text-gray-800 text-lg font-medium leading-relaxed">
+                    {hasHtmlTags(toolText) ? (
+                      <span dangerouslySetInnerHTML={renderSafeHtml(toolText)} />
+                    ) : (
+                      toolText
+                    )}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
@@ -275,21 +281,24 @@ export const Card: React.FC<{
             background: 'linear-gradient(135deg, #F5F9F6 0%, #E8F5EA 100%)'
           }}>
             <ul className="space-y-4">
-              {recipe.mustKnowTips.map((tip: string, index: number) => (
-                <li
-                  key={index}
-                  className="flex items-start space-x-4"
-                >
-                  <span className="text-xl font-bold flex-shrink-0" style={{ color: '#3F7D58' }}>💡</span>
-                  <span className="text-gray-800 leading-relaxed text-lg font-medium">
-                    {hasHtmlTags(tip) ? (
-                      <span dangerouslySetInnerHTML={renderSafeHtml(tip)} />
-                    ) : (
-                      tip
-                    )}
-                  </span>
-                </li>
-              ))}
+              {recipe.mustKnowTips.map((tip: any, index: number) => {
+                const tipText = getItemText(tip);
+                return (
+                  <li
+                    key={index}
+                    className="flex items-start space-x-4"
+                  >
+                    <span className="text-xl font-bold flex-shrink-0" style={{ color: '#3F7D58' }}>💡</span>
+                    <span className="text-gray-800 leading-relaxed text-lg font-medium">
+                      {hasHtmlTags(tipText) ? (
+                        <span dangerouslySetInnerHTML={renderSafeHtml(tipText)} />
+                      ) : (
+                        tipText
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
@@ -307,21 +316,24 @@ export const Card: React.FC<{
             background: 'linear-gradient(135deg, #F5F9F6 0%, #E8F5EA 100%)'
           }}>
             <ul className="space-y-4">
-              {recipe.professionalSecrets.map((secret: string, index: number) => (
-                <li
-                  key={index}
-                  className="flex items-start space-x-4"
-                >
-                  <span className="text-xl font-bold flex-shrink-0" style={{ color: '#3F7D58' }}>🔥</span>
-                  <span className="text-gray-800 leading-relaxed text-lg font-medium">
-                    {hasHtmlTags(secret) ? (
-                      <span dangerouslySetInnerHTML={renderSafeHtml(secret)} />
-                    ) : (
-                      secret
-                    )}
-                  </span>
-                </li>
-              ))}
+              {recipe.professionalSecrets.map((secret: any, index: number) => {
+                const secretText = getItemText(secret);
+                return (
+                  <li
+                    key={index}
+                    className="flex items-start space-x-4"
+                  >
+                    <span className="text-xl font-bold flex-shrink-0" style={{ color: '#3F7D58' }}>🔥</span>
+                    <span className="text-gray-800 leading-relaxed text-lg font-medium">
+                      {hasHtmlTags(secretText) ? (
+                        <span dangerouslySetInnerHTML={renderSafeHtml(secretText)} />
+                      ) : (
+                        secretText
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

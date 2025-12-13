@@ -1,4 +1,4 @@
-import { hasHtmlTags, renderSafeHtml } from "@/lib/utils";
+import { hasHtmlTags, renderSafeHtml, getItemText } from "@/lib/utils";
 
 export const TipCard: React.FC<any> = ({ title, items, after }) => {
   return (
@@ -20,20 +20,23 @@ export const TipCard: React.FC<any> = ({ title, items, after }) => {
           </div>
           <div>
             <ul className="w-full space-y-2 list-none">
-              {Array.isArray(items) && items.map((item: any, index: any) => (
-                <li
-                  key={index}
-                  className="flex items-start"
-                >
-                  <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
-                    {hasHtmlTags(item) ? (
-                      <span dangerouslySetInnerHTML={renderSafeHtml(item)} />
-                    ) : (
-                      item
-                    )}
-                  </span>
-                </li>
-              ))}
+              {Array.isArray(items) && items.map((item: any, index: any) => {
+                const itemText = getItemText(item);
+                return (
+                  <li
+                    key={index}
+                    className="flex items-start"
+                  >
+                    <span className="text-gray-800 text-lg leading-relaxed font-medium flex-1">
+                      {hasHtmlTags(itemText) ? (
+                        <span dangerouslySetInnerHTML={renderSafeHtml(itemText)} />
+                      ) : (
+                        itemText
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>

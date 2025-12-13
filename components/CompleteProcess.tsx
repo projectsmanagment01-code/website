@@ -1,5 +1,5 @@
 import { TipCard } from "./TipCard";
-import { hasHtmlTags, renderSafeHtml } from "@/lib/utils";
+import { hasHtmlTags, renderSafeHtml, getItemText } from "@/lib/utils";
 
 export default function CompleteCookingProcess({
   completeProcess,
@@ -57,18 +57,21 @@ export default function CompleteCookingProcess({
                 {/* Render items array if it exists, otherwise fall back to description */}
                 {step.items && Array.isArray(step.items) ? (
                   <ul className="mt-2 space-y-2">
-                    {step.items.map((item: string, itemIndex: number) => (
-                      <li 
-                        key={`step-${index}-item-${itemIndex}`} 
-                        className="text-gray-700 leading-relaxed text-[19.2px] list-disc ml-6"
-                      >
-                        {hasHtmlTags(item) ? (
-                          <span dangerouslySetInnerHTML={renderSafeHtml(item)} />
-                        ) : (
-                          item
-                        )}
-                      </li>
-                    ))}
+                    {step.items.map((item: any, itemIndex: number) => {
+                      const itemText = getItemText(item);
+                      return (
+                        <li 
+                          key={`step-${index}-item-${itemIndex}`} 
+                          className="text-gray-700 leading-relaxed text-[19.2px] list-disc ml-6"
+                        >
+                          {hasHtmlTags(itemText) ? (
+                            <span dangerouslySetInnerHTML={renderSafeHtml(itemText)} />
+                          ) : (
+                            itemText
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 ) : (
                   <p className=" text-gray-700 leading-relaxed block text-[19.2px]">

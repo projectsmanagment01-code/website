@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { hasHtmlTags, renderSafeHtml } from "@/lib/utils";
+import { hasHtmlTags, renderSafeHtml, getItemText } from "@/lib/utils";
 
 const Ingredient = ({ ingredient, index: itemIndex }: any) => {
   const [clicked, setClicked] = useState(false);
+  const ingredientText = getItemText(ingredient);
 
   return (
     <>
@@ -26,10 +27,10 @@ const Ingredient = ({ ingredient, index: itemIndex }: any) => {
             clicked ? "line-through" : ""
           }`}
         >
-          {hasHtmlTags(ingredient) ? (
-            <span dangerouslySetInnerHTML={renderSafeHtml(ingredient)} />
+          {hasHtmlTags(ingredientText) ? (
+            <span dangerouslySetInnerHTML={renderSafeHtml(ingredientText)} />
           ) : (
-            ingredient
+            ingredientText
           )}
         </span>
       </li>
